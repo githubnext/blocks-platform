@@ -7,5 +7,5 @@ export default function Sandbox() {
     path: "README.md",
   });
 
-  return <div>LOL</div>;
+  return <div></div>;
 }

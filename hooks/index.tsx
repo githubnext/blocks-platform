@@ -1,5 +1,6 @@
 import { useQuery, UseQueryOptions } from "react-query";
-import { Octokit, RestEndpointMethodTypes } from "@octokit/rest";
+import { Octokit } from "@octokit/rest";
+import { components } from "@octokit/openapi-types";
 
 const octokit = new Octokit();
 
@@ -12,12 +13,11 @@ interface UseFileContentParams extends RepoContext {
   path: string;
 }
 
-type FileContent =
-  RestEndpointMethodTypes["repos"]["getContent"]["response"]["data"];
+export type DirectoryItem = components["schemas"]["content-directory"][number];
 
 async function getFileContent(
   params: UseFileContentParams
-): Promise<FileContent> {
+): Promise<DirectoryItem> {
   const { repo, owner, path } = params;
 
   const { data, status } = await octokit.repos.getContent({
@@ -28,17 +28,21 @@ async function getFileContent(
 
   if (status !== 200) throw new Error("Something bad happened");
 
-  return data;
+  if (Array.isArray(data)) {
+    return data[0];
+  } else {
+    return data;
+  }
 }
 
 export function useFileContent(
   params: UseFileContentParams,
-  config?: UseQueryOptions<FileContent>
+  config?: UseQueryOptions<DirectoryItem>
 ) {
   const { repo, owner, path } = params;
 
   return useQuery(
-    ["file", path],
+    ["file", params],
     () =>
       getFileContent({
         repo,

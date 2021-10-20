@@ -9,14 +9,18 @@
     "@octokit/rest": "^18.12.0",
     "@primer/components": "^30.3.0",
     "@primer/octicons-react": "^16.0.0",
+    "formik": "^2.2.9",
     "next": "latest",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-query": "^3.27.0",
+    "react-syntax-highlighter": "^15.4.4",
     "styled-components": "^5.3.3"
   },
   "devDependencies": {
+    "@octokit/openapi-types": "^11.2.0",
     "@types/react": "^17.0.30",
+    "@types/react-syntax-highlighter": "^13.5.2",
     "autoprefixer": "^10.2.6",
     "babel-plugin-styled-components": "^1.13.3",
     "postcss": "^8.3.5",

@@ -1,12 +1,23 @@
-import { Button } from "@primer/components";
-import { SquirrelIcon } from "@primer/octicons-react";
+import { FileForm } from "components/file-form";
+import { FileViewer } from "components/file-viewer";
+import { useFileContent } from "hooks";
+import { useState } from "react";
 
 export default function Home() {
+  const [state, setState] = useState({ repo: "", owner: "", path: "" });
+
+  const { data, status } = useFileContent(state, {
+    enabled: Object.values(state).every(Boolean),
+  });
+
   return (
-    <div className="flex items-center justify-center bg-gray-50 h-screen">
-      <div className="flex flex-col space-y-4">
-        <SquirrelIcon size={56} className="text-gray-400 mx-auto" />
-        <Button>Ship it</Button>
+    <div className="bg-white">
+      <div className="p-4">
+        <FileForm onSubmit={setState} />
+      </div>
+      <div className="p-4">
+        {status === "loading" && <p className="text-sm">Loading...</p>}
+        {status === "success" && <FileViewer data={data} />}
       </div>
     </div>
   );

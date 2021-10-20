@@ -1,7 +1,13 @@
-import 'tailwindcss/tailwind.css'
+import "styles/index.css";
+import { ThemeProvider, BaseStyles } from "@primer/components";
 
-function MyApp({ Component, pageProps }) {
-  return <Component {...pageProps} />
+export default function App({ Component, pageProps }) {
+  return (
+    <>
+      <BaseStyles />
+      <ThemeProvider>
+        <Component {...pageProps} />
+      </ThemeProvider>
+    </>
+  );
 }
-
-export default MyApp

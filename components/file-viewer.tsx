@@ -29,7 +29,7 @@ export function FileViewer(props: FileViewerProps) {
           </select>
         </div>
       </div>
-      <div className="max-h-64 overflow-y-auto text-sm bg-white">
+      <div className="text-sm bg-white">
         <SyntaxHighlighter>{code}</SyntaxHighlighter>
       </div>
     </div>

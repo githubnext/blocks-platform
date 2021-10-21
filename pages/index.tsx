@@ -1,5 +1,6 @@
 import { useTheme } from "@primer/components";
 import { FileViewer } from "components/file-viewer-with-toggle";
+import { viewers } from "components/viewers";
 import { useFileContent } from "hooks";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
@@ -23,6 +24,18 @@ export default function Home() {
   useEffect(() => {
     setColorMode(theme === "dark" ? "night" : "day");
   }, [theme]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    window.parent.postMessage(
+      {
+        type: "set-viewers",
+        viewers: viewers.map((v) => ({ id: v.id, label: v.label })),
+      },
+      "*"
+    );
+  }, []);
 
   return (
     <>

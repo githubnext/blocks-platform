@@ -1,11 +1,13 @@
 import { DirectoryItem } from "hooks";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { Box } from "@primer/components";
 
 import { ErrorBoundary } from "./error-boundary";
 import { getLanguageFromFilename } from "lib";
 import { CodeViewer, viewers } from "components/viewers";
+import { Box } from "@primer/components";
+import { useRouter } from "next/router";
+
 const ViewerPicker = dynamic(() => import("./viewer-picker"), { ssr: false });
 
 interface FileViewerProps {
@@ -14,9 +16,11 @@ interface FileViewerProps {
 }
 
 export function FileViewer(props: FileViewerProps) {
+  const router = useRouter();
   const { data, theme } = props;
   const { name, content, download_url } = data;
   const [viewerType, setViewerType] = useState("code");
+  const debugMode = Boolean(router.query.debug);
 
   const language = getLanguageFromFilename(name);
 
@@ -24,16 +28,34 @@ export function FileViewer(props: FileViewerProps) {
   const viewer = viewers.find((d) => d.id === viewerType) || ({} as any);
   const Viewer = viewer.component || CodeViewer;
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleViewerChange = (e: MessageEvent) => {
+      const { data } = e;
+      if (data.id !== "selected-viewer") return;
+
+      setViewerType(data.value.id);
+    };
+
+    window.addEventListener("message", handleViewerChange);
+
+    return () => {
+      window.removeEventListener("message", handleViewerChange);
+    };
+  }, []);
+
   return (
     <div className="h-full">
-      <div className="relative sticky top-0 z-[9999]">
-        <div>
-          <Box bg="bg.canvas" p={2} borderBottom="1px solid">
-            <ViewerPicker onChange={setViewerType} value={viewerType} />
-          </Box>
+      {debugMode && (
+        <div className="relative sticky top-0 z-[9999]">
+          <div>
+            <Box bg="bg.canvas" p={2} borderBottom="1px solid">
+              <ViewerPicker onChange={setViewerType} value={viewerType} />
+            </Box>
+          </div>
         </div>
-      </div>
-
+      )}
       <ErrorBoundary>
         <Viewer
           meta={{ language, theme, name, download_url }}

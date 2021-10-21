@@ -1,9 +1,12 @@
+import { useTheme } from "@primer/components";
 import { FileViewer } from "components/file-viewer-with-toggle";
 import { useFileContent } from "hooks";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 
 export default function Home() {
   const router = useRouter();
+  const { setColorMode } = useTheme();
   const { repo, owner, path, theme } = router.query;
   const { data, status } = useFileContent(
     {
@@ -15,6 +18,10 @@ export default function Home() {
       enabled: Boolean(repo) && Boolean(owner) && Boolean(path),
     }
   );
+
+  useEffect(() => {
+    setColorMode(theme === "dark" ? "night" : "day");
+  }, [theme]);
 
   return (
     <div>

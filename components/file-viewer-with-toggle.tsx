@@ -1,9 +1,12 @@
 import { DirectoryItem } from "hooks";
 import React, { useState } from "react";
+import dynamic from "next/dynamic";
+import { Box } from "@primer/components";
 
 import { ErrorBoundary } from "./error-boundary";
 import { getLanguageFromFilename } from "lib";
 import { CodeViewer, viewers } from "components/viewers";
+const ViewerPicker = dynamic(() => import("./viewer-picker"), { ssr: false });
 
 interface FileViewerProps {
   data: DirectoryItem;
@@ -12,8 +15,8 @@ interface FileViewerProps {
 
 export function FileViewer(props: FileViewerProps) {
   const { data, theme } = props;
-  const { name, size, content } = data;
-  const [viewerType, setViewerType] = useState("");
+  const { name, content } = data;
+  const [viewerType, setViewerType] = useState("code");
 
   const language = getLanguageFromFilename(name);
 
@@ -22,32 +25,18 @@ export function FileViewer(props: FileViewerProps) {
   const Viewer = viewer.component || CodeViewer;
 
   return (
-    <div className="border overflow-hidden rounded">
-      <div className="border-b p-2 py-3 bg-gray-100 flex items-center justify-between">
-        <div className="flex items-center">
-          <span className="inline-block font-bold">{name}</span>
-          <span className="ml-2 text-sm font-mono text-gray-500">
-            {size.toLocaleString()} bytes
-          </span>
-        </div>
+    <>
+      <div className="relative sticky top-0 z-[9999]">
         <div>
-          <select
-            value={viewerType}
-            onChange={(e) => setViewerType(e.target.value)}
-            className="form-select block w-full pl-3 pr-10 py-2 text-base leading-6 border border-gray-300  rounded focus:outline-none focus:border-blue-500 sm:text-sm sm:leading-5"
-          >
-            {viewers.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.label}
-              </option>
-            ))}
-          </select>
+          <Box bg="bg.canvas" p={2} borderBottom="1px solid">
+            <ViewerPicker onChange={setViewerType} value={viewerType} />
+          </Box>
         </div>
       </div>
 
       <ErrorBoundary>
         <Viewer meta={{ language, theme }} contents={code} />
       </ErrorBoundary>
-    </div>
+    </>
   );
 }

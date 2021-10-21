@@ -25,7 +25,7 @@ export function FileViewer(props: FileViewerProps) {
   const Viewer = viewer.component || CodeViewer;
 
   return (
-    <>
+    <div className="h-full">
       <div className="relative sticky top-0 z-[9999]">
         <div>
           <Box bg="bg.canvas" p={2} borderBottom="1px solid">
@@ -35,8 +35,8 @@ export function FileViewer(props: FileViewerProps) {
       </div>
 
       <ErrorBoundary>
-        <Viewer meta={{ language, theme }} contents={code} />
+        <Viewer meta={{ language, theme, name }} contents={code} />
       </ErrorBoundary>
-    </>
+    </div>
   );
 }

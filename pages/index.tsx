@@ -24,11 +24,11 @@ export default function Home() {
   }, [theme]);
 
   return (
-    <div>
+    <>
       {status === "loading" && <p className="text-sm w-full p-8">Loading...</p>}
       {status === "success" && (
         <FileViewer theme={theme as string} data={data} />
       )}
-    </div>
+    </>
   );
 }

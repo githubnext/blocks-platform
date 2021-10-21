@@ -2,6 +2,12 @@
 @tailwind utilities;
 @tailwind components;
 
+body,
+html,
+#__next {
+  height: 100%;
+}
+
 .code.light {
   .hljs {
     color: #24292e;

@@ -8,10 +8,11 @@ import { getLanguageFromFilename } from "lib";
 
 interface FileViewerProps {
   data: DirectoryItem;
+  theme: string;
 }
 
 export function FileViewer(props: FileViewerProps) {
-  const { data } = props;
+  const { data, theme } = props;
   const { name, size, content } = data;
   const [viewerType, setViewerType] = useState("");
 
@@ -46,7 +47,7 @@ export function FileViewer(props: FileViewerProps) {
       </div>
 
       <ErrorBoundary>
-        <Viewer meta={{ language }} contents={code} />
+        <Viewer meta={{ language, theme }} contents={code} />
       </ErrorBoundary>
     </div>
   );
@@ -69,13 +70,14 @@ interface ViewerProps {
   contents: string;
   meta: {
     language: string;
+    theme: string;
   };
 }
 
 function CodeViewer(props: ViewerProps) {
   const { contents, meta } = props;
   return (
-    <div className="text-sm code light">
+    <div className={`text-sm code ${meta.theme}`}>
       <SyntaxHighlighter
         className="p-4"
         language={meta.language}

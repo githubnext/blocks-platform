@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 
 export default function Home() {
   const router = useRouter();
-  const { repo, owner, path } = router.query;
+  const { repo, owner, path, theme } = router.query;
   const { data, status } = useFileContent(
     {
       repo: repo as string,
@@ -19,7 +19,9 @@ export default function Home() {
   return (
     <div>
       {status === "loading" && <p className="text-sm w-full p-8">Loading...</p>}
-      {status === "success" && <FileViewer data={data} />}
+      {status === "success" && (
+        <FileViewer theme={theme as string} data={data} />
+      )}
     </div>
   );
 }

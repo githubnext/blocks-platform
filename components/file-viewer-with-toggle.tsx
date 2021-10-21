@@ -1,10 +1,9 @@
 import { DirectoryItem } from "hooks";
-import React, { useMemo, useState } from "react";
-import SyntaxHighlighter from "react-syntax-highlighter";
-import { Grid } from "@githubocto/flat-ui";
+import React, { useState } from "react";
 
 import { ErrorBoundary } from "./error-boundary";
 import { getLanguageFromFilename } from "lib";
+import { CodeViewer, viewers } from "components/viewers";
 
 interface FileViewerProps {
   data: DirectoryItem;
@@ -51,52 +50,4 @@ export function FileViewer(props: FileViewerProps) {
       </ErrorBoundary>
     </div>
   );
-}
-
-const viewers = [
-  {
-    id: "code",
-    label: "Code",
-    component: CodeViewer,
-  },
-  {
-    id: "flat",
-    label: "Flat Data",
-    component: FlatViewer,
-  },
-];
-
-interface ViewerProps {
-  contents: string;
-  meta: {
-    language: string;
-    theme: string;
-  };
-}
-
-function CodeViewer(props: ViewerProps) {
-  const { contents, meta } = props;
-  return (
-    <div className={`text-sm code ${meta.theme}`}>
-      <SyntaxHighlighter
-        className="p-4"
-        language={meta.language}
-        useInlineStyles={false}
-      >
-        {contents}
-      </SyntaxHighlighter>
-    </div>
-  );
-}
-function FlatViewer({ contents }: { contents: string }) {
-  const data = useMemo(() => {
-    try {
-      return JSON.parse(contents);
-    } catch (e) {
-      return [];
-    }
-  }, [contents]);
-  console.log(data);
-
-  return <Grid data={data} />;
 }

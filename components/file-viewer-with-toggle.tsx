@@ -1,9 +1,10 @@
 import { DirectoryItem } from "hooks";
 import React, { useMemo, useState } from "react";
 import SyntaxHighlighter from "react-syntax-highlighter";
-import github from "react-syntax-highlighter/dist/cjs/styles/hljs/github";
 import { Grid } from "@githubocto/flat-ui";
+
 import { ErrorBoundary } from "./error-boundary";
+import { getLanguageFromFilename } from "lib";
 
 interface FileViewerProps {
   data: DirectoryItem;
@@ -13,6 +14,8 @@ export function FileViewer(props: FileViewerProps) {
   const { data } = props;
   const { name, size, content } = data;
   const [viewerType, setViewerType] = useState("");
+
+  const language = getLanguageFromFilename(name);
 
   const code = Buffer.from(content, "base64").toString();
   const viewer = viewers.find((d) => d.id === viewerType) || ({} as any);
@@ -43,7 +46,7 @@ export function FileViewer(props: FileViewerProps) {
       </div>
 
       <ErrorBoundary>
-        <Viewer contents={code} />
+        <Viewer meta={{ language }} contents={code} />
       </ErrorBoundary>
     </div>
   );
@@ -62,10 +65,24 @@ const viewers = [
   },
 ];
 
-function CodeViewer({ contents }: { contents: string }) {
+interface ViewerProps {
+  contents: string;
+  meta: {
+    language: string;
+  };
+}
+
+function CodeViewer(props: ViewerProps) {
+  const { contents, meta } = props;
   return (
-    <div className="text-sm bg-white">
-      <SyntaxHighlighter style={github}>{contents}</SyntaxHighlighter>
+    <div className="text-sm code light">
+      <SyntaxHighlighter
+        className="p-4"
+        language={meta.language}
+        useInlineStyles={false}
+      >
+        {contents}
+      </SyntaxHighlighter>
     </div>
   );
 }

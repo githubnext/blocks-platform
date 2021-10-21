@@ -15,7 +15,6 @@ interface FileViewerProps {
 
 export function FileViewer(props: FileViewerProps) {
   const { data, theme } = props;
-  console.log(data);
   const { name, content, download_url } = data;
   const [viewerType, setViewerType] = useState("code");
 

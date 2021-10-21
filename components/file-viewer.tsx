@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { DirectoryItem } from "hooks";
 import SyntaxHighlighter from "react-syntax-highlighter";
-import { Grid } from '@githubocto/flat-ui';
+import { Grid } from "@githubocto/flat-ui";
 
 interface FileViewerProps {
   data: DirectoryItem;
@@ -10,11 +10,11 @@ interface FileViewerProps {
 
 export function FileViewer(props: FileViewerProps) {
   const { data, viewerType } = props;
-  const { name, size, content } = data;
+  const { content } = data;
 
   const code = Buffer.from(content, "base64").toString();
-  const viewer = viewers.find(d => d.id === viewerType) || {} as any;
-  const Viewer = viewer.component || CodeViewer
+  const viewer = viewers.find((d) => d.id === viewerType) || ({} as any);
+  const Viewer = viewer.component || CodeViewer;
 
   return (
     <div className="w-full">
@@ -23,12 +23,13 @@ export function FileViewer(props: FileViewerProps) {
   );
 }
 
-
-const viewers = [{
-  id: "flat",
-  name: "Flat Data",
-  component: FlatViewer
-}]
+const viewers = [
+  {
+    id: "flat",
+    name: "Flat Data",
+    component: FlatViewer,
+  },
+];
 
 function CodeViewer({ contents }: { contents: string }) {
   return (
@@ -46,7 +47,5 @@ function FlatViewer({ contents }: { contents: string }) {
     }
   }, [contents]);
 
-  return (
-    <Grid data={data} />
-  );
+  return <Grid data={data} />;
 }

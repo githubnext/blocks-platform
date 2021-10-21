@@ -1,5 +1,6 @@
 import { CodeViewer } from "./code";
 import { FlatViewer } from "./flat";
+import { IFrameViewer } from "./iframe";
 
 export interface ViewerProps {
   contents: string;
@@ -20,7 +21,14 @@ export const viewers = [
     label: "Flat Data",
     component: FlatViewer,
   },
+  {
+    id: "iframe",
+    label: "Iframe",
+    component: IFrameViewer,
+  },
 ];
 
 export * from "./code";
 export * from "./flat";
+export * from "./iframe";
+

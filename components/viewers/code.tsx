@@ -9,6 +9,8 @@ export function CodeViewer(props: ViewerProps) {
         className="p-4"
         language={meta.language}
         useInlineStyles={false}
+        showLineNumbers
+        lineNumberStyle={{ opacity: 0.45 }}
       >
         {contents}
       </SyntaxHighlighter>

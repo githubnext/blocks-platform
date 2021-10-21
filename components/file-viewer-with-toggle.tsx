@@ -3,6 +3,7 @@ import React, { useMemo, useState } from "react";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import github from "react-syntax-highlighter/dist/cjs/styles/hljs/github";
 import { Grid } from "@githubocto/flat-ui";
+import { ErrorBoundary } from "./error-boundary";
 
 interface FileViewerProps {
   data: DirectoryItem;
@@ -46,30 +47,6 @@ export function FileViewer(props: FileViewerProps) {
       </ErrorBoundary>
     </div>
   );
-}
-
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.log(error);
-  }
-
-  render() {
-    // @ts-ignore
-    if (this.state.hasError) {
-      return <h1>Something went wrong.</h1>;
-    }
-
-    return this.props.children;
-  }
 }
 
 const viewers = [

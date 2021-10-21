@@ -10,12 +10,15 @@
     "@octokit/rest": "^18.12.0",
     "@primer/components": "^30.3.0",
     "@primer/octicons-react": "^16.0.0",
+    "@react-three/drei": "^7.17.1",
+    "@react-three/fiber": "^7.0.17",
     "next": "latest",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-query": "^3.27.0",
     "react-syntax-highlighter": "^15.4.4",
-    "styled-components": "^5.3.3"
+    "styled-components": "^5.3.3",
+    "three": "^0.133.1"
   },
   "devDependencies": {
     "@octokit/openapi-types": "^11.2.0",

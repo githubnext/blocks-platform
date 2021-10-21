@@ -15,7 +15,7 @@ interface FileViewerProps {
 
 export function FileViewer(props: FileViewerProps) {
   const { data, theme } = props;
-  const { name, content } = data;
+  const { name, content, download_url } = data;
   const [viewerType, setViewerType] = useState("code");
 
   const language = getLanguageFromFilename(name);
@@ -35,7 +35,10 @@ export function FileViewer(props: FileViewerProps) {
       </div>
 
       <ErrorBoundary>
-        <Viewer meta={{ language, theme, name }} contents={code} />
+        <Viewer
+          meta={{ language, theme, name, download_url }}
+          contents={code}
+        />
       </ErrorBoundary>
     </div>
   );

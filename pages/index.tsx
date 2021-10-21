@@ -16,6 +16,7 @@ export default function Home() {
     },
     {
       enabled: Boolean(repo) && Boolean(owner) && Boolean(path),
+      refetchOnWindowFocus: false,
     }
   );
 

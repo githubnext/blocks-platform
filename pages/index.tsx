@@ -8,7 +8,7 @@ import { useEffect } from "react";
 export default function Home() {
   const router = useRouter();
   const { setColorMode } = useTheme();
-  const { repo, owner, path, theme } = router.query;
+  const { repo, owner, path, theme, viewerOverride } = router.query;
   const { data, status } = useFileContent(
     {
       repo: repo as string,
@@ -41,7 +41,7 @@ export default function Home() {
     <>
       {status === "loading" && <p className="text-sm w-full p-8">Loading...</p>}
       {status === "success" && (
-        <FileViewer theme={theme as string} data={data} />
+        <FileViewer theme={theme as string} data={data} viewerOverride={viewerOverride} />
       )}
     </>
   );

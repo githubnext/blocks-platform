@@ -13,13 +13,14 @@ const ViewerPicker = dynamic(() => import("./viewer-picker"), { ssr: false });
 interface FileViewerProps {
   data: DirectoryItem;
   theme: string;
+  viewerOverride?: string;
 }
 
 export function FileViewer(props: FileViewerProps) {
   const router = useRouter();
-  const { data, theme } = props;
+  const { data, theme, viewerOverride } = props;
   const { name, content, download_url } = data;
-  const [viewerType, setViewerType] = useState("code");
+  const [viewerType, setViewerType] = useState(viewerOverride || "code");
   const debugMode = Boolean(router.query.debug);
 
   const language = getLanguageFromFilename(name);

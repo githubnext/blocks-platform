@@ -24,8 +24,7 @@ import {
 import { ViewerProps } from ".";
 
 export function NotesViewer({ contents, meta }: ViewerProps) {
-  const { owner, repo, name, sha } = meta
-  const username = "wattenberger"
+  const { owner, repo, name, sha, username = "mystery person" } = meta
   const [editor, setEditor] = useState(null);
 
   const { mutateAsync } = useUpdateFileContents({

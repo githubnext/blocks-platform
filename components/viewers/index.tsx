@@ -6,6 +6,7 @@ import { IFrameViewer } from "./iframe";
 import { CssViewer } from "./css";
 import { NotesViewer } from "./notes";
 import { ExcalidrawViewer } from "./excalidraw";
+import { ChartViewer } from "./chart";
 const ReactViewer = dynamic(() => import('./react'), { ssr: false })
 
 export interface ViewerProps {
@@ -71,6 +72,12 @@ export const viewers = [
     label: "Excalidraw",
     component: ExcalidrawViewer,
     extensions: ["excalidraw"],
+  },
+  {
+    id: "chart",
+    label: "Chart",
+    component: ChartViewer,
+    extensions: ["chart"],
   },
 ];
 

@@ -23,7 +23,7 @@ export function FileViewer(props: FileViewerProps) {
 
   const viewerDefault = getViewerFromFilename(name);
   const [viewerType, setViewerType] = useState(viewerOverride || viewerDefault || "code");
-  const { debug, repo, owner } = router.query;
+  const { debug, repo, owner, username } = router.query;
   const debugMode = Boolean(debug);
 
   const language = getLanguageFromFilename(name);
@@ -62,7 +62,7 @@ export function FileViewer(props: FileViewerProps) {
       )}
       <ErrorBoundary>
         <Viewer
-          meta={{ language, theme, name, download_url, repo, owner, path, sha }}
+          meta={{ language, theme, name, download_url, repo, owner, path, sha, username }}
           contents={code}
         />
       </ErrorBoundary>

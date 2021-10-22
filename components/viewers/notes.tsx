@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Editor } from '@tiptap/core';
+import { useUpdateFileContents } from "hooks";
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Collaboration from '@tiptap/extension-collaboration';
@@ -20,15 +21,20 @@ import {
   BiMessage,
   BiMinus,
 } from 'react-icons/bi';
+import { ViewerProps } from ".";
 
-export function NotesViewer({ contents, owner, repo, path }: {
-  contents: string,
-  owner: string,
-  repo: string,
-  path: string
-}) {
-  const username = "wattenberger"
+export function NotesViewer({ contents, meta }: ViewerProps) {
+  const { owner, repo, name, sha, username = "mystery person" } = meta
   const [editor, setEditor] = useState(null);
+
+  const { mutateAsync } = useUpdateFileContents({
+    onSuccess: () => {
+      console.log("we did it");
+    },
+    onError: (e) => {
+      console.log("something bad happend", e);
+    },
+  });
 
   const getYdocUpdate = (str: string) => {
     try {
@@ -51,7 +57,7 @@ export function NotesViewer({ contents, owner, repo, path }: {
     } catch (e) {
       console.log('e', e);
     }
-    const workspaceId = `devex-composable-github--notes-${owner}_${repo}_${path}`;
+    const workspaceId = `devex-composable-github--notes-${owner}_${repo}_${name}`;
     // new IndexeddbPersistence(workspaceId, ydoc)
     const provider = new WebrtcProvider(workspaceId, ydoc);
     const collaborationExtension = Collaboration.configure({
@@ -79,11 +85,16 @@ export function NotesViewer({ contents, owner, repo, path }: {
       },
     });
 
-    const updateFileDebounced = debounce(() => {
-      // updateDoc(workspaceDoc, {
-      //   notes: btoa(Y.encodeStateAsUpdate(ydoc)),
-      // });
-    });
+    const updateFileDebounced = debounce(async () => {
+      await mutateAsync({
+        // @ts-ignore
+        content: btoa(Y.encodeStateAsUpdate(ydoc)),
+        owner: owner,
+        repo: repo,
+        path: name,
+        sha: "latest",
+      });
+    }, 5000);
 
     const editor = new Editor({
       extensions: [
@@ -93,14 +104,16 @@ export function NotesViewer({ contents, owner, repo, path }: {
       ].filter(Boolean),
       autofocus: 'start',
       editorProps: {
+        handleDOMEvents: {
+          // @ts-ignore
+          input: updateFileDebounced,
+        },
         attributes: {
           class: 'h-full focus:outline-none',
         },
       },
       // content: data?.notes, // now applied above
-      onUpdate: () => {
-        updateFileDebounced();
-      },
+      // onUpdate: updateFileDebounced,
     });
     setEditor(editor);
 

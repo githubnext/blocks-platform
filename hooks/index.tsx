@@ -69,6 +69,20 @@ interface UseUpdateFileContentParams extends RepoContext {
 
 async function updateFileContents(params: UseUpdateFileContentParams) {
   const contentEncoded = Base64.encode(params.content);
+  let sha = params.sha;
+
+  if (sha === "latest") {
+    const { data, status } = await octokit.repos.getContent({
+      owner: params.owner,
+      repo: params.repo,
+      path: params.path,
+    });
+
+    if (status !== 200) throw new Error("Something bad happened");
+
+    // @ts-ignore
+    sha = data.sha;
+  }
 
   try {
     await octokit.repos.createOrUpdateFileContents({
@@ -85,7 +99,7 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
         name: `Composable GitHub Bot`,
         email: "fake@fake.com",
       },
-      sha: params.sha,
+      sha: sha,
     });
   } catch (e) {
     console.log(e);

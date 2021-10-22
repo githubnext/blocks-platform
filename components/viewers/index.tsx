@@ -17,6 +17,7 @@ export interface ViewerProps {
     repo: string;
     owner: string;
     sha: string;
+    username: string;
   };
 }
 

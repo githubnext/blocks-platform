@@ -41,7 +41,7 @@ export default function Home() {
     <>
       {status === "loading" && <p className="text-sm w-full p-8">Loading...</p>}
       {status === "success" && (
-        <FileViewer theme={theme as string} data={data} viewerOverride={viewerOverride} />
+        <FileViewer theme={theme as string} data={data} viewerOverride={viewerOverride as string} />
       )}
     </>
   );

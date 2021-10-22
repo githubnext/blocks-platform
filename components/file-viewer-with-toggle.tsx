@@ -14,11 +14,14 @@ interface FileViewerProps {
   data: DirectoryItem;
   theme: string;
   viewerOverride?: string;
+  owner: string;
+  repo: string;
+  path: string;
 }
 
 export function FileViewer(props: FileViewerProps) {
   const router = useRouter();
-  const { data, theme, viewerOverride } = props;
+  const { data, theme, viewerOverride, owner, repo, path } = props;
   const { name, content, download_url } = data;
   const [viewerType, setViewerType] = useState(viewerOverride || "code");
   const debugMode = Boolean(router.query.debug);
@@ -59,7 +62,7 @@ export function FileViewer(props: FileViewerProps) {
       )}
       <ErrorBoundary>
         <Viewer
-          meta={{ language, theme, name, download_url }}
+          meta={{ language, theme, name, download_url, owner, repo, path }}
           contents={code}
         />
       </ErrorBoundary>

@@ -3,6 +3,7 @@ import { FlatViewer } from "./flat";
 import { ThreeDeeViewer } from "./three-dee";
 import { IFrameViewer } from "./iframe";
 import { CssViewer } from "./css";
+import { NotesViewer } from "./notes";
 
 
 export interface ViewerProps {
@@ -40,6 +41,11 @@ export const viewers = [
     id: "css",
     label: "CSS viewer",
     component: CssViewer,
+  },
+  {
+    id: "notes",
+    label: "Notes",
+    component: NotesViewer,
   },
 ];
 

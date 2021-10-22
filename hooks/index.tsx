@@ -1,3 +1,4 @@
+import wretch from "wretch";
 import {
   useMutation,
   UseMutationOptions,
@@ -33,7 +34,7 @@ async function getFileContent(
     owner,
     repo,
     path,
-    ref: fileRef
+    ref: fileRef,
   });
 
   if (status !== 200) throw new Error("Something bad happened");
@@ -58,7 +59,7 @@ export function useFileContent(
         repo,
         owner,
         path,
-        fileRef
+        fileRef,
       }),
     config
   );
@@ -113,4 +114,21 @@ export function useUpdateFileContents(
   config?: UseMutationOptions<any, any, UseUpdateFileContentParams>
 ) {
   return useMutation(updateFileContents, config);
+}
+
+interface FetchSandboxParams extends RepoContext {
+  path: string;
+}
+
+function fetchSandbox(params: FetchSandboxParams) {
+  const { path, repo, owner } = params;
+
+  return wretch("/api/sandboxify").query({ repo, owner, path }).get().json();
+}
+
+export function useSandboxedComponent(params: FetchSandboxParams) {
+  return useQuery([params], () => fetchSandbox(params), {
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
 }

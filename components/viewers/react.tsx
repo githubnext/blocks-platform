@@ -1,32 +1,29 @@
-import { useView, Compiler, Editor, Error } from 'react-view';
-import { ViewerProps } from '.';
+import { useSandboxedComponent } from "hooks";
+import { ViewerProps } from ".";
 
 export default function ReactViewer({ contents, meta }: ViewerProps) {
-  const { name } = meta
-  const componentName = name.split("/").pop().split(".")[0]
+  const { name } = meta;
+  const componentName = name.split("/").pop().split(".")[0];
 
-  const wrappedContents = `
-() => {
-  ${contents.replaceAll("export ", "")}
-
-  return (
-    <${componentName}>
-      Text
-    </${componentName}>
-  )
-}`
-
-  const params = useView({
-    initialCode: wrappedContents,
-    scope: {},
-    onUpdate: console.log,
+  const { data, status } = useSandboxedComponent({
+    owner: meta.owner,
+    repo: meta.repo,
+    path: meta.path,
   });
+
+  console.log(data?.sandboxUrl);
 
   return (
     <>
-      <Compiler {...params.compilerProps} />
-      <Editor {...params.editorProps} language="jsx" />
-      <Error {...params.errorProps} />
+      {status === "loading" && (
+        <div className="p-4 text-gray-600 text-sm">Loading...</div>
+      )}
+      {status === "success" && data && (
+        <iframe
+          src={data.sandboxUrl.replace("example.jsx", "index.js")}
+          className="flex-1 w-full h-full"
+        />
+      )}
     </>
   );
 }

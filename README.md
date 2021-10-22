@@ -7,23 +7,23 @@
 To start working:
 
 ```bash
-yarn # install the deps
-yarn dev # start up the server
+yarn      # install the deps
+yarn dev  # start up the server
 ```
 
 In the browser, you can choose the file on GitHub to view with url params:
 
 ```bash
-owner # the GitHub org
-repo # the GitHub repo
-path # the path to the file
+owner  # the GitHub org
+repo   # the GitHub repo
+path   # the path to the file
 ```
 
 To debug different viewers, you can use a few query params:
 
 ```bash
-debug # to add the viewer picker to the top
-viewerOverride # to specify a specific viewer on lolad
+debug           # to add the viewer picker to the top
+viewerOverride  # to specify a specific viewer on lolad
 ```
 
 For example:

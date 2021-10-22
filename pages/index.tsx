@@ -4,6 +4,7 @@ import { viewers } from "components/viewers";
 import { useFileContent } from "hooks";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
+import { getViewerFromFilename } from "lib";
 
 export default function Home() {
   const router = useRouter();
@@ -20,6 +21,8 @@ export default function Home() {
       refetchOnWindowFocus: false,
     }
   );
+  const defaultViewer = getViewerFromFilename(data?.name) || "code";
+  console.log("defaultViewer: ", defaultViewer);
 
   useEffect(() => {
     setColorMode(theme === "dark" ? "night" : "day");
@@ -31,12 +34,14 @@ export default function Home() {
     const extension = (path as string)?.split(".").slice(-1)[0];
     const relevantViewers = viewers.filter(viewer => (
       viewer.extensions.includes(extension) || viewer.extensions.includes("*")
-    ))
+    )).map((v) => ({ id: v.id, label: v.label }));
+    relevantViewers.sort((a,b) => (a.id === defaultViewer) ? -1 : 1)
+    console.log("right viewers");
     console.log(relevantViewers, path, extension);
     window.parent.postMessage(
       {
         type: "set-viewers",
-        viewers: relevantViewers.map((v) => ({ id: v.id, label: v.label })),
+        viewers: relevantViewers,
       },
       "*"
     );
@@ -49,6 +54,7 @@ export default function Home() {
         <FileViewer
           theme={theme as string}
           data={data}
+          defaultViewer={defaultViewer}
           viewerOverride={viewerOverride as string}
         />
       )}

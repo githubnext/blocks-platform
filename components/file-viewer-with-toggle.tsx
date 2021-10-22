@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 
 import { ErrorBoundary } from "./error-boundary";
-import { getLanguageFromFilename, getViewerFromFilename } from "lib";
+import { getLanguageFromFilename } from "lib";
 import { CodeViewer, viewers } from "components/viewers";
 import { Box } from "@primer/components";
 import { useRouter } from "next/router";
@@ -14,6 +14,7 @@ interface FileViewerProps {
   data: DirectoryItem;
   theme: string;
   viewerOverride?: string;
+  defaultViewer?: string;
 }
 
 export function FileViewer(props: FileViewerProps) {
@@ -21,9 +22,8 @@ export function FileViewer(props: FileViewerProps) {
   const { data, theme, viewerOverride } = props;
   const { name, content, download_url, path, sha } = data;
 
-  const viewerDefault = getViewerFromFilename(name);
   const extension = name.split(".").slice(-1)[0];
-  const [viewerType, setViewerType] = useState(viewerOverride || viewerDefault || "code");
+  const [viewerType, setViewerType] = useState(viewerOverride || props.defaultViewer);
   const { debug, repo, owner, username } = router.query;
   const debugMode = Boolean(debug);
 

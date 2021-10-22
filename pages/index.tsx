@@ -8,12 +8,13 @@ import { useEffect } from "react";
 export default function Home() {
   const router = useRouter();
   const { setColorMode } = useTheme();
-  const { repo, owner, path, theme, viewerOverride } = router.query;
+  const { repo, owner, path, theme, fileRef, viewerOverride } = router.query;
   const { data, status } = useFileContent(
     {
       repo: repo as string,
       owner: owner as string,
       path: path as string,
+      fileRef: fileRef as string,
     },
     {
       enabled: Boolean(repo) && Boolean(owner) && Boolean(path),
@@ -32,7 +33,6 @@ export default function Home() {
     const relevantViewers = viewers.filter(viewer => (
       viewer.extensions.includes(extension) || viewer.extensions.includes("*")
     ))
-    console.log(relevantViewers, path, extension);
     window.parent.postMessage(
       {
         type: "set-viewers",

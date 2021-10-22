@@ -1,3 +1,4 @@
+import dynamic from 'next/dynamic'
 import { CodeViewer } from "./code";
 import { FlatViewer } from "./flat";
 import { ThreeDeeViewer } from "./three-dee";
@@ -5,6 +6,7 @@ import { IFrameViewer } from "./iframe";
 import { CssViewer } from "./css";
 import { NotesViewer } from "./notes";
 import { ExcalidrawViewer } from "./excalidraw";
+const ReactViewer = dynamic(() => import('./react'), { ssr: false })
 
 export interface ViewerProps {
   contents: string;
@@ -51,6 +53,12 @@ export const viewers = [
     label: "CSS viewer",
     component: CssViewer,
     extensions: ["css", "scss", "sass", "less", "styl", "postcss", "pcss"],
+  },
+  {
+    id: "react",
+    label: "React component",
+    component: ReactViewer,
+    extensions: ["jsx", "js"],
   },
   {
     id: "notes",

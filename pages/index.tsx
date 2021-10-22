@@ -28,14 +28,19 @@ export default function Home() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    const extension = (path as string)?.split(".").slice(-1)[0];
+    const relevantViewers = viewers.filter(viewer => (
+      viewer.extensions.includes(extension) || viewer.extensions.includes("*")
+    ))
+    console.log(relevantViewers, path, extension);
     window.parent.postMessage(
       {
         type: "set-viewers",
-        viewers: viewers.map((v) => ({ id: v.id, label: v.label })),
+        viewers: relevantViewers.map((v) => ({ id: v.id, label: v.label })),
       },
       "*"
     );
-  }, []);
+  }, [path]);
 
   return (
     <>

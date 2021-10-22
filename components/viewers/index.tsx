@@ -26,36 +26,43 @@ export const viewers = [
     id: "code",
     label: "Code",
     component: CodeViewer,
+    extensions: ["*"],
   },
   {
     id: "flat",
     label: "Flat Data",
     component: FlatViewer,
+    extensions: ["csv", "json"],
   },
   {
     id: "3d",
     label: "3D",
     component: ThreeDeeViewer,
+    extensions: ["glb"],
   },
   {
     id: "iframe",
     label: "Iframe",
     component: IFrameViewer,
+    extensions: ["*"],
   },
   {
     id: "css",
     label: "CSS viewer",
     component: CssViewer,
+    extensions: ["css", "scss", "sass", "less", "styl", "postcss", "pcss"],
   },
   {
     id: "notes",
     label: "Notes",
     component: NotesViewer,
+    extensions: ["notes"],
   },
   {
     id: "excalidraw",
     label: "Excalidraw",
     component: ExcalidrawViewer,
+    extensions: ["excalidraw"],
   },
 ];
 

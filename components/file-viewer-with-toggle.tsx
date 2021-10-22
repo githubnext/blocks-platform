@@ -22,6 +22,7 @@ export function FileViewer(props: FileViewerProps) {
   const { name, content, download_url, path, sha } = data;
 
   const viewerDefault = getViewerFromFilename(name);
+  const extension = name.split(".").slice(-1)[0];
   const [viewerType, setViewerType] = useState(viewerOverride || viewerDefault || "code");
   const { debug, repo, owner, username } = router.query;
   const debugMode = Boolean(debug);
@@ -55,7 +56,7 @@ export function FileViewer(props: FileViewerProps) {
         <div className="relative sticky top-0 z-[9999]">
           <div>
             <Box bg="bg.canvas" p={2} borderBottom="1px solid">
-              <ViewerPicker onChange={setViewerType} value={viewerType} />
+              <ViewerPicker extension={extension} onChange={setViewerType} value={viewerType} />
             </Box>
           </div>
         </div>

@@ -21,6 +21,7 @@ import {
   BiMessage,
   BiMinus,
 } from 'react-icons/bi';
+import { ViewerProps } from ".";
 
 export function NotesViewer({ contents, meta }: ViewerProps) {
   const { owner, repo, name, sha } = meta

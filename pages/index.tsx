@@ -42,9 +42,6 @@ export default function Home() {
       {status === "loading" && <p className="text-sm w-full p-8">Loading...</p>}
       {status === "success" && (
         <FileViewer
-          owner={owner}
-          repo={repo}
-          path={path}
           theme={theme as string}
           data={data}
           viewerOverride={viewerOverride as string}

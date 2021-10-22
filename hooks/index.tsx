@@ -1,8 +1,16 @@
-import { useQuery, UseQueryOptions } from "react-query";
+import {
+  useMutation,
+  UseMutationOptions,
+  useQuery,
+  UseQueryOptions,
+} from "react-query";
 import { Octokit } from "@octokit/rest";
 import { components } from "@octokit/openapi-types";
+import { Base64 } from "js-base64";
 
-const octokit = new Octokit();
+const octokit = new Octokit({
+  // AUTH GOES HERE
+});
 
 interface RepoContext {
   repo: string;
@@ -51,4 +59,41 @@ export function useFileContent(
       }),
     config
   );
+}
+
+interface UseUpdateFileContentParams extends RepoContext {
+  content: string;
+  path: string;
+  sha: string;
+}
+
+async function updateFileContents(params: UseUpdateFileContentParams) {
+  const contentEncoded = Base64.encode(params.content);
+
+  try {
+    await octokit.repos.createOrUpdateFileContents({
+      owner: params.owner,
+      repo: params.repo,
+      path: params.path,
+      message: `feat: updated ${params.path} programatically`,
+      content: contentEncoded,
+      committer: {
+        name: `Composable GitHub Bot`,
+        email: "fake@fake.com",
+      },
+      author: {
+        name: `Composable GitHub Bot`,
+        email: "fake@fake.com",
+      },
+      sha: params.sha,
+    });
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+export function useUpdateFileContents(
+  config?: UseMutationOptions<any, any, UseUpdateFileContentParams>
+) {
+  return useMutation(updateFileContents, config);
 }

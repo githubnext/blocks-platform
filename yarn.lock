@@ -246,6 +246,11 @@
   resolved "https://registry.yarnpkg.com/@emotion/weak-memoize/-/weak-memoize-0.2.5.tgz#8eed982e2ee6f7f4e44c253e12962980791efd46"
   integrity sha512-6U71C2Wp7r5XtFtQzYrW5iKFT67OixrSxjI4MptCHzdSVlgabczzqLe0ZSgnub/5Kp4hSbpDB1tMytZY9pwxxA==
 
+"@excalidraw/excalidraw@^0.10.0":
+  version "0.10.0"
+  resolved "https://registry.yarnpkg.com/@excalidraw/excalidraw/-/excalidraw-0.10.0.tgz#5329d6fb1b0cca068e2cd34da6d648dd6d0d3fec"
+  integrity sha512-0fHc/oX394dHAT7LEacwZ0vh8aeI179plYnfaeLeRHBtHARgmtlmvxcnxd2pxJ0Z1Uj/Cy76oK9MVw/y8P1HhQ==
+
 "@githubocto/flat-ui@^0.10.2":
   version "0.10.2"
   resolved "https://registry.yarnpkg.com/@githubocto/flat-ui/-/flat-ui-0.10.2.tgz#25ea025e662721eac7f468662436864ebf81dd4a"
@@ -3522,6 +3527,11 @@ jest-worker@27.0.0-next.5:
     "@types/node" "*"
     merge-stream "^2.0.0"
     supports-color "^8.0.0"
+
+js-base64@^3.7.2:
+  version "3.7.2"
+  resolved "https://registry.yarnpkg.com/js-base64/-/js-base64-3.7.2.tgz#816d11d81a8aff241603d19ce5761e13e41d7745"
+  integrity sha512-NnRs6dsyqUXejqk/yv2aiXlAvOs56sLkX6nUdeaNezI5LFFLlsZjOThmwnrcwh5ZZRwZlCMnVAY3CvhIhoVEKQ==
 
 js-cookie@^2.2.1:
   version "2.2.1"

@@ -4,7 +4,7 @@ import { ThreeDeeViewer } from "./three-dee";
 import { IFrameViewer } from "./iframe";
 import { CssViewer } from "./css";
 import { NotesViewer } from "./notes";
-
+import { ExcalidrawViewer } from "./excalidraw";
 
 export interface ViewerProps {
   contents: string;
@@ -13,6 +13,10 @@ export interface ViewerProps {
     theme: string;
     download_url: string;
     name: string;
+    path: string;
+    repo: string;
+    owner: string;
+    sha: string;
   };
 }
 
@@ -47,9 +51,15 @@ export const viewers = [
     label: "Notes",
     component: NotesViewer,
   },
+  {
+    id: "excalidraw",
+    label: "Excalidraw",
+    component: ExcalidrawViewer,
+  },
 ];
 
 export * from "./code";
 export * from "./flat";
 export * from "./three-dee";
 export * from "./iframe";
+export * from "./excalidraw";

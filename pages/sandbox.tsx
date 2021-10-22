@@ -1,11 +1,15 @@
-import { useFileContent } from "hooks";
+import { useState, useEffect } from "react";
 
 export default function Sandbox() {
-  const { data, status } = useFileContent({
-    repo: "react-overflow-list",
-    owner: "mattrothenberg",
-    path: "README.md",
-  });
+  const [Comp, setComp] = useState(null);
 
-  return <div></div>;
+  const handleChange = (e: any) => {
+    console.log(e);
+  };
+
+  useEffect(() => {
+    import("@excalidraw/excalidraw").then((comp) => setComp(comp.default));
+  }, []);
+
+  return <>{Comp && <Comp onChange={handleChange} />}</>;
 }

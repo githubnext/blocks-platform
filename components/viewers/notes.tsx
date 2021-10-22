@@ -92,7 +92,7 @@ export function NotesViewer({ contents, meta }: ViewerProps) {
         owner: owner,
         repo: repo,
         path: name,
-        sha: sha,
+        sha: "latest",
       });
     }, 5000);
 
@@ -104,12 +104,16 @@ export function NotesViewer({ contents, meta }: ViewerProps) {
       ].filter(Boolean),
       autofocus: 'start',
       editorProps: {
+        handleDOMEvents: {
+          // @ts-ignore
+          input: updateFileDebounced,
+        },
         attributes: {
           class: 'h-full focus:outline-none',
         },
       },
       // content: data?.notes, // now applied above
-      onUpdate: updateFileDebounced,
+      // onUpdate: updateFileDebounced,
     });
     setEditor(editor);
 

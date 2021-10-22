@@ -14,9 +14,6 @@ interface FileViewerProps {
   data: DirectoryItem;
   theme: string;
   viewerOverride?: string;
-  owner: string;
-  repo: string;
-  path: string;
 }
 
 export function FileViewer(props: FileViewerProps) {

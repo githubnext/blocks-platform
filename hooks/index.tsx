@@ -8,7 +8,7 @@ import { Octokit } from "@octokit/rest";
 import { components } from "@octokit/openapi-types";
 import { Base64 } from "js-base64";
 
-const octokit = new Octokit({
+export const octokit = new Octokit({
   // AUTH GOES HERE
 });
 

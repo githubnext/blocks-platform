@@ -8,6 +8,7 @@ import { NotesViewer } from "./notes";
 import { ExcalidrawViewer } from "./excalidraw";
 import { ChartViewer } from "./chart";
 const ReactViewer = dynamic(() => import('./react'), { ssr: false })
+const AnnotateReactViewer = dynamic(() => import('./annotate-react'), { ssr: false })
 
 export interface ViewerProps {
   contents: string;
@@ -59,6 +60,12 @@ export const viewers = [
     id: "react",
     label: "React component",
     component: ReactViewer,
+    extensions: ["jsx", "js"],
+  },
+  {
+    id: "annotate-react",
+    label: "Annotate React component",
+    component: AnnotateReactViewer,
     extensions: ["jsx", "js"],
   },
   {

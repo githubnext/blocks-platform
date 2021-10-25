@@ -1,4 +1,4 @@
-import dynamic from 'next/dynamic'
+import dynamic from "next/dynamic";
 import { CodeViewer } from "./code";
 import { FlatViewer } from "./flat";
 import { ThreeDeeViewer } from "./three-dee";
@@ -7,8 +7,11 @@ import { CssViewer } from "./css";
 import { NotesViewer } from "./notes";
 import { ExcalidrawViewer } from "./excalidraw";
 import { ChartViewer } from "./chart";
-const ReactViewer = dynamic(() => import('./react'), { ssr: false })
-const AnnotateReactViewer = dynamic(() => import('./annotate-react'), { ssr: false })
+const ReactViewer = dynamic(() => import("./react"), { ssr: false });
+const AnnotateReactViewer = dynamic(() => import("./annotate-react"), {
+  ssr: false,
+});
+import { NpmAnalysisViewer } from "./npm-analysis";
 
 export interface ViewerProps {
   contents: string;
@@ -85,6 +88,12 @@ export const viewers = [
     label: "Chart",
     component: ChartViewer,
     extensions: ["chart"],
+  },
+  {
+    id: "npm-analysis",
+    label: "Package JSON Analyzer",
+    component: NpmAnalysisViewer,
+    extensions: ["json"],
   },
 ];
 

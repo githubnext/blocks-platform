@@ -105,8 +105,12 @@ const Annotator = ({ defaultAnnotations, onSubmit, children }) => {
   return (
     <div className="flex py-6">
 
-      <div className="flex-1">
-        <div className="flex">
+      <div className="flex-1 p-6 pt-0 z-10">
+        <div className="flex items-center pb-1">
+          <div className="mr-6 py-2 text-xs uppercase tracking-widest">
+            Annotation type:
+          </div>
+
           {annotationTypes.map(({ id, name }) => (
             <button
               key={id}
@@ -119,7 +123,7 @@ const Annotator = ({ defaultAnnotations, onSubmit, children }) => {
             </button>
           ))}
         </div>
-        <div className="h-80">
+        <div className="">
           <Annotation
             annotations={annotations}
             type={annotationType}

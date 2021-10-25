@@ -23,7 +23,7 @@ export default function AnnotateReactViewer({ contents, meta }: ViewerProps) {
     const url = `https://composable-github.vercel.app?owner=${owner}&repo=${repo}&path=${path}&viewerOverride=annotate-react&annotations=${encodeURIComponent(JSON.stringify(annotations))}`
     const body = `${description}
 
-[${url}](Annotated component)`
+[Annotated component](${url})`
     console.log(url)
 
     const issue = await octokit.rest.issues.create({

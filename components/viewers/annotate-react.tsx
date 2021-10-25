@@ -130,7 +130,11 @@ const Annotator = ({ defaultAnnotations, onSubmit, children }) => {
             value={annotation}
             onChange={setAnnotation}
             onSubmit={onAddAnnotation}
-          >{children}</Annotation>
+          >
+            <div className="relative w-full h-full z-[-1]">
+              {children}
+            </div>
+          </Annotation>
         </div>
       </div>
       <div className="flex-1 p-6 self-stretch max-h-[40em] max-w-[35em]">

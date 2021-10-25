@@ -62,10 +62,12 @@ export function FileViewer(props: FileViewerProps) {
         </div>
       )}
       <ErrorBoundary>
-        <Viewer
-          meta={{ language, theme, name, download_url, repo, owner, path, sha, username }}
-          contents={code}
-        />
+        {!!Viewer && (
+          <Viewer
+            meta={{ language, theme, name, download_url, repo, owner, path, sha, username }}
+            contents={code}
+          />
+        )}
       </ErrorBoundary>
     </div>
   );

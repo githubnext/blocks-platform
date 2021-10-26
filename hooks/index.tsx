@@ -8,8 +8,11 @@ import { Octokit } from "@octokit/rest";
 import { components } from "@octokit/openapi-types";
 import { Base64 } from "js-base64";
 
+// get env variable
+const GITHUB_PAT = process.env.NEXT_PUBLIC_GITHUB_PAT;
 export const octokit = new Octokit({
   // AUTH GOES HERE
+  auth: GITHUB_PAT
 });
 
 interface RepoContext {

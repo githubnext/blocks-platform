@@ -3,21 +3,30 @@ import React from "react";
 export class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, errorMessage: null };
   }
 
   static getDerivedStateFromError(error) {
-    return { hasError: true };
+    return { hasError: true, errorMessage: error.message };
   }
 
   componentDidCatch(error, errorInfo) {
-    console.log(error);
+    console.log(error, errorInfo);
   }
 
   render() {
     // @ts-ignore
     if (this.state.hasError) {
-      return <h1>Something went wrong.</h1>;
+      return (
+        <div className="flex flex-col">
+
+          <h1>Something went wrong.</h1>
+          <p>
+            {/* @ts-ignore */}
+            {this.state.errorMessage || ""}
+          </p>
+        </div>
+      );
     }
 
     return this.props.children;

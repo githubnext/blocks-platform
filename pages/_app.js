@@ -1,4 +1,5 @@
 import "styles/index.css";
+import "styles/markdown.css";
 
 import { useState } from "react";
 import { ThemeProvider, BaseStyles } from "@primer/components";

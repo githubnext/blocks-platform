@@ -7,6 +7,7 @@ import { CssViewer } from "./css";
 import { NotesViewer } from "./notes";
 import { ExcalidrawViewer } from "./excalidraw";
 import { ChartViewer } from "./chart";
+import { MarkdownViewer } from "./markdown";
 const ReactViewer = dynamic(() => import("./react"), { ssr: false });
 const AnnotateReactViewer = dynamic(() => import("./annotate-react"), {
   ssr: false,
@@ -94,6 +95,12 @@ export const viewers = [
     label: "Package JSON Analyzer",
     component: NpmAnalysisViewer,
     extensions: ["json"],
+  },
+  {
+    id: "markdown",
+    label: "Markdown",
+    component: MarkdownViewer,
+    extensions: ["md"],
   },
 ];
 

@@ -1,0 +1,54 @@
+.markdown h1 {
+  font-size: 2.25rem;
+  line-height: 1.25;
+  font-weight: 800;
+  margin-top: 1em;
+  margin-bottom: 0.5rem;
+}
+.markdown h2 {
+  font-size: 2rem;
+  line-height: 1.25;
+  font-weight: 700;
+  margin-top: 1em;
+  margin-bottom: 0.5rem;
+}
+.markdown h3 {
+  font-size: 1.5rem;
+  line-height: 1.25;
+  font-weight: 700;
+  margin-top: 1em;
+  margin-bottom: 0.5rem;
+}
+.markdown h4 {
+  font-size: 1.25rem;
+  line-height: 1.25;
+  font-weight: 700;
+  margin-top: 1em;
+  margin-bottom: 0.5rem;
+}
+.markdown h5 {
+  font-size: 1rem;
+  line-height: 1.25;
+  font-weight: 700;
+  margin-top: 1em;
+  margin-bottom: 0.5rem;
+}
+.markdown a {
+  @apply text-indigo-500;
+  font-weight: 500;
+  text-decoration: none;
+}
+.markdown a:hover {
+  @apply text-indigo-600;
+}
+.markdown a:active {
+  @apply text-indigo-700;
+}
+.markdown a:focus {
+  @apply outline-none;
+}
+.markdown .code > pre {
+  @apply !rounded-2xl;
+  @apply !bg-gray-100;
+  @apply !my-3 !p-4 !px-5;
+}

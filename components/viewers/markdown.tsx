@@ -5,7 +5,7 @@ import { timeFormat } from "d3"
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { ViewerProps } from ".";
 import { octokit, useUpdateFileContents } from "hooks";
-import { Box, Button, StateLabel } from "@primer/components";
+import { Avatar, Box, Button, StateLabel } from "@primer/components";
 import { ErrorBoundary } from "components/error-boundary";
 import { PlusIcon } from "@primer/octicons-react";
 
@@ -235,9 +235,18 @@ function Commits({ num = 2, children }: {
             <div className="flex justify-between items-center">
               <a className="block text-black text-lg" href={commit.html_url}>{commit.commit.message}</a>
             </div>
-            <div className="mt-1 text-sm italic text-gray-600">
-              {formatDate(new Date(commit.commit.author.date))}
-            </div>
+            {/* author */}
+            <Box className="flex items-center mt-1">
+              <Avatar src={commit.author.avatar_url} className="mr-2" />
+              <div className="flex-1 flex items-center justify-between">
+                <div className="text-sm text-gray-600">
+                  {commit.author.login}
+                </div>
+                <div className="mt-1 text-sm italic text-gray-600">
+                  {formatDate(new Date(commit.commit.author.date))}
+                </div>
+              </div>
+            </Box>
             {/* <MDX className="whitespace-pre-wrap truncate">{issue.body}</MDX> */}
           </Box>
         ))}

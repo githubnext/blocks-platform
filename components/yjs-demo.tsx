@@ -1,17 +1,25 @@
 import * as Y from "yjs";
-import { useState, useMemo, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   useYDoc,
-  useYArray,
   useYMap,
   StartAwarenessFunction,
   useYAwareness,
 } from "zustand-yjs";
 import { WebrtcProvider } from "y-webrtc";
-import { useMount } from "react-use";
-import { useFileContent } from "hooks";
+import { useMount, useUpdateEffect, useShallowCompareEffect } from "react-use";
 import partition from "lodash/partition";
 import sample from "lodash/sample";
+import Excalidraw, {
+  serializeAsJSON,
+  getSceneVersion,
+} from "@excalidraw/excalidraw";
+import {
+  AppState,
+  ExcalidrawImperativeAPI,
+} from "@excalidraw/excalidraw/types/types";
+
+import { useFileContent } from "hooks";
 
 const colors = ["red", "orange", "blue", "green", "purple"];
 
@@ -21,6 +29,7 @@ type AwarenessState = {
   ID: number;
   color: string;
   elementIndex: number | null;
+  pointer: any;
 };
 
 const connectMembers = (
@@ -55,17 +64,96 @@ function CollaborativeFileEditor({
   const yDoc = useYDoc("root", connectMembers);
   const { set, data } = useYMap(yDoc.getMap("fileContents"));
   const actualContent = Buffer.from(content, "base64").toString();
+  const excalidrawRef = useRef<ExcalidrawImperativeAPI>(null);
+  const [version, setVersion] = useState<number | null>(null);
 
   useMount(() => {
     set(docKey, actualContent);
   });
 
-  const [awarenessData] = useYAwareness<AwarenessState>(yDoc);
+  const [awarenessData, setAwareness] = useYAwareness<AwarenessState>(yDoc);
 
   const [[me], others] = partition(
     awarenessData,
     ({ ID: userId }) => userId === ID
   );
+
+  const handlePointerUpdate = (payload: {
+    pointer: {
+      x: number;
+      y: number;
+    };
+    button: "up" | "down";
+    pointersMap: Map<
+      number,
+      Readonly<{
+        x: number;
+        y: number;
+      }>
+    >;
+  }) => {
+    setAwareness({ pointer: payload.pointer });
+  };
+
+  // const handleChange = (
+  //   elements: readonly ExcalidrawElement[],
+  //   appState: AppState
+  // ) => {
+  //   const version = getSceneVersion(elements);
+  //   const serialized = serializeAsJSON(elements, appState);
+  //   // console.log(serialized);
+  //   set(docKey, serialized);
+  // };
+
+  useUpdateEffect(() => {
+    if (!excalidrawRef.current) return;
+    const collaborators = others.reduce((map, next) => {
+      map.set(next.ID, {
+        pointer: next.pointer,
+        button: "down",
+        selectedElementIds: [],
+        username: "",
+        userState: undefined,
+        color: {
+          background: next.color,
+        },
+      });
+      return map;
+    }, new Map());
+    if (!collaborators) return;
+    // @ts-ignore
+    excalidrawRef.current.updateScene({
+      collaborators,
+    });
+  }, [others]);
+
+  useEffect(() => {
+    if (!version) return;
+    if (!excalidrawRef.current) return;
+    const serialized = serializeAsJSON(
+      excalidrawRef.current.getSceneElements(),
+      excalidrawRef.current.getAppState()
+    );
+
+    console.log(serialized);
+
+    set(docKey, serialized);
+  }, [version]);
+
+  useEffect(() => {
+    if (!data) return;
+    if (!excalidrawRef.current) return;
+
+    try {
+      const parsed = JSON.parse(data[docKey] as string);
+      excalidrawRef.current.updateScene({
+        elements: parsed.elements,
+        appState: parsed.appState,
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  }, [data]);
 
   if (!data || Object.keys(data).length === 0) return <div>Loading...</div>;
 
@@ -82,6 +170,7 @@ function CollaborativeFileEditor({
         {others.map((other, index) => {
           return (
             <img
+              key={index}
               className="inline-block h-6 w-6 rounded-full"
               src={`https://avatars.dicebear.com/api/pixel-art/${other}-${
                 index + 1
@@ -91,26 +180,31 @@ function CollaborativeFileEditor({
           );
         })}
       </div>
-      <div className="bg-gray-100 p-4 relative">
-        <textarea
-          className="w-full border border-gray-200 rounded p-4 font-mono"
-          cols={20}
-          rows={20}
-          onChange={(e) => {
-            set(docKey, e.target.value);
+      <div className="bg-gray-100 p-4 relative h-full">
+        <Excalidraw
+          initialData={JSON.parse(actualContent)}
+          onPointerUpdate={handlePointerUpdate}
+          onChange={(elements) => {
+            const newVersion = getSceneVersion(elements);
+            setVersion(newVersion);
           }}
-          value={data[docKey] as string}
-        ></textarea>
+          ref={excalidrawRef}
+          isCollaborating
+        />
       </div>
     </>
   );
 }
 
+const repo = `composable-github-test`;
+const owner = `githubnext`;
+const path = `test.excalidraw`;
+
 export default function YJSDemo() {
   const { data, status } = useFileContent({
-    repo: "react-overflow-list",
-    owner: "mattrothenberg",
-    path: "package.json",
+    repo,
+    owner,
+    path,
   });
 
   if (status === "loading") {
@@ -120,7 +214,7 @@ export default function YJSDemo() {
   if (status === "success" && data) {
     return (
       <CollaborativeFileEditor
-        docKey="mattrothenberg/react-overflow-list/package.json"
+        docKey={`${owner}/${repo}/${path}`}
         content={data.content}
       />
     );

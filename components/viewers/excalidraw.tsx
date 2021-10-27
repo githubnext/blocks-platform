@@ -5,7 +5,7 @@ import { ViewerProps } from ".";
 
 const allowList = ["excalidraw"];
 
-export default function ExcalidrawViewer(props: ViewerProps) {
+export function ExcalidrawViewer(props: ViewerProps) {
   const { contents, meta } = props;
   const extension = meta.name.split(".").pop();
   const serializeAsJSON = useRef(null)
@@ -29,7 +29,6 @@ export default function ExcalidrawViewer(props: ViewerProps) {
   };
 
   useEffect(() => {
-    if (typeof window !== "undefined") return
     import("@excalidraw/excalidraw").then((comp) => {
       setComp(comp.default)
       serializeAsJSON.current = comp.serializeAsJSON;

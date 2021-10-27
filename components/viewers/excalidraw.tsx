@@ -10,7 +10,8 @@ import {
 } from "@fluidframework/azure-client";
 import { IFluidContainer, ISharedMap, SharedMap } from "fluid-framework";
 import { connectionConfig, containerSchema, getContainerId } from "lib/azure";
-import { useDeepCompareEffect, useShallowCompareEffect } from "react-use";
+import { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types/types";
+import debounce from "lodash/debounce";
 
 const allowList = ["excalidraw"];
 
@@ -113,8 +114,7 @@ const ExcalidrawCanvas: React.FC<
   const extension = meta.name.split(".").pop();
   const [model] = useState<ExcalidrawModel>(createModel(container));
 
-  const [appState, setAppState] = useState(null);
-  const [elements, setElements] = useState([]);
+  const excalidrawRef = useRef<ExcalidrawImperativeAPI>();
 
   const [fluidState, setFluidState] = useState<any>({
     mutationState: "",
@@ -144,37 +144,59 @@ const ExcalidrawCanvas: React.FC<
 
   useEffect(() => {
     import("@excalidraw/excalidraw").then((comp) => setComp(comp.default));
+    model.setDrawingState(contents);
   }, []);
 
   useEffect(() => {
     const syncLocalAndFluidState = () => {
-      console.log("syncing local and fluid state");
-      const parsed = JSON.parse(model.getDrawingState());
       setFluidState({
         mutationState: model.getMutationState(),
+      });
+
+      const parsed = JSON.parse(model.getDrawingState());
+      if (!excalidrawRef.current) return;
+      excalidrawRef.current.updateScene({
         elements: parsed.elements,
         appState: parsed.appState,
       });
     };
 
-    // Add a listener on the BrainstormModel listener
-    // The listener will call syncLocalAndFluidState everytime there a "valueChanged" event.
-    model.setChangeListener(syncLocalAndFluidState);
+    const debouncedSyncHandler = debounce(syncLocalAndFluidState, 400);
+
+    model.setChangeListener(debouncedSyncHandler);
 
     return () => {
-      model.removeChangeListener(syncLocalAndFluidState);
+      model.removeChangeListener(debouncedSyncHandler);
     };
   }, []);
 
-  const handleChange = (elements: any, appState: any) => {
-    setElements(elements);
-    setAppState(appState);
-  };
+  const handleChange = useCallback(
+    (elements: any, appState: any) => {
+      model.setDrawingState(serializeAsJSON(elements, appState));
+    },
+    [model]
+  );
 
-  const { mutateAsync, status } = useUpdateFileContents();
+  const { mutateAsync, status } = useUpdateFileContents({
+    onMutate: () => {
+      model.setMutationState("loading");
+    },
+    onSuccess: () => {
+      model.setMutationState("success");
+    },
+    onError: () => {
+      model.setMutationState("error");
+    },
+  });
 
   const handleSave = async () => {
-    const serialized = serializeAsJSON(elements, appState);
+    if (!excalidrawRef.current) return;
+
+    const serialized = serializeAsJSON(
+      excalidrawRef.current.getSceneElements(),
+      excalidrawRef.current.getAppState()
+    );
+
     model.setDrawingState(serialized);
 
     await mutateAsync({
@@ -185,10 +207,6 @@ const ExcalidrawCanvas: React.FC<
       sha: meta.sha,
     });
   };
-
-  useEffect(() => {
-    model.setMutationState(status);
-  }, [status]);
 
   if (!allowList.includes(extension)) {
     return (
@@ -207,10 +225,7 @@ const ExcalidrawCanvas: React.FC<
 
   return (
     <div className="h-full flex flex-col">
-      <div>
-        {status} vs. {model.getMutationState()}
-      </div>
-      <div className="flex-shrink-0">
+      <div className="flex-shrink-0 p-4 border-b">
         <Button disabled={isDisabled} onClick={handleSave}>
           {isDisabled ? "Saving..." : "Save Changes"}
         </Button>
@@ -218,10 +233,8 @@ const ExcalidrawCanvas: React.FC<
       <div className="flex-1">
         {Comp && (
           <Comp
-            initialData={{
-              elements: fluidState.elements,
-              appState: fluidState.appState,
-            }}
+            ref={excalidrawRef}
+            initialData={JSON.parse(contents)}
             onChange={handleChange}
           />
         )}

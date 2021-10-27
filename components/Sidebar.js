@@ -12,7 +12,7 @@ export const Sidebar = ({ owner, repo, files = [], activeFilePath }) => {
   const allUsers = []
 
   return (
-    <Box className="h-full overflow-auto flex-1" borderRight="1px solid" className="!border-gray-200">
+    <Box className="h-full !border-gray-200 overflow-auto flex-1" borderRight="1px solid">
       {/* <div className="p-4 w-full border-b">
         <a
           className="flex items-center space-x-1"

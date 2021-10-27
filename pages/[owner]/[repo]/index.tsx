@@ -66,10 +66,10 @@ export default function IndexPage() {
   }, [path, defaultViewer]);
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col w-full h-screen overflow-hidden">
       <GitHubHeader />
       <RepoHeader owner={owner as string} repo={repo as string} />
-      <div className="flex">
+      <div className="flex flex-1 overflow-hidden">
         <div className="flex-none w-60">
           <Sidebar files={files} activeFilePath={path} owner={owner as string} repo={repo as string} />
         </div>
@@ -102,7 +102,7 @@ const links = [
 ]
 const GitHubHeader = () => {
   return (
-    <Header px={30}>
+    <Header px={30} className="flex-none">
       <Header.Item>
         <Header.Link href="#" fontSize={2}>
           <StyledOcticon icon={MarkGithubIcon} size={32} mr={2} />
@@ -148,7 +148,7 @@ const RepoHeader = ({ owner, repo }: {
   repo: string,
 }) => {
   return (
-    <Box bg="canvas.subtle" borderColor="border.default" borderBottomWidth={1} borderBottomStyle="solid" px={30} pt={20}>
+    <Box bg="canvas.subtle" borderColor="border.default" borderBottomWidth={1} borderBottomStyle="solid" px={30} pt={20} className="flex-none">
       <Box display="flex" alignItems="center" mb={2} justifyContent="space-between">
         <Box display="flex" alignItems="center" >
           <StyledOcticon icon={RepoIcon} size={17} mr={2} className="text-gray-500" />
@@ -216,7 +216,9 @@ const footerLinks = [
 ]
 const Footer = () => {
   return (
-    <Box display="flex" alignItems="center" py={40} borderTopWidth={1} borderTopStyle="solid" borderTopColor="border.default" className="mt-10 w-full mx-auto max-w-[1250px]">
+    <Box display="flex" alignItems="center" py={40} borderTopWidth={1} borderTopStyle="solid" borderTopColor="border.default" className="flex-none mt-10 max-w-[1250px] mx-10 self-center" style={{
+      width: "calc(100% - 5em)"
+    }}>
       <Box display="flex" alignItems="center" mr={2} className="text-gray-500">
         <StyledOcticon icon={MarkGithubIcon} size={25} mr={2} />
         <div className="text-xs">© 2021 GitHub, Inc.</div>

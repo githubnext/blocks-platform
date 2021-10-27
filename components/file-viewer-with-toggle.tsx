@@ -56,9 +56,9 @@ export function FileViewer(props: FileViewerProps) {
   }, [path])
 
   return (
-    <div className="h-full">
+    <div className="h-full flex flex-col">
       {(debugMode || hasToggle) && (
-        <div className="relative sticky top-0 z-[9999]">
+        <div className="flex-none top-0 z-[9999]">
           <div>
             <Box bg="canvas.subtle" p={2} borderBottom="1px solid" className="!border-gray-200">
               <ViewerPicker extension={extension} onChange={setViewerType} value={viewerType} />
@@ -67,12 +67,14 @@ export function FileViewer(props: FileViewerProps) {
         </div>
       )}
       <ErrorBoundary key={path}>
-        {!!Viewer && (
-          <Viewer
-            meta={{ language, theme, name, download_url, repo, owner, path, sha, username }}
-            contents={code}
-          />
-        )}
+        <div className="overflow-y-auto flex-1">
+          {!!Viewer && (
+            <Viewer
+              meta={{ language, theme, name, download_url, repo, owner, path, sha, username }}
+              contents={code}
+            />
+          )}
+        </div>
       </ErrorBoundary>
     </div>
   );

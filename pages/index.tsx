@@ -23,7 +23,6 @@ export default function Home() {
     }
   );
   const defaultViewer = getViewerFromFilename(data?.name) || "code";
-  console.log("defaultViewer: ", defaultViewer);
 
   useEffect(() => {
     setColorMode(theme === "dark" ? "night" : "day");
@@ -33,12 +32,15 @@ export default function Home() {
     if (typeof window === "undefined") return;
 
     const extension = (path as string)?.split(".").slice(-1)[0];
-    const relevantViewers = viewers.filter(viewer => (
-      viewer.extensions.includes(extension) || viewer.extensions.includes("*")
-    )).map((v) => ({ id: v.id, label: v.label }));
-    relevantViewers.sort((a,b) => (a.id === defaultViewer) ? -1 : 1); // put default viewer first
-    console.log("right viewers");
-    console.log(relevantViewers, path, extension);
+    const relevantViewers = viewers
+      .filter(
+        (viewer) =>
+          viewer.extensions.includes(extension) ||
+          viewer.extensions.includes("*")
+      )
+      .map((v) => ({ id: v.id, label: v.label }));
+    relevantViewers.sort((a, b) => (a.id === defaultViewer ? -1 : 1)); // put default viewer first
+
     window.parent.postMessage(
       {
         type: "set-viewers",

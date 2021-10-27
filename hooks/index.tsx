@@ -12,7 +12,7 @@ import { Base64 } from "js-base64";
 const GITHUB_PAT = process.env.NEXT_PUBLIC_GITHUB_PAT;
 export const octokit = new Octokit({
   // AUTH GOES HERE
-  auth: GITHUB_PAT
+  auth: "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",
 });
 
 interface RepoContext {
@@ -36,7 +36,7 @@ async function getFileContent(
     owner,
     repo,
     path,
-    ref: fileRef
+    ref: fileRef,
   });
 
   if (status !== 200) throw new Error("Something bad happened");
@@ -61,7 +61,7 @@ export function useFileContent(
         repo,
         owner,
         path,
-        fileRef
+        fileRef,
       }),
     config
   );
@@ -74,42 +74,47 @@ interface UseUpdateFileContentParams extends RepoContext {
 }
 
 async function updateFileContents(params: UseUpdateFileContentParams) {
-  const contentEncoded = Base64.encode(params.content);
-  let sha = params.sha;
+  return new Promise((res) => {
+    setTimeout(() => {
+      res(true);
+    }, 1000);
+  });
+  // const contentEncoded = Base64.encode(params.content);
+  // let sha = params.sha;
 
-  if (sha === "latest") {
-    const { data, status } = await octokit.repos.getContent({
-      owner: params.owner,
-      repo: params.repo,
-      path: params.path,
-    });
+  // if (sha === "latest") {
+  //   const { data, status } = await octokit.repos.getContent({
+  //     owner: params.owner,
+  //     repo: params.repo,
+  //     path: params.path,
+  //   });
 
-    if (status !== 200) throw new Error("Something bad happened");
+  //   if (status !== 200) throw new Error("Something bad happened");
 
-    // @ts-ignore
-    sha = data.sha;
-  }
+  //   // @ts-ignore
+  //   sha = data.sha;
+  // }
 
-  try {
-    await octokit.repos.createOrUpdateFileContents({
-      owner: params.owner,
-      repo: params.repo,
-      path: params.path,
-      message: `feat: updated ${params.path} programatically`,
-      content: contentEncoded,
-      committer: {
-        name: `Composable GitHub Bot`,
-        email: "fake@fake.com",
-      },
-      author: {
-        name: `Composable GitHub Bot`,
-        email: "fake@fake.com",
-      },
-      sha: sha,
-    });
-  } catch (e) {
-    console.log(e);
-  }
+  // try {
+  //   await octokit.repos.createOrUpdateFileContents({
+  //     owner: params.owner,
+  //     repo: params.repo,
+  //     path: params.path,
+  //     message: `feat: updated ${params.path} programatically`,
+  //     content: contentEncoded,
+  //     committer: {
+  //       name: `Composable GitHub Bot`,
+  //       email: "fake@fake.com",
+  //     },
+  //     author: {
+  //       name: `Composable GitHub Bot`,
+  //       email: "fake@fake.com",
+  //     },
+  //     sha: sha,
+  //   });
+  // } catch (e) {
+  //   console.log(e);
+  // }
 }
 
 export function useUpdateFileContents(

@@ -1,5 +1,5 @@
 import * as Y from "yjs";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   useYDoc,
   useYMap,
@@ -7,17 +7,14 @@ import {
   useYAwareness,
 } from "zustand-yjs";
 import { WebrtcProvider } from "y-webrtc";
-import { useMount, useUpdateEffect, useShallowCompareEffect } from "react-use";
+import { useMount, useUpdateEffect } from "react-use";
 import partition from "lodash/partition";
 import sample from "lodash/sample";
 import Excalidraw, {
   serializeAsJSON,
   getSceneVersion,
 } from "@excalidraw/excalidraw";
-import {
-  AppState,
-  ExcalidrawImperativeAPI,
-} from "@excalidraw/excalidraw/types/types";
+import { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types/types";
 
 import { useFileContent } from "hooks";
 
@@ -30,6 +27,7 @@ type AwarenessState = {
   color: string;
   elementIndex: number | null;
   pointer: any;
+  button: any;
 };
 
 const connectMembers = (
@@ -92,26 +90,19 @@ function CollaborativeFileEditor({
       }>
     >;
   }) => {
-    setAwareness({ pointer: payload.pointer });
+    setAwareness({ pointer: payload.pointer, button: payload.button });
   };
-
-  // const handleChange = (
-  //   elements: readonly ExcalidrawElement[],
-  //   appState: AppState
-  // ) => {
-  //   const version = getSceneVersion(elements);
-  //   const serialized = serializeAsJSON(elements, appState);
-  //   // console.log(serialized);
-  //   set(docKey, serialized);
-  // };
 
   useUpdateEffect(() => {
     if (!excalidrawRef.current) return;
+    console.log(excalidrawRef.current.getAppState().selectedElementIds);
+
     const collaborators = others.reduce((map, next) => {
       map.set(next.ID, {
         pointer: next.pointer,
-        button: "down",
-        selectedElementIds: [],
+        button: next.button,
+        selectedElementIds:
+          excalidrawRef.current.getAppState().selectedElementIds,
         username: "",
         userState: undefined,
         color: {

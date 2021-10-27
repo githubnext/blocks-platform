@@ -9,11 +9,19 @@ import { Box, Button, StateLabel } from "@primer/components";
 import { ErrorBoundary } from "components/error-boundary";
 import { PlusIcon } from "@primer/octicons-react";
 
-export const MarkdownContext = createContext<any>({});
+export const MarkdownContext = createContext<any>({
+  issues: [],
+  releases: [],
+  commits: [],
+});
 export function MarkdownViewer({ contents, meta }: ViewerProps) {
   const [markdown, setMarkdown] = useState(contents);
   const [updatedContent, setUpdatedContent] = useState(contents);
-  const [repoInfo, setRepoInfo] = useState({});
+  const [repoInfo, setRepoInfo] = useState({
+    issues: [],
+    releases: [],
+    commits: [],
+  });
 
   const { mutateAsync } = useUpdateFileContents({
     onSuccess: () => {
@@ -56,7 +64,6 @@ export function MarkdownViewer({ contents, meta }: ViewerProps) {
       repo: meta.repo,
       per_page: 100,
     });
-    console.log(commits)
     const info = {
       issues: issues.data,
       releases: releases.data,
@@ -95,30 +102,32 @@ export function MarkdownViewer({ contents, meta }: ViewerProps) {
   return (
     <MarkdownContext.Provider value={scope}>
       <div className="w-full h-full flex items-stretch overflow-hidden">
-        <div className="relative flex-1 overflow-y-auto">
-          <div className="flex items-center justify-between">
-            <div className="pl-6 text-sm font-mono">
-              {meta.path}
+        <div className="relative flex-1 flex flex-col overflow-y-hidden">
+          <div className="flex items-center justify-between flex-none">
+            <div className="pl-6 flex items-center">
+              <div className=" text-sm font-mono">
+                {meta.path}
+              </div>
+
+              {isDirty && (
+                <div className="ml-2">
+                  <Button
+                    variant="small" onClick={handleSave}>Save Changes</Button>
+                </div>
+              )}
             </div>
             <ComponentNamesHint onSelect={onSelectComponent} />
-
           </div>
 
           <textarea
             ref={inputElement}
-            className="w-full h-full p-6 bg-gray-100 focus:outline-none"
+            className="w-full h-full p-6 bg-gray-100 focus:outline-none overflow-y-auto"
             value={markdown}
             onChange={(e) => {
               setMarkdown(e.target.value)
             }}
           />
 
-          {isDirty && (
-            <div className="absolute bottom-2 left-2 shadow-xl">
-              <Button
-                variant="large" onClick={handleSave}>Save Changes</Button>
-            </div>
-          )}
         </div>
         <div className="flex-1 markdown p-6 overflow-y-auto whitespace-pre-wrap">
           <ErrorBoundary key={markdown}>

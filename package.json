@@ -11,6 +11,7 @@
     "@excalidraw/excalidraw": "^0.10.0",
     "@fluidframework/azure-client": "^0.48.1",
     "@fluidframework/test-client-utils": "^0.48.1",
+    "@fluidframework/tinylicious-client": "^0.50.0",
     "@githubocto/flat-ui": "^0.10.2",
     "@mdx-js/runtime": "^1.6.22",
     "@octokit/rest": "^18.12.0",
@@ -45,7 +46,9 @@
     "vega": "^5.21.0",
     "vega-lite": "^5.1.1",
     "y-webrtc": "^10.2.0",
-    "yjs": "^13.5.16"
+    "yjs": "^13.5.16",
+    "zustand": "^3.6.1",
+    "zustand-yjs": "^0.0.14"
   },
   "devDependencies": {
     "@octokit/openapi-types": "^11.2.0",

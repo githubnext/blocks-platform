@@ -1,15 +1,10 @@
-import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
+const YJSDemo = dynamic(() => import("components/yjs-demo"), { ssr: false });
 
 export default function Sandbox() {
-  const [Comp, setComp] = useState(null);
-
-  const handleChange = (e: any) => {
-    console.log(e);
-  };
-
-  useEffect(() => {
-    import("@excalidraw/excalidraw").then((comp) => setComp(comp.default));
-  }, []);
-
-  return <>{Comp && <Comp onChange={handleChange} />}</>;
+  return (
+    <div>
+      <YJSDemo />
+    </div>
+  );
 }

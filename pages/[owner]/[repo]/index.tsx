@@ -163,11 +163,11 @@ const RepoHeader = ({ owner, repo }: {
 
         <Box display="flex" alignItems="center" >
           {repoActions.map(([label, Icon], i) => (
-            <Box key={label} display="flex" alignItems="stretch" mx={2}>
+            <Box key={label as string} display="flex" alignItems="stretch" mx={2}>
               <Box
                 className="hover:bg-gray-100 cursor-pointer py-[0.4em]"
                 display="flex" alignItems="center" borderColor="border.default" borderWidth={1} borderStyle="solid" borderTopLeftRadius={2} borderBottomLeftRadius={2} px={3} boxShadow="0 1px 2px 0 rgba(27,31,35,.1)">
-                <StyledOcticon icon={Icon} size={16} mr={1} className="text-gray-500" />
+                <StyledOcticon icon={Icon as any} size={16} mr={1} className="text-gray-500" />
                 <Box className="text-gray-700 text-xs" fontWeight="500">
                   {label}
                 </Box>
@@ -189,8 +189,8 @@ const RepoHeader = ({ owner, repo }: {
       </Box>
       <UnderlineNav className="mb-[-1px]">
         {repoHeaderLinks.map(([label, Icon], i) => (
-          <UnderlineNav.Link href="#" mx={2} key={label} display="flex" className="items-center" selected={!i}>
-            <StyledOcticon icon={Icon} size={17} mr={2} className="text-gray-500" />
+          <UnderlineNav.Link href="#" mx={2} key={label as string} display="flex" className="items-center" selected={!i}>
+            <StyledOcticon icon={Icon as any} size={17} mr={2} className="text-gray-500" />
             <Box fontSize={1} className="!text-gray-700">
               {label}
             </Box>

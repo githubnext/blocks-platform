@@ -103,3 +103,5 @@ export const viewers = [
     extensions: ["md"],
   },
 ];
+
+export * from "./code";

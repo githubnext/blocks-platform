@@ -103,9 +103,3 @@ export const viewers = [
     extensions: ["md"],
   },
 ];
-
-export * from "./code";
-export * from "./flat";
-export * from "./three-dee";
-export * from "./iframe";
-export * from "./excalidraw";

@@ -1,14 +1,14 @@
 import { Button } from "@primer/components";
 import { useUpdateFileContents } from "hooks";
-import { useState, useEffect } from "react";
-import { serializeAsJSON } from "@excalidraw/excalidraw";
+import { useState, useEffect, useRef } from "react";
 import { ViewerProps } from ".";
 
 const allowList = ["excalidraw"];
 
-export function ExcalidrawViewer(props: ViewerProps) {
+export default function ExcalidrawViewer(props: ViewerProps) {
   const { contents, meta } = props;
   const extension = meta.name.split(".").pop();
+  const serializeAsJSON = useRef(null)
 
   if (!allowList.includes(extension)) {
     return (
@@ -29,7 +29,11 @@ export function ExcalidrawViewer(props: ViewerProps) {
   };
 
   useEffect(() => {
-    import("@excalidraw/excalidraw").then((comp) => setComp(comp.default));
+    if (typeof window !== "undefined") return
+    import("@excalidraw/excalidraw").then((comp) => {
+      setComp(comp.default)
+      serializeAsJSON.current = comp.serializeAsJSON;
+    });
   }, []);
 
   const { mutateAsync } = useUpdateFileContents({
@@ -42,7 +46,8 @@ export function ExcalidrawViewer(props: ViewerProps) {
   });
 
   const handleSave = async () => {
-    const serialized = serializeAsJSON(elements, appState);
+    if (!serializeAsJSON.current) return
+    const serialized = serializeAsJSON.current(elements, appState);
     await mutateAsync({
       content: serialized,
       owner: meta.owner,

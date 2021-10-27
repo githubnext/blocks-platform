@@ -15,11 +15,12 @@ interface FileViewerProps {
   theme: string;
   viewerOverride?: string;
   defaultViewer?: string;
+  hasToggle?: boolean;
 }
 
 export function FileViewer(props: FileViewerProps) {
   const router = useRouter();
-  const { data, theme, viewerOverride } = props;
+  const { data, theme, viewerOverride, defaultViewer, hasToggle } = props;
   const { name, content, download_url, path, sha } = data;
 
   const extension = name.split(".").slice(-1)[0];
@@ -50,18 +51,22 @@ export function FileViewer(props: FileViewerProps) {
     };
   }, []);
 
+  useEffect(() => {
+    setViewerType(defaultViewer)
+  }, [path])
+
   return (
     <div className="h-full">
-      {debugMode && (
+      {(debugMode || hasToggle) && (
         <div className="relative sticky top-0 z-[9999]">
           <div>
-            <Box bg="bg.canvas" p={2} borderBottom="1px solid">
+            <Box bg="canvas.subtle" p={2} borderBottom="1px solid" className="!border-gray-200">
               <ViewerPicker extension={extension} onChange={setViewerType} value={viewerType} />
             </Box>
           </div>
         </div>
       )}
-      <ErrorBoundary>
+      <ErrorBoundary key={path}>
         {!!Viewer && (
           <Viewer
             meta={{ language, theme, name, download_url, repo, owner, path, sha, username }}

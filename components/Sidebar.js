@@ -19,11 +19,11 @@ export const Sidebar = ({ owner, repo, fileChanges = {}, files = [], activeFileP
     const datesExtent = extent(Object.values(fileChanges), d => new Date(d.date));
     return scaleLinear()
       .domain(datesExtent)
-      .range(["#5046E4", "#F9FAFB"])
+      .range(["#aaa", "#F9FAFB"])
   }, [fileChanges])
 
   return (
-    <Box className="sidebar h-full !border-gray-200 overflow-hidden flex-1" borderRight="1px solid">
+    <Box className="sidebar h-full overflow-hidden flex-1">
       <Box className="h-full overflow-auto">
         <div className="p-2 px-0 text-sm pb-20 text-left">
           {files
@@ -220,7 +220,7 @@ const DateChangedIndicator = ({ date, fileChangesScale }) => {
 
   return (
     <Tooltip side="right" text={`Last updated ${formatDate(new Date(date))}`}>
-      <div className="absolute top-[-1px] bottom-[-1px] right-0 left-auto w-2" style={{
+      <div className="absolute top-[-1px] bottom-[-1px] right-0 left-auto w-1" style={{
         backgroundColor
       }}></div>
     </Tooltip>

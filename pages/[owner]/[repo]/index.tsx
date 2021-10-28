@@ -1,20 +1,26 @@
 import { FileViewer } from "components/file-viewer-with-toggle";
 import { viewers } from "components/viewers";
 import { octokit, useFileContent } from "hooks";
-import { Avatar, Box, ButtonDanger, Caret, Header, Link, StyledOcticon, TextInput, UnderlineNav, useTheme } from "@primer/components";
+import { Box, ButtonDanger, Caret, Header, Link, Spinner, StyledOcticon, TextInput, UnderlineNav, useTheme } from "@primer/components";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { getViewerFromFilename } from "lib";
 import { BookIcon, CodeIcon, EyeIcon, GearIcon, GitPullRequestIcon, GraphIcon, IssueOpenedIcon, LogoGithubIcon, MarkGithubIcon, PlayIcon, ProjectIcon, RepoForkedIcon, RepoIcon, ShieldIcon, StarIcon } from "@primer/octicons-react";
 import { BiCaretDown } from "react-icons/bi";
 import { Sidebar } from "components/Sidebar"
+import { Tooltip } from "components/Tooltip";
+import { Avatar, AvatarList } from "components/Avatar";
+import { ActivityFeed } from "components/ActivityFeed";
 
 export default function IndexPage() {
   const router = useRouter();
   const { setColorMode } = useTheme();
   const { repo, owner, path = "README.md", theme, fileRef, viewerOverride } = router.query;
+  const [isLoading, setIsLoading] = useState(true);
   const [files, setFiles] = useState([]);
   const [fileChanges, setFileChanges] = useState({})
+  const [repoInfo, setRepoInfo] = useState({});
+  const [activity, setActivity] = useState([]);
   const [commits, setCommits] = useState([]);
   const { data, status } = useFileContent(
     {
@@ -37,12 +43,15 @@ export default function IndexPage() {
 
   const getFiles = async () => {
     if (!owner || !repo) return
-    const url = `/api/get-tree?owner=${owner}&repo=${repo}`
-    const { files, commits, fileChanges } = await fetch(url).then(res => res.json());
-    console.log({ files, commits, fileChanges })
+    const url = `/api/repo-info?owner=${owner}&repo=${repo}`
+    const { files, repoInfo, activity, commits, fileChanges } = await fetch(url).then(res => res.json());
+    console.log({ files, repoInfo, activity, commits, fileChanges })
     setFiles(files);
+    setRepoInfo(repoInfo);
     setFileChanges(fileChanges)
     setCommits(commits);
+    setActivity(activity);
+    setIsLoading(false)
   }
 
   useEffect(() => {
@@ -63,19 +72,36 @@ export default function IndexPage() {
   return (
     <div className="flex flex-col w-full h-screen overflow-hidden">
       <GitHubHeader />
-      <RepoHeader owner={owner as string} repo={repo as string} />
+      <RepoHeader
+        owner={owner as string}
+        repo={repo as string}
+        // @ts-ignore
+        description={repoInfo.description}
+        // @ts-ignore
+        contributors={repoInfo.contributors}
+      />
       <div className="flex flex-1 overflow-hidden">
-        <div className="flex-none w-80">
-          <Sidebar
-            files={files}
-            activeFilePath={path}
-            fileChanges={fileChanges}
-            owner={owner as string}
-            repo={repo as string}
-          />
+        <div className="flex-none w-80 border-r border-gray-200">
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center h-full w-full">
+              <div className="animate-pulse flex space-y-4">
+                <div className="rounded-full bg-gray-200 h-12 w-full"></div>
+                <div className="rounded-full bg-gray-200 h-12 w-full"></div>
+                <div className="rounded-full bg-gray-200 h-12 w-full"></div>
+              </div>
+            </div>
+          ) : (
+            <Sidebar
+              files={files}
+              activeFilePath={path}
+              fileChanges={fileChanges}
+              owner={owner as string}
+              repo={repo as string}
+            />
+          )}
         </div>
 
-        <div className="flex-1">
+        <div className="flex-1 overflow-hidden">
           {status === "loading" && <p className="text-sm w-full p-8">Loading...</p>}
           {status === "success" && (
             <FileViewer
@@ -85,6 +111,20 @@ export default function IndexPage() {
               viewerOverride={viewerOverride as string}
               hasToggle
             />
+          )}
+        </div>
+
+        <div className="flex-none w-80 h-full border-l border-gray-200">
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center h-full w-full">
+              <div className="animate-pulse flex space-y-4">
+                <div className="rounded-full bg-gray-200 h-12 w-full"></div>
+                <div className="rounded-full bg-gray-200 h-12 w-full"></div>
+                <div className="rounded-full bg-gray-200 h-12 w-full"></div>
+              </div>
+            </div>
+          ) : (
+            <ActivityFeed activity={activity} />
           )}
         </div>
       </div>
@@ -122,7 +162,7 @@ const GitHubHeader = () => {
         </Box>
       </Header.Item>
       <Header.Item mr={0}>
-        <Avatar src="https://github.com/octocat.png" size={20} square alt="@octocat" />
+        <Avatar username="mona" size="small" />
       </Header.Item>
     </Header>
   )
@@ -144,9 +184,11 @@ const repoActions = [
   ["Star", StarIcon],
   ["Fork", RepoForkedIcon],
 ]
-const RepoHeader = ({ owner, repo }: {
+const RepoHeader = ({ owner, repo, description, contributors }: {
   owner: string,
   repo: string,
+  description: string,
+  contributors: [string, string, string][]
 }) => {
   return (
     <Box bg="canvas.subtle" borderColor="border.default" borderBottomWidth={1} borderBottomStyle="solid" px={30} pt={20} className="flex-none">
@@ -160,6 +202,13 @@ const RepoHeader = ({ owner, repo }: {
           <Link href="#" fontSize={3} fontWeight="bold">
             {repo}
           </Link>
+          <Box ml={2}>
+            <AvatarList>
+              {contributors?.map((contributor) => (
+                <Avatar username={contributor[0]} size="small" />
+              ))}
+            </AvatarList>
+          </Box>
         </Box>
 
         <Box display="flex" alignItems="center" >
@@ -188,6 +237,11 @@ const RepoHeader = ({ owner, repo }: {
           ))}
         </Box>
       </Box>
+
+      <Box fontSize={14} ml={4} mb={1} className="text-gray-600">
+        {description}
+      </Box>
+
       <UnderlineNav className="mb-[-1px]">
         {repoHeaderLinks.map(([label, Icon], i) => (
           <UnderlineNav.Link href="#" mx={2} key={label as string} display="flex" className="items-center" selected={!i}>
@@ -217,7 +271,7 @@ const footerLinks = [
 ]
 const Footer = () => {
   return (
-    <Box display="flex" alignItems="center" py={40} borderTopWidth={1} borderTopStyle="solid" borderTopColor="border.default" className="flex-none mt-10 max-w-[1250px] mx-10 self-center" style={{
+    <Box display="flex" alignItems="center" py={20} borderTopWidth={1} borderTopStyle="solid" borderTopColor="border.default" className="flex-none max-w-[1250px] mx-10 self-center" style={{
       width: "calc(100% - 5em)"
     }}>
       <Box display="flex" alignItems="center" mr={2} className="text-gray-500">

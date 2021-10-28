@@ -34,15 +34,15 @@
   margin-bottom: 0.5rem;
 }
 .markdown a {
-  @apply text-indigo-500;
-  font-weight: 500;
+  @apply text-blue-600;
+  font-weight: 400;
   text-decoration: none;
 }
 .markdown a:hover {
-  @apply text-indigo-600;
+  @apply text-blue-700;
 }
 .markdown a:active {
-  @apply text-indigo-700;
+  @apply text-blue-800;
 }
 .markdown a:focus {
   @apply outline-none;
@@ -51,4 +51,16 @@
   @apply !rounded-2xl;
   @apply !bg-gray-100;
   @apply !my-3 !p-4 !px-5;
+}
+.markdown table {
+  @apply my-6;
+}
+.markdown thead th {
+  @apply p-2;
+  @apply py-2;
+  @apply text-left;
+  @apply bg-gray-100;
+}
+.markdown td {
+  @apply p-2;
 }

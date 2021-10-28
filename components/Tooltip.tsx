@@ -2,8 +2,8 @@ import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 
 export const Tooltip = ({ children, side = "top", text, className = "", ...props }: {
   children: React.ReactNode,
-  side: "top" | "bottom" | "left" | "right",
   text: string,
+  side?: "top" | "bottom" | "left" | "right",
   className?: string,
 }) => {
 

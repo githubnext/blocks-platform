@@ -1,4 +1,4 @@
-import { stratify } from 'd3';
+import { stratify, timeParse } from 'd3';
 import { Octokit } from "@octokit/rest";
 
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
@@ -25,6 +25,21 @@ export default async function getInfo(req, res) {
     },
   }).then(res => res.json());
   const files = nestFileTree(fileTree, repo);
+
+  const repoInfoRes = await octokit.repos.get({
+    owner,
+    repo,
+  });
+
+  const contributorsRes = await octokit.repos.listContributors({
+    owner,
+    repo,
+  });
+  const contributors = contributorsRes.data.map(d => ([d.login, d.id, d.avatar_url]));
+
+
+  let repoInfo = { ...repoInfoRes.data, contributors };
+
 
   try {
     const commitsRes = await octokit.repos.listCommits({
@@ -57,10 +72,18 @@ export default async function getInfo(req, res) {
       }
     }
 
-    res.status(200).json({ files, commits, fileChanges })
+    const activityRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/events`, {
+      headers: {
+        Authorization: `Bearer ${GITHUB_PAT}`,
+      },
+    }).then(res => res.json())
+    const parseDate = timeParse("%Y-%m-%dT%H:%M:%SZ");
+    const activity = activityRes.sort((a, b) => parseDate(b.created_at) - parseDate(a.created_at))
+
+    res.status(200).json({ files, repoInfo, activity, commits, fileChanges })
   } catch (e) {
     console.log(e);
-    res.status(200).json({ files, commits: [], fileChanges: {} })
+    res.status(200).json({ files, repoInfo, activity: [], commits: [], fileChanges: {} })
   }
 }
 

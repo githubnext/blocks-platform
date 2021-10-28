@@ -18,7 +18,8 @@ export default function ViewerPicker(props: ViewerPickerProps) {
 
   return (
     <SelectMenu>
-      <Button as="summary">Viewer: {value}</Button>
+      <Button ml={3} as="summary">Viewer: {value}</Button>
+
       <SelectMenu.Modal>
         <SelectMenu.Header>Viewers</SelectMenu.Header>
         <SelectMenu.List>

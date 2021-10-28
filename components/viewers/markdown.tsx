@@ -7,7 +7,7 @@ import { ViewerProps } from ".";
 import { octokit, useUpdateFileContents } from "hooks";
 import { Avatar, Box, Button, StateLabel } from "@primer/components";
 import { ErrorBoundary } from "components/error-boundary";
-import { PlusIcon } from "@primer/octicons-react";
+import { PencilIcon, PlusIcon, XIcon } from "@primer/octicons-react";
 
 export const MarkdownContext = createContext<any>({
   issues: [],
@@ -15,6 +15,7 @@ export const MarkdownContext = createContext<any>({
   commits: [],
 });
 export function MarkdownViewer({ contents, meta }: ViewerProps) {
+  const [isEditing, setIsEditing] = useState(false);
   const [markdown, setMarkdown] = useState(contents);
   const [updatedContent, setUpdatedContent] = useState(contents);
   const [repoInfo, setRepoInfo] = useState({
@@ -102,42 +103,60 @@ export function MarkdownViewer({ contents, meta }: ViewerProps) {
   return (
     <MarkdownContext.Provider value={scope}>
       <div className="w-full h-full flex items-stretch overflow-hidden">
-        <div className="relative flex-1 flex flex-col overflow-y-hidden">
-          <div className="flex items-center justify-between flex-none">
-            <div className="pl-6 flex items-center">
-              <div className=" text-sm font-mono">
-                {meta.path}
+        {isEditing && (
+          <div className="relative flex-1 flex flex-col overflow-y-hidden">
+            <div className="flex items-center justify-between flex-none">
+              <div className="pl-6  py-2 flex items-center">
+                <Button onClick={() => {
+                  setIsEditing(false);
+                }}>
+                  <XIcon /> Finished editing
+                </Button>
+                {/* <div className=" text-sm font-mono">
+                  {meta.path}
+                </div> */}
+
+                {isDirty && (
+                  <div className="ml-2">
+                    <Button
+                      variant="small" onClick={handleSave}>Save Changes</Button>
+                  </div>
+                )}
+              </div>
+              <ComponentNamesHint onSelect={onSelectComponent} />
+            </div>
+
+            <textarea
+              ref={inputElement}
+              className="w-full h-full p-6 bg-gray-100 focus:outline-none overflow-y-auto"
+              value={markdown}
+              onChange={(e) => {
+                setMarkdown(e.target.value)
+              }}
+            />
+
+          </div>
+        )}
+        <div className="flex-1 markdown p-6 overflow-y-auto whitespace-pre-wrap">
+          {!isEditing && (
+            <Button className="absolute -top-4 left-0" display="flex" onClick={() => setIsEditing(true)}>
+              <div className="mr-1">
+                <PencilIcon />
               </div>
 
-              {isDirty && (
-                <div className="ml-2">
-                  <Button
-                    variant="small" onClick={handleSave}>Save Changes</Button>
-                </div>
-              )}
-            </div>
-            <ComponentNamesHint onSelect={onSelectComponent} />
+              Edit
+            </Button>
+          )}
+          <div className="max-w-[60em] mx-auto">
+            <ErrorBoundary key={markdown}>
+              <MDX
+                components={components}
+                scope={scope}
+              >
+                {markdown}
+              </MDX>
+            </ErrorBoundary>
           </div>
-
-          <textarea
-            ref={inputElement}
-            className="w-full h-full p-6 bg-gray-100 focus:outline-none overflow-y-auto"
-            value={markdown}
-            onChange={(e) => {
-              setMarkdown(e.target.value)
-            }}
-          />
-
-        </div>
-        <div className="flex-1 markdown p-6 overflow-y-auto whitespace-pre-wrap">
-          <ErrorBoundary key={markdown}>
-            <MDX
-              components={components}
-              scope={scope}
-            >
-              {markdown}
-            </MDX>
-          </ErrorBoundary>
         </div>
       </div>
     </MarkdownContext.Provider>

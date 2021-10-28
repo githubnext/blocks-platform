@@ -14,6 +14,8 @@ export default function IndexPage() {
   const { setColorMode } = useTheme();
   const { repo, owner, path = "README.md", theme, fileRef, viewerOverride } = router.query;
   const [files, setFiles] = useState([]);
+  const [fileChanges, setFileChanges] = useState({})
+  const [commits, setCommits] = useState([]);
   const { data, status } = useFileContent(
     {
       repo: repo as string,
@@ -36,8 +38,11 @@ export default function IndexPage() {
   const getFiles = async () => {
     if (!owner || !repo) return
     const url = `/api/get-tree?owner=${owner}&repo=${repo}`
-    const fileTree = await fetch(url).then(res => res.json());
-    setFiles(fileTree.files);
+    const { files, commits, fileChanges } = await fetch(url).then(res => res.json());
+    console.log({ files, commits, fileChanges })
+    setFiles(files);
+    setFileChanges(fileChanges)
+    setCommits(commits);
   }
 
   useEffect(() => {
@@ -60,8 +65,14 @@ export default function IndexPage() {
       <GitHubHeader />
       <RepoHeader owner={owner as string} repo={repo as string} />
       <div className="flex flex-1 overflow-hidden">
-        <div className="flex-none w-60">
-          <Sidebar files={files} activeFilePath={path} owner={owner as string} repo={repo as string} />
+        <div className="flex-none w-80">
+          <Sidebar
+            files={files}
+            activeFilePath={path}
+            fileChanges={fileChanges}
+            owner={owner as string}
+            repo={repo as string}
+          />
         </div>
 
         <div className="flex-1">

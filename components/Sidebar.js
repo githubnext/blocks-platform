@@ -1,74 +1,84 @@
-import { useRouter } from 'next/router';
-import { useContext, useEffect, useState } from 'react';
-import Link from 'next/link';
-import { IoFolderOpenOutline, IoFolderOutline } from 'react-icons/io5';
-import { GoMarkGithub } from 'react-icons/go';
-import { VscSymbolFile } from 'react-icons/vsc';
 import { Box } from '@primer/components';
+import { extent, scaleLinear, timeFormat } from 'd3';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { useEffect, useMemo, useState } from 'react';
+import { IoFolderOpenOutline, IoFolderOutline } from 'react-icons/io5';
+import { VscSymbolFile } from 'react-icons/vsc';
+import languageColors from "./../language-colors.json";
+import { Tooltip } from './Tooltip';
 
-export const Sidebar = ({ owner, repo, files = [], activeFilePath }) => {
+
+const doShowPills = false
+export const Sidebar = ({ owner, repo, fileChanges = {}, files = [], activeFilePath }) => {
   if (!files.map) return null;
 
   const allUsers = []
 
+  const fileChangesScale = useMemo(() => {
+    const datesExtent = extent(Object.values(fileChanges), d => new Date(d.date));
+    return scaleLinear()
+      .domain(datesExtent)
+      .range(["#5046E4", "#F9FAFB"])
+  }, [fileChanges])
+
   return (
-    <Box className="h-full !border-gray-200 overflow-auto flex-1" borderRight="1px solid">
-      {/* <div className="p-4 w-full border-b">
-        <a
-          className="flex items-center space-x-1"
-          target="_blank"
-          href={`https://github.com/${owner}/${repo}`}
-        >
-          <GoMarkGithub />
-          <span>
-            {owner}/{repo}
-          </span>
-        </a>
-      </div> */}
-      <div className="p-2 px-3 text-sm pb-20 text-left">
-        {files
-          .sort(
-            (a, b) =>
-              !!b.children.length - !!a.children.length ||
-              a.name.localeCompare(b.name)
-          )
-          .map(file => (
-            <Item
-              key={file.name}
-              {...file}
-              activeFilePath={activeFilePath}
-              allUsers={allUsers}
-            />
-          ))}
-      </div>
+    <Box className="sidebar h-full !border-gray-200 overflow-hidden flex-1" borderRight="1px solid">
+      <Box className="h-full overflow-auto">
+        <div className="p-2 px-0 text-sm pb-20 text-left">
+          {files
+            .sort(
+              (a, b) =>
+                !!b.children.length - !!a.children.length ||
+                a.name.localeCompare(b.name)
+            )
+            .map(file => (
+              <Item
+                key={file.name}
+                {...file}
+                activeFilePath={activeFilePath}
+                allUsers={allUsers}
+                fileChangesScale={fileChangesScale}
+                fileChanges={fileChanges}
+              />
+            ))}
+        </div>
+      </Box>
     </Box>
   );
 };
 
-const Item = item => {
-  if (item.children.length) {
+const Item = props => {
+  if (props.children.length) {
     return (
       <Folder
-        {...item}
-        activeFilePath={item.activeFilePath}
-        allUsers={item.allUsers}
+        {...props}
+        activeFilePath={props.activeFilePath}
+        allUsers={props.allUsers}
+        fileChangesScale={props.fileChangesScale}
+        fileChanges={props.fileChanges}
       />
     );
   }
   return (
     <File
-      {...item}
-      isActive={item.activeFilePath === item.path}
-      activeUsers={item.allUsers.filter(user => user.path === item.path)}
+      {...props}
+      isActive={props.activeFilePath === props.path}
+      activeUsers={props.allUsers.filter(user => user.path === props.path)}
+      fileChangesScale={props.fileChangesScale}
+      date={props.fileChanges[props.path]?.date}
     />
   );
 };
 
 const Folder = ({
   name,
+  path,
   children,
   activeFilePath,
   allUsers,
+  fileChangesScale,
+  fileChanges,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -78,16 +88,37 @@ const Folder = ({
     }
   }, [activeFilePath]);
 
+  const mostRecentChangeDate = useMemo(() => {
+    const relatedChangePaths = Object.keys(fileChanges).filter(
+      d => d.startsWith(path)
+    );
+
+    const mostRecentChange = relatedChangePaths.sort(
+      (a, b) => new Date(fileChanges[a].date) - new Date(fileChanges[b].date)
+    )[0];
+    return mostRecentChange && fileChanges[mostRecentChange].date;
+  }, [path, fileChangesScale]);
+
   return (
-    <Box className="" >
+    <Box className="">
       <button
-        className="flex items-center py-2 px-2 text-left w-full whitespace-nowrap overflow-ellipsis"
+        className="relative flex items-center py-2 px-3 text-left w-full whitespace-nowrap overflow-ellipsis"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="mr-2 text-sm">
           {isExpanded ? <IoFolderOpenOutline /> : <IoFolderOutline />}
         </div>
         {name}
+        {doShowPills && (
+          <div className="ml-auto flex p-1 border-[1px] border-gray-200 rounded-full">
+            {children.slice(0, 10).map(file => (
+              <div className="m-[1px]">
+                <FileDot name={file.name} type={file.children?.length ? "folder" : "file"} key={file.path} />
+              </div>
+            ))}
+          </div>
+        )}
+        <DateChangedIndicator date={mostRecentChangeDate} fileChangesScale={fileChangesScale} />
       </button>
 
       {isExpanded && (
@@ -100,6 +131,8 @@ const Folder = ({
                 {...file}
                 activeFilePath={activeFilePath}
                 allUsers={allUsers}
+                fileChangesScale={fileChangesScale}
+                fileChanges={fileChanges}
               />
             ))}
         </div>
@@ -107,9 +140,10 @@ const Folder = ({
     </Box>
   );
 };
-const File = ({ name, path, activeUsers = [], isActive }) => {
+const File = ({ name, path, activeUsers = [], fileChangesScale, date, isActive }) => {
   const router = useRouter();
   const query = router.query;
+
   return (
     <Link
       shallow
@@ -119,12 +153,16 @@ const File = ({ name, path, activeUsers = [], isActive }) => {
       }}
     >
       <a
-        className={`relative flex items-center justify-between py-2 pl-2 text-left w-full text-sm whitespace-nowrap overflow-ellipsis ${isActive ? 'bg-indigo-100' : ''
-          }`}
+        className={`relative flex items-center justify-between py-2 pl-3 pr-3 text-left w-full text-sm whitespace-nowrap overflow-ellipsis ${isActive ? 'bg-gray-50 border-gray-200' : ' border-transparent'
+          } border border-r-0`}
       >
         <div className="flex items-center flex-1 max-w-full">
           <div className="mr-2">
-            <VscSymbolFile />
+            {doShowPills ? (
+              <FileDot name={name} />
+            ) : (
+              <VscSymbolFile />
+            )}
           </div>
           <div className="max-w-full flex-1 overflow-hidden overflow-ellipsis">
             {name}
@@ -141,7 +179,50 @@ const File = ({ name, path, activeUsers = [], isActive }) => {
             />
           ))}
         </div>
+        <DateChangedIndicator date={date} fileChangesScale={fileChangesScale} />
       </a>
-    </Link>
+    </Link >
   );
 };
+
+
+const FileDot = ({ name, type = "file" }) => {
+  if (!doShowPills) return null
+
+  const extension = name.split('.').pop();
+  let color = languageColors[extension] || '#dadada';
+  if (type === "folder") {
+    color = "transparent"
+  }
+
+  return (
+    <div className={`h-[0.8em] w-[0.5em] rounded-full border-[1px] ${type === "folder" ? "border-gray-400" : "border-transparent"}`} style={{ background: color }} />
+  )
+}
+
+const getOrdinal = n => {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return (s[(v - 20) % 10] || s[v] || s[0]);
+};
+const formatDate = d => ([
+  timeFormat("%B %-d")(d),
+  getOrdinal(+timeFormat("%d")(d)),
+  timeFormat(", %Y")(d),
+].join(''));
+const DateChangedIndicator = ({ date, fileChangesScale }) => {
+  if (!date) return null
+  if (!fileChangesScale) return null
+
+  const backgroundColor = useMemo(() => {
+    return date && fileChangesScale(new Date(date));
+  }, [fileChangesScale, date]);
+
+  return (
+    <Tooltip side="right" text={`Last updated ${formatDate(new Date(date))}`}>
+      <div className="absolute top-[-1px] bottom-[-1px] right-0 left-auto w-2" style={{
+        backgroundColor
+      }}></div>
+    </Tooltip>
+  )
+}

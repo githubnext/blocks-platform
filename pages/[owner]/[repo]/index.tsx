@@ -60,7 +60,6 @@ export default function IndexPage() {
   const [commits, setCommits] = useState([]);
 
   // we'll want to update this at some point
-  const isFolder = !path.includes(".");
   const { data: folderData, status } = useFileContent(
     {
       repo: repo as string,
@@ -73,6 +72,7 @@ export default function IndexPage() {
       refetchOnWindowFocus: false,
     }
   );
+  const isFolder = status !== "success" ? false : folderData?.[0]?.path !== path;
   const data = folderData?.[0];
   const defaultViewer = isFolder
     ? "sidebar"

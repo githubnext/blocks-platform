@@ -10,7 +10,7 @@ export default function Home() {
   const router = useRouter();
   const { setColorMode } = useTheme();
   const { repo, owner, path, theme, fileRef, viewerOverride } = router.query;
-  const { data, status } = useFileContent(
+  const { data: folderData, status } = useFileContent(
     {
       repo: repo as string,
       owner: owner as string,
@@ -22,6 +22,7 @@ export default function Home() {
       refetchOnWindowFocus: false,
     }
   );
+  const data = folderData?.[0]
   const defaultViewer = getViewerFromFilename(data?.name) || "code";
   console.log("defaultViewer: ", defaultViewer);
 
@@ -36,7 +37,7 @@ export default function Home() {
     const relevantViewers = viewers.filter(viewer => (
       viewer.extensions.includes(extension) || viewer.extensions.includes("*")
     )).map((v) => ({ id: v.id, label: v.label }));
-    relevantViewers.sort((a,b) => (a.id === defaultViewer) ? -1 : 1); // put default viewer first
+    relevantViewers.sort((a, b) => (a.id === defaultViewer) ? -1 : 1); // put default viewer first
     console.log("right viewers");
     console.log(relevantViewers, path, extension);
     window.parent.postMessage(

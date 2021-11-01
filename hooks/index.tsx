@@ -12,7 +12,7 @@ import { Base64 } from "js-base64";
 const GITHUB_PAT = process.env.NEXT_PUBLIC_GITHUB_PAT;
 export const octokit = new Octokit({
   // AUTH GOES HERE
-  auth: GITHUB_PAT
+  auth: GITHUB_PAT,
 });
 
 interface RepoContext {
@@ -36,7 +36,7 @@ async function getFileContent(
     owner,
     repo,
     path,
-    ref: fileRef
+    ref: fileRef,
   });
 
   if (status !== 200) throw new Error("Something bad happened");
@@ -61,7 +61,7 @@ export function useFileContent(
         repo,
         owner,
         path,
-        fileRef
+        fileRef,
       }),
     config
   );
@@ -107,9 +107,7 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
       },
       sha: sha,
     });
-  } catch (e) {
-    console.log(e);
-  }
+  } catch (e) {}
 }
 
 export function useUpdateFileContents(

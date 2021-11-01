@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { Editor } from '@tiptap/core';
+import { Editor } from "@tiptap/core";
 import { useUpdateFileContents } from "hooks";
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import Collaboration from '@tiptap/extension-collaboration';
-import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
-import * as Y from 'yjs';
-import { WebrtcProvider } from 'y-webrtc';
-import debounce from 'lodash/debounce';
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Collaboration from "@tiptap/extension-collaboration";
+import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
+import * as Y from "yjs";
+import { WebrtcProvider } from "y-webrtc";
+import debounce from "lodash/debounce";
 import {
   BiBold,
   BiItalic,
@@ -20,43 +20,36 @@ import {
   BiCodeBlock,
   BiMessage,
   BiMinus,
-} from 'react-icons/bi';
+} from "react-icons/bi";
 import { ViewerProps } from ".";
 
 export function NotesViewer({ contents, meta }: ViewerProps) {
-  const { owner, repo, name, sha, username = "mystery person" } = meta
+  const { owner, repo, name, sha, username = "mystery person" } = meta;
   const [editor, setEditor] = useState(null);
 
   const { mutateAsync } = useUpdateFileContents({
-    onSuccess: () => {
-      console.log("we did it");
-    },
-    onError: (e) => {
-      console.log("something bad happend", e);
-    },
+    onSuccess: () => {},
+    onError: (e) => {},
   });
 
   const getYdocUpdate = (str: string) => {
     try {
       const ints = atob(str);
-      return ints.split(',').map(int => parseInt(int));
+      return ints.split(",").map((int) => parseInt(int));
     } catch (e) {
-      console.log('e', e);
       return [];
     }
   };
 
   useEffect(() => {
-    if (typeof window === 'undefined') return null;
+    if (typeof window === "undefined") return null;
 
     const ydoc = new Y.Doc();
-    console.log(contents)
     try {
       // @ts-ignore
-      if (contents && getYdocUpdate(contents)) Y.applyUpdate(ydoc, getYdocUpdate(contents));
-    } catch (e) {
-      console.log('e', e);
-    }
+      if (contents && getYdocUpdate(contents))
+        Y.applyUpdate(ydoc, getYdocUpdate(contents));
+    } catch (e) {}
     const workspaceId = `devex-composable-github--notes-${owner}_${repo}_${name}`;
     // new IndexeddbPersistence(workspaceId, ydoc)
     const provider = new WebrtcProvider(workspaceId, ydoc);
@@ -68,16 +61,22 @@ export function NotesViewer({ contents, meta }: ViewerProps) {
       provider: provider,
       user: {
         name: username,
-        color: '#5046E4',
+        color: "#5046E4",
       },
-      render: user => {
-        const cursor = document.createElement('span');
-        cursor.classList.add('collaboration-cursor__caret');
-        cursor.setAttribute('style', `border-color: ${user.color}; color: white; position: absolute`);
+      render: (user) => {
+        const cursor = document.createElement("span");
+        cursor.classList.add("collaboration-cursor__caret");
+        cursor.setAttribute(
+          "style",
+          `border-color: ${user.color}; color: white; position: absolute`
+        );
 
-        const label = document.createElement('div');
-        label.classList.add('collaboration-cursor__label');
-        label.setAttribute('style', `color: white; background-color: ${user.color}; padding: 0.2em 0.3em 0.3em; line-height: 1em; border-radius: 0.3em;`);
+        const label = document.createElement("div");
+        label.classList.add("collaboration-cursor__label");
+        label.setAttribute(
+          "style",
+          `color: white; background-color: ${user.color}; padding: 0.2em 0.3em 0.3em; line-height: 1em; border-radius: 0.3em;`
+        );
         label.insertBefore(document.createTextNode(user.name), null);
         cursor.insertBefore(label, null);
 
@@ -102,14 +101,14 @@ export function NotesViewer({ contents, meta }: ViewerProps) {
         collaborationExtension,
         collaborationCursors,
       ].filter(Boolean),
-      autofocus: 'start',
+      autofocus: "start",
       editorProps: {
         handleDOMEvents: {
           // @ts-ignore
           input: updateFileDebounced,
         },
         attributes: {
-          class: 'h-full focus:outline-none',
+          class: "h-full focus:outline-none",
         },
       },
       // content: data?.notes, // now applied above
@@ -132,10 +131,10 @@ export function NotesViewer({ contents, meta }: ViewerProps) {
       </div>
     </div>
   );
-};
+}
 
 const buttonClass =
-  'bg-white py-1 px-2 m-[2px] hover:bg-indigo-50 focus:outline-none focus:bg-indigo-50';
+  "bg-white py-1 px-2 m-[2px] hover:bg-indigo-50 focus:outline-none focus:bg-indigo-50";
 
 const MenuBar = ({ editor }) => {
   if (!editor) return null;
@@ -144,64 +143,73 @@ const MenuBar = ({ editor }) => {
     <div className="ml-[-0.8em]">
       <button
         onClick={() => editor.chain().focus().toggleBold().run()}
-        className={`${buttonClass} ${editor.isActive('bold') ? 'is-active' : ''
-          }`}
+        className={`${buttonClass} ${
+          editor.isActive("bold") ? "is-active" : ""
+        }`}
       >
         <BiBold />
       </button>
       <button
         onClick={() => editor.chain().focus().toggleItalic().run()}
-        className={`${buttonClass} ${editor.isActive('italic') ? 'is-active' : ''
-          }`}
+        className={`${buttonClass} ${
+          editor.isActive("italic") ? "is-active" : ""
+        }`}
       >
         <BiItalic />
       </button>
       <button
         onClick={() => editor.chain().focus().toggleStrike().run()}
-        className={`${buttonClass} ${editor.isActive('strike') ? 'is-active' : ''
-          }`}
+        className={`${buttonClass} ${
+          editor.isActive("strike") ? "is-active" : ""
+        }`}
       >
         <BiStrikethrough />
       </button>
       <button
         onClick={() => editor.chain().focus().toggleCode().run()}
-        className={`${buttonClass} ${editor.isActive('code') ? 'is-active' : ''
-          }`}
+        className={`${buttonClass} ${
+          editor.isActive("code") ? "is-active" : ""
+        }`}
       >
         <BiCodeAlt />
       </button>
       <button
         onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-        className={`${buttonClass} ${editor.isActive('heading', { level: 1 }) ? 'is-active' : ''
-          }`}
+        className={`${buttonClass} ${
+          editor.isActive("heading", { level: 1 }) ? "is-active" : ""
+        }`}
       >
         <BiHeading />
       </button>
       <button
         onClick={() => editor.chain().focus().toggleBulletList().run()}
-        className={`${buttonClass} ${editor.isActive('bulletList') ? 'is-active' : ''
-          }`}
+        className={`${buttonClass} ${
+          editor.isActive("bulletList") ? "is-active" : ""
+        }`}
       >
         <BiListUl />
       </button>
       <button
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        className={`${buttonClass} ${editor.isActive('orderedList') ? 'is-active' : ''
-          }`}
+        className={`${buttonClass} ${
+          editor.isActive("orderedList") ? "is-active" : ""
+        }`}
       >
         <BiListOl />
       </button>
       <button
         onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-        className={`${buttonClass} ${editor.isActive('codeBlock') ? 'is-active' : ''
-          }`}
+        className={`${buttonClass} ${
+          editor.isActive("codeBlock") ? "is-active" : ""
+        }`}
       >
         <BiCodeBlock />
       </button>
       <button
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
-        className={`${buttonClass} ${editor.isActive('blockquote') ? 'is-active' : ''
-          }`}
+        className={`${buttonClass} ${
+          editor.isActive("blockquote") ? "is-active" : ""
+        }`}
       >
         <BiMessage />
       </button>

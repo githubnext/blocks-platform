@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { csvParse } from "d3"
-import { Vega } from 'react-vega';
-import JSONInput from 'react-json-editor-ajrm';
+import { csvParse } from "d3";
+import { Vega } from "react-vega";
+import JSONInput from "react-json-editor-ajrm";
 import { useFileContent, useUpdateFileContents } from "hooks";
 import { ViewerProps } from ".";
 export function ChartViewer({ contents, meta }: ViewerProps) {
@@ -31,41 +31,42 @@ export function ChartViewer({ contents, meta }: ViewerProps) {
 
   const data = useMemo(() => {
     try {
-      const parsedContent = Buffer.from(dataRes?.[0]?.content, "base64").toString();
+      const parsedContent = Buffer.from(
+        dataRes?.[0]?.content,
+        "base64"
+      ).toString();
       const parsedData = parseData(parsedContent);
-      return { data: parsedData }
+      return { data: parsedData };
     } catch (e) {
       console.error(e);
       return {};
     }
   }, [dataRes]);
 
-
-
-  console.log({ contents, config, meta, data })
   const parsedConfig = {
     width: 500,
     height: 500,
     data: [{ name: "data" }],
     ...config,
-  }
+  };
 
   return (
     <div className="w-full h-[50em]">
       <div className="flex w-full h-full">
         <ConfigEditor config={config} setConfig={setConfig} meta={meta} />
         <div className="flex-1 font-mono">
-          {!!config && !!data && (
-            <Vega spec={parsedConfig} data={data} />
-          )}
+          {!!config && !!data && <Vega spec={parsedConfig} data={data} />}
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-
-const ConfigEditor = ({ config, setConfig, meta }: {
+const ConfigEditor = ({
+  config,
+  setConfig,
+  meta,
+}: {
   config: Record<string, any>;
   setConfig: (config: Record<string, any>) => void;
   meta: ViewerProps["meta"];
@@ -78,12 +79,8 @@ const ConfigEditor = ({ config, setConfig, meta }: {
   }, [config]);
 
   const { mutateAsync } = useUpdateFileContents({
-    onSuccess: () => {
-      console.log("we did it");
-    },
-    onError: (e) => {
-      console.log("something bad happend", e);
-    },
+    onSuccess: () => {},
+    onError: (e) => {},
   });
 
   const handleSave = async () => {
@@ -92,30 +89,34 @@ const ConfigEditor = ({ config, setConfig, meta }: {
       owner: meta.owner,
       repo: meta.repo,
       path: meta.name,
-      sha: "latest"
+      sha: "latest",
     });
   };
 
   if (!isEditing) {
     return (
-      <button className="block self-start py-2 px-3 bg-indigo-100 text-indigo-600 rounded-lg text-xs uppercase tracking-widest border  border-transparent hover:border-indigo-600 focus:border-indigo-600" onClick={() => {
-        setIsEditing(true);
-      }}>Edit config</button>
-    )
+      <button
+        className="block self-start py-2 px-3 bg-indigo-100 text-indigo-600 rounded-lg text-xs uppercase tracking-widest border  border-transparent hover:border-indigo-600 focus:border-indigo-600"
+        onClick={() => {
+          setIsEditing(true);
+        }}
+      >
+        Edit config
+      </button>
+    );
   }
 
   return (
     <div className="relative flex-1 font-mono h-full text-xs max-w-[32em]">
       <JSONInput
         placeholder={config}
-        height='100%'
-        width='100%'
+        height="100%"
+        width="100%"
         value={textConfig}
         onChange={(newValue) => {
           setTextConfig(newValue.plainText);
-          console.log(newValue.plainText)
           try {
-            const config = newValue.jsObject
+            const config = newValue.jsObject;
             setConfig(config);
           } catch (e) {
             console.error(e);
@@ -138,24 +139,32 @@ const ConfigEditor = ({ config, setConfig, meta }: {
         }
       /> */}
       <div className="absolute bottom-2 right-2 flex items-center">
-
-        <button className="py-2 px-3 bg-yello-100 text-yello-600 rounded-lg text-xs uppercase tracking-widest border  border-transparent hover:border-yello-600 focus:border-yello-600" onClick={() => {
-          try {
-            const config = JSON.parse(textConfig);
-            console.log(config)
-            setTextConfig(JSON.stringify(config, null, 2));
-          } catch (e) {
-            console.error(e);
-          }
-        }}>Clean</button>
-        <button className="py-2 px-3 bg-indigo-100 text-indigo-600 rounded-lg text-xs uppercase tracking-widest border  border-transparent hover:border-indigo-600 focus:border-indigo-600"
-          onClick={handleSave}>Save config</button>
+        <button
+          className="py-2 px-3 bg-yello-100 text-yello-600 rounded-lg text-xs uppercase tracking-widest border  border-transparent hover:border-yello-600 focus:border-yello-600"
+          onClick={() => {
+            try {
+              const config = JSON.parse(textConfig);
+              console.log(config);
+              setTextConfig(JSON.stringify(config, null, 2));
+            } catch (e) {
+              console.error(e);
+            }
+          }}
+        >
+          Clean
+        </button>
+        <button
+          className="py-2 px-3 bg-indigo-100 text-indigo-600 rounded-lg text-xs uppercase tracking-widest border  border-transparent hover:border-indigo-600 focus:border-indigo-600"
+          onClick={handleSave}
+        >
+          Save config
+        </button>
       </div>
     </div>
-  )
-}
+  );
+};
 
-const parseData = str => {
+const parseData = (str) => {
   try {
     return JSON.parse(str);
   } catch (e) {
@@ -163,7 +172,7 @@ const parseData = str => {
       return csvParse(str);
     } catch (e) {
       console.error(e);
-      return []
+      return [];
     }
   }
-}
+};

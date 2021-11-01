@@ -1,6 +1,13 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
-import MDX from '@mdx-js/runtime'
-import { timeFormat } from "d3"
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import MDX from "@mdx-js/runtime";
+import { timeFormat } from "d3";
 
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { ViewerProps } from ".";
@@ -25,18 +32,17 @@ export function MarkdownViewer({ contents, meta }: ViewerProps) {
   });
 
   const { mutateAsync } = useUpdateFileContents({
-    onSuccess: () => {
-      console.log("we did it");
-    },
-    onError: (e) => {
-      console.log("something bad happend", e);
-    },
+    onSuccess: () => {},
+    onError: (e) => {},
   });
 
-  const isDirty = useMemo(() => updatedContent !== markdown, [updatedContent, markdown]);
+  const isDirty = useMemo(
+    () => updatedContent !== markdown,
+    [updatedContent, markdown]
+  );
 
   const handleSave = async () => {
-    if (!isDirty) return
+    if (!isDirty) return;
     await mutateAsync({
       content: markdown,
       owner: meta.owner,
@@ -51,9 +57,9 @@ export function MarkdownViewer({ contents, meta }: ViewerProps) {
     const issues = await octokit.issues.listForRepo({
       owner: meta.owner,
       repo: meta.repo,
-      state: 'all',
+      state: "all",
       per_page: 100,
-      sort: 'updated',
+      sort: "updated",
     });
     const releases = await octokit.repos.listReleases({
       owner: meta.owner,
@@ -69,17 +75,17 @@ export function MarkdownViewer({ contents, meta }: ViewerProps) {
       issues: issues.data,
       releases: releases.data,
       commits: commits.data,
-    }
+    };
     setRepoInfo(info);
-  }
+  };
 
   useEffect(() => {
-    getRepoInfo()
-  }, [])
+    getRepoInfo();
+  }, []);
 
   const scope = {
-    ...repoInfo
-  }
+    ...repoInfo,
+  };
 
   const inputElement = useRef<HTMLTextAreaElement>(null);
   const onSelectComponent = (componentName) => {
@@ -88,17 +94,16 @@ export function MarkdownViewer({ contents, meta }: ViewerProps) {
       markdown.slice(0, currentPosition),
       `<${componentName} />\n`,
       markdown.slice(currentPosition),
-    ].join('');
+    ].join("");
     setMarkdown(newMarkdown);
     inputElement.current.focus({ preventScroll: true });
     setTimeout(() => {
       inputElement.current.setSelectionRange(
         currentPosition,
-        currentPosition + componentName.length + 4,
+        currentPosition + componentName.length + 4
       );
-    })
-
-  }
+    });
+  };
 
   return (
     <MarkdownContext.Provider value={scope}>
@@ -107,9 +112,11 @@ export function MarkdownViewer({ contents, meta }: ViewerProps) {
           <div className="relative flex-1 flex flex-col overflow-y-hidden">
             <div className="flex items-center justify-between flex-none">
               <div className="pl-6  py-2 flex items-center">
-                <Button onClick={() => {
-                  setIsEditing(false);
-                }}>
+                <Button
+                  onClick={() => {
+                    setIsEditing(false);
+                  }}
+                >
                   <XIcon /> Finished editing
                 </Button>
                 {/* <div className=" text-sm font-mono">
@@ -118,8 +125,9 @@ export function MarkdownViewer({ contents, meta }: ViewerProps) {
 
                 {isDirty && (
                   <div className="ml-2">
-                    <Button
-                      variant="small" onClick={handleSave}>Save Changes</Button>
+                    <Button variant="small" onClick={handleSave}>
+                      Save Changes
+                    </Button>
                   </div>
                 )}
               </div>
@@ -131,28 +139,27 @@ export function MarkdownViewer({ contents, meta }: ViewerProps) {
               className="w-full h-full p-6 bg-gray-100 focus:outline-none overflow-y-auto"
               value={markdown}
               onChange={(e) => {
-                setMarkdown(e.target.value)
+                setMarkdown(e.target.value);
               }}
             />
-
           </div>
         )}
         <div className="flex-1 markdown p-6 overflow-y-auto whitespace-pre-wrap">
           {!isEditing && (
-            <Button className="absolute -top-4 left-0" display="flex" onClick={() => setIsEditing(true)}>
+            <Button
+              className="absolute -top-4 left-0"
+              display="flex"
+              onClick={() => setIsEditing(true)}
+            >
               <div className="mr-1">
                 <PencilIcon />
               </div>
-
               Edit
             </Button>
           )}
           <div className="max-w-[60em] mx-auto">
             <ErrorBoundary key={markdown}>
-              <MDX
-                components={components}
-                scope={scope}
-              >
+              <MDX components={components} scope={scope}>
                 {markdown}
               </MDX>
             </ErrorBoundary>
@@ -160,49 +167,59 @@ export function MarkdownViewer({ contents, meta }: ViewerProps) {
         </div>
       </div>
     </MarkdownContext.Provider>
-  )
+  );
 }
 const components = {
   Issues,
   Releases,
   Commits,
   code({ node, inline, className, children }) {
-    const match = /language-(\w+)/.exec(className || '')
+    const match = /language-(\w+)/.exec(className || "");
     return !inline && match ? (
       <div className="code">
-        <SyntaxHighlighter
-          language={match[1]}
-        >
-          {String(children).replace(/\n$/, '')}
+        <SyntaxHighlighter language={match[1]}>
+          {String(children).replace(/\n$/, "")}
         </SyntaxHighlighter>
       </div>
     ) : (
-      <code className={className}>
-        {children}
-      </code>
-    )
-  }
-}
+      <code className={className}>{children}</code>
+    );
+  },
+};
 
 const formatDate = timeFormat("%B %-d");
 const issueStateToStatusMap = {
   closed: "issueClosed",
   open: "issueOpened",
-}
-function Issues({ num = 3, children }: {
-  num: number,
-  children?: React.ReactNode
+};
+function Issues({
+  num = 3,
+  children,
+}: {
+  num: number;
+  children?: React.ReactNode;
 }) {
   const { issues } = useContext(MarkdownContext);
   const filteredIssues = issues.slice(0, num);
   return (
     <div className="mt-3 mb-6">
       <div className="flex space-x-2 flex-wrap">
-        {filteredIssues.map(issue => (
-          <Box bg="canvas.subtle" p={3} key={issue.id} className="relative flex-1 min-w-[20em] m-1">
+        {filteredIssues.map((issue) => (
+          <Box
+            bg="canvas.subtle"
+            p={3}
+            key={issue.id}
+            className="relative flex-1 min-w-[20em] m-1"
+          >
             <div className="flex justify-between items-start">
-              <a className="block text-black text-lg" href={issue.html_url}>{issue.title}</a>
-              <StateLabel status={issueStateToStatusMap[issue.state]} variant="small" className="">
+              <a className="block text-black text-lg" href={issue.html_url}>
+                {issue.title}
+              </a>
+              <StateLabel
+                status={issueStateToStatusMap[issue.state]}
+                variant="small"
+                className=""
+              >
                 {issue.state}
               </StateLabel>
             </div>
@@ -214,21 +231,31 @@ function Issues({ num = 3, children }: {
         ))}
       </div>
     </div>
-  )
+  );
 }
-function Releases({ num = 3, children }: {
-  num: number,
-  children?: React.ReactNode
+function Releases({
+  num = 3,
+  children,
+}: {
+  num: number;
+  children?: React.ReactNode;
 }) {
   const { releases = [] } = useContext(MarkdownContext);
   const filteredReleases = releases.slice(0, num);
   return (
     <div className="mt-3 mb-6">
       <div className="flex space-x-2 flex-wrap">
-        {filteredReleases.map(release => (
-          <Box bg="canvas.subtle" p={3} key={release.id} className="relative flex-1 min-w-[20em] m-1">
+        {filteredReleases.map((release) => (
+          <Box
+            bg="canvas.subtle"
+            p={3}
+            key={release.id}
+            className="relative flex-1 min-w-[20em] m-1"
+          >
             <div className="flex justify-between items-center">
-              <a className="block text-black text-lg" href={release.html_url}>{release.tag_name}</a>
+              <a className="block text-black text-lg" href={release.html_url}>
+                {release.tag_name}
+              </a>
             </div>
             <div className="mt-1 text-sm italic text-gray-600">
               {formatDate(new Date(release.published_at))}
@@ -238,21 +265,31 @@ function Releases({ num = 3, children }: {
         ))}
       </div>
     </div>
-  )
+  );
 }
-function Commits({ num = 2, children }: {
-  num: number,
-  children?: React.ReactNode
+function Commits({
+  num = 2,
+  children,
+}: {
+  num: number;
+  children?: React.ReactNode;
 }) {
   const { commits = [] } = useContext(MarkdownContext);
   const filteredCommits = commits.slice(0, num);
   return (
     <div className="mt-3 mb-6">
       <div className="flex flex-wrap">
-        {filteredCommits.map(commit => (
-          <Box bg="canvas.subtle" p={3} key={commit.sha} className="relative flex-1 min-w-[20em] m-1">
+        {filteredCommits.map((commit) => (
+          <Box
+            bg="canvas.subtle"
+            p={3}
+            key={commit.sha}
+            className="relative flex-1 min-w-[20em] m-1"
+          >
             <div className="flex justify-between items-center">
-              <a className="block text-black text-lg" href={commit.html_url}>{commit.commit.message}</a>
+              <a className="block text-black text-lg" href={commit.html_url}>
+                {commit.commit.message}
+              </a>
             </div>
             {/* author */}
             <Box className="flex items-center mt-1">
@@ -271,19 +308,25 @@ function Commits({ num = 2, children }: {
         ))}
       </div>
     </div>
-  )
+  );
 }
 
-const componentNames = Object.keys(components).filter(d => d[0] === d[0].toUpperCase())
+const componentNames = Object.keys(components).filter(
+  (d) => d[0] === d[0].toUpperCase()
+);
 const ComponentNamesHint = ({ onSelect }) => {
   return (
     <div className="bg-white py-2 px-4">
-      {componentNames.map(c => (
-        <button key={c} className="text-xs text-gray-600 mr-1 px-3 py-2 rounded-full focus:bg-indigo-50 hover:bg-indigo-50" onClick={() => onSelect(c)}>
+      {componentNames.map((c) => (
+        <button
+          key={c}
+          className="text-xs text-gray-600 mr-1 px-3 py-2 rounded-full focus:bg-indigo-50 hover:bg-indigo-50"
+          onClick={() => onSelect(c)}
+        >
           <code>{c}</code>
         </button>
       ))}
       <PlusIcon />
     </div>
-  )
-}
+  );
+};

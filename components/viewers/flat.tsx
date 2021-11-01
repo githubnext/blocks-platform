@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { csvParse } from "d3"
+import { csvParse } from "d3";
 import { Grid } from "@githubocto/flat-ui";
 
 export function FlatViewer({ contents }: { contents: string }) {
@@ -15,7 +15,6 @@ export function FlatViewer({ contents }: { contents: string }) {
       }
     }
   }, [contents]);
-  console.log(data);
 
   return <Grid data={data} />;
 }

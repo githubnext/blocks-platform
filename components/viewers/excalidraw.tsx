@@ -8,7 +8,7 @@ const allowList = ["excalidraw"];
 export function ExcalidrawViewer(props: ViewerProps) {
   const { contents, meta } = props;
   const extension = meta.name.split(".").pop();
-  const serializeAsJSON = useRef(null)
+  const serializeAsJSON = useRef(null);
 
   if (!allowList.includes(extension)) {
     return (
@@ -30,22 +30,18 @@ export function ExcalidrawViewer(props: ViewerProps) {
 
   useEffect(() => {
     import("@excalidraw/excalidraw").then((comp) => {
-      setComp(comp.default)
+      setComp(comp.default);
       serializeAsJSON.current = comp.serializeAsJSON;
     });
   }, []);
 
   const { mutateAsync } = useUpdateFileContents({
-    onSuccess: () => {
-      console.log("we did it");
-    },
-    onError: (e) => {
-      console.log("something bad happend", e);
-    },
+    onSuccess: () => {},
+    onError: (e) => {},
   });
 
   const handleSave = async () => {
-    if (!serializeAsJSON.current) return
+    if (!serializeAsJSON.current) return;
     const serialized = serializeAsJSON.current(elements, appState);
     await mutateAsync({
       content: serialized,

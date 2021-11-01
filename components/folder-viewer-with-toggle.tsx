@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 
 import { ErrorBoundary } from "./error-boundary";
-import { SidebarViewer, folderViewers } from "components/folder-viewers";
+import { MinimapViewer, folderViewers } from "components/folder-viewers";
 import { Box } from "@primer/components";
 import { useRouter } from "next/router";
 
@@ -28,7 +28,7 @@ export function FolderViewer(props: FolderViewerProps) {
   const debugMode = Boolean(debug);
 
   const viewer = folderViewers.find((d) => d.id === viewerType) || ({} as any);
-  const Viewer = viewer.component || SidebarViewer;
+  const Viewer = viewer.component || MinimapViewer;
 
   useEffect(() => {
     if (typeof window === "undefined") return;

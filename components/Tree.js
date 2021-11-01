@@ -78,22 +78,22 @@ const fileColors = {
 const colorThemes = ["file", "changes", "last-change"];
 const colorTheme = "file";
 const looseFilesId = "__structure_loose_file__";
-const defaultWidth = 400;
-const defaultHeight = 400;
+const defaultWidth = 600;
+const defaultHeight = 600;
 const maxChildren = 9000;
 const lastCommitAccessor = (d) => new Date(d.commits?.[0]?.date + "0");
 const numberOfCommitsAccessor = (d) => d?.commits?.length || 0;
 export const Tree = (
-  { data, repoName = "", filesChanged = [], participantLocations = [], maxDepth = 6, onClickFile = () => { } }
+  { data, filesChanged = [], participantLocations = [], maxDepth = 6, onClickFile = () => { } }
 ) => {
   const [ref, { width: containerWidth, height: containerHeight }] = useMeasure();
   const [width, setWidth] = useState(defaultWidth);
   const [height, setHeight] = useState(defaultHeight);
 
-  useDebounce(() => {
-    setWidth(containerWidth);
-    setHeight(containerHeight);
-  }, 500, [containerWidth, containerHeight]);
+  // useDebounce(() => {
+  //   setWidth(containerWidth);
+  //   setHeight(containerHeight);
+  // }, 500, [containerWidth, containerHeight]);
 
   const [selectedNodeId, setSelectedNodeId] = useState(null);
   const [isHovering, setIsHovering] = useState(false);

@@ -75,7 +75,7 @@ export default function IndexPage() {
   const isFolder = status !== "success" ? false : folderData?.[0]?.path !== path;
   const data = folderData?.[0];
   const defaultViewer = isFolder
-    ? "sidebar"
+    ? "minimap"
     : getViewerFromFilename(data?.name) || "code";
 
   useEffect(() => {
@@ -102,9 +102,12 @@ export default function IndexPage() {
   }
 
   useEffect(() => {
-    getFiles()
     getRepoInfo()
   }, [owner, repo]);
+
+  useEffect(() => {
+    getFiles()
+  }, [owner, repo, path]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;

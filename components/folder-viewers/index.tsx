@@ -41,4 +41,4 @@ export const folderViewers = [
   },
 ];
 
-export * from "./sidebar";
+export * from "./minimap";

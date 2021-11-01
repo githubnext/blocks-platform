@@ -1,13 +1,14 @@
 import { SidebarViewer } from "./sidebar";
+import { CypressViewer } from "./cypress";
 
 export type File = {
-  name: string,
-  parent: string,
-  path: string,
-  size: number,
-}
+  name: string;
+  parent: string;
+  path: string;
+  size: number;
+};
 export interface FolderViewerProps {
-  files: File[],
+  files: File[];
   contents: string;
   meta: {
     theme: string;
@@ -27,6 +28,11 @@ export const folderViewers = [
     label: "Sidebar",
     component: SidebarViewer,
   },
-]
+  {
+    id: "cypress",
+    label: "Cypress",
+    component: CypressViewer,
+  },
+];
 
 export * from "./sidebar";

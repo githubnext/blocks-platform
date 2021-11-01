@@ -51,7 +51,8 @@ export default function IndexPage() {
     fileRef,
     viewerOverride,
   } = router.query;
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingRepoInfo, setIsLoadingRepoInfo] = useState(true);
+  const [isLoadingFiles, setIsLoadingFiles] = useState(true);
   const [files, setFiles] = useState([]);
   const [fileChanges, setFileChanges] = useState({});
   const [repoInfo, setRepoInfo] = useState({});
@@ -81,22 +82,28 @@ export default function IndexPage() {
     setColorMode(theme === "dark" ? "night" : "day");
   }, [theme]);
 
-  const getFiles = async () => {
-    if (!owner || !repo) return;
-    const url = `/api/repo-info?owner=${owner}&repo=${repo}`;
-    const { files, repoInfo, activity, commits, fileChanges } = await fetch(
-      url
-    ).then((res) => res.json());
-    setFiles(files);
+  const getRepoInfo = async () => {
+    if (!owner || !repo) return
+    const url = `/api/repo-info?owner=${owner}&repo=${repo}`
+    const { repoInfo, activity, commits, fileChanges } = await fetch(url).then(res => res.json());
+    console.log({ repoInfo, activity, commits, fileChanges })
     setRepoInfo(repoInfo);
     setFileChanges(fileChanges);
     setCommits(commits);
     setActivity(activity);
-    setIsLoading(false);
-  };
+    setIsLoadingRepoInfo(false)
+  }
+  const getFiles = async () => {
+    const url = `/api/file-tree?owner=${owner}&repo=${repo}`
+    const { files } = await fetch(url).then(res => res.json());
+    setFiles(files);
+    setIsLoadingFiles(false)
+    console.log({ files })
+  }
 
   useEffect(() => {
-    getFiles();
+    getFiles()
+    getRepoInfo()
   }, [owner, repo]);
 
   useEffect(() => {
@@ -139,7 +146,7 @@ export default function IndexPage() {
       />
       <div className="flex flex-1 overflow-hidden">
         <div className="flex-none w-80 border-r border-gray-200">
-          {isLoading ? (
+          {isLoadingFiles ? (
             <div className="flex flex-col items-center justify-center h-full w-full">
               <div className="animate-pulse flex space-y-4">
                 <div className="rounded-full bg-gray-200 h-12 w-full"></div>
@@ -182,7 +189,7 @@ export default function IndexPage() {
         </div>
 
         <div className="flex-none w-80 h-full border-l border-gray-200">
-          {isLoading ? (
+          {isLoadingRepoInfo ? (
             <div className="flex flex-col items-center justify-center h-full w-full">
               <div className="animate-pulse flex space-y-4">
                 <div className="rounded-full bg-gray-200 h-12 w-full"></div>

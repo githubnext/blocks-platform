@@ -15,17 +15,6 @@ export default async function getInfo(req, res) {
 
   const branch = "HEAD";
 
-  const GITHUB_PAT = process.env.NEXT_PUBLIC_GITHUB_PAT;
-  // the octokit API doesn't seem to surface this recursive endpoint
-  const url = `https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`;
-
-  const fileTree = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${GITHUB_PAT}`,
-    },
-  }).then((res) => res.json());
-  const files = nestFileTree(fileTree, repo);
-
   const repoInfoRes = await octokit.repos.get({
     owner,
     repo,
@@ -69,7 +58,7 @@ export default async function getInfo(req, res) {
         files.forEach((file) => {
           fileChanges[file.filename] = commit;
         });
-      } catch (e) {}
+      } catch (e) { }
     }
 
     const activityRes = await fetch(
@@ -85,11 +74,11 @@ export default async function getInfo(req, res) {
       (a, b) => parseDate(b.created_at) - parseDate(a.created_at)
     );
 
-    res.status(200).json({ files, repoInfo, activity, commits, fileChanges });
+    res.status(200).json({ repoInfo, activity, commits, fileChanges });
   } catch (e) {
     res
       .status(200)
-      .json({ files, repoInfo, activity: [], commits: [], fileChanges: {} });
+      .json({ repoInfo, activity: [], commits: [], fileChanges: {} });
   }
 }
 

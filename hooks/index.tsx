@@ -50,7 +50,7 @@ async function getFileContent(
 
 export function useFileContent(
   params: UseFileContentParams,
-  config?: UseQueryOptions<DirectoryItem>
+  config?: UseQueryOptions<DirectoryItem[]>
 ) {
   const { repo, owner, path, fileRef } = params;
 

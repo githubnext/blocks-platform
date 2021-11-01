@@ -31,7 +31,7 @@ export function ChartViewer({ contents, meta }: ViewerProps) {
 
   const data = useMemo(() => {
     try {
-      const parsedContent = Buffer.from(dataRes?.content, "base64").toString();
+      const parsedContent = Buffer.from(dataRes?.[0]?.content, "base64").toString();
       const parsedData = parseData(parsedContent);
       return { data: parsedData }
     } catch (e) {

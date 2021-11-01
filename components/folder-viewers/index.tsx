@@ -1,5 +1,6 @@
 import { SidebarViewer } from "./sidebar";
 import { CypressViewer } from "./cypress";
+import { MinimapViewer } from "./minimap";
 
 export type File = {
   name: string;
@@ -32,6 +33,11 @@ export const folderViewers = [
     id: "cypress",
     label: "Cypress",
     component: CypressViewer,
+  },
+  {
+    id: "minimap",
+    label: "Minimap",
+    component: MinimapViewer,
   },
 ];
 

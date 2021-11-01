@@ -29,7 +29,7 @@ export type DirectoryItem = components["schemas"]["content-directory"][number];
 
 async function getFileContent(
   params: UseFileContentParams
-): Promise<DirectoryItem> {
+): Promise<DirectoryItem[]> {
   const { repo, owner, path, fileRef } = params;
 
   const { data, status } = await octokit.repos.getContent({
@@ -42,9 +42,9 @@ async function getFileContent(
   if (status !== 200) throw new Error("Something bad happened");
 
   if (Array.isArray(data)) {
-    return data[0];
-  } else {
     return data;
+  } else {
+    return [data];
   }
 }
 

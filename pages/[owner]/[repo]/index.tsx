@@ -1,9 +1,10 @@
 import { FileViewer } from "components/file-viewer-with-toggle";
+import { FolderViewer } from "components/folder-viewer-with-toggle";
 import { viewers } from "components/viewers";
 import { octokit, useFileContent } from "hooks";
 import { Box, ButtonDanger, Caret, Header, Link, Spinner, StyledOcticon, TextInput, UnderlineNav, useTheme } from "@primer/components";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getViewerFromFilename } from "lib";
 import { BookIcon, CodeIcon, EyeIcon, GearIcon, GitPullRequestIcon, GraphIcon, IssueOpenedIcon, LogoGithubIcon, MarkGithubIcon, PlayIcon, ProjectIcon, RepoForkedIcon, RepoIcon, ShieldIcon, StarIcon } from "@primer/octicons-react";
 import { BiCaretDown } from "react-icons/bi";
@@ -22,7 +23,10 @@ export default function IndexPage() {
   const [repoInfo, setRepoInfo] = useState({});
   const [activity, setActivity] = useState([]);
   const [commits, setCommits] = useState([]);
-  const { data, status } = useFileContent(
+
+  // we'll want to update this at some point
+  const isFolder = !path.includes(".")
+  const { data: folderData, status } = useFileContent(
     {
       repo: repo as string,
       owner: owner as string,
@@ -34,8 +38,8 @@ export default function IndexPage() {
       refetchOnWindowFocus: false,
     }
   );
-  const defaultViewer = getViewerFromFilename(data?.name) || "code";
-  console.log("defaultViewer: ", defaultViewer);
+  const data = folderData?.[0]
+  const defaultViewer = isFolder ? "sidebar" : getViewerFromFilename(data?.name) || "code";
 
   useEffect(() => {
     setColorMode(theme === "dark" ? "night" : "day");
@@ -68,6 +72,16 @@ export default function IndexPage() {
       .map((v) => ({ id: v.id, label: v.label }))
       .sort((a, b) => (a.id === defaultViewer) ? -1 : 1); // put default viewer first
   }, [path, defaultViewer]);
+
+  const findNestedItem = (path: string, files: any) => {
+    const nextItemName = path.split("/")[0]
+    const nextItem = files.find(item => item.name === nextItemName)
+    const nextPath = path.split("/").slice(1).join("/")
+    return nextPath ? findNestedItem(nextPath, nextItem?.children || []) : nextItem
+  }
+  const folderFiles = useMemo(() => (
+    isFolder && findNestedItem(path as string, files)?.children || []
+  ), [isFolder, files]);
 
   return (
     <div className="flex flex-col w-full h-screen overflow-hidden">
@@ -104,13 +118,24 @@ export default function IndexPage() {
         <div className="flex-1 overflow-hidden">
           {status === "loading" && <p className="text-sm w-full p-8">Loading...</p>}
           {status === "success" && (
-            <FileViewer
-              theme={theme as string || "light"}
-              data={data}
-              defaultViewer={defaultViewer}
-              viewerOverride={viewerOverride as string}
-              hasToggle
-            />
+            isFolder ? (
+              <FolderViewer
+                theme={theme as string || "light"}
+                path={path as string}
+                data={folderFiles}
+                defaultViewer={defaultViewer}
+                viewerOverride={viewerOverride as string}
+                hasToggle
+              />
+            ) : (
+              <FileViewer
+                theme={theme as string || "light"}
+                data={data}
+                defaultViewer={defaultViewer}
+                viewerOverride={viewerOverride as string}
+                hasToggle
+              />
+            )
           )}
         </div>
 

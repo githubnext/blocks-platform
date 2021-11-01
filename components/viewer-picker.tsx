@@ -1,19 +1,24 @@
 import { Button, SelectMenu } from "@primer/components";
 import { getViewerFromFilename } from "lib";
-import { viewers } from "./viewers";
+import { viewers as fileViewers } from "./viewers";
+import { folderViewers } from "./folder-viewers";
 
 interface ViewerPickerProps {
   value: string;
-  extension: string;
+  extension?: string;
+  isFolder?: boolean;
   onChange: (newType: string) => void;
 }
 
 export default function ViewerPicker(props: ViewerPickerProps) {
-  const { value, extension, onChange } = props;
-  const defaultViewer = getViewerFromFilename(`.${extension}`) || "code";
-  const relevantViewers = viewers.filter(viewer => (
-    viewer.extensions.includes(extension) || viewer.extensions.includes("*")
-  ))
+  const { value, extension, isFolder, onChange } = props;
+  const defaultViewer = isFolder ? "sidebar" : (getViewerFromFilename(`.${extension}`) || "code")
+  const relevantViewers = (
+    isFolder
+      ? folderViewers
+      : fileViewers.filter(viewer => (
+        viewer.extensions.includes(extension) || viewer.extensions.includes("*")
+      )))
     .sort((a, b) => (a.id === defaultViewer) ? -1 : 1); // put default viewer first
 
   return (

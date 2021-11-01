@@ -10,7 +10,7 @@ import { Tooltip } from './Tooltip';
 
 
 const doShowPills = false
-export const Sidebar = ({ owner, repo, fileChanges = {}, files = [], activeFilePath }) => {
+export const Sidebar = ({ fileChanges = {}, files = [], activeFilePath = "" }) => {
   if (!files.map) return null;
 
   const allUsers = []
@@ -81,6 +81,8 @@ const Folder = ({
   fileChanges,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const router = useRouter();
+  const query = router.query;
 
   useEffect(() => {
     if (!isExpanded && activeFilePath?.includes(name)) {
@@ -100,26 +102,34 @@ const Folder = ({
   }, [path, fileChangesScale]);
 
   return (
-    <Box className="">
-      <button
-        className="relative flex items-center py-2 px-3 text-left w-full whitespace-nowrap overflow-ellipsis"
-        onClick={() => setIsExpanded(!isExpanded)}
+    <Box>
+      <Link
+        shallow
+        href={{
+          pathname: router.pathname,
+          query: { ...query, path },
+        }}
       >
-        <div className="mr-2 text-sm">
-          {isExpanded ? <IoFolderOpenOutline /> : <IoFolderOutline />}
-        </div>
-        {name}
-        {doShowPills && (
-          <div className="ml-auto flex p-1 border-[1px] border-gray-200 rounded-full">
-            {children.slice(0, 10).map(file => (
-              <div className="m-[1px]">
-                <FileDot name={file.name} type={file.children?.length ? "folder" : "file"} key={file.path} />
-              </div>
-            ))}
+        <a
+          className="relative flex items-center py-2 px-3 text-left w-full whitespace-nowrap overflow-ellipsis"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          <div className="mr-2 text-sm">
+            {isExpanded ? <IoFolderOpenOutline /> : <IoFolderOutline />}
           </div>
-        )}
-        <DateChangedIndicator date={mostRecentChangeDate} fileChangesScale={fileChangesScale} />
-      </button>
+          {name}
+          {doShowPills && (
+            <div className="ml-auto flex p-1 border-[1px] border-gray-200 rounded-full">
+              {children.slice(0, 10).map(file => (
+                <div className="m-[1px]">
+                  <FileDot name={file.name} type={file.children?.length ? "folder" : "file"} key={file.path} />
+                </div>
+              ))}
+            </div>
+          )}
+          <DateChangedIndicator date={mostRecentChangeDate} fileChangesScale={fileChangesScale} />
+        </a>
+      </Link>
 
       {isExpanded && (
         <div className="pl-6">

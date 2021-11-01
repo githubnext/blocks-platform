@@ -28,3 +28,9 @@ viewerOverride  # to specify a specific viewer on lolad
 
 For example:
 http://localhost:3000/?owner=githubnext&repo=composable-github-test&path=data.csv&debug=true&viewerOverride=flat
+
+You'll need a GitHub PAT to load data from the API. Add that to an .env.local file.
+
+```
+NEXT_PUBLIC_GITHUB_PAT=XX
+```

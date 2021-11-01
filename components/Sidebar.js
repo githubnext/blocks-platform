@@ -101,6 +101,8 @@ const Folder = ({
     return mostRecentChange && fileChanges[mostRecentChange].date;
   }, [path, fileChangesScale]);
 
+  const isActive = activeFilePath === path
+
   return (
     <Box>
       <Link
@@ -111,7 +113,8 @@ const Folder = ({
         }}
       >
         <a
-          className="relative flex items-center py-2 px-3 text-left w-full whitespace-nowrap overflow-ellipsis"
+          className={`relative flex items-center py-2 px-3 text-left w-full whitespace-nowrap overflow-ellipsis ${isActive ? 'bg-gray-50 border-gray-200' : ' border-transparent'
+            } border border-r-0`}
           onClick={() => setIsExpanded(!isExpanded)}
         >
           <div className="mr-2 text-sm">

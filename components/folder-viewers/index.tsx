@@ -1,6 +1,7 @@
 import { SidebarViewer } from "./sidebar";
 import { CypressViewer } from "./cypress";
 import { MinimapViewer } from "./minimap";
+import { ReadmeViewer } from "./readme";
 
 export type File = {
   name: string;
@@ -25,6 +26,11 @@ export interface FolderViewerProps {
 
 export const folderViewers = [
   {
+    id: "readme",
+    label: "Readme",
+    component: ReadmeViewer,
+  },
+  {
     id: "sidebar",
     label: "Sidebar",
     component: SidebarViewer,
@@ -41,4 +47,4 @@ export const folderViewers = [
   },
 ];
 
-export * from "./minimap";
+export * from "./readme";

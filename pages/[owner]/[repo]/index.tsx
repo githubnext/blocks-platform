@@ -75,7 +75,7 @@ export default function IndexPage() {
   const isFolder = status !== "success" ? false : folderData?.[0]?.path !== path;
   const data = folderData?.[0];
   const defaultViewer = isFolder
-    ? "minimap"
+    ? "readme"
     : getViewerFromFilename(data?.name) || "code";
 
   useEffect(() => {

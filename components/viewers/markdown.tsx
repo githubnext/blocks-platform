@@ -15,6 +15,7 @@ import { octokit, useUpdateFileContents } from "hooks";
 import { Avatar, Box, Button, StateLabel } from "@primer/components";
 import { ErrorBoundary } from "components/error-boundary";
 import { PencilIcon, PlusIcon, XIcon } from "@primer/octicons-react";
+import { CodeSandbox } from "components/CodeSandbox"
 
 export const MarkdownContext = createContext<any>({
   issues: [],
@@ -32,8 +33,8 @@ export function MarkdownViewer({ contents, meta }: ViewerProps) {
   });
 
   const { mutateAsync } = useUpdateFileContents({
-    onSuccess: () => {},
-    onError: (e) => {},
+    onSuccess: () => { },
+    onError: (e) => { },
   });
 
   const isDirty = useMemo(
@@ -136,7 +137,7 @@ export function MarkdownViewer({ contents, meta }: ViewerProps) {
 
             <textarea
               ref={inputElement}
-              className="w-full h-full p-6 bg-gray-100 focus:outline-none overflow-y-auto"
+              className="w-full h-full p-6 bg-gray-100 focus:outline-none overflow-y-auto resize-none"
               value={markdown}
               onChange={(e) => {
                 setMarkdown(e.target.value);
@@ -173,7 +174,8 @@ const components = {
   Issues,
   Releases,
   Commits,
-  code({ node, inline, className, children }) {
+  CodeSandbox,
+  code({ inline, className, children }) {
     const match = /language-(\w+)/.exec(className || "");
     return !inline && match ? (
       <div className="code">

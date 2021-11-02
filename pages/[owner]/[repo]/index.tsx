@@ -86,7 +86,7 @@ export default function IndexPage() {
     if (!owner || !repo) return
     const url = `/api/repo-info?owner=${owner}&repo=${repo}`
     const { repoInfo, activity, commits, fileChanges } = await fetch(url).then(res => res.json());
-    console.log({ repoInfo, activity, commits, fileChanges })
+    // console.log({ repoInfo, activity, commits, fileChanges })
     setRepoInfo(repoInfo);
     setFileChanges(fileChanges);
     setCommits(commits);
@@ -98,7 +98,7 @@ export default function IndexPage() {
     const { files } = await fetch(url).then(res => res.json());
     setFiles(files);
     setIsLoadingFiles(false)
-    console.log({ files })
+    // console.log({ files })
   }
 
   useEffect(() => {

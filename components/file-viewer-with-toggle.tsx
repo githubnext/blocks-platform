@@ -58,7 +58,7 @@ export function FileViewer(props: FileViewerProps) {
   return (
     <div className="h-full flex flex-col">
       {(debugMode || hasToggle) && (
-        <div className="flex-none top-0 z-[9999]">
+        <div className="flex-none top-0 z-10">
           <div>
             <Box bg="canvas.subtle" p={2} borderBottom="1px solid" className="!border-gray-200">
               <ViewerPicker extension={extension} onChange={setViewerType} value={viewerType} />

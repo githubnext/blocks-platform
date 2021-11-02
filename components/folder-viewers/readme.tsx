@@ -9,7 +9,7 @@ export function ReadmeViewer(props: FolderViewerProps) {
   const { data } = useFileContent({
     owner: meta.owner,
     repo: meta.repo,
-    path: "README.md",
+    path: (meta.path ? meta.path + "/" : "") + "README.md",
     fileRef: meta.sha
   }, {
     refetchOnWindowFocus: false,
@@ -22,7 +22,7 @@ export function ReadmeViewer(props: FolderViewerProps) {
   }), [meta])
 
   return (
-    <div className={`${meta.theme}`}>
+    <div className={`h-full`}>
       <MarkdownViewer
         contents={contents}
         meta={fileMeta}

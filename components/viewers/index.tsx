@@ -3,6 +3,7 @@ import { CodeViewer } from "./code";
 import { FlatViewer } from "./flat";
 import { ThreeDeeViewer } from "./three-dee";
 import { IFrameViewer } from "./iframe";
+import { PollViewer } from "./poll";
 import { CssViewer } from "./css";
 import { NotesViewer } from "./notes";
 import { ExcalidrawViewer } from "./excalidraw";
@@ -53,6 +54,12 @@ export const viewers = [
     label: "Iframe",
     component: IFrameViewer,
     extensions: ["*"],
+  },
+  {
+    id: "poll",
+    label: "Poll",
+    component: PollViewer,
+    extensions: ["poll"],
   },
   {
     id: "css",

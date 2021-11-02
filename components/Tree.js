@@ -84,7 +84,7 @@ const maxChildren = 9000;
 const lastCommitAccessor = (d) => new Date(d.commits?.[0]?.date + "0");
 const numberOfCommitsAccessor = (d) => d?.commits?.length || 0;
 export const Tree = (
-  { data, filesChanged = [], participantLocations = [], maxDepth = 6, onClickFile = () => { } }
+  { data, filesChanged = [], participantLocations = [], maxDepth = 6, onClickFile = (file) => { } }
 ) => {
   const [ref, { width: containerWidth, height: containerHeight }] = useMeasure();
   const [width, setWidth] = useState(defaultWidth);

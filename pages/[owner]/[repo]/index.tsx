@@ -46,7 +46,7 @@ export default function IndexPage() {
   const {
     repo,
     owner,
-    path = "README.md",
+    path = "",
     theme,
     fileRef,
     viewerOverride,
@@ -68,7 +68,7 @@ export default function IndexPage() {
       fileRef: fileRef as string,
     },
     {
-      enabled: Boolean(repo) && Boolean(owner) && Boolean(path),
+      enabled: Boolean(repo) && Boolean(owner),
       refetchOnWindowFocus: false,
     }
   );
@@ -132,7 +132,7 @@ export default function IndexPage() {
       : nextItem;
   };
   const folderFiles = useMemo(
-    () => (isFolder && findNestedItem(path as string, files)?.children) || [],
+    () => (isFolder && path ? (findNestedItem(path as string, files)?.children) : files) || [],
     [isFolder, files]
   );
 

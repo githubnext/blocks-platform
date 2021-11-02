@@ -108,17 +108,25 @@ const Folder = ({
         }}
       >
         <a
-          className={`relative flex items-center py-2 px-3 text-left w-full whitespace-nowrap overflow-ellipsis ${isActive ? 'bg-gray-50 border-gray-200' : ' border-transparent'
+          className={`relative flex items-center text-left w-full whitespace-nowrap overflow-ellipsis ${isActive ? 'bg-gray-50 border-gray-200' : ' border-transparent'
             } border border-r-0`}
           onClick={() => {
             if (!canCollapse) return
             setIsExpanded(!isExpanded)
           }}
         >
-          <div className="mr-2 text-sm">
+          <button className="mr-2 text-sm pl-3 py-2"
+            onClick={e => {
+              e.stopPropagation();
+              e.preventDefault()
+              setIsExpanded(!isExpanded)
+            }}
+          >
             {isExpanded ? <IoFolderOpenOutline /> : <IoFolderOutline />}
+          </button>
+          <div className="py-2 pr-3">
+            {name}
           </div>
-          {name}
           {doShowPills && (
             <div className="ml-auto flex p-1 border-[1px] border-gray-200 rounded-full">
               {children.slice(0, 10).map(file => (
@@ -172,7 +180,7 @@ const File = ({ name, path, activeUsers = [], fileChangesScale, date, isActive }
             {doShowPills ? (
               <FileDot name={name} />
             ) : (
-              <VscSymbolFile />
+              <VscSymbolFile className="text-gray-400" />
             )}
           </div>
           <div className="max-w-full flex-1 overflow-hidden overflow-ellipsis">

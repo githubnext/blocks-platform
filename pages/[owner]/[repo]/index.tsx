@@ -159,6 +159,8 @@ export default function IndexPage() {
             </div>
           ) : (
             <Sidebar
+              owner={owner as string}
+              repo={repo as string}
               files={files}
               activeFilePath={path as string}
               fileChanges={fileChanges}

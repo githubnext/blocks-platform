@@ -10,7 +10,7 @@ import { Tooltip } from './Tooltip';
 
 
 const doShowPills = false
-export const Sidebar = ({ fileChanges = {}, files = [], activeFilePath = "" }) => {
+export const Sidebar = ({ owner = "", repo = "", fileChanges = {}, files = [], activeFilePath = "" }) => {
   if (!files.map) return null;
 
   const allUsers = []
@@ -26,22 +26,16 @@ export const Sidebar = ({ fileChanges = {}, files = [], activeFilePath = "" }) =
     <Box className="sidebar h-full overflow-hidden flex-1">
       <Box className="h-full overflow-auto">
         <div className="p-2 px-0 text-sm pb-20 text-left">
-          {files
-            .sort(
-              (a, b) =>
-                !!b.children.length - !!a.children.length ||
-                a.name.localeCompare(b.name)
-            )
-            .map(file => (
-              <Item
-                key={file.name}
-                {...file}
-                activeFilePath={activeFilePath}
-                allUsers={allUsers}
-                fileChangesScale={fileChangesScale}
-                fileChanges={fileChanges}
-              />
-            ))}
+          <Item
+            name={`${owner}/${repo}`}
+            path={""}
+            children={files}
+            activeFilePath={activeFilePath}
+            allUsers={allUsers}
+            fileChangesScale={fileChangesScale}
+            fileChanges={fileChanges}
+            canCollapse={false}
+          />
         </div>
       </Box>
     </Box>
@@ -79,8 +73,9 @@ const Folder = ({
   allUsers,
   fileChangesScale,
   fileChanges,
+  canCollapse = true,
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(!canCollapse);
   const router = useRouter();
   const query = router.query;
 
@@ -115,7 +110,10 @@ const Folder = ({
         <a
           className={`relative flex items-center py-2 px-3 text-left w-full whitespace-nowrap overflow-ellipsis ${isActive ? 'bg-gray-50 border-gray-200' : ' border-transparent'
             } border border-r-0`}
-          onClick={() => setIsExpanded(!isExpanded)}
+          onClick={() => {
+            if (!canCollapse) return
+            setIsExpanded(!isExpanded)
+          }}
         >
           <div className="mr-2 text-sm">
             {isExpanded ? <IoFolderOpenOutline /> : <IoFolderOutline />}

@@ -10,7 +10,7 @@ import { Tooltip } from './Tooltip';
 
 
 const doShowPills = false
-export const Sidebar = ({ owner = "", repo = "", fileChanges = {}, files = [], activeFilePath = "" }) => {
+export const Sidebar = ({ owner = "", repo = "", fileChanges = {}, files = [], activeFilePath = "", positions = [] }) => {
   if (!files.map) return null;
 
   const allUsers = []
@@ -35,6 +35,7 @@ export const Sidebar = ({ owner = "", repo = "", fileChanges = {}, files = [], a
             fileChangesScale={fileChangesScale}
             fileChanges={fileChanges}
             canCollapse={false}
+            positions={positions}
           />
         </div>
       </Box>
@@ -43,6 +44,7 @@ export const Sidebar = ({ owner = "", repo = "", fileChanges = {}, files = [], a
 };
 
 const Item = props => {
+  const relevantPositions = (props.positions || []).filter(d => !props.path || d.path.startsWith(props.path))
   if (props.children.length) {
     return (
       <Folder
@@ -51,6 +53,7 @@ const Item = props => {
         allUsers={props.allUsers}
         fileChangesScale={props.fileChangesScale}
         fileChanges={props.fileChanges}
+        positions={relevantPositions}
       />
     );
   }
@@ -58,9 +61,10 @@ const Item = props => {
     <File
       {...props}
       isActive={props.activeFilePath === props.path}
-      activeUsers={props.allUsers.filter(user => user.path === props.path)}
+      activeUsers={relevantPositions.filter(user => user.path === props.path)}
       fileChangesScale={props.fileChangesScale}
       date={props.fileChanges[props.path]?.date}
+      positions={relevantPositions}
     />
   );
 };
@@ -73,6 +77,7 @@ const Folder = ({
   allUsers,
   fileChangesScale,
   fileChanges,
+  positions = [],
   canCollapse = true,
 }) => {
   const [isExpanded, setIsExpanded] = useState(!canCollapse);
@@ -148,10 +153,12 @@ const Folder = ({
               <Item
                 key={file.name}
                 {...file}
+                positions={positions}
                 activeFilePath={activeFilePath}
                 allUsers={allUsers}
                 fileChangesScale={fileChangesScale}
                 fileChanges={fileChanges}
+                activeUsers={positions && positions.map(d => d.id)}
               />
             ))}
         </div>
@@ -159,7 +166,7 @@ const Folder = ({
     </Box>
   );
 };
-const File = ({ name, path, activeUsers = [], fileChangesScale, date, isActive }) => {
+const File = ({ name, path, activeUsers = [], fileChangesScale, date, positions, isActive }) => {
   const router = useRouter();
   const query = router.query;
 

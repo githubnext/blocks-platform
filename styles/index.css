@@ -241,3 +241,76 @@ html,
     /* purposely ignored */
   }
 }
+
+@keyframes slideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(1em);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-up {
+  opacity: 0;
+  animation: slideUp 0.5s ease-in-out;
+  transform: translateY(1em);
+  animation-fill-mode: forwards;
+}
+
+@keyframes slideUpFull {
+  0% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-up-full {
+  opacity: 0;
+  animation: slideUpFull 0.5s ease-in-out;
+  transform: translateY(100%);
+  animation-fill-mode: forwards;
+}
+
+.monaco-remote-cursor {
+  position: absolute;
+  pointer-events: none;
+  z-index: 4000;
+  width: 2px;
+}
+
+.monaco-remote-cursor:before {
+  content: "";
+  width: 6px;
+  height: 5px;
+  display: block;
+  margin-left: -2px;
+  margin-top: 0;
+  z-index: 4000;
+  background: inherit;
+}
+
+.monaco-remote-cursor-tooltip {
+  position: absolute;
+  white-space: nowrap;
+  color: #ffffff;
+  opacity: 1;
+  font-size: 12px;
+  padding: 2px 8px;
+  font-family: monospace;
+  z-index: 4000;
+  transition: opacity 0.5s ease-out;
+}
+
+.monaco-remote-selection {
+  position: absolute;
+  pointer-events: auto;
+  opacity: 0.3;
+  @apply bg-indigo-400;
+}

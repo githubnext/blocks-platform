@@ -30,7 +30,13 @@ export default async function getInfo(req, res) {
     d.avatar_url,
   ]);
 
-  let repoInfo = { ...repoInfoRes.data, contributors };
+  const branchesRes = await octokit.repos.listBranches({
+    owner,
+    repo,
+  });
+  const branches = branchesRes.data
+
+  let repoInfo = { ...repoInfoRes.data, contributors, branches };
 
   try {
     const commitsRes = await octokit.repos.listCommits({

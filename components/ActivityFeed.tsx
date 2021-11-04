@@ -95,11 +95,11 @@ const Activity = ({
         {/* <Box bg="canvas.subtle" borderRadius={10} p={3} m={1} className="flex"> */}
         <div className="flex justify-between -mt-1">
           {/* {type} */}
-          <Box sx={{ mr: 2, mt: 1 }}>
+          <Box sx={{ mr: 2, mt: 1 }} overflow="hidden">
             <Link display="inline" href={actor.url} sx={{ fontWeight: 'bold', color: "fg.default", mr: 1 }} muted>
               {actor.display_login}
             </Link>
-            <span className="text-gray-500">
+            <span className="text-gray-500 overflow-x-hidden">
               {actionText || ""}
             </span>
           </Box>

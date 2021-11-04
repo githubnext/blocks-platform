@@ -7,6 +7,8 @@ import {
 import { Octokit } from "@octokit/rest";
 import { components } from "@octokit/openapi-types";
 import { Base64 } from "js-base64";
+import { useCallback } from "react";
+import debounce from 'lodash/debounce';
 
 // get env variable
 const GITHUB_PAT = process.env.NEXT_PUBLIC_GITHUB_PAT;
@@ -107,7 +109,7 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
       },
       sha: sha,
     });
-  } catch (e) {}
+  } catch (e) { }
 }
 
 export function useUpdateFileContents(
@@ -115,3 +117,23 @@ export function useUpdateFileContents(
 ) {
   return useMutation(updateFileContents, config);
 }
+
+
+export const useDebounce = (fnToDebounce, durationInMs = 200) => {
+  if (isNaN(durationInMs)) {
+    throw new TypeError('durationInMs for debounce should be a number');
+  }
+
+  if (fnToDebounce == null) {
+    throw new TypeError('fnToDebounce cannot be null');
+  }
+
+  if (typeof fnToDebounce !== 'function') {
+    throw new TypeError('fnToDebounce should be a function');
+  }
+
+  return useCallback(debounce(fnToDebounce, durationInMs), [
+    fnToDebounce,
+    durationInMs,
+  ]);
+};

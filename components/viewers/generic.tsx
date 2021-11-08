@@ -87,7 +87,10 @@ export function GenericViewer({ contents, meta }: ViewerProps) {
         {status === "loading" && <p>Loading viewer...</p>}
         {status === "success" && data && (
           <GenericSandbox
-            meta={data[0]}
+            meta={{
+              ...data[0],
+              ...params,
+            }}
             contents={contents}
             code={Buffer.from(data?.[0]?.content, "base64").toString()}
           />

@@ -48,6 +48,7 @@ export function NotesViewer({ contents, meta }: ViewerProps) {
     try {
       // @ts-ignore
       if (contents && getYdocUpdate(contents))
+        // @ts-ignore
         Y.applyUpdate(ydoc, getYdocUpdate(contents));
     } catch (e) {}
     const workspaceId = `devex-composable-github--notes-${owner}_${repo}_${name}`;

@@ -1,29 +1,35 @@
 import { ReactNode, useEffect, useState } from "react";
-import { getParameters } from 'codesandbox/lib/api/define';
+import { getParameters } from "codesandbox/lib/api/define";
 
-export const CodeSandbox = ({ children, language = "js", dependencies }: {
-  children: ReactNode,
+export const CodeSandbox = ({
+  children,
+  language = "js",
+  dependencies,
+}: {
+  children: ReactNode;
   language?: string;
-  dependencies?: string[]
+  dependencies?: string[];
 }) => {
   const [url, setUrl] = useState("");
-  console.log(children)
+  console.log(children);
   const parameters = getParameters({
     files: {
-      'index.js': {
+      "index.js": {
+        // @ts-ignore
         content: children?.props?.children?.props?.children,
         isBinary: false,
       },
-      'package.json': {
-        content: JSON.stringify({ dependencies: parseDependencies(dependencies) }),
+      "package.json": {
+        content: JSON.stringify({
+          dependencies: parseDependencies(dependencies),
+        }),
         isBinary: false,
       },
     },
   });
 
-
   const getSandboxUrl = async () => {
-    console.log(parameters)
+    console.log(parameters);
     const url = `https://codesandbox.io/api/v1/sandboxes/define?parameters=${parameters}&json=1`;
     const res = await fetch(url);
     const data = await res.json();
@@ -31,8 +37,10 @@ export const CodeSandbox = ({ children, language = "js", dependencies }: {
     const iframeUrl = `https://codesandbox.io/embed/${id}?fontsize=14&hidenavigation=1&expanddevtools=1&hidenavigation=1&theme=light`;
 
     setUrl(iframeUrl);
-  }
-  useEffect(() => { getSandboxUrl() }, [])
+  };
+  useEffect(() => {
+    getSandboxUrl();
+  }, []);
 
   return (
     <div className="w-full h-full mt-3 mb-10">
@@ -45,14 +53,14 @@ export const CodeSandbox = ({ children, language = "js", dependencies }: {
         />
       )}
     </div>
-  )
-}
+  );
+};
 
 const parseDependencies = (dependencies: string[]): Record<string, string> => {
-  let res = {}
-  dependencies.forEach(dep => {
-    const [name, version = "latest"] = dep.split('@')
-    res[name] = version
-  })
-  return res
-}
+  let res = {};
+  dependencies.forEach((dep) => {
+    const [name, version = "latest"] = dep.split("@");
+    res[name] = version;
+  });
+  return res;
+};

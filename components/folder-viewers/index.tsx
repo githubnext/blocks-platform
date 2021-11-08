@@ -22,6 +22,8 @@ export interface FolderViewerProps {
     sha: string;
     username: string;
   };
+  metadata: any;
+  onUpdateMetadata: (metadata: any) => Promise<void>;
 }
 
 export const folderViewers = [

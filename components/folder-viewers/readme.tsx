@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { FolderViewerProps } from ".";
 
 export function ReadmeViewer(props: FolderViewerProps) {
-  const { meta, files } = props;
+  const { meta, files, metadata, onUpdateMetadata } = props;
 
   const { data } = useFileContent({
     owner: meta.owner,
@@ -26,6 +26,8 @@ export function ReadmeViewer(props: FolderViewerProps) {
       <MarkdownViewer
         contents={contents}
         meta={fileMeta}
+        metadata={metadata}
+        onUpdateMetadata={onUpdateMetadata}
       />
     </div>
   );

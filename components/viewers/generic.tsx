@@ -8,10 +8,11 @@ import { useFileContent, UseFileContentParams } from "hooks";
 interface GenericSandboxProps {
   code: string;
   meta: any;
+  contents: string;
 }
 
 function GenericSandbox(props: GenericSandboxProps) {
-  const { code, meta } = props;
+  const { code, meta, contents } = props;
 
   // TODO: get dependencies from code
   const dependencies = useMemo(() => {
@@ -26,12 +27,12 @@ function GenericSandbox(props: GenericSandboxProps) {
   }, [code]);
 
   const injectedCode = `
-    ${code}
+    ${code.replace(/\nexport/g, "\n// export")}
 
     export default function WrappedViewer() {
-      return <Viewer code={${JSON.stringify(code)}} meta={${JSON.stringify(
-    meta
-  )}} />
+      return <Viewer content={${JSON.stringify(
+        contents
+      )}} meta={${JSON.stringify(meta)}} />
     }
   `;
 
@@ -87,6 +88,7 @@ export function GenericViewer({ contents, meta }: ViewerProps) {
         {status === "success" && data && (
           <GenericSandbox
             meta={data[0]}
+            contents={contents}
             code={Buffer.from(data?.[0]?.content, "base64").toString()}
           />
         )}

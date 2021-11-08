@@ -15,12 +15,12 @@ export const octokit = new Octokit({
   auth: GITHUB_PAT,
 });
 
-interface RepoContext {
+export interface RepoContext {
   repo: string;
   owner: string;
 }
 
-interface UseFileContentParams extends RepoContext {
+export interface UseFileContentParams extends RepoContext {
   path: string;
   fileRef?: string;
 }

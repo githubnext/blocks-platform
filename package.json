@@ -6,6 +6,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@codesandbox/sandpack-react": "^0.1.20",
     "@excalidraw/excalidraw": "^0.10.0",
     "@githubocto/flat-ui": "^0.10.2",
     "@mdx-js/runtime": "^1.6.22",
@@ -15,6 +16,7 @@
     "@radix-ui/react-tooltip": "^0.1.1",
     "@react-three/drei": "^7.17.1",
     "@react-three/fiber": "^7.0.17",
+    "@tailwindcss/forms": "^0.3.4",
     "@tiptap/core": "^2.0.0-beta.126",
     "@tiptap/extension-collaboration": "^2.0.0-beta.25",
     "@tiptap/extension-collaboration-cursor": "^2.0.0-beta.25",
@@ -26,6 +28,7 @@
     "js-base64": "^3.7.2",
     "lodash": "^4.17.21",
     "next": "latest",
+    "parse-github-url": "^1.0.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-icons": "^4.3.1",

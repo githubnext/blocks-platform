@@ -9,6 +9,7 @@ import { NotesViewer } from "./notes";
 import { ExcalidrawViewer } from "./excalidraw";
 import { ChartViewer } from "./chart";
 import { MarkdownViewer } from "./markdown";
+import { GenericViewer } from "./generic";
 const ReactViewer = dynamic(() => import("./react"), { ssr: false });
 const AnnotateReactViewer = dynamic(() => import("./annotate-react"), {
   ssr: false,
@@ -35,6 +36,12 @@ export const viewers = [
     id: "code",
     label: "Code",
     component: CodeViewer,
+    extensions: ["*"],
+  },
+  {
+    id: "generic",
+    label: "Generic",
+    component: GenericViewer,
     extensions: ["*"],
   },
   {

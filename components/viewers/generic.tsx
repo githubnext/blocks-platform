@@ -1,6 +1,6 @@
 import { SandpackRunner } from "@codesandbox/sandpack-react";
 import "@codesandbox/sandpack-react/dist/index.css";
-import { FormEventHandler, useState } from "react";
+import { FormEventHandler, useState, useMemo } from "react";
 import parseUrl from "parse-github-url";
 import { ViewerProps } from ".";
 import { useFileContent, UseFileContentParams } from "hooks";
@@ -12,6 +12,18 @@ interface GenericSandboxProps {
 
 function GenericSandbox(props: GenericSandboxProps) {
   const { code, meta } = props;
+
+  // TODO: get dependencies from code
+  const dependencies = useMemo(() => {
+    try {
+      const depRegex = new RegExp(/dependencies = {(.*)}/gi);
+      const match = depRegex.exec(code);
+      const dependencies = match[1].replace(/'/g, '"');
+      return JSON.parse(`{${dependencies}}`);
+    } catch (e) {
+      return {};
+    }
+  }, [code]);
 
   const injectedCode = `
     ${code}
@@ -28,9 +40,7 @@ function GenericSandbox(props: GenericSandboxProps) {
       template="react"
       code={injectedCode}
       customSetup={{
-        dependencies: {
-          "react-markdown": "latest",
-        },
+        dependencies,
         entry: "/index.js",
       }}
     />

@@ -42,7 +42,10 @@ function GenericSandbox(props: GenericSandboxProps) {
       code={injectedCode}
       customSetup={{
         dependencies,
-        entry: "/index.js",
+        // Get the working tree of whatever directory the viewer lives in
+        files: {
+          "/style.css": `body { color: blue; }`,
+        },
       }}
     />
   );

@@ -29,6 +29,8 @@ export interface ViewerProps {
     sha: string;
     username: string;
   };
+  metadata: any;
+  onUpdateMetadata: (metadata: any) => Promise<void>;
 }
 
 export const viewers = [
@@ -102,7 +104,7 @@ export const viewers = [
     id: "chart",
     label: "Chart",
     component: ChartViewer,
-    extensions: ["chart"],
+    extensions: ["chart", "csv", "json"],
   },
   {
     id: "npm-analysis",

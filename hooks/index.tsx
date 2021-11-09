@@ -55,7 +55,7 @@ export function useFileContent(
   const { repo, owner, path, fileRef } = params;
 
   return useQuery(
-    ["file", params],
+    ["file", params, config.queryKey],
     () =>
       getFileContent({
         repo,
@@ -107,7 +107,7 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
       },
       sha: sha,
     });
-  } catch (e) {}
+  } catch (e) { }
 }
 
 export function useUpdateFileContents(

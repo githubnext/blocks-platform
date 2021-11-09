@@ -7,6 +7,7 @@ import {
 import { Octokit } from "@octokit/rest";
 import { components } from "@octokit/openapi-types";
 import { Base64 } from "js-base64";
+import { useCallback, useMemo, useState } from "react";
 
 // get env variable
 const GITHUB_PAT = process.env.NEXT_PUBLIC_GITHUB_PAT;
@@ -76,18 +77,23 @@ interface UseUpdateFileContentParams extends RepoContext {
 async function updateFileContents(params: UseUpdateFileContentParams) {
   const contentEncoded = Base64.encode(params.content);
   let sha = params.sha;
+  console.log(params)
 
   if (sha === "latest") {
-    const { data, status } = await octokit.repos.getContent({
-      owner: params.owner,
-      repo: params.repo,
-      path: params.path,
-    });
+    try {
+      const { data, status } = await octokit.repos.getContent({
+        owner: params.owner,
+        repo: params.repo,
+        path: params.path,
+      });
 
-    if (status !== 200) throw new Error("Something bad happened");
+      if (status !== 200) throw new Error("Something bad happened");
 
-    // @ts-ignore
-    sha = data.sha;
+      // @ts-ignore
+      sha = data.sha;
+    } catch (e) {
+      sha = "HEAD"
+    }
   }
 
   try {
@@ -114,4 +120,56 @@ export function useUpdateFileContents(
   config?: UseMutationOptions<any, any, UseUpdateFileContentParams>
 ) {
   return useMutation(updateFileContents, config);
+}
+
+
+export function useMetadata({ owner, repo, path }: {
+  owner: string,
+  repo: string,
+  path: string,
+}) {
+  const [iteration, setIteration] = useState(0);
+  const { data: metadataData } = useFileContent({
+    repo,
+    owner,
+    path,
+  }, {
+    queryKey: [iteration],
+    refetchOnWindowFocus: false,
+  })
+  const fullMetadata = useMemo(() => {
+    try {
+      const encodedStr = metadataData[0].content;
+      const rawString = Buffer.from(encodedStr, "base64").toString()
+      const fullMetadata = JSON.parse(rawString)
+      return fullMetadata
+    } catch (e) {
+      return {}
+    }
+  }, [metadataData])
+  const metadata = useMemo(() => fullMetadata?.[path] || {}, [fullMetadata, path])
+  const { mutateAsync } = useUpdateFileContents({})
+  const onUpdateMetadata = useCallback(async (contents) => {
+    const fullContents = {
+      ...fullMetadata,
+      [path]: contents
+    }
+    console.log("onUpdateMetadata", path, contents)
+    await mutateAsync({
+      content: JSON.stringify(fullContents),
+      owner,
+      repo,
+      path,
+      sha: "latest",
+    })
+    setTimeout(() => {
+      setIteration(iteration => iteration + 1)
+    }, 500)
+  }, [mutateAsync, owner, repo, path])
+
+  return {
+    metadata,
+    onUpdateMetadata,
+  }
+
 }

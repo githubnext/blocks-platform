@@ -1,4 +1,4 @@
-import { DirectoryItem, useFileContent, useUpdateFileContents } from "hooks";
+import { DirectoryItem, useFileContent, useMetadata, useUpdateFileContents } from "hooks";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 
@@ -31,42 +31,11 @@ export function FolderViewer(props: FolderViewerProps) {
   const viewer = folderViewers.find((d) => d.id === viewerType) || ({} as any);
   const Viewer = viewer.component || ReadmeViewer;
 
-  const { data: metadataData } = useFileContent({
-    repo: repo as string,
+  const { metadata, onUpdateMetadata } = useMetadata({
     owner: owner as string,
-    path: `.github/viewers/${viewer.id}`,
-  }, {
-    queryKey: [metadataIteration],
-    refetchOnWindowFocus: false,
+    repo: repo as string,
+    path: `.github/viewers/folder/${viewer.id}`,
   })
-  const fullMetadata = useMemo(() => {
-    try {
-      const encodedStr = metadataData[0].content;
-      const rawString = Buffer.from(encodedStr, "base64").toString()
-      const fullMetadata = JSON.parse(rawString)
-      return fullMetadata
-    } catch (e) {
-      return {}
-    }
-  }, [metadataData])
-  const metadata = useMemo(() => fullMetadata?.[path] || {}, [fullMetadata, path])
-  const { mutateAsync } = useUpdateFileContents({})
-  const onUpdateMetadata = useCallback(async (contents) => {
-    const fullContents = {
-      ...fullMetadata,
-      [path]: contents
-    }
-    const res = await mutateAsync({
-      content: JSON.stringify(fullContents),
-      owner: owner as string,
-      repo: repo as string,
-      path: `.github/viewers/${viewer.id}`,
-      sha: "latest",
-    })
-    setTimeout(() => {
-      setMetadataIteration(iteration => iteration + 1)
-    }, 500)
-  }, [mutateAsync, viewer.id])
 
   useEffect(() => {
     if (typeof window === "undefined") return;

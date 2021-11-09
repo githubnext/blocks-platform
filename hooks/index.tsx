@@ -43,17 +43,6 @@ async function fetchAndConvertContentToString(
     throw new Error("Something bad happened");
 
   return convertContentToString(data);
-  // const res = await fetch(d.download_url, {
-  //   headers: {
-  //     // Authorization: `token ${GITHUB_PAT}`,
-  //     Accept: "application/vnd.github.v3.raw",
-  //   },
-  // });
-  // const content = await res.text();
-  // return {
-  //   ...d,
-  //   content,
-  // };
 }
 
 function convertContentToString(d: DirectoryItem) {

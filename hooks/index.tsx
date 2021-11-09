@@ -77,7 +77,6 @@ interface UseUpdateFileContentParams extends RepoContext {
 async function updateFileContents(params: UseUpdateFileContentParams) {
   const contentEncoded = Base64.encode(params.content);
   let sha = params.sha;
-  console.log(params)
 
   if (sha === "latest") {
     try {
@@ -154,7 +153,6 @@ export function useMetadata({ owner, repo, path }: {
       ...fullMetadata,
       [path]: contents
     }
-    console.log("onUpdateMetadata", path, contents)
     await mutateAsync({
       content: JSON.stringify(fullContents),
       owner,

@@ -3,65 +3,68 @@ import "@codesandbox/sandpack-react/dist/index.css";
 import { FormEventHandler, useState, useMemo } from "react";
 import parseUrl from "parse-github-url";
 import { ViewerProps } from ".";
-import { useFileContent, UseFileContentParams } from "hooks";
+import { DirectoryItem, RepoContext, useViewerTemplateContents } from "hooks";
 
 interface GenericSandboxProps {
-  code: string;
-  meta: any;
-  contents: string;
+  tree: DirectoryItem[];
+  originalContent: string;
+  context: RepoContext;
 }
 
 function GenericSandbox(props: GenericSandboxProps) {
-  const { code, meta, contents } = props;
+  const { tree, context, originalContent } = props;
+  const meta = JSON.stringify(context);
 
-  // TODO: get dependencies from code
-  const dependencies = useMemo(() => {
-    try {
-      const depRegex = new RegExp(/dependencies = {(.*)}/gi);
-      const match = depRegex.exec(code);
-      const dependencies = match[1].replace(/'/g, '"');
-      return JSON.parse(`{${dependencies}}`);
-    } catch (e) {
-      return {};
-    }
-  }, [code]);
+  const pkgJson = tree.find((item) => item.name === "package.json");
+  if (!pkgJson) throw new Error("No package.json found");
 
-  const injectedCode = `
-    ${code.replace(/\nexport/g, "\n// export")}
+  const parsedPkgJson = JSON.parse(pkgJson.content);
+  const { dependencies } = parsedPkgJson;
+
+  const viewerSrc = tree.find(
+    (item) => item.name.toLowerCase() === "viewer.tsx"
+  );
+  if (!viewerSrc) throw new Error("No viewer component found");
+
+  const injectedSrc = `
+    ${viewerSrc.content.replace(/\nexport/g, "\n// export")}
 
     export default function WrappedViewer() {
-      return <Viewer content={${JSON.stringify(
-        contents
-      )}} meta={${JSON.stringify(meta)}} />
+      return <Viewer meta={${meta}} content={${JSON.stringify(
+    originalContent
+  )}} />
     }
   `;
+
+  const files = tree.reduce<Record<string, string>>((acc, item) => {
+    if (item.path.startsWith("src")) {
+      acc[item.path.replace("src", "")] = item.content;
+    } else {
+      acc[item.path] = item.content;
+    }
+    return acc;
+  }, {});
 
   return (
     <SandpackRunner
       template="react"
-      code={injectedCode}
+      code={injectedSrc}
       customSetup={{
         dependencies,
-        // Get the working tree of whatever directory the viewer lives in
-        files: {
-          "/style.css": `body { color: blue; }`,
-        },
+        files,
       }}
     />
   );
 }
 
 export function GenericViewer({ contents, meta }: ViewerProps) {
-  const [params, setParams] = useState<UseFileContentParams>({
+  const [params, setParams] = useState<RepoContext>({
     repo: "",
     owner: "",
-    path: "",
-    fileRef: "",
   });
 
-  const { data, status } = useFileContent(params, {
-    enabled:
-      Boolean(params.repo) && Boolean(params.owner) && Boolean(params.path),
+  const { data, status } = useViewerTemplateContents(params, {
+    enabled: Boolean(params.repo) && Boolean(params.owner),
   });
 
   const handleSubmit: FormEventHandler = (e) => {
@@ -69,8 +72,8 @@ export function GenericViewer({ contents, meta }: ViewerProps) {
     const form = new FormData(e.target as HTMLFormElement);
     const { url } = Object.fromEntries(form);
     const parsed = parseUrl(url);
-    const { name: repo, owner, filepath: path, branch } = parsed;
-    setParams({ repo, owner, path, fileRef: branch });
+    const { name: repo, owner } = parsed;
+    setParams({ repo, owner });
   };
 
   return (
@@ -90,12 +93,16 @@ export function GenericViewer({ contents, meta }: ViewerProps) {
         {status === "loading" && <p>Loading viewer...</p>}
         {status === "success" && data && (
           <GenericSandbox
-            meta={{
-              ...data[0],
-              ...params,
-            }}
-            contents={contents}
-            code={Buffer.from(data?.[0]?.content, "base64").toString()}
+            originalContent={contents}
+            context={params}
+            tree={data}
+            //           meta={{
+            // console.log(d);
+            //             ...data[0],
+            //             ...params,
+            //           }}
+            //           contents={contents}
+            //           code={Buffer.from(data?.[0]?.content, "base64").toString()}
           />
         )}
       </div>

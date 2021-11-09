@@ -7,6 +7,7 @@ import {
 import { Octokit } from "@octokit/rest";
 import { components } from "@octokit/openapi-types";
 import { Base64 } from "js-base64";
+import { isArray } from "lodash";
 
 // get env variable
 const GITHUB_PAT = process.env.NEXT_PUBLIC_GITHUB_PAT;
@@ -26,6 +27,41 @@ export interface UseFileContentParams extends RepoContext {
 }
 
 export type DirectoryItem = components["schemas"]["content-directory"][number];
+export type TreeItem = components["schemas"]["git-tree"]["tree"][number];
+
+async function fetchAndConvertContentToString(
+  t: TreeItem,
+  params: RepoContext
+) {
+  const { data, status } = await octokit.repos.getContent({
+    owner: params.owner,
+    repo: params.repo,
+    path: t.path,
+  });
+
+  if (status !== 200 || isArray(data))
+    throw new Error("Something bad happened");
+
+  return convertContentToString(data);
+  // const res = await fetch(d.download_url, {
+  //   headers: {
+  //     // Authorization: `token ${GITHUB_PAT}`,
+  //     Accept: "application/vnd.github.v3.raw",
+  //   },
+  // });
+  // const content = await res.text();
+  // return {
+  //   ...d,
+  //   content,
+  // };
+}
+
+function convertContentToString(d: DirectoryItem) {
+  return {
+    ...d,
+    content: Buffer.from(d.content ? d.content : "", "base64").toString(),
+  };
+}
 
 async function getFileContent(
   params: UseFileContentParams
@@ -114,4 +150,33 @@ export function useUpdateFileContents(
   config?: UseMutationOptions<any, any, UseUpdateFileContentParams>
 ) {
   return useMutation(updateFileContents, config);
+}
+
+async function getViewerTemplateContents(params: RepoContext) {
+  const { data, status } = await octokit.git.getTree({
+    repo: params.repo,
+    owner: params.owner,
+    tree_sha: "main",
+    recursive: "true",
+  });
+
+  if (status !== 200) throw Error("Something bad happened");
+
+  const onlyFiles = data.tree.filter((d) => d.type === "blob");
+
+  return await Promise.all(
+    onlyFiles.map((treeItem) =>
+      fetchAndConvertContentToString(treeItem, params)
+    )
+  );
+}
+
+export function useViewerTemplateContents(
+  params: RepoContext,
+  config?: UseQueryOptions<any, any, any>
+) {
+  return useQuery(["viewer", params], () => getViewerTemplateContents(params), {
+    retry: false,
+    ...config,
+  });
 }

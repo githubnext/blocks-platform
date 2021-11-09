@@ -122,16 +122,17 @@ export function useUpdateFileContents(
 }
 
 
-export function useMetadata({ owner, repo, path }: {
+export function useMetadata({ owner, repo, metadataPath, filePath }: {
   owner: string,
   repo: string,
-  path: string,
+  metadataPath: string,
+  filePath: string,
 }) {
   const [iteration, setIteration] = useState(0);
   const { data: metadataData } = useFileContent({
     repo,
     owner,
-    path,
+    path: metadataPath,
   }, {
     queryKey: [iteration],
     refetchOnWindowFocus: false,
@@ -146,24 +147,24 @@ export function useMetadata({ owner, repo, path }: {
       return {}
     }
   }, [metadataData])
-  const metadata = useMemo(() => fullMetadata?.[path] || {}, [fullMetadata, path])
+  const metadata = useMemo(() => fullMetadata?.[filePath] || {}, [fullMetadata, filePath])
   const { mutateAsync } = useUpdateFileContents({})
   const onUpdateMetadata = useCallback(async (contents) => {
     const fullContents = {
       ...fullMetadata,
-      [path]: contents
+      [filePath]: contents
     }
     await mutateAsync({
       content: JSON.stringify(fullContents),
       owner,
       repo,
-      path,
+      path: metadataPath,
       sha: "latest",
     })
     setTimeout(() => {
       setIteration(iteration => iteration + 1)
     }, 500)
-  }, [mutateAsync, owner, repo, path])
+  }, [mutateAsync, owner, repo, metadataPath, filePath])
 
   return {
     metadata,

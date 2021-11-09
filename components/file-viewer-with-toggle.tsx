@@ -38,7 +38,8 @@ export function FileViewer(props: FileViewerProps) {
   const { metadata, onUpdateMetadata } = useMetadata({
     owner: owner as string,
     repo: repo as string,
-    path: `.github/viewers/file/${viewer.id}`,
+    metadataPath: `.github/viewers/file/${viewer.id}`,
+    filePath: path,
   })
 
   useEffect(() => {
@@ -57,6 +58,7 @@ export function FileViewer(props: FileViewerProps) {
       window.removeEventListener("message", handleViewerChange);
     };
   }, []);
+  console.log({ code, metadata })
 
   useEffect(() => {
     setViewerType(defaultViewer)

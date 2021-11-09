@@ -34,7 +34,8 @@ export function FolderViewer(props: FolderViewerProps) {
   const { metadata, onUpdateMetadata } = useMetadata({
     owner: owner as string,
     repo: repo as string,
-    path: `.github/viewers/folder/${viewer.id}`,
+    metadataPath: `.github/viewers/folder/${viewer.id}`,
+    filePath: path,
   })
 
   useEffect(() => {

@@ -58,7 +58,6 @@ export function FileViewer(props: FileViewerProps) {
       window.removeEventListener("message", handleViewerChange);
     };
   }, []);
-  console.log({ code, metadata })
 
   useEffect(() => {
     setViewerType(defaultViewer)

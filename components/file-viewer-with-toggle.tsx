@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { ErrorBoundary } from "./error-boundary";
 import { getLanguageFromFilename } from "lib";
 import { CodeViewer, viewers } from "components/viewers";
-import { Box } from "@primer/components";
+import { Box, Button } from "@primer/components";
 import { useRouter } from "next/router";
 
 const ViewerPicker = dynamic(() => import("./viewer-picker"), { ssr: false });
@@ -16,11 +16,12 @@ interface FileViewerProps {
   viewerOverride?: string;
   defaultViewer?: string;
   hasToggle?: boolean;
+  onSetDefaultViewer?: (viewer: string) => void;
 }
 
 export function FileViewer(props: FileViewerProps) {
   const router = useRouter();
-  const { data, theme, viewerOverride, defaultViewer, hasToggle } = props;
+  const { data, theme, viewerOverride, defaultViewer, hasToggle, onSetDefaultViewer } = props;
   const { name, content, download_url, path, sha } = data;
   const [metadataIteration, setMetadataIteration] = useState(0);
 
@@ -68,8 +69,13 @@ export function FileViewer(props: FileViewerProps) {
       {(debugMode || hasToggle) && (
         <div className="flex-none top-0 z-10">
           <div>
-            <Box bg="canvas.subtle" p={2} borderBottom="1px solid" className="!border-gray-200">
+            <Box bg="canvas.subtle" p={2} borderBottom="1px solid" className="!border-gray-200" display="flex" alignItems="center">
               <ViewerPicker extension={extension} onChange={setViewerType} value={viewerType} />
+              {viewerType !== defaultViewer && (
+                <Button fontSize="1" ml={2} onClick={() => onSetDefaultViewer(viewerType)}>
+                  Set as default for all users
+                </Button>
+              )}
             </Box>
           </div>
         </div>

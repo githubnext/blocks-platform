@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 
 import { ErrorBoundary } from "./error-boundary";
 import { ReadmeViewer, folderViewers } from "components/folder-viewers";
-import { Box } from "@primer/components";
+import { Box, Button } from "@primer/components";
 import { useRouter } from "next/router";
 
 const ViewerPicker = dynamic(() => import("./viewer-picker"), { ssr: false });
@@ -16,11 +16,12 @@ interface FolderViewerProps {
   viewerOverride?: string;
   defaultViewer?: string;
   hasToggle?: boolean;
+  onSetDefaultViewer: (viewer: string) => void;
 }
 
 export function FolderViewer(props: FolderViewerProps) {
   const router = useRouter();
-  const { data, theme, viewerOverride, path, defaultViewer, hasToggle } = props;
+  const { data, theme, viewerOverride, path, defaultViewer, hasToggle, onSetDefaultViewer } = props;
   // const { name, content, download_url, sha } = data;
   const [metadataIteration, setMetadataIteration] = useState(0);
 
@@ -64,8 +65,13 @@ export function FolderViewer(props: FolderViewerProps) {
       {(debugMode || hasToggle) && (
         <div className="flex-none top-0 z-[9999]">
           <div>
-            <Box bg="canvas.subtle" p={2} borderBottom="1px solid" className="!border-gray-200">
+            <Box bg="canvas.subtle" p={2} borderBottom="1px solid" className="!border-gray-200" display="flex" alignItems="center">
               <ViewerPicker isFolder onChange={setViewerType} value={viewerType} />
+              {viewerType !== defaultViewer && (
+                <Button fontSize="1" ml={2} onClick={() => onSetDefaultViewer(viewerType)}>
+                  Set as default for all users
+                </Button>
+              )}
             </Box>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import { FileViewer } from "components/file-viewer-with-toggle";
 import { FolderViewer } from "components/folder-viewer-with-toggle";
 import { viewers } from "components/viewers";
-import { octokit, useFileContent } from "hooks";
+import { octokit, useFileContent, useMetadata } from "hooks";
 import {
   Box,
   ButtonDanger,
@@ -74,9 +74,6 @@ export default function IndexPage() {
   );
   const isFolder = status !== "success" ? false : folderData?.[0]?.path !== path;
   const data = folderData?.[0];
-  const defaultViewer = isFolder
-    ? "readme"
-    : getViewerFromFilename(data?.name) || "code";
 
   useEffect(() => {
     setColorMode(theme === "dark" ? "night" : "day");
@@ -108,6 +105,21 @@ export default function IndexPage() {
   useEffect(() => {
     getFiles()
   }, [owner, repo, path]);
+
+  const { metadata, onUpdateMetadata } = useMetadata({
+    owner: owner as string,
+    repo: repo as string,
+    metadataPath: `.github/viewers/all`,
+    filePath: path as string,
+  })
+  const defaultViewer = metadata.defaultViewer
+    || (isFolder ? "readme" : getViewerFromFilename(data?.name))
+    || "code";
+  const onSetDefaultViewer = (viewerId: string) => {
+    onUpdateMetadata({
+      defaultViewer: viewerId,
+    })
+  }
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -180,6 +192,7 @@ export default function IndexPage() {
                 data={folderFiles}
                 defaultViewer={defaultViewer}
                 viewerOverride={viewerOverride as string}
+                onSetDefaultViewer={onSetDefaultViewer}
                 hasToggle
               />
             ) : (
@@ -188,6 +201,7 @@ export default function IndexPage() {
                 data={data}
                 defaultViewer={defaultViewer}
                 viewerOverride={viewerOverride as string}
+                onSetDefaultViewer={onSetDefaultViewer}
                 hasToggle
               />
             ))}

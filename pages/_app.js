@@ -1,11 +1,14 @@
 import "styles/index.css";
 import "styles/markdown.css";
-
 import { useState } from "react";
+import { SessionProvider } from "next-auth/react";
 import { ThemeProvider, BaseStyles } from "@primer/components";
 import { Hydrate, QueryClient, QueryClientProvider } from "react-query";
 
-export default function App({ Component, pageProps }) {
+export default function App({
+  Component,
+  pageProps: { session, ...pageProps },
+}) {
   const [queryClient] = useState(() => new QueryClient());
 
   return (
@@ -13,7 +16,9 @@ export default function App({ Component, pageProps }) {
       <Hydrate state={pageProps.dehydratedState}>
         <BaseStyles />
         <ThemeProvider>
-          <Component {...pageProps} />
+          <SessionProvider session={session}>
+            <Component {...pageProps} />
+          </SessionProvider>
         </ThemeProvider>
       </Hydrate>
     </QueryClientProvider>

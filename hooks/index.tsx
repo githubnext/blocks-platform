@@ -91,7 +91,7 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
       // @ts-ignore
       sha = data.sha;
     } catch (e) {
-      sha = "HEAD"
+      sha = "HEAD";
     }
   }
 
@@ -112,7 +112,7 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
       },
       sha: sha,
     });
-  } catch (e) { }
+  } catch (e) {}
 }
 
 export function useUpdateFileContents(
@@ -121,54 +121,106 @@ export function useUpdateFileContents(
   return useMutation(updateFileContents, config);
 }
 
-
-export function useMetadata({ owner, repo, metadataPath, filePath }: {
-  owner: string,
-  repo: string,
-  metadataPath: string,
-  filePath: string,
+export function useMetadata({
+  owner,
+  repo,
+  metadataPath,
+  filePath,
+}: {
+  owner: string;
+  repo: string;
+  metadataPath: string;
+  filePath: string;
 }) {
   const [iteration, setIteration] = useState(0);
-  const { data: metadataData } = useFileContent({
-    repo,
-    owner,
-    path: metadataPath,
-  }, {
-    queryKey: [iteration],
-    refetchOnWindowFocus: false,
-  })
+  const { data: metadataData } = useFileContent(
+    {
+      repo,
+      owner,
+      path: metadataPath,
+    },
+    {
+      queryKey: [iteration],
+      refetchOnWindowFocus: false,
+    }
+  );
   const fullMetadata = useMemo(() => {
     try {
       const encodedStr = metadataData[0].content;
-      const rawString = Buffer.from(encodedStr, "base64").toString()
-      const fullMetadata = JSON.parse(rawString)
-      return fullMetadata
+      const rawString = Buffer.from(encodedStr, "base64").toString();
+      const fullMetadata = JSON.parse(rawString);
+      return fullMetadata;
     } catch (e) {
-      return {}
+      return {};
     }
-  }, [metadataData])
-  const metadata = useMemo(() => fullMetadata?.[filePath] || {}, [fullMetadata, filePath])
-  const { mutateAsync } = useUpdateFileContents({})
-  const onUpdateMetadata = useCallback(async (contents) => {
-    const fullContents = {
-      ...fullMetadata,
-      [filePath]: contents
-    }
-    await mutateAsync({
-      content: JSON.stringify(fullContents),
-      owner,
-      repo,
-      path: metadataPath,
-      sha: "latest",
-    })
-    setTimeout(() => {
-      setIteration(iteration => iteration + 1)
-    }, 500)
-  }, [mutateAsync, owner, repo, metadataPath, filePath])
+  }, [metadataData]);
+  const metadata = useMemo(
+    () => fullMetadata?.[filePath] || {},
+    [fullMetadata, filePath]
+  );
+  const { mutateAsync } = useUpdateFileContents({});
+  const onUpdateMetadata = useCallback(
+    async (contents) => {
+      const fullContents = {
+        ...fullMetadata,
+        [filePath]: contents,
+      };
+      await mutateAsync({
+        content: JSON.stringify(fullContents),
+        owner,
+        repo,
+        path: metadataPath,
+        sha: "latest",
+      });
+      setTimeout(() => {
+        setIteration((iteration) => iteration + 1);
+      }, 500);
+    },
+    [mutateAsync, owner, repo, metadataPath, filePath]
+  );
 
   return {
     metadata,
     onUpdateMetadata,
-  }
+  };
+}
 
+interface RepoInfo {
+  repoInfo: any;
+  activity: any;
+  commits: any;
+  fileChanges: any;
+}
+
+type RepoFiles = any[];
+
+async function getRepoInfo(params: RepoContext): Promise<RepoInfo> {
+  const { owner, repo } = params;
+  const url = `/api/repo-info?owner=${owner}&repo=${repo}`;
+  const res = await fetch(url);
+  return await res.json();
+}
+
+async function getRepoFiles(params: RepoContext): Promise<RepoFiles> {
+  const { owner, repo } = params;
+  const url = `/api/file-tree?owner=${owner}&repo=${repo}`;
+  const res = await fetch(url);
+  const { files } = await res.json();
+  return files;
+}
+
+export function useRepoInfo(params: RepoContext) {
+  return useQuery(["info", params], () => getRepoInfo(params), {
+    enabled: Boolean(params.repo) && Boolean(params.owner),
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
+}
+
+export function useRepoFiles(params: RepoContext) {
+  return useQuery(["files", params], () => getRepoFiles(params), {
+    enabled: Boolean(params.repo) && Boolean(params.owner),
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
 }

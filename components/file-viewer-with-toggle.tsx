@@ -1,10 +1,10 @@
 import { Box, Button } from "@primer/components";
 import { CodeViewer, viewers } from "components/viewers";
-import { DirectoryItem, useMetadata } from "hooks";
+import { useMetadata } from "hooks";
 import { getLanguageFromFilename } from "lib";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import { Session } from "node_modules/next-auth";
+import { Session } from "next-auth";
 import React, { useEffect, useState } from "react";
 import { ErrorBoundary } from "./error-boundary";
 

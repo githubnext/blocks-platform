@@ -42,6 +42,7 @@ export function RepoDetail(props: RepoDetailProps) {
     token: session.token as string,
   });
 
+  console.log(folderData);
   const isFolder =
     status !== "success" ? false : folderData?.[0]?.path !== path;
   const data = folderData?.[0];
@@ -131,6 +132,7 @@ export function RepoDetail(props: RepoDetailProps) {
                 defaultViewer={defaultViewer}
                 viewerOverride={viewerOverride as string}
                 onSetDefaultViewer={onSetDefaultViewer}
+                session={session}
                 hasToggle
               />
             ) : (

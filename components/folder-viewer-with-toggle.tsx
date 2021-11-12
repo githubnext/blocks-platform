@@ -1,9 +1,11 @@
 import { Box, Button } from "@primer/components";
 import { folderViewers, ReadmeViewer } from "components/folder-viewers";
-import { DirectoryItem, useMetadata } from "hooks";
+import { useMetadata } from "hooks";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import { Session } from "next-auth";
+
 import { ErrorBoundary } from "./error-boundary";
 
 const ViewerPicker = dynamic(() => import("./viewer-picker"), { ssr: false });
@@ -15,6 +17,7 @@ interface FolderViewerProps {
   viewerOverride?: string;
   defaultViewer?: string;
   hasToggle?: boolean;
+  session: Session;
   onSetDefaultViewer: (viewer: string) => void;
 }
 
@@ -28,6 +31,7 @@ export function FolderViewer(props: FolderViewerProps) {
     defaultViewer,
     hasToggle,
     onSetDefaultViewer,
+    session,
   } = props;
   // const { name, content, download_url, sha } = data;
   const [metadataIteration, setMetadataIteration] = useState(0);
@@ -46,6 +50,7 @@ export function FolderViewer(props: FolderViewerProps) {
     repo: repo as string,
     metadataPath: `.github/viewers/folder/${viewer.id}`,
     filePath: path,
+    token: session.token as string,
   });
 
   useEffect(() => {

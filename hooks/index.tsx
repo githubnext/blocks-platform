@@ -5,9 +5,18 @@ import {
   UseQueryOptions,
 } from "react-query";
 import { Octokit } from "@octokit/rest";
-import { components } from "@octokit/openapi-types";
 import { Base64 } from "js-base64";
 import { useCallback, useMemo, useState } from "react";
+import {
+  UseFileContentParams,
+  getFileContent,
+  getFolderContent,
+  getRepoInfo,
+  getRepoFiles,
+  RepoContext,
+  RepoContextWithToken,
+  UseFolderContentParams,
+} from "api";
 
 // get env variable
 const GITHUB_PAT = process.env.NEXT_PUBLIC_GITHUB_PAT;
@@ -16,53 +25,11 @@ export const octokit = new Octokit({
   auth: GITHUB_PAT,
 });
 
-export interface RepoContext {
-  repo: string;
-  owner: string;
-}
-
-export interface RepoContextWithToken extends RepoContext {
-  token: string;
-}
-
-export interface UseFileContentParams extends RepoContext {
-  path: string;
-  token: string;
-  fileRef?: string;
-}
-
-export type DirectoryItem = components["schemas"]["content-directory"][number];
-
-async function getFileContent(
-  params: UseFileContentParams
-): Promise<DirectoryItem[]> {
-  const { repo, owner, path, fileRef, token } = params;
-
-  const userOctokit = new Octokit({
-    auth: token,
-  });
-
-  const { data, status } = await userOctokit.repos.getContent({
-    owner,
-    repo,
-    path,
-    ref: fileRef,
-  });
-
-  if (status !== 200) throw new Error("Something bad happened");
-
-  if (Array.isArray(data)) {
-    return data;
-  } else {
-    return [data];
-  }
-}
-
 export function useFileContent(
   params: UseFileContentParams,
   config?: UseQueryOptions<any>
 ) {
-  const { repo, owner, path, fileRef, token } = params;
+  const { repo, owner, path, fileRef = "HEAD", token } = params;
 
   return useQuery(
     ["file", params],
@@ -79,6 +46,31 @@ export function useFileContent(
       refetchOnWindowFocus: false,
       retry: false,
       ...config,
+    }
+  );
+}
+
+export function useFolderContent(
+  params: UseFolderContentParams,
+  config?: UseQueryOptions<FolderData>
+) {
+  const { repo, owner, path, fileRef, token } = params;
+
+  return useQuery(
+    ["folder", params],
+    () =>
+      getFolderContent({
+        repo,
+        owner,
+        path,
+        fileRef,
+        token,
+      }),
+    // @ts-ignore
+    {
+      ...config,
+      retry: false,
+      refetchOnWindowFocus: false,
     }
   );
 }
@@ -201,30 +193,6 @@ export function useMetadata({
     metadata,
     onUpdateMetadata,
   };
-}
-
-interface RepoInfo {
-  repoInfo: any;
-  activity: any;
-  commits: any;
-  fileChanges: any;
-}
-
-type RepoFiles = any[];
-
-async function getRepoInfo(params: RepoContextWithToken): Promise<RepoInfo> {
-  const { owner, repo, token } = params;
-  const url = `/api/repo-info?owner=${owner}&repo=${repo}&token=${token}`;
-  const res = await fetch(url);
-  return await res.json();
-}
-
-async function getRepoFiles(params: RepoContextWithToken): Promise<RepoFiles> {
-  const { owner, repo, token } = params;
-  const url = `/api/file-tree?owner=${owner}&repo=${repo}&token=${token}`;
-  const res = await fetch(url);
-  const { files } = await res.json();
-  return files;
 }
 
 export function useRepoInfo(params: RepoContextWithToken) {

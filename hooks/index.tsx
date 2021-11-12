@@ -32,7 +32,7 @@ export function useFileContent(
   const { repo, owner, path, fileRef = "HEAD", token } = params;
 
   return useQuery(
-    ["file", params],
+    ["file", params, config?.queryKey],
     () =>
       getFileContent({
         repo,

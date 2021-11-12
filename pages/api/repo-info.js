@@ -1,19 +1,14 @@
 import { stratify, timeParse } from "d3";
 import { Octokit } from "@octokit/rest";
 
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-
-// get env variable
-const GITHUB_PAT = process.env.NEXT_PUBLIC_GITHUB_PAT;
-export const octokit = new Octokit({
-  // AUTH GOES HERE
-  auth: GITHUB_PAT,
-});
-
 export default async function getInfo(req, res) {
-  const { owner, repo } = req.query;
+  const { owner, repo, token } = req.query;
 
   const branch = "HEAD";
+
+  const octokit = new Octokit({
+    auth: token,
+  });
 
   const repoInfoRes = await octokit.repos.get({
     owner,
@@ -58,17 +53,13 @@ export default async function getInfo(req, res) {
         files.forEach((file) => {
           fileChanges[file.filename] = commit;
         });
-      } catch (e) { }
+      } catch (e) {}
     }
 
-    const activityRes = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/events`,
-      {
-        headers: {
-          Authorization: `Bearer ${GITHUB_PAT}`,
-        },
-      }
-    ).then((res) => res.json());
+    const { data: activityRes } = await octokit.activity.listRepoEvents({
+      owner,
+      repo,
+    });
     const parseDate = timeParse("%Y-%m-%dT%H:%M:%SZ");
     const activity = activityRes.sort(
       (a, b) => parseDate(b.created_at) - parseDate(a.created_at)

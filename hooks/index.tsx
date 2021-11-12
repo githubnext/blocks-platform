@@ -21,6 +21,10 @@ export interface RepoContext {
   owner: string;
 }
 
+export interface RepoContextWithToken extends RepoContext {
+  token: string;
+}
+
 export interface UseFileContentParams extends RepoContext {
   path: string;
   token: string;
@@ -38,8 +42,6 @@ async function getFileContent(
     auth: token,
   });
 
-  console.log(token, userOctokit);
-
   const { data, status } = await userOctokit.repos.getContent({
     owner,
     repo,
@@ -56,9 +58,11 @@ async function getFileContent(
   }
 }
 
-export function useFileContent(params: UseFileContentParams) {
+export function useFileContent(
+  params: UseFileContentParams,
+  config?: UseQueryOptions<any>
+) {
   const { repo, owner, path, fileRef, token } = params;
-  console.log("useFileContent", token);
 
   return useQuery(
     ["file", params],
@@ -74,6 +78,7 @@ export function useFileContent(params: UseFileContentParams) {
       enabled: Boolean(repo) && Boolean(owner) && Boolean(token),
       refetchOnWindowFocus: false,
       retry: false,
+      ...config,
     }
   );
 }
@@ -136,11 +141,13 @@ export function useMetadata({
   repo,
   metadataPath,
   filePath,
+  token,
 }: {
   owner: string;
   repo: string;
   metadataPath: string;
   filePath: string;
+  token: string;
 }) {
   const [iteration, setIteration] = useState(0);
   const { data: metadataData } = useFileContent(
@@ -148,6 +155,7 @@ export function useMetadata({
       repo,
       owner,
       path: metadataPath,
+      token,
     },
     {
       queryKey: [iteration],
@@ -204,32 +212,34 @@ interface RepoInfo {
 
 type RepoFiles = any[];
 
-async function getRepoInfo(params: RepoContext): Promise<RepoInfo> {
-  const { owner, repo } = params;
-  const url = `/api/repo-info?owner=${owner}&repo=${repo}`;
+async function getRepoInfo(params: RepoContextWithToken): Promise<RepoInfo> {
+  const { owner, repo, token } = params;
+  const url = `/api/repo-info?owner=${owner}&repo=${repo}&token=${token}`;
   const res = await fetch(url);
   return await res.json();
 }
 
-async function getRepoFiles(params: RepoContext): Promise<RepoFiles> {
-  const { owner, repo } = params;
-  const url = `/api/file-tree?owner=${owner}&repo=${repo}`;
+async function getRepoFiles(params: RepoContextWithToken): Promise<RepoFiles> {
+  const { owner, repo, token } = params;
+  const url = `/api/file-tree?owner=${owner}&repo=${repo}&token=${token}`;
   const res = await fetch(url);
   const { files } = await res.json();
   return files;
 }
 
-export function useRepoInfo(params: RepoContext) {
+export function useRepoInfo(params: RepoContextWithToken) {
   return useQuery(["info", params], () => getRepoInfo(params), {
-    enabled: Boolean(params.repo) && Boolean(params.owner),
+    enabled:
+      Boolean(params.repo) && Boolean(params.owner) && Boolean(params.token),
     refetchOnWindowFocus: false,
     retry: false,
   });
 }
 
-export function useRepoFiles(params: RepoContext) {
+export function useRepoFiles(params: RepoContextWithToken) {
   return useQuery(["files", params], () => getRepoFiles(params), {
-    enabled: Boolean(params.repo) && Boolean(params.owner),
+    enabled:
+      Boolean(params.repo) && Boolean(params.owner) && Boolean(params.token),
     refetchOnWindowFocus: false,
     retry: false,
   });

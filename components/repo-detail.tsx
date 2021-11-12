@@ -49,11 +49,13 @@ export function RepoDetail(props: RepoDetailProps) {
   const { data: repoInfo, status: repoInfoStatus } = useRepoInfo({
     repo: repo as string,
     owner: owner as string,
+    token: session.token as string,
   });
 
   const { data: files, status: repoFilesStatus } = useRepoFiles({
     repo: repo as string,
     owner: owner as string,
+    token: session.token as string,
   });
 
   const { metadata, onUpdateMetadata } = useMetadata({
@@ -61,6 +63,7 @@ export function RepoDetail(props: RepoDetailProps) {
     repo: repo as string,
     metadataPath: `.github/viewers/all`,
     filePath: path as string,
+    token: session.token as string,
   });
 
   const defaultViewer =
@@ -110,7 +113,7 @@ export function RepoDetail(props: RepoDetailProps) {
               repo={repo as string}
               files={files}
               activeFilePath={path as string}
-              fileChanges={repoInfo.fileChanges}
+              fileChanges={repoInfo?.fileChanges}
             />
           )}
         </div>
@@ -137,6 +140,7 @@ export function RepoDetail(props: RepoDetailProps) {
                 defaultViewer={defaultViewer}
                 viewerOverride={viewerOverride as string}
                 onSetDefaultViewer={onSetDefaultViewer}
+                session={session}
                 hasToggle
               />
             ))}
@@ -152,7 +156,7 @@ export function RepoDetail(props: RepoDetailProps) {
               </div>
             </div>
           ) : (
-            <ActivityFeed activity={repoInfo.activity} />
+            <ActivityFeed activity={repoInfo?.activity} />
           )}
         </div>
       </div>

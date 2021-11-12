@@ -4,6 +4,7 @@ import { DirectoryItem, useMetadata } from "hooks";
 import { getLanguageFromFilename } from "lib";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
+import { Session } from "node_modules/next-auth";
 import React, { useEffect, useState } from "react";
 import { ErrorBoundary } from "./error-boundary";
 
@@ -16,6 +17,7 @@ interface FileViewerProps {
   defaultViewer?: string;
   hasToggle?: boolean;
   onSetDefaultViewer?: (viewer: string) => void;
+  session: Session;
 }
 
 export function FileViewer(props: FileViewerProps) {
@@ -27,6 +29,7 @@ export function FileViewer(props: FileViewerProps) {
     defaultViewer,
     hasToggle,
     onSetDefaultViewer,
+    session,
   } = props;
   const { name, content, download_url, path, sha } = data;
   const [metadataIteration, setMetadataIteration] = useState(0);
@@ -49,6 +52,7 @@ export function FileViewer(props: FileViewerProps) {
     repo: repo as string,
     metadataPath: `.github/viewers/file/${viewer.id}`,
     filePath: path,
+    token: session.token as string,
   });
 
   useEffect(() => {

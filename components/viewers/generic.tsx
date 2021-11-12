@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { SandpackRunner } from "@codesandbox/sandpack-react";
 import "@codesandbox/sandpack-react/dist/index.css";
 import { FormEventHandler, useState, useMemo } from "react";

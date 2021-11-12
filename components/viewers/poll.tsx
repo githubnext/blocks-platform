@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState } from "react";
 import { useUpdateFileContents, useFileContent } from "hooks";
 import { ViewerProps } from ".";

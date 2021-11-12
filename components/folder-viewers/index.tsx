@@ -1,5 +1,4 @@
 import { SidebarViewer } from "./sidebar";
-import { CypressViewer } from "./cypress";
 import { MinimapViewer } from "./minimap";
 import { ReadmeViewer } from "./readme";
 
@@ -37,11 +36,7 @@ export const folderViewers = [
     label: "Sidebar",
     component: SidebarViewer,
   },
-  {
-    id: "cypress",
-    label: "Cypress",
-    component: CypressViewer,
-  },
+
   {
     id: "minimap",
     label: "Minimap",

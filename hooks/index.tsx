@@ -5,9 +5,18 @@ import {
   UseQueryOptions,
 } from "react-query";
 import { Octokit } from "@octokit/rest";
-import { components } from "@octokit/openapi-types";
 import { Base64 } from "js-base64";
 import { useCallback, useMemo, useState } from "react";
+import {
+  UseFileContentParams,
+  getFileContent,
+  getFolderContent,
+  getRepoInfo,
+  getRepoFiles,
+  RepoContext,
+  RepoContextWithToken,
+  UseFolderContentParams,
+} from "api";
 
 // get env variable
 const GITHUB_PAT = process.env.NEXT_PUBLIC_GITHUB_PAT;
@@ -16,44 +25,11 @@ export const octokit = new Octokit({
   auth: GITHUB_PAT,
 });
 
-export interface RepoContext {
-  repo: string;
-  owner: string;
-}
-
-export interface UseFileContentParams extends RepoContext {
-  path: string;
-  fileRef?: string;
-}
-
-export type DirectoryItem = components["schemas"]["content-directory"][number];
-
-async function getFileContent(
-  params: UseFileContentParams
-): Promise<DirectoryItem[]> {
-  const { repo, owner, path, fileRef } = params;
-
-  const { data, status } = await octokit.repos.getContent({
-    owner,
-    repo,
-    path,
-    ref: fileRef,
-  });
-
-  if (status !== 200) throw new Error("Something bad happened");
-
-  if (Array.isArray(data)) {
-    return data;
-  } else {
-    return [data];
-  }
-}
-
 export function useFileContent(
   params: UseFileContentParams,
-  config?: UseQueryOptions<DirectoryItem[]>
+  config?: UseQueryOptions<any>
 ) {
-  const { repo, owner, path, fileRef } = params;
+  const { repo, owner, path, fileRef = "HEAD", token } = params;
 
   return useQuery(
     ["file", params, config?.queryKey],
@@ -63,8 +39,40 @@ export function useFileContent(
         owner,
         path,
         fileRef,
+        token,
       }),
-    config
+    {
+      enabled:
+        Boolean(repo) && Boolean(owner) && Boolean(path) && Boolean(token),
+      refetchOnWindowFocus: false,
+      retry: false,
+      ...config,
+    }
+  );
+}
+
+export function useFolderContent(
+  params: UseFolderContentParams,
+  config?: UseQueryOptions<FolderData>
+) {
+  const { repo, owner, path, fileRef, token } = params;
+
+  return useQuery(
+    ["folder", params],
+    () =>
+      getFolderContent({
+        repo,
+        owner,
+        path,
+        fileRef,
+        token,
+      }),
+    // @ts-ignore
+    {
+      ...config,
+      retry: false,
+      refetchOnWindowFocus: false,
+    }
   );
 }
 
@@ -91,7 +99,7 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
       // @ts-ignore
       sha = data.sha;
     } catch (e) {
-      sha = "HEAD"
+      sha = "HEAD";
     }
   }
 
@@ -112,7 +120,7 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
       },
       sha: sha,
     });
-  } catch (e) { }
+  } catch (e) {}
 }
 
 export function useUpdateFileContents(
@@ -121,54 +129,87 @@ export function useUpdateFileContents(
   return useMutation(updateFileContents, config);
 }
 
-
-export function useMetadata({ owner, repo, metadataPath, filePath }: {
-  owner: string,
-  repo: string,
-  metadataPath: string,
-  filePath: string,
+export function useMetadata({
+  owner,
+  repo,
+  metadataPath,
+  filePath,
+  token,
+}: {
+  owner: string;
+  repo: string;
+  metadataPath: string;
+  filePath: string;
+  token: string;
 }) {
   const [iteration, setIteration] = useState(0);
-  const { data: metadataData } = useFileContent({
-    repo,
-    owner,
-    path: metadataPath,
-  }, {
-    queryKey: [iteration],
-    refetchOnWindowFocus: false,
-  })
+  const { data: metadataData } = useFileContent(
+    {
+      repo,
+      owner,
+      path: metadataPath,
+      token,
+    },
+    {
+      queryKey: [iteration],
+      refetchOnWindowFocus: false,
+    }
+  );
   const fullMetadata = useMemo(() => {
     try {
       const encodedStr = metadataData[0].content;
-      const rawString = Buffer.from(encodedStr, "base64").toString()
-      const fullMetadata = JSON.parse(rawString)
-      return fullMetadata
+      const rawString = Buffer.from(encodedStr, "base64").toString();
+      const fullMetadata = JSON.parse(rawString);
+      return fullMetadata;
     } catch (e) {
-      return {}
+      return {};
     }
-  }, [metadataData])
-  const metadata = useMemo(() => fullMetadata?.[filePath] || {}, [fullMetadata, filePath])
-  const { mutateAsync } = useUpdateFileContents({})
-  const onUpdateMetadata = useCallback(async (contents) => {
-    const fullContents = {
-      ...fullMetadata,
-      [filePath]: contents
-    }
-    await mutateAsync({
-      content: JSON.stringify(fullContents),
-      owner,
-      repo,
-      path: metadataPath,
-      sha: "latest",
-    })
-    setTimeout(() => {
-      setIteration(iteration => iteration + 1)
-    }, 500)
-  }, [mutateAsync, owner, repo, metadataPath, filePath])
+  }, [metadataData]);
+  const metadata = useMemo(
+    () => fullMetadata?.[filePath] || {},
+    [fullMetadata, filePath]
+  );
+  const { mutateAsync } = useUpdateFileContents({});
+  const onUpdateMetadata = useCallback(
+    async (contents) => {
+      const fullContents = {
+        ...fullMetadata,
+        [filePath]: contents,
+      };
+      await mutateAsync({
+        content: JSON.stringify(fullContents),
+        owner,
+        repo,
+        path: metadataPath,
+        sha: "latest",
+      });
+      setTimeout(() => {
+        setIteration((iteration) => iteration + 1);
+      }, 500);
+    },
+    [mutateAsync, owner, repo, metadataPath, filePath]
+  );
 
   return {
     metadata,
     onUpdateMetadata,
-  }
+  };
+}
 
+export function useRepoInfo(params: RepoContextWithToken) {
+  return useQuery(["info", params], () => getRepoInfo(params), {
+    enabled:
+      Boolean(params.repo) && Boolean(params.owner) && Boolean(params.token),
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
+}
+
+export function useRepoFiles(params: RepoContextWithToken) {
+  return useQuery(["files", params], () => getRepoFiles(params), {
+    enabled:
+      Boolean(params.repo) && Boolean(params.owner) && Boolean(params.token),
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
 }

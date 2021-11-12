@@ -144,7 +144,7 @@ export const RepoHeader = ({
                 fontWeight="500"
                 boxShadow="0 1px 2px 0 rgba(27,31,35,.1)"
               >
-                {Math.round(Math.random() * 100)}
+                123
               </Box>
             </Box>
           ))}

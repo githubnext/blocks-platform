@@ -1,13 +1,12 @@
 import { Session } from "next-auth";
 import { useRouter } from "next/router";
 import { useTheme } from "@primer/components";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 
-import { useFileContent, useMetadata, useRepoFiles, useRepoInfo } from "hooks";
+import { useMetadata, useRepoFiles, useRepoInfo } from "hooks";
 import { FileViewer } from "components/file-viewer-with-toggle";
 import { FolderViewer } from "components/folder-viewer-with-toggle";
 import { ActivityFeed } from "components/ActivityFeed";
-import { findNestedItem, getViewerFromFilename } from "lib";
 import { GitHubHeader } from "./github-header";
 import { RepoHeader } from "./repo-header";
 import { Sidebar } from "./Sidebar";
@@ -30,34 +29,41 @@ export function RepoDetail(props: RepoDetailProps) {
     viewerOverride,
   } = router.query;
 
-  useEffect(() => {
-    setColorMode(theme === "dark" ? "night" : "day");
-  }, [theme]);
-
-  const { data: folderData, status } = useFileContent({
+  const context = {
     repo: repo as string,
     owner: owner as string,
     path: path as string,
     fileRef: fileRef as string,
+  };
+
+  useEffect(() => {
+    setColorMode(theme === "dark" ? "night" : "day");
+  }, [theme]);
+
+  const {
+    data: repoInfo,
+    status: repoInfoStatus,
+    error: repoInfoError,
+  } = useRepoInfo({
+    repo: repo as string,
+    owner: owner as string,
     token: session.token as string,
   });
 
-  console.log(folderData);
+  const {
+    data: files,
+    status: repoFilesStatus,
+    error: repoFilesError,
+  } = useRepoFiles({
+    repo: repo as string,
+    owner: owner as string,
+    token: session.token as string,
+  });
+
   const isFolder =
-    status !== "success" ? false : folderData?.[0]?.path !== path;
-  const data = folderData?.[0];
-
-  const { data: repoInfo, status: repoInfoStatus } = useRepoInfo({
-    repo: repo as string,
-    owner: owner as string,
-    token: session.token as string,
-  });
-
-  const { data: files, status: repoFilesStatus } = useRepoFiles({
-    repo: repo as string,
-    owner: owner as string,
-    token: session.token as string,
-  });
+    repoFilesStatus === "success"
+      ? files?.find((d) => d.path === path)?.type === "tree"
+      : false;
 
   const { metadata, onUpdateMetadata } = useMetadata({
     owner: owner as string,
@@ -67,37 +73,43 @@ export function RepoDetail(props: RepoDetailProps) {
     token: session.token as string,
   });
 
-  const defaultViewer =
-    metadata.defaultViewer ||
-    (isFolder ? "readme" : getViewerFromFilename(data?.name)) ||
-    "code";
+  const defaultViewer = metadata.defaultViewer;
   const onSetDefaultViewer = (viewerId: string) => {
     onUpdateMetadata({
       defaultViewer: viewerId,
     });
   };
 
-  const folderFiles = useMemo(
-    () =>
-      (isFolder && path
-        ? findNestedItem(path as string, files)?.children
-        : files) || [],
-    [isFolder, files]
-  );
+  const fileInfo = files?.find((d) => d.path === path);
+  const size = fileInfo?.size || 0;
+  const fileSizeLimit = 100000; // 200KB
+  const isTooLarge = size > fileSizeLimit;
+
+  if (repoFilesStatus === "error" || repoInfoStatus === "error") {
+    const error = repoInfoError || repoFilesError;
+
+    return (
+      <div className="p-4 pt-40 text-center mx-auto text-red-600">
+        Uh oh, something went wrong!
+        <p className="max-w-[50em] mx-auto text-sm mt-4 text-gray-600">
+          {/* @ts-ignore */}
+          {error?.message || ""}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col w-full h-screen overflow-hidden">
       <GitHubHeader />
-      {repoInfoStatus === "success" && (
-        <RepoHeader
-          owner={owner as string}
-          repo={repo as string}
-          // @ts-ignore
-          description={repoInfo.description}
-          // @ts-ignore
-          contributors={repoInfo.contributors}
-        />
-      )}
+      <RepoHeader
+        owner={owner as string}
+        repo={repo as string}
+        // @ts-ignore
+        description={repoInfo?.description}
+        // @ts-ignore
+        contributors={repoInfo?.contributors}
+      />
       <div className="flex flex-1 overflow-hidden">
         <div className="flex-none w-80 border-r border-gray-200">
           {repoFilesStatus === "loading" || repoInfoStatus === "loading" ? (
@@ -120,25 +132,26 @@ export function RepoDetail(props: RepoDetailProps) {
         </div>
 
         <div className="flex-1 overflow-hidden">
-          {status === "loading" && (
-            <p className="text-sm w-full p-8">Loading...</p>
-          )}
-          {status === "success" &&
+          {repoFilesStatus !== "loading" &&
             (isFolder ? (
               <FolderViewer
+                context={context}
                 theme={(theme as string) || "light"}
-                path={path as string}
-                data={folderFiles}
+                allFiles={files}
                 defaultViewer={defaultViewer}
                 viewerOverride={viewerOverride as string}
                 onSetDefaultViewer={onSetDefaultViewer}
                 session={session}
                 hasToggle
               />
+            ) : isTooLarge ? (
+              <div className="italic p-4 pt-40 text-center mx-auto text-gray-600">
+                Oh boy, that's a honkin file! It's {size / 1000} KBs.
+              </div>
             ) : (
               <FileViewer
+                context={context}
                 theme={(theme as string) || "light"}
-                data={data}
                 defaultViewer={defaultViewer}
                 viewerOverride={viewerOverride as string}
                 onSetDefaultViewer={onSetDefaultViewer}

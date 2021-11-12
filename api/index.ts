@@ -95,7 +95,9 @@ export async function getFolderContent(
   };
 }
 
-type RepoFiles = any[];
+type listRepoFilesResponse =
+  Endpoints["GET /repos/{owner}/{repo}/git/trees/{tree_sha}"]["response"];
+type RepoFiles = listRepoFilesResponse["data"]["tree"];
 
 export async function getRepoInfo(
   params: RepoContextWithToken
@@ -103,6 +105,10 @@ export async function getRepoInfo(
   const { owner, repo, token } = params;
   const url = `/api/repo-info?owner=${owner}&repo=${repo}&token=${token}`;
   const res = await fetch(url);
+  if (res.status !== 200) {
+    const error = await res.json();
+    throw new Error(error.message);
+  }
   return await res.json();
 }
 
@@ -112,6 +118,12 @@ export async function getRepoFiles(
   const { owner, repo, token } = params;
   const url = `/api/file-tree?owner=${owner}&repo=${repo}&token=${token}`;
   const res = await fetch(url);
+  if (res.status !== 200) {
+    const error = await res.json();
+    throw new Error(error.message);
+  }
   const { files } = await res.json();
   return files;
 }
+
+import { Endpoints } from "@octokit/types";

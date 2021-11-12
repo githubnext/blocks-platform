@@ -1,26 +1,41 @@
-import { Box } from '@primer/components';
-import { extent, scaleLinear, timeFormat } from 'd3';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import { useEffect, useMemo, useState } from 'react';
-import { IoFolderOpenOutline, IoFolderOutline } from 'react-icons/io5';
-import { VscSymbolFile } from 'react-icons/vsc';
+import { Box } from "@primer/components";
+import { extent, scaleLinear, timeFormat } from "d3";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { useEffect, useMemo, useState } from "react";
+import { IoFolderOpenOutline, IoFolderOutline } from "react-icons/io5";
+import { VscSymbolFile } from "react-icons/vsc";
+import { getNestedFileTree } from "@githubnext/utils";
 import languageColors from "./../language-colors.json";
-import { Tooltip } from './Tooltip';
+import { Tooltip } from "./Tooltip";
 
-
-const doShowPills = false
-export const Sidebar = ({ owner = "", repo = "", fileChanges = {}, files = [], activeFilePath = "" }) => {
+const doShowPills = false;
+export const Sidebar = ({
+  owner = "",
+  repo = "",
+  fileChanges = {},
+  files = [],
+  activeFilePath = "",
+}) => {
   if (!files.map) return null;
 
-  const allUsers = []
+  const nestedFiles = useMemo(() => {
+    try {
+      return getNestedFileTree(files);
+    } catch (e) {
+      console.log(e);
+    }
+  }, [files]);
+
+  const allUsers = [];
 
   const fileChangesScale = useMemo(() => {
-    const datesExtent = extent(Object.values(fileChanges), d => new Date(d.date));
-    return scaleLinear()
-      .domain(datesExtent)
-      .range(["#aaa", "#F9FAFB"])
-  }, [fileChanges])
+    const datesExtent = extent(
+      Object.values(fileChanges),
+      (d) => new Date(d.date)
+    );
+    return scaleLinear().domain(datesExtent).range(["#aaa", "#F9FAFB"]);
+  }, [fileChanges]);
 
   return (
     <Box className="sidebar h-full overflow-hidden flex-1">
@@ -29,7 +44,7 @@ export const Sidebar = ({ owner = "", repo = "", fileChanges = {}, files = [], a
           <Item
             name={`${owner}/${repo}`}
             path={""}
-            children={files}
+            children={nestedFiles}
             activeFilePath={activeFilePath}
             allUsers={allUsers}
             fileChangesScale={fileChangesScale}
@@ -42,7 +57,7 @@ export const Sidebar = ({ owner = "", repo = "", fileChanges = {}, files = [], a
   );
 };
 
-const Item = props => {
+const Item = (props) => {
   if (props.children.length) {
     return (
       <Folder
@@ -58,7 +73,7 @@ const Item = props => {
     <File
       {...props}
       isActive={props.activeFilePath === props.path}
-      activeUsers={props.allUsers.filter(user => user.path === props.path)}
+      activeUsers={props.allUsers.filter((user) => user.path === props.path)}
       fileChangesScale={props.fileChangesScale}
       date={props.fileChanges[props.path]?.date}
     />
@@ -86,8 +101,8 @@ const Folder = ({
   }, [activeFilePath]);
 
   const mostRecentChangeDate = useMemo(() => {
-    const relatedChangePaths = Object.keys(fileChanges).filter(
-      d => d.startsWith(path)
+    const relatedChangePaths = Object.keys(fileChanges).filter((d) =>
+      d.startsWith(path)
     );
 
     const mostRecentChange = relatedChangePaths.sort(
@@ -96,7 +111,7 @@ const Folder = ({
     return mostRecentChange && fileChanges[mostRecentChange].date;
   }, [path, fileChangesScale]);
 
-  const isActive = activeFilePath === path
+  const isActive = activeFilePath === path;
 
   return (
     <Box>
@@ -108,35 +123,42 @@ const Folder = ({
         }}
       >
         <a
-          className={`relative flex items-center text-left w-full whitespace-nowrap overflow-ellipsis ${isActive ? 'bg-gray-50 border-gray-200' : ' border-transparent'
-            } border border-r-0`}
+          className={`relative flex items-center text-left w-full whitespace-nowrap overflow-ellipsis ${
+            isActive ? "bg-gray-50 border-gray-200" : " border-transparent"
+          } border border-r-0`}
           onClick={() => {
-            if (!canCollapse) return
-            setIsExpanded(!isExpanded)
+            if (!canCollapse) return;
+            setIsExpanded(!isExpanded);
           }}
         >
-          <button className="mr-2 text-sm pl-3 py-2"
-            onClick={e => {
+          <button
+            className="mr-2 text-sm pl-3 py-2"
+            onClick={(e) => {
               e.stopPropagation();
-              e.preventDefault()
-              setIsExpanded(!isExpanded)
+              e.preventDefault();
+              setIsExpanded(!isExpanded);
             }}
           >
             {isExpanded ? <IoFolderOpenOutline /> : <IoFolderOutline />}
           </button>
-          <div className="py-2 pr-3">
-            {name}
-          </div>
+          <div className="py-2 pr-3">{name}</div>
           {doShowPills && (
             <div className="ml-auto flex p-1 border-[1px] border-gray-200 rounded-full">
-              {children.slice(0, 10).map(file => (
+              {children.slice(0, 10).map((file) => (
                 <div className="m-[1px]">
-                  <FileDot name={file.name} type={file.children?.length ? "folder" : "file"} key={file.path} />
+                  <FileDot
+                    name={file.name}
+                    type={file.children?.length ? "folder" : "file"}
+                    key={file.path}
+                  />
                 </div>
               ))}
             </div>
           )}
-          <DateChangedIndicator date={mostRecentChangeDate} fileChangesScale={fileChangesScale} />
+          <DateChangedIndicator
+            date={mostRecentChangeDate}
+            fileChangesScale={fileChangesScale}
+          />
         </a>
       </Link>
 
@@ -144,7 +166,7 @@ const Folder = ({
         <div className="pl-6">
           {children
             .sort((a, b) => b.children.length - a.children.length)
-            .map(file => (
+            .map((file) => (
               <Item
                 key={file.name}
                 {...file}
@@ -159,7 +181,14 @@ const Folder = ({
     </Box>
   );
 };
-const File = ({ name, path, activeUsers = [], fileChangesScale, date, isActive }) => {
+const File = ({
+  name,
+  path,
+  activeUsers = [],
+  fileChangesScale,
+  date,
+  isActive,
+}) => {
   const router = useRouter();
   const query = router.query;
 
@@ -172,8 +201,9 @@ const File = ({ name, path, activeUsers = [], fileChangesScale, date, isActive }
       }}
     >
       <a
-        className={`relative flex items-center justify-between py-2 pl-3 pr-3 text-left w-full text-sm whitespace-nowrap overflow-ellipsis ${isActive ? 'bg-gray-50 border-gray-200' : ' border-transparent'
-          } border border-r-0`}
+        className={`relative flex items-center justify-between py-2 pl-3 pr-3 text-left w-full text-sm whitespace-nowrap overflow-ellipsis ${
+          isActive ? "bg-gray-50 border-gray-200" : " border-transparent"
+        } border border-r-0`}
       >
         <div className="flex items-center flex-1 max-w-full">
           <div className="mr-2">
@@ -188,7 +218,7 @@ const File = ({ name, path, activeUsers = [], fileChangesScale, date, isActive }
           </div>
         </div>
         <div className="group flex items-center h-0">
-          {activeUsers.map(user => (
+          {activeUsers.map((user) => (
             <div
               className="-ml-4 h-8 w-8 rounded-full bg-cover border-[0.2em] border-white group-hover:-ml-1 transition-all"
               key={user.id}
@@ -200,38 +230,43 @@ const File = ({ name, path, activeUsers = [], fileChangesScale, date, isActive }
         </div>
         <DateChangedIndicator date={date} fileChangesScale={fileChangesScale} />
       </a>
-    </Link >
+    </Link>
   );
 };
 
-
 const FileDot = ({ name, type = "file" }) => {
-  if (!doShowPills) return null
+  if (!doShowPills) return null;
 
-  const extension = name.split('.').pop();
-  let color = languageColors[extension] || '#dadada';
+  const extension = name.split(".").pop();
+  let color = languageColors[extension] || "#dadada";
   if (type === "folder") {
-    color = "transparent"
+    color = "transparent";
   }
 
   return (
-    <div className={`h-[0.8em] w-[0.5em] rounded-full border-[1px] ${type === "folder" ? "border-gray-400" : "border-transparent"}`} style={{ background: color }} />
-  )
-}
-
-const getOrdinal = n => {
-  const s = ['th', 'st', 'nd', 'rd'];
-  const v = n % 100;
-  return (s[(v - 20) % 10] || s[v] || s[0]);
+    <div
+      className={`h-[0.8em] w-[0.5em] rounded-full border-[1px] ${
+        type === "folder" ? "border-gray-400" : "border-transparent"
+      }`}
+      style={{ background: color }}
+    />
+  );
 };
-const formatDate = d => ([
-  timeFormat("%B %-d")(d),
-  getOrdinal(+timeFormat("%d")(d)),
-  timeFormat(", %Y")(d),
-].join(''));
+
+const getOrdinal = (n) => {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return s[(v - 20) % 10] || s[v] || s[0];
+};
+const formatDate = (d) =>
+  [
+    timeFormat("%B %-d")(d),
+    getOrdinal(+timeFormat("%d")(d)),
+    timeFormat(", %Y")(d),
+  ].join("");
 const DateChangedIndicator = ({ date, fileChangesScale }) => {
-  if (!date) return null
-  if (!fileChangesScale) return null
+  if (!date) return null;
+  if (!fileChangesScale) return null;
 
   const backgroundColor = useMemo(() => {
     return date && fileChangesScale(new Date(date));
@@ -239,9 +274,12 @@ const DateChangedIndicator = ({ date, fileChangesScale }) => {
 
   return (
     <Tooltip side="right" text={`Last updated ${formatDate(new Date(date))}`}>
-      <div className="absolute top-[-1px] bottom-[-1px] right-0 left-auto w-1" style={{
-        backgroundColor
-      }}></div>
+      <div
+        className="absolute top-[-1px] bottom-[-1px] right-0 left-auto w-1"
+        style={{
+          backgroundColor,
+        }}
+      ></div>
     </Tooltip>
-  )
-}
+  );
+};

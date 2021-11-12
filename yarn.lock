@@ -693,6 +693,14 @@
   resolved "https://registry.yarnpkg.com/@fisker/parse-srcset/-/parse-srcset-1.0.2.tgz#6e051549fbf77ab5febda5176720e85aea70e80e"
   integrity sha512-DCLDSVB5PWC/KbT1ajPPwBGWwAb87/BxfwL8LVlbx3RPlOo5kWg/OMkNyrzwAk4KFMhdINLoBIhqz01f39Joug==
 
+"@githubnext/utils@^0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@githubnext/utils/-/utils-0.6.0.tgz#d7d8e97a3c0bc22571879ade60e62580e9bfe29f"
+  integrity sha512-S5blRTFEbl7U76Rc6AOH/VOoSm9jb1XyJ20dcbpJTcsaUKwk/XsVKklFqjHxE8+8Whi+eLhsYROIBsxoEBC9SA==
+  dependencies:
+    react "^17.0.2"
+    zod "^3.11.6"
+
 "@githubocto/flat-ui@^0.10.2":
   version "0.10.2"
   resolved "https://registry.yarnpkg.com/@githubocto/flat-ui/-/flat-ui-0.10.2.tgz#25ea025e662721eac7f468662436864ebf81dd4a"
@@ -9908,6 +9916,11 @@ yocto-queue@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
+
+zod@^3.11.6:
+  version "3.11.6"
+  resolved "https://registry.yarnpkg.com/zod/-/zod-3.11.6.tgz#e43a5e0c213ae2e02aefe7cb2b1a6fa3d7f1f483"
+  integrity sha512-daZ80A81I3/9lIydI44motWe6n59kRBfNzTuS2bfzVh1nAXi667TOTWWtatxyG+fwgNUiagSj/CWZwRRbevJIg==
 
 zstddec@^0.0.2:
   version "0.0.2"

@@ -42,7 +42,8 @@ export function useFileContent(
         token,
       }),
     {
-      enabled: Boolean(repo) && Boolean(owner) && Boolean(token),
+      enabled:
+        Boolean(repo) && Boolean(owner) && Boolean(path) && Boolean(token),
       refetchOnWindowFocus: false,
       retry: false,
       ...config,

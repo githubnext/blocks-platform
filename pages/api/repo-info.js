@@ -1,4 +1,4 @@
-import { stratify, timeParse } from "d3";
+import { timeParse } from "d3";
 import { Octokit } from "@octokit/rest";
 
 export default async function getInfo(req, res) {
@@ -10,24 +10,24 @@ export default async function getInfo(req, res) {
     auth: token,
   });
 
-  const repoInfoRes = await octokit.repos.get({
-    owner,
-    repo,
-  });
-
-  const contributorsRes = await octokit.repos.listContributors({
-    owner,
-    repo,
-  });
-  const contributors = contributorsRes.data.map((d) => [
-    d.login,
-    d.id,
-    d.avatar_url,
-  ]);
-
-  let repoInfo = { ...repoInfoRes.data, contributors };
-
   try {
+    const repoInfoRes = await octokit.repos.get({
+      owner,
+      repo,
+    });
+
+    const contributorsRes = await octokit.repos.listContributors({
+      owner,
+      repo,
+    });
+    const contributors = contributorsRes.data.map((d) => [
+      d.login,
+      d.id,
+      d.avatar_url,
+    ]);
+
+    let repoInfo = { ...repoInfoRes.data, contributors };
+
     const commitsRes = await octokit.repos.listCommits({
       owner,
       repo,
@@ -67,41 +67,6 @@ export default async function getInfo(req, res) {
 
     res.status(200).json({ repoInfo, activity, commits, fileChanges });
   } catch (e) {
-    res
-      .status(200)
-      .json({ repoInfo, activity: [], commits: [], fileChanges: {} });
+    res.status(Number(e.status)).json({ message: e.message });
   }
 }
-
-export const nestFileTree = (fileTree, repoName) => {
-  const leaves = [
-    ...(fileTree.tree || []).map((d) => ({
-      name: d.path.split("/").pop(),
-      path: d.path,
-      parent: d.path.split("/").slice(0, -1).join("/") || repoName,
-      size: d.size || 0,
-      children: [],
-    })),
-    {
-      name: repoName,
-      path: repoName,
-      parent: null,
-      size: 0,
-      children: [],
-    },
-  ];
-  // .filter(d => !foldersToIgnore.find(f => d.path.startsWith(f)))
-
-  const tree = stratify()
-    .id((d) => d.path)
-    .parentId((d) => d.parent)(leaves);
-
-  const convertStratifyItem = (d) => ({
-    ...d.data,
-    children: d.children?.map(convertStratifyItem) || [],
-  });
-
-  const data = convertStratifyItem(tree).children;
-
-  return data;
-};

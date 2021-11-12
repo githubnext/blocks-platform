@@ -2,8 +2,7 @@ import { Box, Button } from "@primer/components";
 import { folderViewers, ReadmeViewer } from "components/folder-viewers";
 import { useMetadata } from "hooks";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Session } from "next-auth";
 
 import { ErrorBoundary } from "./error-boundary";
@@ -11,36 +10,45 @@ import { ErrorBoundary } from "./error-boundary";
 const ViewerPicker = dynamic(() => import("./viewer-picker"), { ssr: false });
 
 interface FolderViewerProps {
-  data: DirectoryItem[];
-  path: string;
   theme: string;
+  context: {
+    repo: string;
+    owner: string;
+    path: string;
+    fileRef: string;
+  };
   viewerOverride?: string;
   defaultViewer?: string;
   hasToggle?: boolean;
+  allFiles: {
+    path?: string;
+    mode?: string;
+    type?: string;
+    sha?: string;
+    size?: number;
+    url?: string;
+  }[];
   session: Session;
   onSetDefaultViewer: (viewer: string) => void;
 }
 
 export function FolderViewer(props: FolderViewerProps) {
-  const router = useRouter();
   const {
-    data,
+    allFiles,
     theme,
     viewerOverride,
-    path,
     defaultViewer,
     hasToggle,
     onSetDefaultViewer,
+    context,
     session,
   } = props;
   // const { name, content, download_url, sha } = data;
-  const [metadataIteration, setMetadataIteration] = useState(0);
 
   const [viewerType, setViewerType] = useState(
     viewerOverride || props.defaultViewer
   );
-  const { debug, repo, owner, username } = router.query;
-  const debugMode = Boolean(debug);
+  const { repo, owner, path } = context;
 
   const viewer = folderViewers.find((d) => d.id === viewerType) || ({} as any);
   const Viewer = viewer.component || ReadmeViewer;
@@ -70,13 +78,18 @@ export function FolderViewer(props: FolderViewerProps) {
     };
   }, []);
 
+  const data = useMemo(
+    () => allFiles.filter((d) => d.path.startsWith(path)),
+    [allFiles, path]
+  );
+
   useEffect(() => {
     setViewerType(defaultViewer);
   }, [path]);
 
   return (
     <div className="h-full flex flex-col">
-      {(debugMode || hasToggle) && (
+      {hasToggle && (
         <div className="flex-none top-0 z-[9999]">
           <div>
             <Box
@@ -109,7 +122,7 @@ export function FolderViewer(props: FolderViewerProps) {
         <div className="overflow-y-auto flex-1">
           {!!Viewer && (
             <Viewer
-              meta={{ theme, repo, owner, path, username }}
+              meta={{ theme, repo, owner, path }}
               files={data}
               metadata={metadata}
               onUpdateMetadata={onUpdateMetadata}

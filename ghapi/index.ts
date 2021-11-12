@@ -23,11 +23,7 @@ export async function getFileContent(
   const { repo, owner, path, fileRef, token } = params;
 
   const apiUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${fileRef}/${path}`;
-  const res = await fetch(apiUrl, {
-    headers: {
-      Accept: `Bearer ${token}`,
-    },
-  });
+  const res = await fetch(apiUrl);
 
   if (res.status !== 200) throw new Error("Something bad happened");
 
@@ -59,7 +55,7 @@ export async function getFolderContent(
 
   const res = await fetch(apiUrl, {
     headers: {
-      Accept: `Bearer ${token}`,
+      Authorization: `token ${token}`,
     },
   });
   const { tree: rawTree } = await res.json();

@@ -29,7 +29,7 @@ export function useFileContent(
   params: UseFileContentParams,
   config?: UseQueryOptions<any>
 ) {
-  const { repo, owner, path, fileRef = "HEAD", token } = params;
+  const { repo, owner, path, fileRef = "main", token } = params;
 
   return useQuery(
     ["file", params, config?.queryKey],

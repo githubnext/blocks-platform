@@ -1,15 +1,19 @@
+import { Box, Button } from "@primer/components";
 import { Session } from "next-auth";
 import { useRouter } from "next/router";
 import { useTheme } from "@primer/components";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
-import { useMetadata, useRepoFiles, useRepoInfo } from "hooks";
+import { useFileContent, useMetadata, useRepoFiles, useRepoInfo } from "hooks";
 import { FileViewer } from "components/file-viewer-with-toggle";
 import { FolderViewer } from "components/folder-viewer-with-toggle";
 import { ActivityFeed } from "components/ActivityFeed";
 import { GitHubHeader } from "./github-header";
 import { RepoHeader } from "./repo-header";
 import { Sidebar } from "./Sidebar";
+
+import dynamic from "next/dynamic";
+const ViewerPicker = dynamic(() => import("./viewer-picker"), { ssr: false });
 
 interface RepoDetailProps {
   session: Session;
@@ -19,6 +23,7 @@ export function RepoDetail(props: RepoDetailProps) {
   const { session } = props;
   const router = useRouter();
   const { setColorMode } = useTheme();
+  const [viewer, setViewer] = useState<Viewer>();
 
   const {
     repo,
@@ -80,6 +85,26 @@ export function RepoDetail(props: RepoDetailProps) {
     });
   };
 
+  const viewerContext = {
+    repo: "composable-github-viewer-examples",
+    owner: "githubnext",
+  };
+
+  const {
+    data: viewersInfo,
+    status: viewersStatus,
+    error: viewersError,
+  } = useFileContent({
+    repo: "composable-github-viewer-examples",
+    owner: "githubnext",
+    token: session.token as string,
+    path: "package.json",
+  });
+  const viewersInfoParsed = viewersInfo?.content
+    ? JSON.parse(viewersInfo.content)
+    : {};
+  const viewers = viewersInfoParsed?.viewers || [];
+
   const fileInfo = files?.find((d) => d.path === path);
   const size = fileInfo?.size || 0;
   const fileSizeLimit = 100000; // 200KB
@@ -132,19 +157,52 @@ export function RepoDetail(props: RepoDetailProps) {
         </div>
 
         <div className="flex-1 overflow-hidden">
-          {repoFilesStatus !== "loading" &&
+          <div className="flex-none top-0 z-10">
+            <div>
+              <Box
+                bg="canvas.subtle"
+                p={2}
+                borderBottom="1px solid"
+                className="!border-gray-200"
+                display="flex"
+                alignItems="center"
+              >
+                <ViewerPicker
+                  viewers={(viewers || []).filter(
+                    (d) => d.type === (isFolder ? "folder" : "file")
+                  )}
+                  isFolder={isFolder}
+                  path={path as string}
+                  onChange={setViewer}
+                  value={viewer}
+                />
+                {/* {viewerType !== defaultViewer && (
+              <Button
+                fontSize="1"
+                ml={2}
+                onClick={() => onSetDefaultViewer(viewerType)}
+              >
+                Set as default for all users
+              </Button>
+            )} */}
+              </Box>
+            </div>
+          </div>
+          {!!viewer &&
+            repoFilesStatus !== "loading" &&
             (isFolder ? (
-              <FolderViewer
-                context={context}
-                theme={(theme as string) || "light"}
-                allFiles={files}
-                defaultViewer={defaultViewer}
-                viewerOverride={viewerOverride as string}
-                onSetDefaultViewer={onSetDefaultViewer}
-                session={session}
-                hasToggle
-              />
-            ) : isTooLarge ? (
+              <div>This is a folder viewer</div>
+            ) : // <FolderViewer
+            //   context={context}
+            //   theme={(theme as string) || "light"}
+            //   allFiles={files}
+            //   defaultViewer={defaultViewer}
+            //   viewerOverride={viewerOverride as string}
+            //   onSetDefaultViewer={onSetDefaultViewer}
+            //   session={session}
+            //   hasToggle
+            // />
+            isTooLarge ? (
               <div className="italic p-4 pt-40 text-center mx-auto text-gray-600">
                 Oh boy, that's a honkin file! It's {size / 1000} KBs.
               </div>
@@ -152,9 +210,8 @@ export function RepoDetail(props: RepoDetailProps) {
               <FileViewer
                 context={context}
                 theme={(theme as string) || "light"}
-                defaultViewer={defaultViewer}
-                viewerOverride={viewerOverride as string}
-                onSetDefaultViewer={onSetDefaultViewer}
+                viewer={viewer}
+                viewerContext={viewerContext}
                 session={session}
                 hasToggle
               />

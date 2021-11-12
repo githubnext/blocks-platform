@@ -4,26 +4,26 @@ import { viewers as fileViewers } from "./viewers";
 import { folderViewers } from "./folder-viewers";
 
 interface ViewerPickerProps {
-  value: string;
-  extension?: string;
+  viewers: Viewer[];
+  value: Viewer;
   isFolder?: boolean;
-  onChange: (newType: string) => void;
+  path: string;
+  onChange: (newType: Viewer) => void;
 }
 
 export default function ViewerPicker(props: ViewerPickerProps) {
-  const { value, extension, isFolder, onChange } = props;
-  const defaultViewer = isFolder ? "sidebar" : (getViewerFromFilename(`.${extension}`) || "code")
-  const relevantViewers = (
-    isFolder
-      ? folderViewers
-      : fileViewers.filter(viewer => (
-        viewer.extensions.includes(extension) || viewer.extensions.includes("*")
-      )))
-    .sort((a, b) => (a.id === defaultViewer) ? -1 : 1); // put default viewer first
+  const { viewers, value, path, isFolder, onChange } = props;
+  // const defaultViewer = isFolder ? "sidebar" : (getViewerFromFilename(`.${extension}`) || "code")
+  const extension = path.split(".").slice(-1)[0];
+  const relevantViewers = viewers.filter(
+    (d) => d.extensions.includes("*") || d.extensions.includes(extension)
+  );
 
   return (
     <SelectMenu>
-      <Button ml={3} as="summary">Viewer: {value}</Button>
+      <Button ml={3} as="summary">
+        Viewer: {value?.title}
+      </Button>
 
       <SelectMenu.Modal>
         <SelectMenu.Header>Viewers</SelectMenu.Header>
@@ -32,12 +32,12 @@ export default function ViewerPicker(props: ViewerPickerProps) {
             return (
               <SelectMenu.Item
                 as="button"
-                key={d.id}
+                key={d.entry}
                 onClick={(e) => {
-                  onChange(d.id);
+                  onChange(d);
                 }}
               >
-                {d.label}
+                {d.title}
               </SelectMenu.Item>
             );
           })}

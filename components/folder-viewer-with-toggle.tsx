@@ -17,6 +17,7 @@ interface FolderViewerProps {
     path: string;
     fileRef: string;
   };
+  viewers: any[];
   viewerOverride?: string;
   defaultViewer?: string;
   hasToggle?: boolean;
@@ -37,6 +38,7 @@ export function FolderViewer(props: FolderViewerProps) {
     allFiles,
     theme,
     viewerOverride,
+    viewers,
     defaultViewer,
     hasToggle,
     onSetDefaultViewer,

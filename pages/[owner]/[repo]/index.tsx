@@ -1,8 +1,8 @@
 import { FullPageLoader } from "components/full-page-loader";
-import { IndexPageDetail } from "components/index-page-detail";
+import { RepoDetail } from "components/repo-detail";
 import { signIn, useSession } from "next-auth/react";
 
-export default function IndexPageContainer() {
+export default function RepoDetailContainer() {
   const { data: session, status } = useSession({
     required: true,
     onUnauthenticated: () => {
@@ -16,7 +16,7 @@ export default function IndexPageContainer() {
   }
 
   if (status === "authenticated" && session) {
-    return <IndexPageDetail session={session} />;
+    return <RepoDetail session={session} />;
   }
 
   // TODO: Handle errors here

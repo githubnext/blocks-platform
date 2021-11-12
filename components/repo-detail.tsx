@@ -7,17 +7,17 @@ import { useFileContent, useMetadata, useRepoFiles, useRepoInfo } from "hooks";
 import { FileViewer } from "components/file-viewer-with-toggle";
 import { FolderViewer } from "components/folder-viewer-with-toggle";
 import { ActivityFeed } from "components/ActivityFeed";
-import { viewers } from "components/viewers";
-import { getViewerFromFilename } from "lib";
+import { findNestedItem, getViewerFromFilename } from "lib";
 import { GitHubHeader } from "./github-header";
 import { RepoHeader } from "./repo-header";
 import { Sidebar } from "./Sidebar";
 
-interface IndexPageDetailProps {
+interface RepoDetailProps {
   session: Session;
 }
 
-export function IndexPageDetail(props: IndexPageDetailProps) {
+export function RepoDetail(props: RepoDetailProps) {
+  const { session } = props;
   const router = useRouter();
   const { setColorMode } = useTheme();
 
@@ -34,18 +34,13 @@ export function IndexPageDetail(props: IndexPageDetailProps) {
     setColorMode(theme === "dark" ? "night" : "day");
   }, [theme]);
 
-  const { data: folderData, status } = useFileContent(
-    {
-      repo: repo as string,
-      owner: owner as string,
-      path: path as string,
-      fileRef: fileRef as string,
-    },
-    {
-      enabled: Boolean(repo) && Boolean(owner),
-      refetchOnWindowFocus: false,
-    }
-  );
+  const { data: folderData, status } = useFileContent({
+    repo: repo as string,
+    owner: owner as string,
+    path: path as string,
+    fileRef: fileRef as string,
+    token: session.token as string,
+  });
 
   const isFolder =
     status !== "success" ? false : folderData?.[0]?.path !== path;
@@ -78,28 +73,6 @@ export function IndexPageDetail(props: IndexPageDetailProps) {
     });
   };
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const extension = (path as string)?.split(".").slice(-1)[0];
-    const relevantViewers = viewers
-      .filter(
-        (viewer) =>
-          viewer.extensions.includes(extension) ||
-          viewer.extensions.includes("*")
-      )
-      .map((v) => ({ id: v.id, label: v.label }))
-      .sort((a, b) => (a.id === defaultViewer ? -1 : 1)); // put default viewer first
-  }, [path, defaultViewer]);
-
-  const findNestedItem = (path: string, files: any) => {
-    const nextItemName = path.split("/")[0];
-    const nextItem = files.find((item) => item.name === nextItemName);
-    const nextPath = path.split("/").slice(1).join("/");
-    return nextPath
-      ? findNestedItem(nextPath, nextItem?.children || [])
-      : nextItem;
-  };
   const folderFiles = useMemo(
     () =>
       (isFolder && path

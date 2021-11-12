@@ -23,6 +23,7 @@ export interface RepoContext {
 
 export interface UseFileContentParams extends RepoContext {
   path: string;
+  token: string;
   fileRef?: string;
 }
 
@@ -31,9 +32,15 @@ export type DirectoryItem = components["schemas"]["content-directory"][number];
 async function getFileContent(
   params: UseFileContentParams
 ): Promise<DirectoryItem[]> {
-  const { repo, owner, path, fileRef } = params;
+  const { repo, owner, path, fileRef, token } = params;
 
-  const { data, status } = await octokit.repos.getContent({
+  const userOctokit = new Octokit({
+    auth: token,
+  });
+
+  console.log(token, userOctokit);
+
+  const { data, status } = await userOctokit.repos.getContent({
     owner,
     repo,
     path,
@@ -49,22 +56,25 @@ async function getFileContent(
   }
 }
 
-export function useFileContent(
-  params: UseFileContentParams,
-  config?: UseQueryOptions<DirectoryItem[]>
-) {
-  const { repo, owner, path, fileRef } = params;
+export function useFileContent(params: UseFileContentParams) {
+  const { repo, owner, path, fileRef, token } = params;
+  console.log("useFileContent", token);
 
   return useQuery(
-    ["file", params, config.queryKey],
+    ["file", params],
     () =>
       getFileContent({
         repo,
         owner,
         path,
         fileRef,
+        token,
       }),
-    config
+    {
+      enabled: Boolean(repo) && Boolean(owner) && Boolean(token),
+      refetchOnWindowFocus: false,
+      retry: false,
+    }
   );
 }
 

@@ -1,6 +1,6 @@
 import { SandpackRunner } from "@codesandbox/sandpack-react";
 import "@codesandbox/sandpack-react/dist/index.css";
-import { RepoContext, RepoFiles } from "api";
+import { RepoContext, RepoFiles } from "ghapi";
 import { useFileContent, useViewerContentAndDependencies } from "hooks";
 import { useMemo } from "react";
 import { Session } from "node_modules/next-auth";

@@ -1,4 +1,4 @@
-import { RepoContext } from "api";
+import { RepoContext } from "ghapi";
 import { SandboxedFileViewer } from "components/sandboxed-file-viewer";
 import { useFileContent, useMetadata } from "hooks";
 import { getLanguageFromFilename } from "lib";

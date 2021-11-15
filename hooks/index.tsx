@@ -16,6 +16,7 @@ import {
   RepoContext,
   RepoContextWithToken,
   UseFolderContentParams,
+  getFileContentsAndDependencies,
 } from "ghapi";
 
 // get env variable

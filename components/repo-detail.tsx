@@ -19,18 +19,25 @@ interface RepoDetailProps {
   session: Session;
 }
 
-const defaultViewer = {
+const defaultFileViewer = {
   description: "A basic code viewer",
   entry: "/viewers/file-viewers/code/index.tsx",
   extensions: ["*"],
   title: "Code viewer",
   type: "file",
 }
+
+const defaultFolderViewer = {
+  "type": "folder",
+  "title": "Minimap",
+  "description": "A visualization of your folders and files",
+  "entry": "/viewers/folder-viewers/minimap/index.tsx"
+}
 export function RepoDetail(props: RepoDetailProps) {
   const { session } = props;
   const router = useRouter();
   const { setColorMode } = useTheme();
-  const [viewer, setViewer] = useState<Viewer>(defaultViewer);
+  const [viewer, setViewer] = useState<Viewer>(defaultFileViewer);
 
   const {
     repo,
@@ -75,6 +82,12 @@ export function RepoDetail(props: RepoDetailProps) {
     repoFilesStatus === "success"
       ? files?.find((d) => d.path === path)?.type !== "blob"
       : true;
+
+  useEffect(() => {
+    if (repoFilesStatus !== "success") return
+    const viewer = isFolder ? defaultFolderViewer : defaultFileViewer;
+    setViewer(viewer);
+  }, [isFolder]);
 
   const { metadata, onUpdateMetadata } = useMetadata({
     owner: owner as string,

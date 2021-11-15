@@ -1,16 +1,11 @@
-import { Box, Button } from "@primer/components";
-import { CodeViewer, viewers } from "components/viewers";
+import { RepoContext } from "api";
+import { SandboxedFileViewer } from "components/sandboxed-file-viewer";
 import { useFileContent, useMetadata } from "hooks";
 import { getLanguageFromFilename } from "lib";
-import dynamic from "next/dynamic";
-import { useRouter } from "next/router";
 import { Session } from "next-auth";
-import React, { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import React from "react";
 import { ErrorBoundary } from "./error-boundary";
-import { SandboxedFileViewer } from "components/sandboxed-file-viewer";
-import { RepoContext } from "api";
-
-const ViewerPicker = dynamic(() => import("./viewer-picker"), { ssr: false });
 
 interface FileViewerProps {
   theme: string;
@@ -23,12 +18,11 @@ interface FileViewerProps {
   };
   dependencies: Record<string, string>;
   viewer: Viewer;
-  hasToggle?: boolean;
   session: Session;
 }
 
 export function FileViewer(props: FileViewerProps) {
-  const { context, theme, viewer, dependencies, hasToggle, session, viewerContext } = props;
+  const { context, theme, viewer, dependencies, session, viewerContext } = props;
   const { repo, owner, path, fileRef } = context;
 
   const { data } = useFileContent({

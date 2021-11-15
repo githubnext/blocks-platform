@@ -135,7 +135,7 @@ export async function getFolderContent(
 
 type listRepoFilesResponse =
   Endpoints["GET /repos/{owner}/{repo}/git/trees/{tree_sha}"]["response"];
-type RepoFiles = listRepoFilesResponse["data"]["tree"];
+export type RepoFiles = listRepoFilesResponse["data"]["tree"];
 
 export async function getRepoInfo(
   params: RepoContextWithToken

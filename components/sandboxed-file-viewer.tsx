@@ -1,6 +1,6 @@
 import { SandpackRunner } from "@codesandbox/sandpack-react";
 import "@codesandbox/sandpack-react/dist/index.css";
-import { RepoContext } from "api";
+import { RepoContext, RepoFiles } from "api";
 import { useFileContent, useViewerContentAndDependencies } from "hooks";
 import { useMemo } from "react";
 import { Session } from "node_modules/next-auth";
@@ -8,10 +8,11 @@ import { Session } from "node_modules/next-auth";
 interface SandboxedFileViewerProps {
   viewer: Viewer;
   viewerContext: RepoContext;
-  contents: string;
+  contents?: string;
+  tree?: RepoFiles;
   metadata: any;
   meta: {
-    language: string;
+    language?: string;
     theme: string;
     name: string;
     download_url: string;
@@ -27,7 +28,7 @@ interface SandboxedFileViewerProps {
 }
 
 export function SandboxedFileViewer(props: SandboxedFileViewerProps) {
-  const { viewer, viewerContext, contents, dependencies, meta } = props;
+  const { viewer, viewerContext, contents, tree, dependencies, meta } = props;
   const { repo, owner, path } = meta;
 
   const params = useMemo(() => ({
@@ -75,7 +76,7 @@ export function SandboxedFileViewer(props: SandboxedFileViewerProps) {
       export default function WrappedViewer() {
         return <Viewer context={${JSON.stringify(
       viewerContent.context
-    )}} content={${JSON.stringify(contents)}} />
+    )}} content={${JSON.stringify(contents)}} tree={${JSON.stringify(tree)}} />
       }
     `;
 

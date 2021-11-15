@@ -1,5 +1,5 @@
 import { RepoContext, RepoFiles } from "ghapi";
-import { SandboxedFileViewer } from "components/sandboxed-file-viewer";
+import { SandboxedFileViewer } from "components/sandboxed-viewer";
 import { useMetadata } from "hooks";
 import { Session } from "next-auth";
 import React, { useMemo } from "react";

@@ -1,5 +1,5 @@
 import { RepoContext } from "ghapi";
-import { SandboxedFileViewer } from "components/sandboxed-file-viewer";
+import { SandboxedFileViewer } from "components/sandboxed-viewer";
 import { useFileContent, useMetadata } from "hooks";
 import { getLanguageFromFilename } from "lib";
 import { Session } from "next-auth";

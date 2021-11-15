@@ -2,6 +2,7 @@ import { Button, SelectMenu } from "@primer/components";
 import { getViewerFromFilename } from "lib";
 import { viewers as fileViewers } from "./viewers";
 import { folderViewers } from "./folder-viewers";
+import { useEffect } from "react";
 
 interface ViewerPickerProps {
   viewers: Viewer[];
@@ -18,6 +19,13 @@ export default function ViewerPicker(props: ViewerPickerProps) {
   const relevantViewers = viewers.filter(
     (d) => !d.extensions || d.extensions.includes("*") || d.extensions.includes(extension)
   );
+
+  useEffect(() => {
+    if (!relevantViewers.find((v) => v.entry === value.entry)) {
+      console.log("CHANGE")
+      onChange(relevantViewers[0]);
+    }
+  }, [value, relevantViewers.map(d => d.entry).join(",")])
 
   return (
     <SelectMenu>

@@ -37,7 +37,7 @@ export function SandboxedFileViewer(props: SandboxedFileViewerProps) {
     path: "src" + viewer.entry,
     fileRef: "main",
     token: "",
-  }), [viewerContext.repo, viewerContext.owner, viewer])
+  }), [viewerContext.repo, viewerContext.owner, viewer.entry])
   const { data, status } = useViewerContentAndDependencies(params);
 
   const [viewerContent, ...otherFiles] = data || []
@@ -61,14 +61,12 @@ export function SandboxedFileViewer(props: SandboxedFileViewerProps) {
     }, {})
   }, [data])
 
-
-
-
-
   if (!viewerContent?.content) return <div className="p-4">Loading...</div>;
 
   if (status === "loading") return <div className="p-4">Loading...</div>;
   if (status === "error") return <div className="p-4">Error...</div>;
+
+  if (!contents && !tree) return null
 
   if (status === "success" && data) {
     const injectedSource = `

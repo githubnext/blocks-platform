@@ -37,7 +37,7 @@ export function RepoDetail(props: RepoDetailProps) {
   const { session } = props;
   const router = useRouter();
   const { setColorMode } = useTheme();
-  const [viewer, setViewer] = useState<Viewer>(defaultFileViewer);
+  const [viewer, setViewer] = useState<Viewer>(defaultFolderViewer);
 
   const {
     repo,

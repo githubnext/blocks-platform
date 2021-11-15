@@ -22,7 +22,6 @@ export default function ViewerPicker(props: ViewerPickerProps) {
 
   useEffect(() => {
     if (!relevantViewers.find((v) => v.entry === value.entry)) {
-      console.log("CHANGE")
       onChange(relevantViewers[0]);
     }
   }, [value, relevantViewers.map(d => d.entry).join(",")])

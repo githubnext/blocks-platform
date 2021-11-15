@@ -16,7 +16,7 @@ import {
   RepoContext,
   RepoContextWithToken,
   UseFolderContentParams,
-} from "api";
+} from "ghapi";
 
 // get env variable
 const GITHUB_PAT = process.env.NEXT_PUBLIC_GITHUB_PAT;

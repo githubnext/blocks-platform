@@ -73,8 +73,8 @@ export function RepoDetail(props: RepoDetailProps) {
 
   const isFolder =
     repoFilesStatus === "success"
-      ? files?.find((d) => d.path === path)?.type === "tree"
-      : false;
+      ? files?.find((d) => d.path === path)?.type !== "blob"
+      : true;
 
   const { metadata, onUpdateMetadata } = useMetadata({
     owner: owner as string,

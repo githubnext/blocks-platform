@@ -19,11 +19,18 @@ interface RepoDetailProps {
   session: Session;
 }
 
+const defaultViewer = {
+  description: "A basic code viewer",
+  entry: "/viewers/file-viewers/code/index.tsx",
+  extensions: ["*"],
+  title: "Code viewer",
+  type: "file",
+}
 export function RepoDetail(props: RepoDetailProps) {
   const { session } = props;
   const router = useRouter();
   const { setColorMode } = useTheme();
-  const [viewer, setViewer] = useState<Viewer>();
+  const [viewer, setViewer] = useState<Viewer>(defaultViewer);
 
   const {
     repo,
@@ -31,7 +38,6 @@ export function RepoDetail(props: RepoDetailProps) {
     path = "",
     theme,
     fileRef,
-    viewerOverride,
   } = router.query;
 
   const context = {
@@ -78,12 +84,12 @@ export function RepoDetail(props: RepoDetailProps) {
     token: session.token as string,
   });
 
-  const defaultViewer = metadata.defaultViewer;
-  const onSetDefaultViewer = (viewerId: string) => {
-    onUpdateMetadata({
-      defaultViewer: viewerId,
-    });
-  };
+  // const defaultViewer = metadata.defaultViewer;
+  // const onSetDefaultViewer = (viewerId: string) => {
+  //   onUpdateMetadata({
+  //     defaultViewer: viewerId,
+  //   });
+  // };
 
   const viewerContext = {
     repo: "composable-github-viewer-examples",
@@ -137,7 +143,7 @@ export function RepoDetail(props: RepoDetailProps) {
       />
       <div className="flex flex-1 overflow-hidden">
         <div className="flex-none w-80 border-r border-gray-200">
-          {repoFilesStatus === "loading" || repoInfoStatus === "loading" ? (
+          {repoFilesStatus === "loading" ? (
             <div className="flex flex-col items-center justify-center h-full w-full">
               <div className="animate-pulse flex space-y-4">
                 <div className="rounded-full bg-gray-200 h-12 w-full"></div>
@@ -191,17 +197,16 @@ export function RepoDetail(props: RepoDetailProps) {
           {!!viewer &&
             repoFilesStatus !== "loading" &&
             (isFolder ? (
-              <div>This is a folder viewer</div>
-            ) : // <FolderViewer
-              //   context={context}
-              //   theme={(theme as string) || "light"}
-              //   allFiles={files}
-              //   defaultViewer={defaultViewer}
-              //   viewerOverride={viewerOverride as string}
-              //   onSetDefaultViewer={onSetDefaultViewer}
-              //   session={session}
-              //   hasToggle
-              // />
+              <FolderViewer
+                allFiles={files}
+                theme={(theme as string) || "light"}
+                viewerContext={viewerContext}
+                context={context}
+                dependencies={viewersInfoParsed.dependencies}
+                viewer={viewer}
+                session={session}
+              />
+            ) :
               isTooLarge ? (
                 <div className="italic p-4 pt-40 text-center mx-auto text-gray-600">
                   Oh boy, that's a honkin file! It's {size / 1000} KBs.
@@ -214,7 +219,6 @@ export function RepoDetail(props: RepoDetailProps) {
                   dependencies={viewersInfoParsed.dependencies}
                   viewerContext={viewerContext}
                   session={session}
-                  hasToggle
                 />
               ))}
         </div>

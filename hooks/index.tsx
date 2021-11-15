@@ -120,7 +120,7 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
       },
       sha: sha,
     });
-  } catch (e) {}
+  } catch (e) { }
 }
 
 export function useUpdateFileContents(
@@ -212,4 +212,29 @@ export function useRepoFiles(params: RepoContextWithToken) {
     refetchOnWindowFocus: false,
     retry: false,
   });
+}
+
+
+export function useViewerContentAndDependencies(
+  params: UseFileContentParams
+) {
+  const { repo, owner, path, fileRef = "main", token } = params;
+
+  return useQuery(
+    ["viewer-content-and-dependencies", params],
+    () =>
+      getFileContentsAndDependencies({
+        repo,
+        owner,
+        path,
+        fileRef,
+        token,
+      }),
+    {
+      enabled:
+        Boolean(repo) && Boolean(owner) && Boolean(path),
+      refetchOnWindowFocus: false,
+      retry: false,
+    }
+  );
 }

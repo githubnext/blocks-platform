@@ -193,29 +193,30 @@ export function RepoDetail(props: RepoDetailProps) {
             (isFolder ? (
               <div>This is a folder viewer</div>
             ) : // <FolderViewer
-            //   context={context}
-            //   theme={(theme as string) || "light"}
-            //   allFiles={files}
-            //   defaultViewer={defaultViewer}
-            //   viewerOverride={viewerOverride as string}
-            //   onSetDefaultViewer={onSetDefaultViewer}
-            //   session={session}
-            //   hasToggle
-            // />
-            isTooLarge ? (
-              <div className="italic p-4 pt-40 text-center mx-auto text-gray-600">
-                Oh boy, that's a honkin file! It's {size / 1000} KBs.
-              </div>
-            ) : (
-              <FileViewer
-                context={context}
-                theme={(theme as string) || "light"}
-                viewer={viewer}
-                viewerContext={viewerContext}
-                session={session}
-                hasToggle
-              />
-            ))}
+              //   context={context}
+              //   theme={(theme as string) || "light"}
+              //   allFiles={files}
+              //   defaultViewer={defaultViewer}
+              //   viewerOverride={viewerOverride as string}
+              //   onSetDefaultViewer={onSetDefaultViewer}
+              //   session={session}
+              //   hasToggle
+              // />
+              isTooLarge ? (
+                <div className="italic p-4 pt-40 text-center mx-auto text-gray-600">
+                  Oh boy, that's a honkin file! It's {size / 1000} KBs.
+                </div>
+              ) : (
+                <FileViewer
+                  context={context}
+                  theme={(theme as string) || "light"}
+                  viewer={viewer}
+                  dependencies={viewersInfoParsed.dependencies}
+                  viewerContext={viewerContext}
+                  session={session}
+                  hasToggle
+                />
+              ))}
         </div>
 
         <div className="flex-none w-80 h-full border-l border-gray-200">

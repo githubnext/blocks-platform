@@ -16,7 +16,7 @@ export default function ViewerPicker(props: ViewerPickerProps) {
   // const defaultViewer = isFolder ? "sidebar" : (getViewerFromFilename(`.${extension}`) || "code")
   const extension = path.split(".").slice(-1)[0];
   const relevantViewers = viewers.filter(
-    (d) => d.extensions.includes("*") || d.extensions.includes(extension)
+    (d) => !d.extensions || d.extensions.includes("*") || d.extensions.includes(extension)
   );
 
   return (

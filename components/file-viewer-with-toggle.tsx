@@ -21,13 +21,14 @@ interface FileViewerProps {
     path: string;
     fileRef: string;
   };
+  dependencies: Record<string, string>;
   viewer: Viewer;
   hasToggle?: boolean;
   session: Session;
 }
 
 export function FileViewer(props: FileViewerProps) {
-  const { context, theme, viewer, hasToggle, session, viewerContext } = props;
+  const { context, theme, viewer, dependencies, hasToggle, session, viewerContext } = props;
   const { repo, owner, path, fileRef } = context;
 
   const { data } = useFileContent({
@@ -72,6 +73,7 @@ export function FileViewer(props: FileViewerProps) {
               username: session.user.name,
             }}
             viewerContext={viewerContext}
+            dependencies={dependencies}
             contents={code}
             metadata={metadata}
             // @ts-ignore

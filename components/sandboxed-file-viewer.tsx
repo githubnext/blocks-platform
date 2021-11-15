@@ -1,5 +1,8 @@
+import { SandpackRunner } from "@codesandbox/sandpack-react";
+import "@codesandbox/sandpack-react/dist/index.css";
 import { RepoContext } from "api";
-import { useFileContent } from "hooks";
+import { useFileContent, useViewerContentAndDependencies } from "hooks";
+import { useMemo } from "react";
 import { Session } from "node_modules/next-auth";
 
 interface SandboxedFileViewerProps {
@@ -18,55 +21,79 @@ interface SandboxedFileViewerProps {
     sha: string;
     username: string;
   };
+  dependencies: Record<string, string>;
   onUpdateMetaData: () => Promise<void>;
   session: Session;
 }
 
 export function SandboxedFileViewer(props: SandboxedFileViewerProps) {
-  const { viewer, viewerContext, meta } = props;
+  const { viewer, viewerContext, contents, dependencies, meta } = props;
   const { repo, owner, path } = meta;
 
-  console.log(viewer, viewerContext, meta);
-
-  const { data, status } = useFileContent({
+  const params = useMemo(() => ({
     repo: viewerContext.repo,
     owner: viewerContext.owner,
-    path: viewer.entry,
-    fileRef: "",
+    path: "src" + viewer.entry,
+    fileRef: "main",
     token: "",
-  });
+  }), [viewerContext.repo, viewerContext.owner, viewer])
+  const { data, status } = useViewerContentAndDependencies(params);
 
-  return <div>Sandboxed</div>;
+  const [viewerContent, ...otherFiles] = data || []
+  const rootPath = "src" + (viewer.entry || "").split("/").slice(0, -1).join("/")
+  const otherFilesMap = useMemo(() => {
+    return otherFiles.reduce<Record<string, string>>((acc, file) => {
+      const relativePath = file.context.path.replace(rootPath, "")
+      acc[relativePath] = file.content;
+      return acc;
+    }, {})
+  }, [otherFiles])
 
-  // if (status === "loading") return <div className="p-4">Loading...</div>;
-  // if (status === "error") return <div className="p-4">Error...</div>;
+  const relevantDependencies = useMemo(() => {
+    if (!data) return {}
+    const allDependencyNames = Object.keys(dependencies)
+    const allFileContents = data.map(d => d.content).join("/n")
+    const relevantDependencyNames = allDependencyNames.filter(d => allFileContents.includes(d))
+    return relevantDependencyNames.reduce<Record<string, string>>((acc, d) => {
+      acc[d] = dependencies[d]
+      return acc;
+    }, {})
+  }, [data])
 
-  // if (status === "success" && data) {
-  //   const injectedSource = `
-  //     ${data.source}
-  //     export default function WrappedViewer() {
-  //       return <Viewer context={${JSON.stringify(
-  //         context
-  //       )}} content={${JSON.stringify(content)}} />
-  //     }
-  //   `;
 
-  //   return (
-  //     <div className="flex-1 h-full sandbox-wrapper">
-  //       <SandpackRunner
-  //         template="react"
-  //         code={injectedSource}
-  //         customSetup={{
-  //           dependencies: data.dependencies,
-  //           files: data.files,
-  //         }}
-  //         options={{
-  //           showNavigator: false,
-  //         }}
-  //       />
-  //     </div>
-  //   );
-  // }
 
-  return null;
+
+
+  if (!viewerContent?.content) return <div className="p-4">Loading...</div>;
+
+  if (status === "loading") return <div className="p-4">Loading...</div>;
+  if (status === "error") return <div className="p-4">Error...</div>;
+
+  if (status === "success" && data) {
+    const injectedSource = `
+      ${viewerContent.content}
+      export default function WrappedViewer() {
+        return <Viewer context={${JSON.stringify(
+      viewerContent.context
+    )}} content={${JSON.stringify(contents)}} />
+      }
+    `;
+
+
+    return (
+      <div className="flex-1 h-full sandbox-wrapper">
+        <SandpackRunner
+          template="react"
+          code={injectedSource}
+          customSetup={{
+            dependencies: relevantDependencies,
+            files: otherFilesMap,
+          }}
+          options={{
+            showNavigator: false,
+          }}
+        />
+      </div>
+    );
+  }
 }

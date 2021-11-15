@@ -1,3 +1,5 @@
+import parseStaticImports from "parse-static-imports";
+
 export interface RepoContext {
   repo: string;
   owner: string;
@@ -24,7 +26,6 @@ export async function getFileContent(
 
   const apiUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${fileRef}/${path}`;
   const res = await fetch(apiUrl);
-
   if (res.status !== 200) throw new Error("Something bad happened");
 
   const content = await res.text();
@@ -43,6 +44,47 @@ export async function getFileContent(
     content,
     context,
   };
+}
+
+type Import = {
+  moduleName: string;
+  starImport: string;
+  namedImports: {
+    name: string;
+    alias: string;
+  }[];
+  defaultImport: string;
+  sideEffectOnly: boolean;
+};
+
+const combinePaths = (path1: string, path2: string): string => {
+  return path1.split("/").slice(0, -1).join("/") + path2.slice(1);
+};
+
+export async function getFileContentsAndDependencies(
+  params: UseFileContentParams
+): Promise<FileData[]> {
+  const { repo, owner, path, fileRef, token } = params;
+
+  const file = await getFileContent(params);
+  const imports = await parseStaticImports(file.content);
+  // TODO: do we need to make this smarter?
+  const relativeImports = imports.filter((d: Import) =>
+    d.moduleName.startsWith(".")
+  );
+  let otherFiles = [];
+  for (const relativeImport of relativeImports) {
+    const filePath = relativeImport.moduleName;
+    const absoluteFilePath = combinePaths(path, filePath);
+    const fileParams = {
+      ...params,
+      path: absoluteFilePath,
+    };
+    const importFileData = await getFileContentsAndDependencies(fileParams);
+    otherFiles = [...otherFiles, ...importFileData];
+  }
+
+  return [file, ...otherFiles];
 }
 
 export async function getFolderContent(

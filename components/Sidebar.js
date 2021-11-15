@@ -21,7 +21,7 @@ export const Sidebar = ({
 
   const nestedFiles = useMemo(() => {
     try {
-      return getNestedFileTree(files);
+      return getNestedFileTree(files)?.[0]?.children || []
     } catch (e) {
       console.log(e);
     }
@@ -123,9 +123,8 @@ const Folder = ({
         }}
       >
         <a
-          className={`relative flex items-center text-left w-full whitespace-nowrap overflow-ellipsis ${
-            isActive ? "bg-gray-50 border-gray-200" : " border-transparent"
-          } border border-r-0`}
+          className={`relative flex items-center text-left w-full whitespace-nowrap overflow-ellipsis ${isActive ? "bg-gray-50 border-gray-200" : " border-transparent"
+            } border border-r-0`}
           onClick={() => {
             if (!canCollapse) return;
             setIsExpanded(!isExpanded);
@@ -201,9 +200,8 @@ const File = ({
       }}
     >
       <a
-        className={`relative flex items-center justify-between py-2 pl-3 pr-3 text-left w-full text-sm whitespace-nowrap overflow-ellipsis ${
-          isActive ? "bg-gray-50 border-gray-200" : " border-transparent"
-        } border border-r-0`}
+        className={`relative flex items-center justify-between py-2 pl-3 pr-3 text-left w-full text-sm whitespace-nowrap overflow-ellipsis ${isActive ? "bg-gray-50 border-gray-200" : " border-transparent"
+          } border border-r-0`}
       >
         <div className="flex items-center flex-1 max-w-full">
           <div className="mr-2">
@@ -245,9 +243,8 @@ const FileDot = ({ name, type = "file" }) => {
 
   return (
     <div
-      className={`h-[0.8em] w-[0.5em] rounded-full border-[1px] ${
-        type === "folder" ? "border-gray-400" : "border-transparent"
-      }`}
+      className={`h-[0.8em] w-[0.5em] rounded-full border-[1px] ${type === "folder" ? "border-gray-400" : "border-transparent"
+        }`}
       style={{ background: color }}
     />
   );

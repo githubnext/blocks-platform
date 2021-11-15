@@ -53,3 +53,11 @@ interface RepoInfo {
   commits: any;
   fileChanges: any;
 }
+
+interface Viewer {
+  type: string;
+  title: string;
+  description: string;
+  entry: string;
+  extensions?: string[];
+}

@@ -21,10 +21,10 @@ export default function ViewerPicker(props: ViewerPickerProps) {
   );
 
   useEffect(() => {
-    if (!relevantViewers.find((v) => v.entry === value.entry)) {
+    if (!relevantViewers?.find((v) => v?.entry === value?.entry)) {
       onChange(relevantViewers[0]);
     }
-  }, [value, relevantViewers.map(d => d.entry).join(",")])
+  }, [value, relevantViewers?.map(d => d.entry).join(",")])
 
   return (
     <SelectMenu>

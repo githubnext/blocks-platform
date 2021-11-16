@@ -1,5 +1,6 @@
 import { Header } from "@primer/components";
 import { NextOctocat } from "./next-octocat";
+import SearchDropdown from "./search-dropdown";
 
 export const GitHubHeader = () => {
   return (
@@ -13,7 +14,10 @@ export const GitHubHeader = () => {
       </Header.Item>
 
       <Header.Item full>
-        This is a prototype. More information about this project{" "}
+        <div className="mr-2">
+          <SearchDropdown/>
+        </div>
+        GitHub Blocks is an exploratory prototype. More information about this project{" "}
         <a href="" className="underline ml-1">
           {" "}
           can be found here

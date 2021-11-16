@@ -26,6 +26,13 @@ export default function ViewerPicker(props: ViewerPickerProps) {
     }
   }, [value, relevantViewers?.map(d => d.entry).join(",")])
 
+  // start with the second default viewer not the code one
+  useEffect(() => {
+    if (relevantViewers.length > 0) {
+      onChange(relevantViewers[1]);
+    }
+  }, [relevantViewers?.map(d => d.entry).join(",")])
+
   return (
     <SelectMenu>
       <Button ml={3} as="summary">

@@ -20,7 +20,7 @@ interface RepoDetailProps {
 
 const defaultFileViewer = {
   description: "A basic code viewer",
-  entry: "/viewers/file-viewers/code/index.tsx",
+  entry: "/src/viewers/file-viewers/code/index.tsx",
   extensions: ["*"],
   title: "Code viewer",
   type: "file",
@@ -30,7 +30,7 @@ const defaultFolderViewer = {
   "type": "folder",
   "title": "Minimap",
   "description": "A visualization of your folders and files",
-  "entry": "/viewers/folder-viewers/minimap/index.tsx"
+  "entry": "/src/viewers/folder-viewers/minimap/index.tsx"
 }
 export function RepoDetail(props: RepoDetailProps) {
   const { session } = props;
@@ -104,7 +104,7 @@ export function RepoDetail(props: RepoDetailProps) {
   // };
 
   const viewerContext = {
-    repo: "composable-github-viewer-examples",
+    repo: "composable-github-example-viewers",
     owner: "githubnext",
   };
 
@@ -113,7 +113,7 @@ export function RepoDetail(props: RepoDetailProps) {
     status: viewersStatus,
     error: viewersError,
   } = useFileContent({
-    repo: "composable-github-viewer-examples",
+    repo: "composable-github-example-viewers",
     owner: "githubnext",
     token: session.token as string,
     path: "package.json",

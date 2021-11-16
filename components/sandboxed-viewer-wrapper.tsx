@@ -12,12 +12,11 @@ interface SandboxedViewerWrapperProps {
   context: FileContext | FolderContext;
   dependencies: Record<string, string>;
   metadata: any;
-  onUpdateMetadata: () => Promise<void>;
   session: Session;
 }
 
 export function SandboxedViewerWrapper(props: SandboxedViewerWrapperProps) {
-  const { viewer, viewerContext, metadata, onUpdateMetadata, contents, theme, tree, dependencies, context, session } = props;
+  const { viewer, viewerContext, metadata, contents, theme, tree, dependencies, context, session } = props;
 
   const getFileContentForPath = useCallback(async (path: string) => {
     const res = await getFileContent({
@@ -45,9 +44,7 @@ export function SandboxedViewerWrapper(props: SandboxedViewerWrapperProps) {
         dependencies={dependencies}
         viewer={viewer}
         metadata={metadata}
-        onUpdateMetadata={onUpdateMetadata}
         session={session}
-        onRequestUpdateContent={() => { }}
       />
     </div>
   );

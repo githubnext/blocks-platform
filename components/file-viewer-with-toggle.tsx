@@ -2,7 +2,7 @@ import { RepoContext } from "ghapi";
 import { SandboxedViewerWrapper } from "components/sandboxed-viewer-wrapper";
 import { useFileContent, useMetadata } from "hooks";
 import { getLanguageFromFilename } from "lib";
-import React from "react";
+import React, { useEffect } from "react";
 import { ErrorBoundary } from "./error-boundary";
 import { FileContext } from "@githubnext/utils";
 
@@ -43,6 +43,21 @@ export function FileViewer(props: FileViewerProps) {
     token: session.token as string,
   });
 
+  useEffect(() => {
+    const onUpdateMetadataEvent = (event: MessageEvent) => {
+      // TODO: restrict by event.origin
+      if (event.data.codesandbox) return
+      if (event.data.type !== "update-metadata") return
+      const newMetadata = event?.data?.metadata || {};
+      onUpdateMetadata(newMetadata)
+    }
+    window.addEventListener("message", onUpdateMetadataEvent as EventListener)
+    return () => {
+      window.removeEventListener("message", onUpdateMetadataEvent as EventListener)
+    }
+  }, [onUpdateMetadata])
+
+
   return (
     <div className="h-full flex flex-col">
       <ErrorBoundary key={path}>
@@ -56,8 +71,6 @@ export function FileViewer(props: FileViewerProps) {
             contents={code}
             metadata={metadata}
             session={session}
-            // @ts-ignore
-            onUpdateMetadata={onUpdateMetadata}
           />
         </div>
       </ErrorBoundary>

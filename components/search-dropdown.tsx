@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Downshift from 'downshift';
+import Router from 'next/router'
 
 const items = ['githubnext/composable-github-example-viewers', 'githubnext/composable-github-example-files'];
 
@@ -10,12 +11,9 @@ export default function SearchDropdown() {
     const handleStateChange = (changes) => {
         if (changes.hasOwnProperty('selectedItem')) {
             setValue(changes.selectedItem);
-            console.log(changes.selectedItem);
-        //   this.setState({value: changes.selectedItem})
+            Router.push(`/${changes.selectedItem}`)
         } else if (changes.hasOwnProperty('inputValue')) {
-        //   this.setState({value: changes.inputValue})
-          setValue(changes.inputValue);
-          console.log(changes.inputValue);
+            setValue(changes.inputValue);
         }
       }
 

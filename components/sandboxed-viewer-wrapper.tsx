@@ -34,6 +34,11 @@ export function SandboxedViewerWrapper(props: SandboxedViewerWrapperProps) {
     theme,
   } as any
 
+  if ((!contents && viewer.type === "file")
+    || (!tree && viewer.type === "tree")) {
+    return null
+  }
+
   return (
     <div className="sandbox-wrapper h-full w-full">
       <SandboxedViewer

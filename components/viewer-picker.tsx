@@ -1,7 +1,4 @@
 import { Button, SelectMenu } from "@primer/components";
-import { getViewerFromFilename } from "lib";
-import { viewers as fileViewers } from "./viewers";
-import { folderViewers } from "./folder-viewers";
 import { useEffect } from "react";
 
 interface ViewerPickerProps {
@@ -17,21 +14,24 @@ export default function ViewerPicker(props: ViewerPickerProps) {
   // const defaultViewer = isFolder ? "sidebar" : (getViewerFromFilename(`.${extension}`) || "code")
   const extension = path.split(".").slice(-1)[0];
   const relevantViewers = viewers.filter(
-    (d) => !d.extensions || d.extensions.includes("*") || d.extensions.includes(extension)
+    (d) =>
+      !d.extensions ||
+      d.extensions.includes("*") ||
+      d.extensions.includes(extension)
   );
 
   useEffect(() => {
     if (!relevantViewers?.find((v) => v?.entry === value?.entry)) {
       onChange(relevantViewers[0]);
     }
-  }, [value, relevantViewers?.map(d => d.entry).join(",")])
+  }, [value, relevantViewers?.map((d) => d.entry).join(",")]);
 
   // start with the second default viewer not the code one
   useEffect(() => {
     if (relevantViewers.length > 0) {
       onChange(relevantViewers[1]);
     }
-  }, [relevantViewers?.map(d => d.entry).join(",")])
+  }, [relevantViewers?.map((d) => d.entry).join(",")]);
 
   return (
     <SelectMenu>

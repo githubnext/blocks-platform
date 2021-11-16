@@ -10,8 +10,9 @@ export default function SearchDropdown() {
 
     const handleStateChange = (changes) => {
         if (changes.hasOwnProperty('selectedItem')) {
-            setValue(changes.selectedItem);
-            Router.push(`/${changes.selectedItem}`)
+            // setValue(changes.selectedItem);
+            Router.push(`/${changes.selectedItem}`);
+            setValue('');
         } else if (changes.hasOwnProperty('inputValue')) {
             setValue(changes.inputValue);
         }
@@ -27,21 +28,10 @@ export default function SearchDropdown() {
         }
     }, [value]);
 
-    console.log(filteredItems);
-
     return (
         <Downshift
             selectedItem={value}
             onStateChange={handleStateChange}
-        //   onChange={selection =>
-        //     console.log(`You selected ${selection.value}`)
-        //     // alert(
-        //     //   selection
-        //     //     ? `You selected ${selection.value}`
-        //     //     : 'Selection Cleared',
-        //     // )
-        //   }
-        //   itemToString={item => (item ? item.value : '')}
         >
           {({
             getInputProps,
@@ -94,5 +84,3 @@ export default function SearchDropdown() {
         </Downshift>
       )
 }
-
-// border border-solid border-gray-300 

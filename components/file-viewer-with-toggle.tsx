@@ -1,21 +1,15 @@
 import { RepoContext } from "ghapi";
-import { SandboxedFileViewer } from "components/sandboxed-viewer";
+import { SandboxedViewerWrapper } from "components/sandboxed-viewer-wrapper";
 import { useFileContent, useMetadata } from "hooks";
 import { getLanguageFromFilename } from "lib";
-import { Session } from "next-auth";
-import dynamic from "next/dynamic";
 import React from "react";
 import { ErrorBoundary } from "./error-boundary";
+import { FileContext } from "@githubnext/utils";
 
 interface FileViewerProps {
   theme: string;
   viewerContext: RepoContext;
-  context: {
-    owner: string;
-    repo: string;
-    path: string;
-    fileRef: string;
-  };
+  context: FileContext;
   dependencies: Record<string, string>;
   viewer: Viewer;
   session: Session;
@@ -23,16 +17,16 @@ interface FileViewerProps {
 
 export function FileViewer(props: FileViewerProps) {
   const { context, theme, viewer, dependencies, session, viewerContext } = props;
-  const { repo, owner, path, fileRef } = context;
+  const { repo, owner, path, sha } = context;
 
   const { data } = useFileContent({
     repo: repo,
     owner: owner,
     path: path,
-    fileRef: fileRef,
+    fileRef: sha,
     token: session.token as string,
   });
-  const { name = "", content = "", download_url = "", sha = "" } = data || {};
+  const { name = "", content = "", download_url = "" } = data || {};
 
   const extension = name.split(".").slice(-1)[0];
 
@@ -53,23 +47,15 @@ export function FileViewer(props: FileViewerProps) {
     <div className="h-full flex flex-col">
       <ErrorBoundary key={path}>
         <div className="overflow-y-auto flex-1">
-          <SandboxedFileViewer
+          <SandboxedViewerWrapper
             viewer={viewer}
-            meta={{
-              language,
-              theme,
-              name,
-              download_url,
-              repo,
-              owner,
-              path,
-              sha,
-              username: session.user.name,
-            }}
+            theme={theme}
+            context={{ ...context, file: name }}
             viewerContext={viewerContext}
             dependencies={dependencies}
             contents={code}
             metadata={metadata}
+            session={session}
             // @ts-ignore
             onUpdateMetadata={onUpdateMetadata}
           />

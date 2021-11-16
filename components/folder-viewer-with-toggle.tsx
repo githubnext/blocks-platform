@@ -1,21 +1,16 @@
 import { RepoContext, RepoFiles } from "ghapi";
-import { SandboxedFileViewer } from "components/sandboxed-viewer";
+import { SandboxedViewerWrapper } from "components/sandboxed-viewer-wrapper";
 import { useMetadata } from "hooks";
-import { Session } from "next-auth";
 import React, { useMemo } from "react";
 import { ErrorBoundary } from "./error-boundary";
+import { FolderContext } from "@githubnext/utils";
 
 
 interface FolderViewerProps {
   allFiles: RepoFiles;
   theme: string;
   viewerContext: RepoContext;
-  context: {
-    owner: string;
-    repo: string;
-    path: string;
-    fileRef: string;
-  };
+  context: FolderContext;
   dependencies: Record<string, string>;
   viewer: Viewer;
   session: Session;
@@ -23,7 +18,7 @@ interface FolderViewerProps {
 
 export function FolderViewer(props: FolderViewerProps) {
   const { context, theme, viewer, dependencies, allFiles, session, viewerContext } = props;
-  const { repo, owner, path, fileRef } = context;
+  const { repo, owner, path, sha } = context;
 
   const { metadata, onUpdateMetadata } = useMetadata({
     owner: owner as string,
@@ -45,22 +40,15 @@ export function FolderViewer(props: FolderViewerProps) {
     <div className="h-full flex flex-col">
       <ErrorBoundary key={path}>
         <div className="overflow-y-auto flex-1">
-          <SandboxedFileViewer
+          <SandboxedViewerWrapper
             viewer={viewer}
-            meta={{
-              theme,
-              name,
-              download_url: "",
-              repo,
-              owner,
-              path,
-              sha: fileRef,
-              username: session.user.name,
-            }}
+            theme={theme}
+            context={{ ...context, folder: name }}
             viewerContext={viewerContext}
             dependencies={dependencies}
             tree={data}
             metadata={metadata}
+            session={session}
             // @ts-ignore
             onUpdateMetadata={onUpdateMetadata}
           />

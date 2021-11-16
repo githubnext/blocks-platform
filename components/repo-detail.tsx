@@ -1,5 +1,4 @@
 import { Box, Button } from "@primer/components";
-import { Session } from "next-auth";
 import { useRouter } from "next/router";
 import { useTheme } from "@primer/components";
 import { useEffect, useState } from "react";
@@ -51,7 +50,7 @@ export function RepoDetail(props: RepoDetailProps) {
     repo: repo as string,
     owner: owner as string,
     path: path as string,
-    fileRef: fileRef as string,
+    sha: fileRef as string,
   };
 
   useEffect(() => {
@@ -214,7 +213,10 @@ export function RepoDetail(props: RepoDetailProps) {
                 allFiles={files}
                 theme={(theme as string) || "light"}
                 viewerContext={viewerContext}
-                context={context}
+                context={{
+                  folder: "",
+                  ...context
+                }}
                 dependencies={viewersInfoParsed.dependencies}
                 viewer={viewer}
                 session={session}
@@ -226,7 +228,10 @@ export function RepoDetail(props: RepoDetailProps) {
                 </div>
               ) : (
                 <FileViewer
-                  context={context}
+                  context={{
+                    file: "",
+                    ...context,
+                  }}
                   theme={(theme as string) || "light"}
                   viewer={viewer}
                   dependencies={viewersInfoParsed.dependencies}
@@ -246,7 +251,8 @@ export function RepoDetail(props: RepoDetailProps) {
               </div>
             </div>
           ) : (
-            <ActivityFeed activity={repoInfo?.activity} />
+            // <ActivityFeed activity={repoInfo?.activity} />
+            null
           )}
         </div> */}
       </div>

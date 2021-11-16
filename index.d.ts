@@ -1,17 +1,11 @@
-interface FileContext {
-  download_url: string;
-  file: string;
-  path: string;
-  repo: string;
-  owner: string;
-  sha: string;
-  username: string;
-}
-
 interface CommonViewerProps {
   metadata: any;
   onUpdateMetadata: () => any;
   onRequestUpdateContent: () => any;
+}
+
+interface Session {
+  token: string;
 }
 
 interface FileData {
@@ -20,15 +14,6 @@ interface FileData {
 }
 type FileViewerProps = FileData & CommonViewerProps;
 
-interface FolderContext {
-  download_url: string;
-  folder: string;
-  path: string;
-  repo: string;
-  owner: string;
-  sha: string;
-  username: string;
-}
 interface FolderData {
   tree: {
     path: string;

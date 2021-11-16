@@ -246,7 +246,8 @@ export function RepoDetail(props: RepoDetailProps) {
               </div>
             </div>
           ) : (
-            <ActivityFeed activity={repoInfo?.activity} />
+            // <ActivityFeed activity={repoInfo?.activity} />
+            null
           )}
         </div>
       </div>

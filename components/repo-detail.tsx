@@ -236,7 +236,7 @@ export function RepoDetail(props: RepoDetailProps) {
               ))}
         </div>
 
-        <div className="flex-none w-80 h-full border-l border-gray-200">
+        {/* <div className="flex-none w-80 h-full border-l border-gray-200">
           {repoInfoStatus === "loading" ? (
             <div className="flex flex-col items-center justify-center h-full w-full">
               <div className="animate-pulse flex space-y-4">
@@ -246,10 +246,9 @@ export function RepoDetail(props: RepoDetailProps) {
               </div>
             </div>
           ) : (
-            // <ActivityFeed activity={repoInfo?.activity} />
-            null
+            <ActivityFeed activity={repoInfo?.activity} />
           )}
-        </div>
+        </div> */}
       </div>
     </div>
   );

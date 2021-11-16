@@ -27,7 +27,6 @@ export function SandboxedViewerWrapper(props: SandboxedViewerWrapperProps) {
       token: "",
       path
     })
-    console.log(path, res)
     return res.content;
   }, [context.repo, context.owner, context.sha, session.token]);
 
@@ -48,6 +47,7 @@ export function SandboxedViewerWrapper(props: SandboxedViewerWrapperProps) {
         metadata={metadata}
         onUpdateMetadata={onUpdateMetadata}
         session={session}
+        onRequestUpdateContent={() => { }}
       />
     </div>
   );

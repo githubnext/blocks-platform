@@ -16,6 +16,7 @@ export default function RepoDetailContainer() {
   }
 
   if (status === "authenticated" && session) {
+    // @ts-ignore
     return <RepoDetail session={session} />;
   }
 

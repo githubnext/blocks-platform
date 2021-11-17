@@ -240,7 +240,7 @@ export function useViewerContentAndDependencies(params: UseFileContentParams) {
 
 export function useSearchRepos(params: SearchContextWithToken) {
   return useQuery(["search-repos", params], () => searchRepos(params), {
-    enabled: Boolean(params.token),
+    enabled: Boolean(params.user) && Boolean(params.token),
     refetchOnWindowFocus: false,
     retry: false,
   });

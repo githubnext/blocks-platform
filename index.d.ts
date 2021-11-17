@@ -49,3 +49,14 @@ interface Viewer {
   entry: string;
   extensions?: string[];
 }
+
+interface User {
+  name: string;
+  image: string;
+}
+
+interface Session {
+  token: string;
+  user: User;
+  expires: string;
+}

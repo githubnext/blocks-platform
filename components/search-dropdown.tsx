@@ -34,7 +34,7 @@ export default function SearchDropdown(props: SearchDropdownProps) {
     () => {
       setDebouncedValue(value);
     },
-    50,
+    80,
     [value]
   );
 
@@ -44,6 +44,7 @@ export default function SearchDropdown(props: SearchDropdownProps) {
     status: searchQueryStatus,
     error: searchQueryError,
   } = useSearchRepos({
+    user: session.user.name,
     query: debouncedValue,
     token: session.token as string,
   });

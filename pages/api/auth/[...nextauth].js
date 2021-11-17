@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 
 export default NextAuth({
+  secret: "blocksblocksblocks",
   providers: [
     GithubProvider({
       authorization: "https://github.com/login/oauth/authorize?scope=repo",

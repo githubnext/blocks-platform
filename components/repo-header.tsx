@@ -96,10 +96,11 @@ export const RepoHeader = ({
               key={label as string}
               display="flex"
               alignItems="stretch"
+              opacity={0.2}
               mx={2}
             >
               <Box
-                className="hover:bg-gray-100 cursor-pointer py-[0.4em]"
+                className="hover:bg-gray-100 py-[0.4em]"
                 display="flex"
                 alignItems="center"
                 borderColor="border.default"

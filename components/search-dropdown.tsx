@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Downshift from "downshift";
 import Router from "next/router";
 import { useSearchRepos } from "hooks";
+import { useDebounce, useMeasure } from "react-use";
 
 const items = [
   "githubnext/composable-github-example-viewers",
@@ -15,6 +16,7 @@ interface SearchDropdownProps {
 export default function SearchDropdown(props: SearchDropdownProps) {
   const { session } = props;
   const [value, setValue] = useState("");
+  const [debouncedValue, setDebouncedValue] = useState("");
   const [filteredItems, setFilteredItems] = useState([]);
 
   const handleStateChange = (changes) => {
@@ -27,15 +29,26 @@ export default function SearchDropdown(props: SearchDropdownProps) {
     }
   };
 
+  // debounce the input value
+  const [, cancel] = useDebounce(
+    () => {
+      setDebouncedValue(value);
+    },
+    50,
+    [value]
+  );
+
+  // search for repos that match the debounced value
   const {
     data: searchQuery,
     status: searchQueryStatus,
     error: searchQueryError,
   } = useSearchRepos({
-    query: value,
+    query: debouncedValue,
     token: session.token as string,
   });
 
+  // update the filtered items list
   useEffect(() => {
     if (searchQuery) {
       setFilteredItems(searchQuery);

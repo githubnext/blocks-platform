@@ -27,11 +27,11 @@ export function FolderViewer(props: FolderViewerProps) {
   } = props;
   const { repo, owner, path, sha } = context;
 
+  const viewerId = `${viewerContext.owner}/${viewerContext.repo}__${viewer.entry}`.replace(/\//g, "__");
   const { metadata, onUpdateMetadata } = useMetadata({
     owner: owner as string,
     repo: repo as string,
-    // TODO: Make unique repo
-    metadataPath: viewer.title && `.github/viewers/folder/${viewer.title}`,
+    metadataPath: viewer.entry && `.github/viewers/folder/${viewerId}`,
     filePath: path,
     token: session.token as string,
   });

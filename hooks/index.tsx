@@ -123,7 +123,7 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
       },
       sha: sha,
     });
-  } catch (e) {}
+  } catch (e) { }
 }
 
 export function useUpdateFileContents(
@@ -160,8 +160,7 @@ export function useMetadata({
   );
   const fullMetadata = useMemo(() => {
     try {
-      const encodedStr = metadataData[0].content;
-      const rawString = Buffer.from(encodedStr, "base64").toString();
+      const rawString = metadataData.content;
       const fullMetadata = JSON.parse(rawString);
       return fullMetadata;
     } catch (e) {

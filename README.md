@@ -32,5 +32,6 @@ http://localhost:3000/?owner=githubnext&repo=composable-github-test&path=data.cs
 You'll need a GitHub PAT to load data from the API. Add that to an .env.local file.
 
 ```
-NEXT_PUBLIC_GITHUB_PAT=XX
+GITHUB_SECRET=X
+GITHUB_ID=X
 ```

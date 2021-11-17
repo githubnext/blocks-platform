@@ -32,6 +32,9 @@ type DirectoryItem =
 type TreeItem =
   import("@octokit/openapi-types").components["schemas"]["git-tree"]["tree"][number];
 
+type RepoItem =
+  import("@octokit/openapi-types").components["schemas"]["repo-search-result-item"];
+
 interface RepoInfo {
   repoInfo: any;
   activity: any;

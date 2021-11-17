@@ -5,7 +5,6 @@ import React, { useMemo } from "react";
 import { ErrorBoundary } from "./error-boundary";
 import { FolderContext } from "@githubnext/utils";
 
-
 interface FolderViewerProps {
   allFiles: RepoFiles;
   theme: string;
@@ -17,7 +16,15 @@ interface FolderViewerProps {
 }
 
 export function FolderViewer(props: FolderViewerProps) {
-  const { context, theme, viewer, dependencies, allFiles, session, viewerContext } = props;
+  const {
+    context,
+    theme,
+    viewer,
+    dependencies,
+    allFiles,
+    session,
+    viewerContext,
+  } = props;
   const { repo, owner, path, sha } = context;
 
   const { metadata, onUpdateMetadata } = useMetadata({
@@ -30,7 +37,7 @@ export function FolderViewer(props: FolderViewerProps) {
   });
 
   const data = useMemo(
-    () => allFiles.filter((d) => d.path.startsWith(path)),
+    () => allFiles?.filter((d) => d.path.startsWith(path)),
     [allFiles, path]
   );
 

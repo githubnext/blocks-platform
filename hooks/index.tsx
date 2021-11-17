@@ -17,6 +17,8 @@ import {
   RepoContextWithToken,
   UseFolderContentParams,
   getFileContentsAndDependencies,
+  SearchContextWithToken,
+  searchRepos,
 } from "ghapi";
 
 // get env variable
@@ -121,7 +123,7 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
       },
       sha: sha,
     });
-  } catch (e) { }
+  } catch (e) {}
 }
 
 export function useUpdateFileContents(
@@ -215,10 +217,7 @@ export function useRepoFiles(params: RepoContextWithToken) {
   });
 }
 
-
-export function useViewerContentAndDependencies(
-  params: UseFileContentParams
-) {
+export function useViewerContentAndDependencies(params: UseFileContentParams) {
   const { repo, owner, path, fileRef = "main", token } = params;
 
   return useQuery(
@@ -232,10 +231,17 @@ export function useViewerContentAndDependencies(
         token,
       }),
     {
-      enabled:
-        Boolean(repo) && Boolean(owner) && Boolean(path),
+      enabled: Boolean(repo) && Boolean(owner) && Boolean(path),
       refetchOnWindowFocus: false,
       retry: false,
     }
   );
+}
+
+export function useSearchRepos(params: SearchContextWithToken) {
+  return useQuery(["search-repos", params], () => searchRepos(params), {
+    enabled: Boolean(params.token),
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
 }

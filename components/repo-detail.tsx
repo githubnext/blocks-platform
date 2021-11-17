@@ -24,27 +24,21 @@ const defaultFileViewer = {
   extensions: ["*"],
   title: "Code viewer",
   type: "file",
-}
+};
 
 const defaultFolderViewer = {
-  "type": "folder",
-  "title": "Minimap",
-  "description": "A visualization of your folders and files",
-  "entry": "/src/viewers/folder-viewers/minimap/index.tsx"
-}
+  type: "folder",
+  title: "Minimap",
+  description: "A visualization of your folders and files",
+  entry: "/src/viewers/folder-viewers/minimap/index.tsx",
+};
 export function RepoDetail(props: RepoDetailProps) {
   const { session } = props;
   const router = useRouter();
   const { setColorMode } = useTheme();
   const [viewer, setViewer] = useState<Viewer>(defaultFolderViewer);
 
-  const {
-    repo,
-    owner,
-    path = "",
-    theme,
-    fileRef,
-  } = router.query;
+  const { repo, owner, path = "", theme, fileRef } = router.query;
 
   const context = {
     repo: repo as string,
@@ -83,7 +77,7 @@ export function RepoDetail(props: RepoDetailProps) {
       : true;
 
   useEffect(() => {
-    if (repoFilesStatus !== "success") return
+    if (repoFilesStatus !== "success") return;
     const viewer = isFolder ? defaultFolderViewer : defaultFileViewer;
     setViewer(viewer);
   }, [isFolder]);
@@ -144,7 +138,7 @@ export function RepoDetail(props: RepoDetailProps) {
 
   return (
     <div className="flex flex-col w-full h-screen overflow-hidden">
-      <GitHubHeader />
+      <GitHubHeader session={session} />
       <RepoHeader
         owner={owner as string}
         repo={repo as string}
@@ -216,31 +210,30 @@ export function RepoDetail(props: RepoDetailProps) {
                 viewerContext={viewerContext}
                 context={{
                   folder: "",
-                  ...context
+                  ...context,
                 }}
                 dependencies={viewersInfoParsed.dependencies}
                 viewer={viewer}
                 session={session}
               />
-            ) :
-              isTooLarge ? (
-                <div className="italic p-4 pt-40 text-center mx-auto text-gray-600">
-                  Oh boy, that's a honkin file! It's {size / 1000} KBs.
-                </div>
-              ) : (
-                <FileViewer
-                  key={viewer.entry}
-                  context={{
-                    file: "",
-                    ...context,
-                  }}
-                  theme={(theme as string) || "light"}
-                  viewer={viewer}
-                  dependencies={viewersInfoParsed.dependencies}
-                  viewerContext={viewerContext}
-                  session={session}
-                />
-              ))}
+            ) : isTooLarge ? (
+              <div className="italic p-4 pt-40 text-center mx-auto text-gray-600">
+                Oh boy, that's a honkin file! It's {size / 1000} KBs.
+              </div>
+            ) : (
+              <FileViewer
+                key={viewer.entry}
+                context={{
+                  file: "",
+                  ...context,
+                }}
+                theme={(theme as string) || "light"}
+                viewer={viewer}
+                dependencies={viewersInfoParsed.dependencies}
+                viewerContext={viewerContext}
+                session={session}
+              />
+            ))}
         </div>
 
         {/* <div className="flex-none w-80 h-full border-l border-gray-200">

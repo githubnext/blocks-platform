@@ -19,6 +19,14 @@ export interface UseFolderContentParams extends RepoContextWithToken {
   fileRef?: string;
 }
 
+export interface SearchContext {
+  query: string;
+}
+
+export interface SearchContextWithToken extends SearchContext {
+  token: string;
+}
+
 export async function getFileContent(
   params: UseFileContentParams
 ): Promise<FileData> {
@@ -162,6 +170,27 @@ export async function getRepoFiles(
   }
   const { files } = await res.json();
   return files;
+}
+
+export async function searchRepos(
+  params: SearchContextWithToken
+): Promise<string[]> {
+  const { query, token } = params;
+  if (query !== "") {
+    const url = `https://api.github.com/search/repositories?q=${query}&token=${token}&sort=stars&order=desc&per_page=10`;
+    const res = await fetch(url);
+    if (res.status !== 200) {
+      const error = await res.json();
+      throw new Error(error.message);
+    }
+    const { items: searchItems } = await res.json();
+    const data = (searchItems as RepoItem[]).map((item) => {
+      return item.full_name;
+    });
+    return data;
+  } else {
+    return [];
+  }
 }
 
 import { Endpoints } from "@octokit/types";

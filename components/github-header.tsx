@@ -2,7 +2,11 @@ import { Header } from "@primer/components";
 import { NextOctocat } from "./next-octocat";
 import SearchDropdown from "./search-dropdown";
 
-export const GitHubHeader = () => {
+interface GitHubHeaderProps {
+  session: Session;
+}
+
+export const GitHubHeader = (props: GitHubHeaderProps) => {
   return (
     <Header px={30} className="flex-none">
       <Header.Item>
@@ -15,9 +19,10 @@ export const GitHubHeader = () => {
 
       <Header.Item full>
         <div className="mr-2">
-          <SearchDropdown/>
+          <SearchDropdown session={props.session} />
         </div>
-        GitHub Blocks is an exploratory prototype. More information about this project{" "}
+        GitHub Blocks is an exploratory prototype. More information about this
+        project{" "}
         <a href="" className="underline ml-1">
           {" "}
           can be found here

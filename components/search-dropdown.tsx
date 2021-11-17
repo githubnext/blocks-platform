@@ -1,13 +1,19 @@
 import React, { useEffect, useState } from "react";
 import Downshift from "downshift";
 import Router from "next/router";
+import { useSearchRepos } from "hooks";
 
 const items = [
   "githubnext/composable-github-example-viewers",
   "githubnext/composable-github-example-files",
 ];
 
-export default function SearchDropdown() {
+interface SearchDropdownProps {
+  session: Session;
+}
+
+export default function SearchDropdown(props: SearchDropdownProps) {
+  const { session } = props;
   const [value, setValue] = useState("");
   const [filteredItems, setFilteredItems] = useState([]);
 
@@ -21,13 +27,20 @@ export default function SearchDropdown() {
     }
   };
 
+  const {
+    data: searchQuery,
+    status: searchQueryStatus,
+    error: searchQueryError,
+  } = useSearchRepos({
+    query: value,
+    token: session.token as string,
+  });
+
   useEffect(() => {
-    if (value === "") {
-      setFilteredItems([]);
-    } else {
-      setFilteredItems(items.filter((item: string) => item.includes(value)));
+    if (searchQuery) {
+      setFilteredItems(searchQuery);
     }
-  }, [value]);
+  }, [searchQuery]);
 
   return (
     <Downshift selectedItem={value} onStateChange={handleStateChange}>

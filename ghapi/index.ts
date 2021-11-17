@@ -31,28 +31,39 @@ export interface SearchContextWithToken extends SearchContext {
 export async function getFileContent(
   params: UseFileContentParams
 ): Promise<FileData> {
-  const { repo, owner, path, fileRef, token } = params;
+  try {
+    const { repo, owner, path, fileRef, token } = params;
 
-  const apiUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${fileRef}/${path}`;
-  const res = await fetch(apiUrl);
-  if (res.status !== 200) throw new Error("Something bad happened");
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+    const res = await fetch(apiUrl, {
+      headers: {
+        Authorization: `token ${token}`,
+      },
+    });
+    if (res.status !== 200) throw new Error("Something bad happened");
 
-  const content = await res.text();
+    const resObject = await res.json();
+    const encodedContent = resObject.content;
+    const content = Buffer.from(encodedContent, "base64").toString("utf8");
 
-  const context = {
-    download_url: apiUrl,
-    file: path.split("/").pop() || "",
-    path: path,
-    repo: repo,
-    owner: owner,
-    sha: fileRef || "",
-    username: "mona",
-  };
+    const context = {
+      download_url: apiUrl,
+      file: path.split("/").pop() || "",
+      path: path,
+      repo: repo,
+      owner: owner,
+      sha: fileRef || "",
+      username: "mona",
+    };
 
-  return {
-    content,
-    context,
-  };
+    return {
+      content,
+      context,
+    };
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
 }
 
 type Import = {

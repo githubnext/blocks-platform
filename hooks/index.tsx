@@ -6,7 +6,7 @@ import {
 } from "react-query";
 import { Octokit } from "@octokit/rest";
 import { Base64 } from "js-base64";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   UseFileContentParams,
   getFileContent,
@@ -123,7 +123,7 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
       },
       sha: sha,
     });
-  } catch (e) {}
+  } catch (e) { }
 }
 
 export function useUpdateFileContents(
@@ -145,7 +145,6 @@ export function useMetadata({
   filePath: string;
   token: string;
 }) {
-  const [iteration, setIteration] = useState(0);
   const { data: metadataData } = useFileContent(
     {
       repo,
@@ -154,23 +153,27 @@ export function useMetadata({
       token,
     },
     {
-      queryKey: [iteration],
       refetchOnWindowFocus: false,
     }
   );
-  const fullMetadata = useMemo(() => {
+
+  const [fullMetadata, setFullMetadata] = useState<any>();
+
+  useEffect(() => {
     try {
       const rawString = metadataData.content;
       const fullMetadata = JSON.parse(rawString);
-      return fullMetadata;
+      setFullMetadata(fullMetadata);
     } catch (e) {
-      return {};
+      console.error(e);
+      setFullMetadata({});
     }
   }, [metadataData]);
   const metadata = useMemo(
     () => fullMetadata?.[filePath] || {},
     [fullMetadata, filePath]
   );
+
   const { mutateAsync } = useUpdateFileContents({});
   const onUpdateMetadata = useCallback(
     async (contents) => {
@@ -178,6 +181,7 @@ export function useMetadata({
         ...fullMetadata,
         [filePath]: contents,
       };
+
       await mutateAsync({
         content: JSON.stringify(fullContents),
         owner,
@@ -185,9 +189,7 @@ export function useMetadata({
         path: metadataPath,
         sha: "latest",
       });
-      setTimeout(() => {
-        setIteration((iteration) => iteration + 1);
-      }, 500);
+      setFullMetadata(fullContents);
     },
     [mutateAsync, owner, repo, metadataPath, filePath]
   );

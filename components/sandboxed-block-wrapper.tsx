@@ -34,8 +34,8 @@ export function SandboxedBlockWrapper(props: SandboxedBlockWrapperProps) {
         repo: blockContext.repo,
         owner: blockContext.owner,
         fileRef: "main",
-        token: "",
-        path,
+        token: session.token,
+        path: path.slice(1),
       });
       return res.content;
     },

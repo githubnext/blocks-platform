@@ -27,19 +27,15 @@ export function FileViewer(props: FileViewerProps) {
     fileRef: sha,
     token: session.token as string,
   });
-  const { name = "", content = "", download_url = "" } = data || {};
-
-  const extension = name.split(".").slice(-1)[0];
-
-  const language = getLanguageFromFilename(name);
+  const { name = "", content = "" } = data || {};
 
   const code = content;
 
+  const viewerId = `${viewerContext.owner}/${viewerContext.repo}__${viewer.entry}`.replace(/\//g, "__");
   const { metadata, onUpdateMetadata } = useMetadata({
     owner: owner as string,
     repo: repo as string,
-    // TODO: Make unique repo
-    metadataPath: viewer.title && `.github/viewers/file/${viewer.title}`,
+    metadataPath: viewer.entry && `.github/viewers/file/${viewerId}`,
     filePath: path,
     token: session.token as string,
   });

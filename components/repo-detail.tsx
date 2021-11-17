@@ -210,6 +210,7 @@ export function RepoDetail(props: RepoDetailProps) {
             repoFilesStatus !== "loading" &&
             (isFolder ? (
               <FolderViewer
+                key={viewer.entry}
                 allFiles={files}
                 theme={(theme as string) || "light"}
                 viewerContext={viewerContext}
@@ -228,6 +229,7 @@ export function RepoDetail(props: RepoDetailProps) {
                 </div>
               ) : (
                 <FileViewer
+                  key={viewer.entry}
                   context={{
                     file: "",
                     ...context,

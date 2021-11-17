@@ -1,19 +1,19 @@
 import { Button, SelectMenu } from "@primer/components";
 import { useEffect } from "react";
 
-interface ViewerPickerProps {
-  viewers: Viewer[];
-  value: Viewer;
+interface BlockPickerProps {
+  blocks: Block[];
+  value: Block;
   isFolder?: boolean;
   path: string;
-  onChange: (newType: Viewer) => void;
+  onChange: (newType: Block) => void;
 }
 
-export default function ViewerPicker(props: ViewerPickerProps) {
-  const { viewers, value, path, isFolder, onChange } = props;
-  // const defaultViewer = isFolder ? "sidebar" : (getViewerFromFilename(`.${extension}`) || "code")
+export default function BlockPicker(props: BlockPickerProps) {
+  const { blocks, value, path, isFolder, onChange } = props;
+  // const defaultBlock = isFolder ? "sidebar" : (getBlockFromFilename(`.${extension}`) || "code")
   const extension = path.split(".").slice(-1)[0];
-  const relevantViewers = viewers.filter(
+  const relevantBlocks = blocks.filter(
     (d) =>
       !d.extensions ||
       d.extensions.includes("*") ||
@@ -21,28 +21,28 @@ export default function ViewerPicker(props: ViewerPickerProps) {
   );
 
   useEffect(() => {
-    if (!relevantViewers?.find((v) => v?.entry === value?.entry)) {
-      onChange(relevantViewers[0]);
+    if (!relevantBlocks?.find((v) => v?.entry === value?.entry)) {
+      onChange(relevantBlocks[0]);
     }
-  }, [value, relevantViewers?.map((d) => d.entry).join(",")]);
+  }, [value, relevantBlocks?.map((d) => d.entry).join(",")]);
 
-  // start with the second default viewer not the code one
+  // start with the second default block not the code one
   useEffect(() => {
-    if (relevantViewers.length > 0) {
-      onChange(relevantViewers[1]);
+    if (relevantBlocks.length > 0) {
+      onChange(relevantBlocks[1]);
     }
-  }, [relevantViewers?.map((d) => d.entry).join(",")]);
+  }, [relevantBlocks?.map((d) => d.entry).join(",")]);
 
   return (
     <SelectMenu>
       <Button ml={3} as="summary">
-        Viewer: {value?.title}
+        Block: {value?.title}
       </Button>
 
       <SelectMenu.Modal>
-        <SelectMenu.Header>Viewers</SelectMenu.Header>
+        <SelectMenu.Header>Blocks</SelectMenu.Header>
         <SelectMenu.List>
-          {relevantViewers.map((d) => {
+          {relevantBlocks.map((d) => {
             return (
               <SelectMenu.Item
                 as="button"

@@ -20,7 +20,7 @@ export default function Home() {
           <p className="text-xl text-gray-500 leading-7">
             An exploration around what GitHub would look and feel like if end
             users had the ability to write and publish their own custom file
-            "viewers."
+            "blocks."
           </p>
         </div>
         <div className="mt-4">

@@ -114,16 +114,16 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
       message: `feat: updated ${params.path} programatically`,
       content: contentEncoded,
       committer: {
-        name: `Composable GitHub Bot`,
+        name: `GitHub Block Bot`,
         email: "fake@fake.com",
       },
       author: {
-        name: `Composable GitHub Bot`,
+        name: `GitHub Block Bot`,
         email: "fake@fake.com",
       },
       sha: sha,
     });
-  } catch (e) { }
+  } catch (e) {}
 }
 
 export function useUpdateFileContents(
@@ -216,11 +216,11 @@ export function useRepoFiles(params: RepoContextWithToken) {
   });
 }
 
-export function useViewerContentAndDependencies(params: UseFileContentParams) {
+export function useBlockContentAndDependencies(params: UseFileContentParams) {
   const { repo, owner, path, fileRef = "main", token } = params;
 
   return useQuery(
-    ["viewer-content-and-dependencies", params],
+    ["block-content-and-dependencies", params],
     () =>
       getFileContentsAndDependencies({
         repo,

@@ -1,4 +1,4 @@
-interface CommonViewerProps {
+interface CommonBlockProps {
   metadata: any;
   onUpdateMetadata: () => any;
   onRequestUpdateContent: () => any;
@@ -12,7 +12,7 @@ interface FileData {
   content: string;
   context: FileContext;
 }
-type FileViewerProps = FileData & CommonViewerProps;
+type FileBlockProps = FileData & CommonBlockProps;
 
 interface FolderData {
   tree: {
@@ -25,7 +25,7 @@ interface FolderData {
   }[];
   context: FolderContext;
 }
-type FolderViewerProps = FolderData & CommonViewerProps;
+type FolderBlockProps = FolderData & CommonBlockProps;
 
 type DirectoryItem =
   import("@octokit/openapi-types").components["schemas"]["content-directory"][number];
@@ -42,7 +42,7 @@ interface RepoInfo {
   fileChanges: any;
 }
 
-interface Viewer {
+interface Block {
   type: string;
   title: string;
   description: string;

@@ -1,37 +1,41 @@
 import { RepoContext, RepoFiles } from "ghapi";
-import { SandboxedViewerWrapper } from "components/sandboxed-viewer-wrapper";
+import { SandboxedBlockWrapper } from "components/sandboxed-block-wrapper";
 import { useMetadata } from "hooks";
 import React, { useMemo } from "react";
 import { ErrorBoundary } from "./error-boundary";
 import { FolderContext } from "@githubnext/utils";
 
-interface FolderViewerProps {
+interface FolderBlockProps {
   allFiles: RepoFiles;
   theme: string;
-  viewerContext: RepoContext;
+  blockContext: RepoContext;
   context: FolderContext;
   dependencies: Record<string, string>;
-  viewer: Viewer;
+  block: Block;
   session: Session;
 }
 
-export function FolderViewer(props: FolderViewerProps) {
+export function FolderBlock(props: FolderBlockProps) {
   const {
     context,
     theme,
-    viewer,
+    block,
     dependencies,
     allFiles,
     session,
-    viewerContext,
+    blockContext,
   } = props;
   const { repo, owner, path, sha } = context;
 
-  const viewerId = `${viewerContext.owner}/${viewerContext.repo}__${viewer.entry}`.replace(/\//g, "__");
+  const blockId =
+    `${blockContext.owner}/${blockContext.repo}__${block.entry}`.replace(
+      /\//g,
+      "__"
+    );
   const { metadata, onUpdateMetadata } = useMetadata({
     owner: owner as string,
     repo: repo as string,
-    metadataPath: viewer.entry && `.github/viewers/folder/${viewerId}`,
+    metadataPath: block.entry && `.github/blocks/folder/${blockId}`,
     filePath: path,
     token: session.token as string,
   });
@@ -47,11 +51,11 @@ export function FolderViewer(props: FolderViewerProps) {
     <div className="h-full flex flex-col">
       <ErrorBoundary key={path}>
         <div className="overflow-y-auto flex-1">
-          <SandboxedViewerWrapper
-            viewer={viewer}
+          <SandboxedBlockWrapper
+            block={block}
             theme={theme}
             context={{ ...context, folder: name }}
-            viewerContext={viewerContext}
+            blockContext={blockContext}
             dependencies={dependencies}
             tree={data}
             metadata={metadata}

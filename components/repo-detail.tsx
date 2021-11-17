@@ -4,39 +4,39 @@ import { useTheme } from "@primer/components";
 import { useEffect, useState } from "react";
 
 import { useFileContent, useMetadata, useRepoFiles, useRepoInfo } from "hooks";
-import { FileViewer } from "components/file-viewer-with-toggle";
-import { FolderViewer } from "components/folder-viewer-with-toggle";
+import { FileBlock } from "components/file-block";
+import { FolderBlock } from "components/folder-block";
 import { ActivityFeed } from "components/ActivityFeed";
 import { GitHubHeader } from "./github-header";
 import { RepoHeader } from "./repo-header";
 import { Sidebar } from "./Sidebar";
 
 import dynamic from "next/dynamic";
-const ViewerPicker = dynamic(() => import("./viewer-picker"), { ssr: false });
+const BlockPicker = dynamic(() => import("./block-picker"), { ssr: false });
 
 interface RepoDetailProps {
   session: Session;
 }
 
-const defaultFileViewer = {
-  description: "A basic code viewer",
-  entry: "/src/viewers/file-viewers/code/index.tsx",
+const defaultFileBlock = {
+  description: "A basic code block",
+  entry: "/src/blocks/file-blocks/code/index.tsx",
   extensions: ["*"],
-  title: "Code viewer",
+  title: "Code block",
   type: "file",
 };
 
-const defaultFolderViewer = {
+const defaultFolderBlock = {
   type: "folder",
   title: "Minimap",
   description: "A visualization of your folders and files",
-  entry: "/src/viewers/folder-viewers/minimap/index.tsx",
+  entry: "/src/blocks/folder-blocks/minimap/index.tsx",
 };
 export function RepoDetail(props: RepoDetailProps) {
   const { session } = props;
   const router = useRouter();
   const { setColorMode } = useTheme();
-  const [viewer, setViewer] = useState<Viewer>(defaultFolderViewer);
+  const [block, setBlock] = useState<Block>(defaultFolderBlock);
 
   const { repo, owner, path = "", theme, fileRef } = router.query;
 
@@ -78,44 +78,44 @@ export function RepoDetail(props: RepoDetailProps) {
 
   useEffect(() => {
     if (repoFilesStatus !== "success") return;
-    const viewer = isFolder ? defaultFolderViewer : defaultFileViewer;
-    setViewer(viewer);
+    const block = isFolder ? defaultFolderBlock : defaultFileBlock;
+    setBlock(block);
   }, [isFolder]);
 
   const { metadata, onUpdateMetadata } = useMetadata({
     owner: owner as string,
     repo: repo as string,
-    metadataPath: `.github/viewers/all`,
+    metadataPath: `.github/blocks/all`,
     filePath: path as string,
     token: session.token as string,
   });
 
-  // const defaultViewer = metadata.defaultViewer;
-  // const onSetDefaultViewer = (viewerId: string) => {
+  // const defaultBlock = metadata.defaultBlock;
+  // const onSetDefaultBlock = (blockId: string) => {
   //   onUpdateMetadata({
-  //     defaultViewer: viewerId,
+  //     defaultBlock: blockId,
   //   });
   // };
 
-  const viewerContext = {
+  const blockContext = {
     repo: "blocks-examples",
     owner: "githubnext",
   };
 
   const {
-    data: viewersInfo,
-    status: viewersStatus,
-    error: viewersError,
+    data: blocksInfo,
+    status: blocksStatus,
+    error: blocksError,
   } = useFileContent({
     repo: "blocks-examples",
     owner: "githubnext",
     token: session.token as string,
     path: "package.json",
   });
-  const viewersInfoParsed = viewersInfo?.content
-    ? JSON.parse(viewersInfo.content)
+  const blocksInfoParsed = blocksInfo?.content
+    ? JSON.parse(blocksInfo.content)
     : {};
-  const viewers = viewersInfoParsed?.viewers || [];
+  const blocks = blocksInfoParsed?.blocks || [];
 
   const fileInfo = files?.find((d) => d.path === path);
   const size = fileInfo?.size || 0;
@@ -179,20 +179,20 @@ export function RepoDetail(props: RepoDetailProps) {
                 display="flex"
                 alignItems="center"
               >
-                <ViewerPicker
-                  viewers={(viewers || []).filter(
+                <BlockPicker
+                  blocks={(blocks || []).filter(
                     (d) => d.type === (isFolder ? "folder" : "file")
                   )}
                   isFolder={isFolder}
                   path={path as string}
-                  onChange={setViewer}
-                  value={viewer}
+                  onChange={setBlock}
+                  value={block}
                 />
-                {/* {viewerType !== defaultViewer && (
+                {/* {blockType !== defaultBlock && (
               <Button
                 fontSize="1"
                 ml={2}
-                onClick={() => onSetDefaultViewer(viewerType)}
+                onClick={() => onSetDefaultBlock(blockType)}
               >
                 Set as default for all users
               </Button>
@@ -200,20 +200,20 @@ export function RepoDetail(props: RepoDetailProps) {
               </Box>
             </div>
           </div>
-          {!!viewer &&
+          {!!block &&
             repoFilesStatus !== "loading" &&
             (isFolder ? (
-              <FolderViewer
-                key={viewer.entry}
+              <FolderBlock
+                key={block.entry}
                 allFiles={files}
                 theme={(theme as string) || "light"}
-                viewerContext={viewerContext}
+                blockContext={blockContext}
                 context={{
                   folder: "",
                   ...context,
                 }}
-                dependencies={viewersInfoParsed.dependencies}
-                viewer={viewer}
+                dependencies={blocksInfoParsed.dependencies}
+                block={block}
                 session={session}
               />
             ) : isTooLarge ? (
@@ -221,16 +221,16 @@ export function RepoDetail(props: RepoDetailProps) {
                 Oh boy, that's a honkin file! It's {size / 1000} KBs.
               </div>
             ) : (
-              <FileViewer
-                key={viewer.entry}
+              <FileBlock
+                key={block.entry}
                 context={{
                   file: "",
                   ...context,
                 }}
                 theme={(theme as string) || "light"}
-                viewer={viewer}
-                dependencies={viewersInfoParsed.dependencies}
-                viewerContext={viewerContext}
+                block={block}
+                dependencies={blocksInfoParsed.dependencies}
+                blockContext={blockContext}
                 session={session}
               />
             ))}

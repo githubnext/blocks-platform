@@ -1,23 +1,22 @@
 import { RepoContext } from "ghapi";
-import { SandboxedViewerWrapper } from "components/sandboxed-viewer-wrapper";
+import { SandboxedBlockWrapper } from "components/sandboxed-block-wrapper";
 import { useFileContent, useMetadata } from "hooks";
 import { getLanguageFromFilename } from "lib";
 import React, { useEffect } from "react";
 import { ErrorBoundary } from "./error-boundary";
 import { FileContext } from "@githubnext/utils";
 
-interface FileViewerProps {
+interface FileBlockProps {
   theme: string;
-  viewerContext: RepoContext;
+  blockContext: RepoContext;
   context: FileContext;
   dependencies: Record<string, string>;
-  viewer: Viewer;
+  block: Block;
   session: Session;
 }
 
-export function FileViewer(props: FileViewerProps) {
-  const { context, theme, viewer, dependencies, session, viewerContext } =
-    props;
+export function FileBlock(props: FileBlockProps) {
+  const { context, theme, block, dependencies, session, blockContext } = props;
   const { repo, owner, path, sha } = context;
 
   const { data } = useFileContent({
@@ -31,11 +30,15 @@ export function FileViewer(props: FileViewerProps) {
 
   const code = content;
 
-  const viewerId = `${viewerContext.owner}/${viewerContext.repo}__${viewer.entry}`.replace(/\//g, "__");
+  const blockId =
+    `${blockContext.owner}/${blockContext.repo}__${block.entry}`.replace(
+      /\//g,
+      "__"
+    );
   const { metadata, onUpdateMetadata } = useMetadata({
     owner: owner as string,
     repo: repo as string,
-    metadataPath: viewer.entry && `.github/viewers/file/${viewerId}`,
+    metadataPath: block.entry && `.github/blocks/file/${blockId}`,
     filePath: path,
     token: session.token as string,
   });
@@ -61,11 +64,11 @@ export function FileViewer(props: FileViewerProps) {
     <div className="h-full flex flex-col">
       <ErrorBoundary key={path}>
         <div className="overflow-y-auto flex-1">
-          <SandboxedViewerWrapper
-            viewer={viewer}
+          <SandboxedBlockWrapper
+            block={block}
             theme={theme}
             context={{ ...context, file: name }}
-            viewerContext={viewerContext}
+            blockContext={blockContext}
             dependencies={dependencies}
             contents={code}
             metadata={metadata}

@@ -178,7 +178,11 @@ export async function searchRepos(
   const { query, token } = params;
   if (query !== "") {
     const url = `https://api.github.com/search/repositories?q=${query}&token=${token}&sort=stars&order=desc&per_page=10`;
-    const res = await fetch(url);
+    const res = await fetch(url, {
+      headers: {
+        Authorization: `token ${token}`,
+      },
+    });
     if (res.status !== 200) {
       const error = await res.json();
       throw new Error(error.message);

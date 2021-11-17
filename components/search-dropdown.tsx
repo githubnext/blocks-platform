@@ -4,10 +4,7 @@ import Router from "next/router";
 import { useSearchRepos } from "hooks";
 import { useDebounce, useMeasure } from "react-use";
 
-const items = [
-  "githubnext/composable-github-example-viewers",
-  "githubnext/composable-github-example-files",
-];
+const items = ["githubnext/blocks-examples", "githubnext/blocks-tutorial"];
 
 interface SearchDropdownProps {
   session: Session;

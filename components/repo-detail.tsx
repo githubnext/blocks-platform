@@ -98,7 +98,7 @@ export function RepoDetail(props: RepoDetailProps) {
   // };
 
   const viewerContext = {
-    repo: "composable-github-example-viewers",
+    repo: "blocks-examples",
     owner: "githubnext",
   };
 
@@ -107,7 +107,7 @@ export function RepoDetail(props: RepoDetailProps) {
     status: viewersStatus,
     error: viewersError,
   } = useFileContent({
-    repo: "composable-github-example-viewers",
+    repo: "blocks-examples",
     owner: "githubnext",
     token: session.token as string,
     path: "package.json",

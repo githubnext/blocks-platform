@@ -15,7 +15,7 @@ export default function Home() {
         <img className="w-24" src="/next-octocat.svg" alt="GitHub Next logo" />
         <div className="mt-4 pl-1 space-y-2">
           <h1 className="text-5xl font-bold tracking-tighter text-gray-800">
-            Composable GitHub™️
+            GitHub Blocks™️
           </h1>
           <p className="text-xl text-gray-500 leading-7">
             An exploration around what GitHub would look and feel like if end
@@ -25,7 +25,7 @@ export default function Home() {
         </div>
         <div className="mt-4">
           {session ? (
-            <Link href="/githubnext/composable-github-example-files?path=README.md">
+            <Link href="/githubnext/blocks-tutorial?path=README.md">
               <a className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                 View Sample Repository
               </a>

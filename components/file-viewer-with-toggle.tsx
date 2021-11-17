@@ -16,7 +16,8 @@ interface FileViewerProps {
 }
 
 export function FileViewer(props: FileViewerProps) {
-  const { context, theme, viewer, dependencies, session, viewerContext } = props;
+  const { context, theme, viewer, dependencies, session, viewerContext } =
+    props;
   const { repo, owner, path, sha } = context;
 
   const { data } = useFileContent({
@@ -46,17 +47,19 @@ export function FileViewer(props: FileViewerProps) {
   useEffect(() => {
     const onUpdateMetadataEvent = (event: MessageEvent) => {
       // TODO: restrict by event.origin
-      if (event.data.codesandbox) return
-      if (event.data.type !== "update-metadata") return
+      if (event.data.codesandbox) return;
+      if (event.data.type !== "update-metadata") return;
       const newMetadata = event?.data?.metadata || {};
-      onUpdateMetadata(newMetadata)
-    }
-    window.addEventListener("message", onUpdateMetadataEvent as EventListener)
+      onUpdateMetadata(newMetadata);
+    };
+    window.addEventListener("message", onUpdateMetadataEvent as EventListener);
     return () => {
-      window.removeEventListener("message", onUpdateMetadataEvent as EventListener)
-    }
-  }, [onUpdateMetadata])
-
+      window.removeEventListener(
+        "message",
+        onUpdateMetadataEvent as EventListener
+      );
+    };
+  }, [onUpdateMetadata]);
 
   return (
     <div className="h-full flex flex-col">

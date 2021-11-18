@@ -35,8 +35,10 @@ type TreeItem =
 type RepoItem =
   import("@octokit/openapi-types").components["schemas"]["repo-search-result-item"];
 
-interface RepoInfo {
-  repoInfo: any;
+type RepoInfo =
+  import("@octokit/openapi-types").components["schemas"]["repository"];
+
+interface RepoTimeline {
   activity: any;
   commits: any;
   fileChanges: any;

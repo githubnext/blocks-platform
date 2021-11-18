@@ -1,68 +1,39 @@
+import { FileContext } from "@githubnext/utils";
+import MDX from "@mdx-js/runtime";
 import { Box, Link, StyledOcticon, Timeline } from "@primer/components";
 import {
-  CommentDiscussionIcon,
-  CommentIcon,
-  EyeIcon,
-  GitPullRequestIcon,
-  IssueOpenedIcon,
-  RepoForkedIcon,
-  RepoPushIcon,
-  StarIcon,
-  TrashIcon,
+  CommitIcon
 } from "@primer/octicons-react";
+import { timeDay, timeFormat, timeMonth, timeWeek, timeYear } from "d3";
+import { useRepoTimeline } from "hooks";
+import { useRouter } from "next/router";
 import { Avatar } from "./Avatar";
-import { timeFormat, timeDay, timeWeek, timeMonth, timeYear } from "d3";
-import MDX from "@mdx-js/runtime";
 
-type Activity = {
-  actor: {
-    login: string;
-    avatar_url: string;
-    display_login: string;
-    id: number;
-    url: string;
-  };
-  created_at: string;
-  id: string;
-  org: {
-    login: string;
-    url: string;
-    avatar_url: string;
-    gravatar_id: string;
-    id: number;
-  };
-  payload: {
-    action: string;
-    issue?: any;
-    labels_url?: string;
-    comment?: any;
-    commits?: any[];
-  };
-  public: boolean;
-  repo: {
-    id: number;
-    name: string;
-    url: string;
-  };
-  type:
-    | "IssuesEvent"
-    | "PullRequestEvent"
-    | "PushEvent"
-    | "WatchEvent"
-    | "DeleteEvent"
-    | "ForkEvent"
-    | "CommitCommentEvent"
-    | "IssueCommentEvent";
-};
+export const ActivityFeed = ({ context, session }: {
+  context: Omit<FileContext, "file">,
+  session: Session
+}) => {
+  const { owner, repo, path } = context;
 
-export const ActivityFeed = ({ activity }: { activity: Activity[] }) => {
-  if (!activity || activity.length === 0) return null;
+  const {
+    data: timelineData,
+    status: timelineStatus,
+    error: timelineError,
+  } = useRepoTimeline({
+    repo: repo,
+    owner: owner,
+    token: session.token,
+    path: path,
+  });
+
+  const commits = timelineData?.commits || [];
+
   return (
     <div className="h-full overflow-auto">
-      <div className="flex flex-col h-full p-4">
+      <div className="flex flex-col h-full">
         <Timeline>
-          {activity.map((item, index) => (
-            <Activity {...item} key={item.id} />
+          {commits.map(item => (
+            <Commit {...item} isSelected={context.sha === item.sha} key={item.sha} />
           ))}
         </Timeline>
       </div>
@@ -70,127 +41,63 @@ export const ActivityFeed = ({ activity }: { activity: Activity[] }) => {
   );
 };
 
-const Activity = ({
-  actor,
-  created_at,
-  id,
-  org,
-  payload,
-  public: isPublic,
-  repo,
-  type,
-}: Activity) => {
-  const icon = {
-    IssuesEvent: IssueOpenedIcon,
-    PullRequestEvent: GitPullRequestIcon,
-    PushEvent: RepoPushIcon,
-    WatchEvent: StarIcon,
-    DeleteEvent: TrashIcon,
-    ForkEvent: RepoForkedIcon,
-    CommitCommentEvent: CommentDiscussionIcon,
-    IssueCommentEvent: CommentIcon,
-  }[type];
 
-  const actionText =
-    {
-      IssuesEvent: "opened an issue",
-      PullRequestEvent: "opened a pull request",
-      PushEvent: (
-        <>
-          pushed to <Link href={repo.url}>{repo.name}</Link>
-        </>
-      ),
-      WatchEvent: "starred this repo",
-      DeleteEvent: (
-        <>
-          deleted <Link href={repo.url}>{repo.name}</Link>
-        </>
-      ),
-      ForkEvent: (
-        <>
-          forked <Link href={repo.url}>{repo.name}</Link>
-        </>
-      ),
-      CommitCommentEvent: (
-        <>
-          commented on{" "}
-          <Link href={payload.comment?.html_url}>
-            {payload.comment?.commit_id?.substring(0, 7)}
-          </Link>
-        </>
-      ),
-      IssueCommentEvent: (
-        <>
-          commented on issue{" "}
-          <Link href={payload.issue?.html_url}>#{payload.issue?.number}</Link>
-        </>
-      ),
-    }[type] || type;
-
+const Commit = ({
+  isSelected,
+  date,
+  username,
+  message,
+  sha
+}: {
+  isSelected: boolean,
+  date: string,
+  message: string,
+  username: string,
+  sha: string
+}) => {
+  const router = useRouter()
   return (
-    <Timeline.Item>
-      <Timeline.Badge>{icon && <StyledOcticon icon={icon} />}</Timeline.Badge>
-      <Timeline.Body>
-        {/* <Box bg="canvas.subtle" borderRadius={10} p={3} m={1} className="flex"> */}
-        <div className="flex justify-between -mt-1">
-          {/* {type} */}
-          <Box sx={{ mr: 2, mt: 1 }}>
-            <Link
-              display="inline"
-              href={actor.url}
-              sx={{ fontWeight: "bold", color: "fg.default", mr: 1 }}
-              muted
-            >
-              {actor.display_login}
-            </Link>
-            <span className="text-gray-500">{actionText || ""}</span>
-          </Box>
-          <Avatar username={actor.login} />
-        </div>
+    <button className={`text-left px-2 cursor-pointer ${isSelected ? 'bg-indigo-50' : ''}`} onClick={() => {
+      let { fileRef, ...newQuery } = router.query
+      if (!isSelected) newQuery.fileRef = sha
+      router.push({
+        pathname: router.pathname,
+        query: newQuery
+      })
+    }
+    }>
+      <Timeline.Item>
+        <Timeline.Badge><StyledOcticon icon={CommitIcon} /></Timeline.Badge>
+        <Timeline.Body>
+          <div className={`flex justify-between -mt-1`}>
+            <Box sx={{ mr: 2, mt: 1 }}>
+              <Link
+                display="inline"
+                href={`http://github.com/${username}`}
+                sx={{ fontWeight: "bold", color: "fg.default", mr: 1 }}
+                muted
+                target="_blank"
+              >
+                {username}
+              </Link>
+              <span className="text-gray-500">pushed a commit</span>
+            </Box>
+            <Avatar username={username} />
+          </div>
 
-        {type === "IssuesEvent" ? (
-          <Box sx={{ mt: 1 }} className="overflow-x-hidden markdown">
-            <Link
-              display="inline"
-              href={payload.issue.html_url}
-              sx={{ fontWeight: "bold", color: "fg.default", mr: 1 }}
-              muted
-            >
-              {payload.issue.title}
-            </Link>
-            <MDX className="text-gray-500 text-xs whitespace-pre">
-              {payload.issue.body}
-            </MDX>
-          </Box>
-        ) : type === "CommitCommentEvent" ? (
           <Box sx={{ mt: 1 }} className="overflow-x-hidden markdown">
             <MDX className="text-gray-500 text-xs whitespace-pre">
-              {payload.comment?.body}
+              {message}
             </MDX>
           </Box>
-        ) : type === "IssueCommentEvent" ? (
-          <Box sx={{ mt: 1 }} className="overflow-x-hidden markdown">
-            <MDX className="text-gray-500 text-xs whitespace-pre">
-              {payload.comment?.body}
-            </MDX>
+          <Box fontStyle="italic" mt={1} className="text-gray-400">
+            {getRelativeTime(new Date(date))}
           </Box>
-        ) : type === "PushEvent" ? (
-          <Box
-            sx={{ mt: 1 }}
-            className="overflow-x-hidden font-semibold text-gray-900"
-          >
-            {payload.commits?.[0]?.message}
-          </Box>
-        ) : null}
-
-        <Box fontStyle="italic" mt={1} className="text-gray-400">
-          {getRelativeTime(new Date(created_at))}
-        </Box>
-        {/* </Box> */}
-      </Timeline.Body>
-    </Timeline.Item>
-  );
-};
+        </Timeline.Body>
+      </Timeline.Item>
+    </button>
+  )
+}
 
 const getOrdinal = (n) => {
   const s = ["th", "st", "nd", "rd"];
@@ -205,7 +112,8 @@ const formatDate = (d) =>
   ].join("");
 const formatTime = timeFormat("%-I:%M %p");
 const getRelativeTime = (d) => {
-  const today = timeDay.floor(new Date());
+  const now = new Date();
+  const today = timeDay.floor(now);
   if (d > today) {
     return formatTime(d);
   }
@@ -213,7 +121,7 @@ const getRelativeTime = (d) => {
   if (d > yesterday) {
     return `Yesterday, ${formatTime(d)}`;
   }
-  const thisWeek = timeWeek.floor(new Date());
+  const thisWeek = timeWeek.floor(now);
   if (d > thisWeek) {
     return timeFormat("%A")(d);
   }
@@ -221,14 +129,12 @@ const getRelativeTime = (d) => {
   if (d > lastWeek) {
     return `Last ${timeFormat("%A")(d)}`;
   }
-  const thisMonth = timeMonth.floor(new Date());
-  if (d > thisMonth) {
-    const daysAgo = timeDay.count(thisMonth, d);
+  const daysAgo = timeDay.count(d, now);
+  if (daysAgo < 30) {
     return `${daysAgo} days ago`;
   }
-  const thisYear = timeYear.floor(new Date());
-  if (d > thisYear) {
-    const monthsAgo = timeMonth.count(thisYear, d);
+  const monthsAgo = timeMonth.count(d, now);
+  if (monthsAgo < 12) {
     return `${monthsAgo} months ago`;
   }
   const yearsAgo = timeYear.count(new Date(0), d);

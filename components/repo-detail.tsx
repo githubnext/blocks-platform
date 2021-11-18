@@ -5,6 +5,7 @@ import { useFileContent, useMetadata, useRepoFiles, useRepoInfo } from "hooks";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
+import { ActivityFeed } from "./ActivityFeed";
 import { GitHubHeader } from "./github-header";
 import { RepoHeader } from "./repo-header";
 import { Sidebar } from "./Sidebar";
@@ -168,7 +169,6 @@ export function RepoDetail(props: RepoDetailProps) {
               repo={repo as string}
               files={files}
               activeFilePath={path as string}
-              fileChanges={repoInfo?.fileChanges}
             />
           )}
         </div>
@@ -241,20 +241,12 @@ export function RepoDetail(props: RepoDetailProps) {
             ))}
         </div>
 
-        {/* <div className="flex-none w-80 h-full border-l border-gray-200">
-          {repoInfoStatus === "loading" ? (
-            <div className="flex flex-col items-center justify-center h-full w-full">
-              <div className="animate-pulse flex space-y-4">
-                <div className="rounded-full bg-gray-200 h-12 w-full"></div>
-                <div className="rounded-full bg-gray-200 h-12 w-full"></div>
-                <div className="rounded-full bg-gray-200 h-12 w-full"></div>
-              </div>
-            </div>
-          ) : (
-            // <ActivityFeed activity={repoInfo?.activity} />
-            null
-          )}
-        </div> */}
+        <div className="flex-none hidden lg:block w-80 h-full border-l border-gray-200">
+          <ActivityFeed
+            context={context}
+            session={session}
+          />
+        </div>
       </div>
     </div>
   );

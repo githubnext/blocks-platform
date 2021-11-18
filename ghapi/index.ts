@@ -34,7 +34,7 @@ export async function getFileContent(
   try {
     const { repo, owner, path, fileRef, token } = params;
 
-    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${fileRef}`;
     const res = await fetch(apiUrl, {
       headers: {
         Authorization: `token ${token}`,
@@ -161,13 +161,42 @@ export async function getRepoInfo(
   params: RepoContextWithToken
 ): Promise<RepoInfo> {
   const { owner, repo, token } = params;
-  const url = `/api/repo-info?owner=${owner}&repo=${repo}&token=${token}`;
+  const url = `https://api.github.com/repos/${owner}/${repo}`;
+  const res = await fetch(url, {
+    headers: {
+      Authorization: `token ${token}`,
+    },
+  });
+  if (res.status !== 200) {
+    const error = await res.json();
+    throw new Error(error.message);
+  }
+
+  const data = await res.json();
+
+  const contributorsUrl = `${url}/contributors`;
+  const contributorsRes = await fetch(contributorsUrl, {
+    headers: {
+      Authorization: `token ${token}`,
+    },
+  });
+  const contributors = await contributorsRes.json();
+
+  return { ...data, contributors };
+}
+
+export async function getRepoTimeline(
+  params: RepoContextWithToken & { path: string }
+): Promise<RepoTimeline> {
+  const { owner, repo, path, token } = params;
+  const url = `/api/repo-info?owner=${owner}&repo=${repo}&path=${path}&token=${token}`;
   const res = await fetch(url);
   if (res.status !== 200) {
     const error = await res.json();
     throw new Error(error.message);
   }
-  return await res.json();
+  const data = await res.json();
+  return data;
 }
 
 export async function getRepoFiles(

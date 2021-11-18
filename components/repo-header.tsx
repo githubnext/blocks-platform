@@ -42,12 +42,12 @@ export const RepoHeader = ({
   owner,
   repo,
   description,
-  contributors,
+  contributors = [],
 }: {
   owner: string;
   repo: string;
   description: string;
-  contributors: [string, string, string][];
+  contributors: any[];
 }) => {
   return (
     <Box
@@ -84,7 +84,7 @@ export const RepoHeader = ({
           <Box ml={2}>
             <AvatarList>
               {contributors?.map((contributor) => (
-                <Avatar username={contributor[0]} size="small" />
+                <Avatar username={contributor.login} size="small" />
               ))}
             </AvatarList>
           </Box>

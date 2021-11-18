@@ -19,6 +19,7 @@ import {
   getFileContentsAndDependencies,
   SearchContextWithToken,
   searchRepos,
+  getRepoTimeline,
 } from "ghapi";
 
 // get env variable
@@ -202,6 +203,15 @@ export function useMetadata({
 
 export function useRepoInfo(params: RepoContextWithToken) {
   return useQuery(["info", params], () => getRepoInfo(params), {
+    enabled:
+      Boolean(params.repo) && Boolean(params.owner) && Boolean(params.token),
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
+}
+
+export function useRepoTimeline(params: RepoContextWithToken & { path: string }) {
+  return useQuery(["timeline", params], () => getRepoTimeline(params), {
     enabled:
       Boolean(params.repo) && Boolean(params.owner) && Boolean(params.token),
     refetchOnWindowFocus: false,

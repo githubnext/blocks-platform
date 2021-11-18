@@ -1,10 +1,9 @@
-import { RepoContext } from "ghapi";
+import { FileContext } from "@githubnext/utils";
 import { SandboxedBlockWrapper } from "components/sandboxed-block-wrapper";
+import { RepoContext } from "ghapi";
 import { useFileContent, useMetadata } from "hooks";
-import { getLanguageFromFilename } from "lib";
 import React, { useEffect } from "react";
 import { ErrorBoundary } from "./error-boundary";
-import { FileContext } from "@githubnext/utils";
 
 interface FileBlockProps {
   theme: string;

@@ -57,7 +57,7 @@ const Commit = ({
 }) => {
   const router = useRouter()
   return (
-    <button className={`text-left px-2 cursor-pointer ${isSelected ? 'bg-indigo-50' : ''}`} onClick={() => {
+    <button className={`text-left px-2 cursor-pointer ${isSelected ? 'bg-indigo-500 text-white' : 'hover:bg-indigo-50'}`} onClick={() => {
       let { fileRef, ...newQuery } = router.query
       if (!isSelected) newQuery.fileRef = sha
       router.push({
@@ -67,30 +67,30 @@ const Commit = ({
     }
     }>
       <Timeline.Item>
-        <Timeline.Badge><StyledOcticon icon={CommitIcon} /></Timeline.Badge>
-        <Timeline.Body>
+        <Timeline.Badge className={`transition-transform ${isSelected ? '!bg-indigo-500 !text-white !border-indigo-200 transform scale-110' : ''}`}><StyledOcticon icon={CommitIcon} /></Timeline.Badge>
+        <Timeline.Body className={`${isSelected ? '!text-white' : ''}`}>
           <div className={`flex justify-between -mt-1`}>
             <Box sx={{ mr: 2, mt: 1 }}>
               <Link
                 display="inline"
                 href={`http://github.com/${username}`}
-                sx={{ fontWeight: "bold", color: "fg.default", mr: 1 }}
+                sx={{ fontWeight: "bold", color: "inherit", mr: 1 }}
                 muted
                 target="_blank"
               >
                 {username}
               </Link>
-              <span className="text-gray-500">pushed a commit</span>
+              <span className="opacity-80">pushed a commit</span>
             </Box>
             <Avatar username={username} />
           </div>
 
           <Box sx={{ mt: 1 }} className="overflow-x-hidden markdown">
-            <MDX className="text-gray-500 text-xs whitespace-pre">
+            <MDX className="opacity-80 text-xs whitespace-pre">
               {message}
             </MDX>
           </Box>
-          <Box fontStyle="italic" mt={1} className="text-gray-400">
+          <Box fontStyle="italic" mt={1} className="opacity-60">
             {getRelativeTime(new Date(date))}
           </Box>
         </Timeline.Body>

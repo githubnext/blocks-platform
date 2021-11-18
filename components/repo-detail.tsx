@@ -1,17 +1,15 @@
-import { Box, Button } from "@primer/components";
-import { useRouter } from "next/router";
-import { useTheme } from "@primer/components";
-import { useEffect, useState } from "react";
-
-import { useFileContent, useMetadata, useRepoFiles, useRepoInfo } from "hooks";
+import { Box, useTheme } from "@primer/components";
 import { FileBlock } from "components/file-block";
 import { FolderBlock } from "components/folder-block";
-import { ActivityFeed } from "components/ActivityFeed";
+import { useFileContent, useMetadata, useRepoFiles, useRepoInfo } from "hooks";
+import dynamic from "next/dynamic";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 import { GitHubHeader } from "./github-header";
 import { RepoHeader } from "./repo-header";
 import { Sidebar } from "./Sidebar";
 
-import dynamic from "next/dynamic";
+
 const BlockPicker = dynamic(() => import("./block-picker"), { ssr: false });
 
 interface RepoDetailProps {
@@ -32,12 +30,17 @@ const defaultFolderBlock = {
   description: "A visualization of your folders and files",
   entry: "/src/blocks/folder-blocks/minimap/index.tsx",
 };
+const getBlockId = (owner: string, repo: string, block: Block) => (
+  [owner, repo, block?.entry || ""].join("--")
+)
+const defaultFileBlockId = getBlockId(
+  "githubnext", "blocks-examples", defaultFileBlock
+)
 export function RepoDetail(props: RepoDetailProps) {
   const { session } = props;
   const router = useRouter();
   const { setColorMode } = useTheme();
-  const [block, setBlock] = useState<Block>(defaultFolderBlock);
-
+  const { blockId = defaultFileBlockId } = router.query;
   const { repo, owner, path = "", theme, fileRef } = router.query;
 
   const context = {
@@ -74,13 +77,18 @@ export function RepoDetail(props: RepoDetailProps) {
   const isFolder =
     repoFilesStatus === "success"
       ? files?.find((d) => d.path === path)?.type !== "blob"
-      : true;
+      : null;
 
-  useEffect(() => {
-    if (repoFilesStatus !== "success") return;
-    const block = isFolder ? defaultFolderBlock : defaultFileBlock;
-    setBlock(block);
-  }, [isFolder]);
+  const onLoadBlock = (owner: string, repo: string, block: Block) => {
+    if (!block) return;
+    router.push({
+      pathname: router.pathname,
+      query: {
+        ...router.query,
+        blockId: getBlockId(owner, repo, block),
+      },
+    });
+  }
 
   const { metadata, onUpdateMetadata } = useMetadata({
     owner: owner as string,
@@ -90,16 +98,10 @@ export function RepoDetail(props: RepoDetailProps) {
     token: session.token as string,
   });
 
-  // const defaultBlock = metadata.defaultBlock;
-  // const onSetDefaultBlock = (blockId: string) => {
-  //   onUpdateMetadata({
-  //     defaultBlock: blockId,
-  //   });
-  // };
-
+  const [blockOwner = "githubnext", blockRepo = "blocks-examples", blockPath] = (blockId as string).split("--");
   const blockContext = {
-    repo: "blocks-examples",
-    owner: "githubnext",
+    owner: blockOwner,
+    repo: blockRepo,
   };
 
   const {
@@ -107,8 +109,8 @@ export function RepoDetail(props: RepoDetailProps) {
     status: blocksStatus,
     error: blocksError,
   } = useFileContent({
-    repo: "blocks-examples",
-    owner: "githubnext",
+    owner: blockOwner,
+    repo: blockRepo,
     token: session.token as string,
     path: "package.json",
   });
@@ -116,6 +118,9 @@ export function RepoDetail(props: RepoDetailProps) {
     ? JSON.parse(blocksInfo.content)
     : {};
   const blocks = blocksInfoParsed?.blocks || [];
+  const block = blocks.find(block => {
+    return getBlockId(blockOwner, blockRepo, block) === blockId;
+  })
 
   const fileInfo = files?.find((d) => d.path === path);
   const size = fileInfo?.size || 0;
@@ -185,7 +190,7 @@ export function RepoDetail(props: RepoDetailProps) {
                   )}
                   isFolder={isFolder}
                   path={path as string}
-                  onChange={setBlock}
+                  onChange={(block) => onLoadBlock(blockOwner, blockRepo, block)}
                   value={block}
                 />
                 {/* {blockType !== defaultBlock && (

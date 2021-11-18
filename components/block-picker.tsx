@@ -11,7 +11,6 @@ interface BlockPickerProps {
 
 export default function BlockPicker(props: BlockPickerProps) {
   const { blocks, value, path, isFolder, onChange } = props;
-  // const defaultBlock = isFolder ? "sidebar" : (getBlockFromFilename(`.${extension}`) || "code")
   const extension = path.split(".").slice(-1)[0];
   const relevantBlocks = blocks.filter(
     (d) =>
@@ -21,17 +20,11 @@ export default function BlockPicker(props: BlockPickerProps) {
   );
 
   useEffect(() => {
+    if (isFolder === null) return
     if (!relevantBlocks?.find((v) => v?.entry === value?.entry)) {
       onChange(relevantBlocks[0]);
     }
   }, [value, relevantBlocks?.map((d) => d.entry).join(",")]);
-
-  // start with the second default block not the code one
-  useEffect(() => {
-    if (relevantBlocks.length > 0) {
-      onChange(relevantBlocks[1]);
-    }
-  }, [relevantBlocks?.map((d) => d.entry).join(",")]);
 
   return (
     <SelectMenu>

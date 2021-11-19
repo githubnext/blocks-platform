@@ -1,3 +1,4 @@
+import { AnimatedBlocks } from "components/AnimatedBlocks";
 import { FullPageLoader } from "components/full-page-loader";
 import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
@@ -10,23 +11,22 @@ export default function Home() {
   }
 
   return (
-    <div className="h-screen flex items-center justify-center">
-      <div className="max-w-2xl w-full px-4 lg:px-0">
-        <img className="w-24" src="/next-octocat.svg" alt="GitHub Next logo" />
-        <div className="mt-4 pl-1 space-y-2">
-          <h1 className="text-5xl font-bold tracking-tighter text-gray-800">
-            GitHub Blocks™️
-          </h1>
-          <p className="text-xl text-gray-500 leading-7">
-            An exploration around what GitHub would look and feel like if end
-            users had the ability to write and publish their own custom file
-            "blocks."
-          </p>
-        </div>
-        <div className="mt-4">
+    <div className="h-screen flex items-center justify-center bg-gradient-to-t from-indigo-100 to-indigo-50">
+      <div className="w-full px-4 lg:px-0 flex flex-col items-center justify-center z-10">
+        <h1 className="text-[10vw] font-black tracking-tighter text-gray-800 leading-[0.8em]">
+          <span className="font-thin">
+            GitHub
+          </span>
+          Blocks
+        </h1>
+        <p className="text-2xl tracking-[0.01em] font-light text-gray-500 leading-8 mt-7 max-w-2xl text-center mx-auto">
+          What GitHub would look and feel like if end
+          users could control how they interact with their content?
+        </p>
+        <div className="mt-10 space-x-4">
           {session ? (
             <Link href="/githubnext/blocks-tutorial?path=README.md">
-              <a className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+              <a className="inline-flex items-center px-8 py-4 text-lg border border-transparent leading-4 font-medium rounded-md shadow-sm text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                 View Sample Repository
               </a>
             </Link>
@@ -34,12 +34,25 @@ export default function Home() {
             <button
               // @ts-ignore
               onClick={() => signIn("github")}
-              className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+              className="inline-flex items-center px-8 py-4 text-lg border border-transparent leading-4 font-medium rounded-md shadow-sm text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
             >
               Sign in with GitHub
             </button>
           )}
         </div>
+        <div className="mt-6 text-2xl tracking-tight flex items-center">
+          <div className="font-light text-xl">
+            an exploration by
+          </div>
+          <img className="w-[1.5em] ml-2" src="/next-octocat.svg" alt="GitHub Next logo" />
+          <div className="font-bold">
+            GitHub Next
+          </div>
+
+        </div>
+      </div>
+      <div className="absolute inset-0 z-0">
+        <AnimatedBlocks />
       </div>
     </div>
   );

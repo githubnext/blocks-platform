@@ -1,6 +1,6 @@
 import { FileContext, FolderContext } from "@githubnext/utils";
 import { RepoFiles } from "ghapi";
-import { SandboxedBlock } from "./sandboxed-block";
+import { SandboxedBlock } from "components/sandboxed-block"
 
 interface SandboxedBlockWrapperProps {
   block: Block;

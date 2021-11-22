@@ -84,7 +84,7 @@ export const RepoHeader = ({
           <Box ml={2}>
             <AvatarList>
               {contributors?.map((contributor) => (
-                <Avatar username={contributor.login} size="small" />
+                <Avatar key={contributor.login} username={contributor.login} size="small" />
               ))}
             </AvatarList>
           </Box>

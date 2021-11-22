@@ -20,16 +20,16 @@ interface RepoDetailProps {
 const defaultFileBlock = {
   id: "file-block",
   owner: "githubnext",
-  repo: "blocks-template"
+  repo: "blocks-examples"
 } as Block
 
 const defaultFolderBlock = {
   id: "minimap-block",
   owner: "githubnext",
-  repo: "blocks-template"
+  repo: "blocks-examples"
 } as Block
 const getBlockKey = (block: Block) => (
-  [block?.owner, block?.repo, block?.entry || ""].join("--")
+  [block?.owner, block?.repo, block?.id || ""].join("__")
 )
 const defaultFileBlockKey = getBlockKey(defaultFileBlock)
 export function RepoDetail(props: RepoDetailProps) {
@@ -81,7 +81,7 @@ export function RepoDetail(props: RepoDetailProps) {
       pathname: router.pathname,
       query: {
         ...router.query,
-        blockId: getBlockKey(block),
+        blockKey: getBlockKey(block),
       },
     });
   }
@@ -94,17 +94,19 @@ export function RepoDetail(props: RepoDetailProps) {
     token: session.token as string,
   });
 
-  const [blockOwner = "githubnext", blockRepo = "blocks-template", blockId] = (blockKey as string).split("--");
+  const [blockOwner = "githubnext", blockRepo = "blocks-examples", blockId] = (blockKey as string).split("__");
 
   const { data: allBlocksInfo = [] } = useGetBlocksInfo()
   const blocksRepo = allBlocksInfo.find(block => (
     block.owner === blockOwner && block.repo === blockRepo
   ))
-  const block = {
-    ...blocksRepo?.blocks?.find(block => block.id === blockId) || blocksRepo?.blocks[0] || {},
+  const blocks = (blocksRepo?.blocks || []).map(block => ({
+    ...block,
     owner: blockOwner,
     repo: blockRepo,
-  } as Block
+  } as Block))
+
+  const block = blocks.find(block => block.id === blockId) || blocksRepo?.blocks[0] || {} as Block
   const fileInfo = files?.find((d) => d.path === path);
   const size = fileInfo?.size || 0;
   const fileSizeLimit = 100000; // 200KB
@@ -167,7 +169,7 @@ export function RepoDetail(props: RepoDetailProps) {
                 alignItems="center"
               >
                 <BlockPicker
-                  blocks={(blocksRepo?.blocks || []).filter(
+                  blocks={blocks.filter(
                     (d) => d.type === (isFolder ? "folder" : "file")
                   )}
                   isFolder={isFolder}

@@ -400,7 +400,7 @@
     "@codemirror/view" "^0.19.0"
     "@lezer/common" "^0.15.0"
 
-"@codemirror/closebrackets@0.19.0", "@codemirror/closebrackets@^0.19.0":
+"@codemirror/closebrackets@0.19.0":
   version "0.19.0"
   resolved "https://registry.yarnpkg.com/@codemirror/closebrackets/-/closebrackets-0.19.0.tgz#69fdcee85779d638a00a42becd9f53a33a26d77f"
   integrity sha512-dFWX5OEVYWRNtGaifSbwIAlymnRRjxWMiMbffbAjF7p0zfGHDbdGkiT56q3Xud63h5/tQdSo5dK1iyNTzHz5vg==
@@ -411,7 +411,7 @@
     "@codemirror/text" "^0.19.0"
     "@codemirror/view" "^0.19.0"
 
-"@codemirror/commands@0.19.5", "@codemirror/commands@^0.19.5":
+"@codemirror/commands@0.19.5":
   version "0.19.5"
   resolved "https://registry.yarnpkg.com/@codemirror/commands/-/commands-0.19.5.tgz#2607b5c12c5c96df2cabce2e43f6285c07cfaf11"
   integrity sha512-8PZOtx7d/GbKhFYA88zs2wINDtaUgj3pEjLYScKTd/Vsyw8qOp86tJQQNnMFTRZj/ISQl9Lbg3aAmHvroMqspw==
@@ -423,7 +423,7 @@
     "@codemirror/view" "^0.19.0"
     "@lezer/common" "^0.15.0"
 
-"@codemirror/comment@0.19.0", "@codemirror/comment@^0.19.0":
+"@codemirror/comment@0.19.0":
   version "0.19.0"
   resolved "https://registry.yarnpkg.com/@codemirror/comment/-/comment-0.19.0.tgz#4f23497924e9346898c2e0123011acc535a0bea6"
   integrity sha512-3hqAd0548fxqOBm4khFMcXVIivX8p0bSlbAuZJ6PNoUn/0wXhxkxowPp0FmFzU2+y37Z+ZQF5cRB5EREWPRIiQ==
@@ -441,7 +441,7 @@
     "@codemirror/state" "^0.19.0"
     "@codemirror/view" "^0.19.0"
 
-"@codemirror/gutter@^0.19.4", "@codemirror/gutter@^0.19.5":
+"@codemirror/gutter@^0.19.4":
   version "0.19.5"
   resolved "https://registry.yarnpkg.com/@codemirror/gutter/-/gutter-0.19.5.tgz#b90527832c3f3066d1aeb53b003a764b5a561cfc"
   integrity sha512-Vqy+RXgBdnmbxNYx4/irQcfU9ecFz8SB/vhDOeHHSGtDqs+TihYHnHgBZLz6uILEG0YIjp0/zYY3P2NgZ/iyEg==
@@ -462,7 +462,7 @@
     "@lezer/common" "^0.15.0"
     style-mod "^4.0.0"
 
-"@codemirror/history@0.19.0", "@codemirror/history@^0.19.0":
+"@codemirror/history@0.19.0":
   version "0.19.0"
   resolved "https://registry.yarnpkg.com/@codemirror/history/-/history-0.19.0.tgz#cc8095c927c9566f7b69fa404074edde4c54d39c"
   integrity sha512-E0H+lncH66IMDhaND9jgkjE7s0dhYfjCPmS+Ig2Yes9I8+UIEecIdObj8c8HPCFGctGg3fxXqRAw2mdHl2Wouw==
@@ -470,7 +470,7 @@
     "@codemirror/state" "^0.19.0"
     "@codemirror/view" "^0.19.0"
 
-"@codemirror/lang-css@0.19.3", "@codemirror/lang-css@^0.19.0", "@codemirror/lang-css@^0.19.3":
+"@codemirror/lang-css@0.19.3", "@codemirror/lang-css@^0.19.0":
   version "0.19.3"
   resolved "https://registry.yarnpkg.com/@codemirror/lang-css/-/lang-css-0.19.3.tgz#7a17adf78c6fcdab4ad5ee4e360631c41e949e4a"
   integrity sha512-tyCUJR42/UlfOPLb94/p7dN+IPsYSIzHbAHP2KQHANj0I+Orqp+IyIOS++M8TuCX4zkWh9dvi8s92yy/Tn8Ifg==
@@ -481,7 +481,7 @@
     "@codemirror/state" "^0.19.0"
     "@lezer/css" "^0.15.2"
 
-"@codemirror/lang-html@0.19.3", "@codemirror/lang-html@^0.19.3":
+"@codemirror/lang-html@0.19.3":
   version "0.19.3"
   resolved "https://registry.yarnpkg.com/@codemirror/lang-html/-/lang-html-0.19.3.tgz#73ff276efd4b22d28062f70367fd0f638993f36a"
   integrity sha512-QlZN8VhQ+vlOpDMbcfXcG3HiiNeklAfIYnKonPM902SM3nJc4rJ66X9O8mzy0TUDBmew9zaYDubvQcqw7rc5Bg==
@@ -508,7 +508,7 @@
     "@codemirror/view" "^0.19.0"
     "@lezer/javascript" "^0.15.0"
 
-"@codemirror/lang-javascript@^0.19.0", "@codemirror/lang-javascript@^0.19.3":
+"@codemirror/lang-javascript@^0.19.0":
   version "0.19.3"
   resolved "https://registry.yarnpkg.com/@codemirror/lang-javascript/-/lang-javascript-0.19.3.tgz#281b3447d8b65d98311ebf25893ef5c30a11418b"
   integrity sha512-2NE5z98Nz9Rv4OS5UtgehCSnyQjac+P85+evzy1D/4wllp/EPaHIEEtSP1daBvrLy49SdI/9vES3ZJu6rSv4/w==
@@ -532,7 +532,7 @@
     "@lezer/common" "^0.15.5"
     "@lezer/lr" "^0.15.0"
 
-"@codemirror/language@^0.19.0", "@codemirror/language@^0.19.4":
+"@codemirror/language@^0.19.0":
   version "0.19.4"
   resolved "https://registry.yarnpkg.com/@codemirror/language/-/language-0.19.4.tgz#14e54003ae822bf51a298a7cc6e4e7d51a21e8ff"
   integrity sha512-yLnLDUkK00BlRVXpPkoJMYEssYKuRLOmK+DdJJ8zOOD4D62T7bSQ05NPyWzWr3PQX1k7sxGICGKR7INzfv9Snw==
@@ -556,7 +556,7 @@
     "@codemirror/view" "^0.19.0"
     crelt "^1.0.5"
 
-"@codemirror/matchbrackets@0.19.3", "@codemirror/matchbrackets@^0.19.0", "@codemirror/matchbrackets@^0.19.3":
+"@codemirror/matchbrackets@0.19.3", "@codemirror/matchbrackets@^0.19.0":
   version "0.19.3"
   resolved "https://registry.yarnpkg.com/@codemirror/matchbrackets/-/matchbrackets-0.19.3.tgz#1f430ada6fa21af2205280ff344ef57bb95dd3cb"
   integrity sha512-ljkrBxaLgh8jesroUiBa57pdEwqJamxkukXrJpL9LdyFZVJaF+9TldhztRaMsMZO1XnCSSHQ9sg32iuHo7Sc2g==
@@ -588,7 +588,7 @@
   dependencies:
     "@codemirror/text" "^0.19.0"
 
-"@codemirror/state@^0.19.0", "@codemirror/state@^0.19.2", "@codemirror/state@^0.19.3", "@codemirror/state@^0.19.4", "@codemirror/state@^0.19.5":
+"@codemirror/state@^0.19.0", "@codemirror/state@^0.19.2", "@codemirror/state@^0.19.3", "@codemirror/state@^0.19.4":
   version "0.19.5"
   resolved "https://registry.yarnpkg.com/@codemirror/state/-/state-0.19.5.tgz#af56e3af50224d748a992e56d1e31a52287594a5"
   integrity sha512-a3bJnkFuh4Z36nuOzAYobWViQ9eq5ux2wOb/46jUl+0Sj2BGrdz+pY1L+y2NUZhwPyWGcIrBtranr5P0rEEq8A==
@@ -619,7 +619,7 @@
     style-mod "^4.0.0"
     w3c-keyname "^2.2.4"
 
-"@codemirror/view@^0.19.0", "@codemirror/view@^0.19.16":
+"@codemirror/view@^0.19.0":
   version "0.19.18"
   resolved "https://registry.yarnpkg.com/@codemirror/view/-/view-0.19.18.tgz#8189dacd3b07cb728d425a9f43633401300297c0"
   integrity sha512-OxYc+6PvppfFVKcheLZtqRxzYoiC9dGzKZfCBzx63en/HsKuM2ZBOHHKH57ZtGNcI2ctW0j5Wr2yNm9QAdgGsA==
@@ -634,14 +634,6 @@
   version "0.1.20"
   resolved "https://registry.yarnpkg.com/@codesandbox/sandpack-client/-/sandpack-client-0.1.20.tgz#4b6c618e223a5ffdc6a82f266e7391fd3a91f15a"
   integrity sha512-FlX1AfZwHWJmdeTMZkNdW0YM6sGO+lp9sBwVlxwF4zxq/ki8kGqXJzo326XzjZ5WXQHbWigppjtgyya4BhJy+Q==
-  dependencies:
-    codesandbox-import-utils "^1.2.3"
-    lodash.isequal "^4.5.0"
-
-"@codesandbox/sandpack-client@^0.3.7":
-  version "0.3.7"
-  resolved "https://registry.yarnpkg.com/@codesandbox/sandpack-client/-/sandpack-client-0.3.7.tgz#ac1884c87954b4ce1f4e9ba5992ed29731594e3b"
-  integrity sha512-NEV7NDjZeZ/ovBF/wbI0QnRBCEtsAcmFRO9C/gQ3UAQKSQnNctktSKLPq31QZv6jBrFUf86+sjHrwGEKAumczQ==
   dependencies:
     codesandbox-import-utils "^1.2.3"
     lodash.isequal "^4.5.0"
@@ -666,29 +658,6 @@
     "@codemirror/state" "0.19.4"
     "@codemirror/view" "0.19.14"
     "@codesandbox/sandpack-client" "^0.1.20"
-    codesandbox-import-util-types "^2.2.3"
-    codesandbox-import-utils "^2.2.3"
-
-"@codesandbox/sandpack-react@^0.3.3":
-  version "0.3.7"
-  resolved "https://registry.yarnpkg.com/@codesandbox/sandpack-react/-/sandpack-react-0.3.7.tgz#937bd45f1bcf898d8dd91da175ff8283595fe5ee"
-  integrity sha512-drdiJyqSrH/OX1kf3l08vbBpZ3C/VzTnoyuzZeZ2V62wruNE4iG8qPf8CR+EEZ2aXU3McK6sB8LxKnXxR9KePQ==
-  dependencies:
-    "@code-hike/classer" "^0.0.0-aa6efee"
-    "@codemirror/closebrackets" "^0.19.0"
-    "@codemirror/commands" "^0.19.5"
-    "@codemirror/comment" "^0.19.0"
-    "@codemirror/gutter" "^0.19.5"
-    "@codemirror/highlight" "^0.19.6"
-    "@codemirror/history" "^0.19.0"
-    "@codemirror/lang-css" "^0.19.3"
-    "@codemirror/lang-html" "^0.19.3"
-    "@codemirror/lang-javascript" "^0.19.3"
-    "@codemirror/language" "^0.19.4"
-    "@codemirror/matchbrackets" "^0.19.3"
-    "@codemirror/state" "^0.19.5"
-    "@codemirror/view" "^0.19.16"
-    "@codesandbox/sandpack-client" "^0.3.7"
     codesandbox-import-util-types "^2.2.3"
     codesandbox-import-utils "^2.2.3"
 
@@ -784,15 +753,12 @@
   resolved "https://registry.yarnpkg.com/@fisker/parse-srcset/-/parse-srcset-1.0.2.tgz#6e051549fbf77ab5febda5176720e85aea70e80e"
   integrity sha512-DCLDSVB5PWC/KbT1ajPPwBGWwAb87/BxfwL8LVlbx3RPlOo5kWg/OMkNyrzwAk4KFMhdINLoBIhqz01f39Joug==
 
-"@githubnext/utils@^0.10.0":
-  version "0.10.0"
-  resolved "https://registry.yarnpkg.com/@githubnext/utils/-/utils-0.10.0.tgz#dda60306a6eac7dde230b87e28a432c789f898c6"
-  integrity sha512-+hMvjwWIh/JCJHKjzdVmwAoA9Ewe+TQuNEuv2woZ+hQG21HNofRb4RcWr++/qdgumyPonbmD8Y+5A3VSrSE95A==
+"@githubnext/utils@^0.11.0":
+  version "0.11.0"
+  resolved "https://registry.yarnpkg.com/@githubnext/utils/-/utils-0.11.0.tgz#f63dc7d1839ef0490a149789f7a7c0bd3c07fa5d"
+  integrity sha512-mfuc78LyIBtm4yrCBktDkLRh30ZmsjXgl89/hgkbkQFt3RE9k8U2QsvWHdUY3lCwWp9dvRjCes7zYDt43//31w==
   dependencies:
-    "@codesandbox/sandpack-react" "^0.3.3"
-    parse-static-imports "^1.1.0"
     react "^17.0.2"
-    react-use "^17.3.1"
     zod "^3.11.6"
 
 "@githubocto/flat-ui@^0.10.2":
@@ -7425,7 +7391,7 @@ react-use-measure@^2.0.4:
   dependencies:
     debounce "^1.2.0"
 
-react-use@^17.2.0, react-use@^17.3.1:
+react-use@^17.2.0:
   version "17.3.1"
   resolved "https://registry.yarnpkg.com/react-use/-/react-use-17.3.1.tgz#12b248555775519aa2b900b22f1928d029bf99d1"
   integrity sha512-hs7+tS4rRm1QLHPfanLCqXIi632tP4V7Sai1ENUP2WTufU6am++tU9uSw9YrNCFqbABiEv0ndKU1XCUcfu2tXA==

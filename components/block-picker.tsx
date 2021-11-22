@@ -21,7 +21,7 @@ export default function BlockPicker(props: BlockPickerProps) {
 
   useEffect(() => {
     if (isFolder === null) return
-    if (!relevantBlocks?.find((v) => v?.entry === value?.entry)) {
+    if (!relevantBlocks?.find((v) => v?.id === value?.id)) {
       onChange(relevantBlocks[0]);
     }
   }, [value, relevantBlocks?.map((d) => d.id).join(",")]);

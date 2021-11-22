@@ -1,6 +1,5 @@
 import { FileContext } from "@githubnext/utils";
 import { SandboxedBlockWrapper } from "components/sandboxed-block-wrapper";
-import { RepoContext } from "ghapi";
 import { useFileContent, useMetadata } from "hooks";
 import React, { useEffect } from "react";
 import { ErrorBoundary } from "./error-boundary";
@@ -35,7 +34,7 @@ export function FileBlock(props: FileBlockProps) {
   const { metadata, onUpdateMetadata } = useMetadata({
     owner: owner as string,
     repo: repo as string,
-    metadataPath: block.entry && `.github/blocks/file/${blockKey}`,
+    metadataPath: block.id && `.github/blocks/file/${blockKey}`,
     filePath: path,
     token: session.token as string,
   });

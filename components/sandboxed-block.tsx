@@ -15,8 +15,13 @@ interface SandboxedBlockProps {
 
 const stateStyles = {
   width: "100%",
-  padding: "5em 0",
+  padding: "20% 0",
+  fontStyle: "italic",
   margin: "0 auto",
+  display: "flex",
+  justifyContent: "center",
+  fontSize: "0.9em",
+  color: "#7D7D7E"
 }
 const DefaultLoadingState = <div style={stateStyles}>Loading...</div>;
 const DefaultErrorState = <div style={stateStyles}>Error...</div>;
@@ -32,7 +37,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
     renderLoading = DefaultLoadingState,
     renderError = DefaultErrorState,
   } = props;
-  const state = useFetchZip(block.owner, block.repo, block.id);
+  const state = useFetchZip(block);
 
   const status = state.status
   const blockContent = bundleCode || state.value;
@@ -86,11 +91,11 @@ type UseFetchZipResponse = {
   value: string | null;
   status: "loading" | "error" | "success";
 }
-const useFetchZip = (blockOwner: string, blockRepo: string, blockId: string): UseFetchZipResponse => {
-  if (!blockOwner || !blockRepo || !blockId) {
+const useFetchZip = (block: Block): UseFetchZipResponse => {
+  if (!block.owner || !block.repo || !block.id) {
     return { value: null, status: "success" };
   }
-  const url = `https://blocks-marketplace.vercel.app/api/get-block-content?owner=${blockOwner}&repo=${blockRepo}&id=${blockId}`
+  const url = `https://blocks-marketplace.vercel.app/api/get-block-content?owner=${block.owner}&repo=${block.repo}&id=${block.id}`
   const [state, setState] = React.useState<UseFetchZipResponse>({
     value: null,
     status: "loading",
@@ -107,7 +112,10 @@ const useFetchZip = (blockOwner: string, blockRepo: string, blockId: string): Us
       const res = await fetch(url)
 
       const allContent = await res.json();
-      const scriptFile = allContent.content?.find(f => f.name === `${blockId}/index.js`)
+      const fileName = (block.entry.split("/").pop() || "index.js")
+        .replace(".ts", ".js")
+        .replace(".jsx", ".js")
+      const scriptFile = allContent.content?.find(f => f.name === `${block.id}/${fileName}`)
 
       setState({
         status: "success",

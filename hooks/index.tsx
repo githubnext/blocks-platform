@@ -258,24 +258,24 @@ export function useSearchRepos(params: SearchContextWithToken) {
 }
 
 interface BlocksInfo {
-  "owner": string,
-  "repo": string,
-  "full_name": string,
-  "id": number,
-  "html_url": string,
-  "description": string,
-  "stars": number,
-  "watchers": number,
-  "language": string,
-  "topics": string[],
-  "blocks": Block[],
-  "release": {
-    "tag_name": string,
-    "name": string,
-    "tarball_url": string,
-    "zipball_url": string,
-    "published_at": string,
-    "browser_download_url": string
+  owner: string,
+  repo: string,
+  full_name: string,
+  id: number,
+  html_url: string,
+  description: string,
+  stars: number,
+  watchers: number,
+  language: string,
+  topics: string[],
+  blocks: Block[],
+  release: {
+    tag_name: string,
+    name: string,
+    tarball_url: string,
+    zipball_url: string,
+    published_at: string,
+    browser_download_url: string
   }
 }
 

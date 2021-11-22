@@ -49,7 +49,6 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
 
   if (!contents && !tree) return null;
   if (status === "success" && blockContent) {
-
     const fileName = (block.entry.split("/").pop() || "index.js")
       .replace(".ts", ".js")
       .replace(".jsx", ".js")
@@ -151,7 +150,7 @@ const useFetchZip = (block: Block): UseFetchZipResponse => {
 
       setState({
         status: "success",
-        value: allContent,
+        value: allContent?.content,
       });
     } catch (error) {
       setState({

@@ -2,13 +2,14 @@ import { SandpackRunner } from "@codesandbox/sandpack-react/dist/cjs/index.js";
 import { FileContext, FolderContext, RepoFiles } from "@githubnext/utils";
 import React from "react";
 
+interface BundleCode { name: string, content: string }
 interface SandboxedBlockProps {
   block: Block;
   contents?: string;
   tree?: RepoFiles;
   metadata?: any;
   context: FileContext | FolderContext
-  bundleCode?: string;
+  bundleCode?: BundleCode[];
   renderLoading?: React.ReactNode;
   renderError?: React.ReactNode;
 }
@@ -47,12 +48,48 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
   if (status === "error") return renderError as JSX.Element;
 
   if (!contents && !tree) return null;
-
   if (status === "success" && blockContent) {
+
+    const fileName = (block.entry.split("/").pop() || "index.js")
+      .replace(".ts", ".js")
+      .replace(".jsx", ".js")
+    const contentWithUpdatedNames = blockContent.map(({ name, content }) => ({
+      name: name.slice(block.id.length + 1),
+      content,
+    }))
+    const scriptFile = contentWithUpdatedNames?.find(f => f.name === fileName)
+    const mainContent = scriptFile?.content || ""
+    const otherFilesContent = contentWithUpdatedNames.filter(f => f.name !== fileName)
+
+    const cssFiles = otherFilesContent.filter(f => f.name.endsWith(".css"));
+    const cssFilesString = cssFiles.map(f => `<style>${f.content}</style>`).join("\n");
+    const otherFilesContentProcessed = [{
+      name: "/public/index.html",
+      content: `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom block</title>
+  </head>
+  <body>
+    ${cssFilesString}
+    <div id="root"></div>
+  </body>
+</html>`
+    },
+    ...otherFilesContent.filter(f => !f.name.endsWith(".css"))]
+
+    let otherFiles = otherFilesContentProcessed.reduce((acc, { name, content }) => {
+      acc[name] = content;
+      return acc;
+    }, {} as any)
+
     const injectedSource = `
       import React from "react";
 
-      ${blockContent}
+      ${processBundle(mainContent)}
+      const Block = BlockBundle.default;
 
       const onUpdateMetadata = (newMetadata) => {
         window.parent.postMessage({
@@ -61,22 +98,21 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
           metadata: newMetadata
         }, "*")
       }
-      const Block = BlockBundle.default;
 
       export default function WrappedBlock() {
         return <Block context={${JSON.stringify(
       context
     )}} content={${JSON.stringify(contents)}} tree={${JSON.stringify(tree)}} metadata={${JSON.stringify(metadata)
       }} onUpdateMetadata={onUpdateMetadata} />
-      }
-    `;
+      }`;
+
     return (
       <SandpackRunner
         template="react"
         code={injectedSource}
         customSetup={{
           dependencies: {},
-          // files: otherFilesMap,
+          files: otherFiles,
         }}
         options={{
           showNavigator: false,
@@ -88,7 +124,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
 }
 
 type UseFetchZipResponse = {
-  value: string | null;
+  value: BundleCode[] | null;
   status: "loading" | "error" | "success";
 }
 const useFetchZip = (block: Block): UseFetchZipResponse => {
@@ -112,14 +148,10 @@ const useFetchZip = (block: Block): UseFetchZipResponse => {
       const res = await fetch(url)
 
       const allContent = await res.json();
-      const fileName = (block.entry.split("/").pop() || "index.js")
-        .replace(".ts", ".js")
-        .replace(".jsx", ".js")
-      const scriptFile = allContent.content?.find(f => f.name === `${block.id}/${fileName}`)
 
       setState({
         status: "success",
-        value: scriptFile?.content || "",
+        value: allContent,
       });
     } catch (error) {
       setState({
@@ -130,4 +162,11 @@ const useFetchZip = (block: Block): UseFetchZipResponse => {
   }
   React.useEffect(() => { fetchContentForBlock() }, [url]);
   return state;
+}
+
+const processBundle = (bundle: string) => {
+  // remove imports from React
+  bundle = bundle.replace(/import.*?from.*?react.*?;/g, "");
+
+  return bundle;
 }

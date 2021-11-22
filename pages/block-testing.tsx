@@ -16,19 +16,28 @@ const BlockTesting = ({ }) => {
   const [props, setProps] = useState<BlockTestingProps | null>(null)
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
-      if (event.data.type !== "block-props") return
-      const { block, contents, tree, metadata, context, bundleCode } = event.data
-      console.log(block, contents, tree, metadata, context, bundleCode)
+      if (event.data.type === "block-props") {
+        const { block, contents, tree, metadata, context, bundleCode } = event.data
 
-      setProps({ block, contents, tree, metadata, context, bundleCode })
+        setProps({ block, contents, tree, metadata, context, bundleCode })
+      } else {
+        // pass messages up to parent of iframe (eg. to update metadata)
+        window.parent.postMessage(event.data, "*")
+      }
     }
     window.addEventListener("message", onMessage)
     return () => window.removeEventListener("message", onMessage)
   }, [])
 
-  if (!props) return null
+  if (!props) return (
+    <div className="w-full text-center py-16 italic text-gray-500">
+      Waiting for props...
+    </div>
+  )
   return (
-    <SandboxedBlock {...props} />
+    <div className="sandbox-wrapper h-full w-full">
+      <SandboxedBlock {...props} />
+    </div>
   )
 }
 

@@ -2,9 +2,6 @@
 @tailwind utilities;
 @tailwind components;
 
-.sandbox-wrapper .sp-loading {
-  max-height: calc(100vh - 16em);
-}
 .sandbox-wrapper .sp-loading:before {
   content: "Loading...";
   position: absolute;

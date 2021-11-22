@@ -1,7 +1,7 @@
 import { Box, useTheme } from "@primer/components";
 import { FileBlock } from "components/file-block";
 import { FolderBlock } from "components/folder-block";
-import { useFileContent, useMetadata, useRepoFiles, useRepoInfo } from "hooks";
+import { useGetBlocksInfo, useMetadata, useRepoFiles, useRepoInfo } from "hooks";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
@@ -18,30 +18,25 @@ interface RepoDetailProps {
 }
 
 const defaultFileBlock = {
-  description: "A basic code block",
-  entry: "/src/blocks/file-blocks/code/index.tsx",
-  extensions: ["*"],
-  title: "Code block",
-  type: "file",
-};
+  id: "file-block",
+  owner: "githubnext",
+  repo: "blocks-template"
+} as Block
 
 const defaultFolderBlock = {
-  type: "folder",
-  title: "Minimap",
-  description: "A visualization of your folders and files",
-  entry: "/src/blocks/folder-blocks/minimap/index.tsx",
-};
-const getBlockId = (owner: string, repo: string, block: Block) => (
-  [owner, repo, block?.entry || ""].join("--")
+  id: "minimap-block",
+  owner: "githubnext",
+  repo: "blocks-template"
+} as Block
+const getBlockKey = (block: Block) => (
+  [block?.owner, block?.repo, block?.entry || ""].join("--")
 )
-const defaultFileBlockId = getBlockId(
-  "githubnext", "blocks-examples", defaultFileBlock
-)
+const defaultFileBlockKey = getBlockKey(defaultFileBlock)
 export function RepoDetail(props: RepoDetailProps) {
   const { session } = props;
   const router = useRouter();
   const { setColorMode } = useTheme();
-  const { blockId = defaultFileBlockId } = router.query;
+  const { blockKey = defaultFileBlockKey } = router.query;
   const { repo, owner, path = "", theme, fileRef } = router.query;
 
   const context = {
@@ -80,13 +75,13 @@ export function RepoDetail(props: RepoDetailProps) {
       ? files?.find((d) => d.path === path)?.type !== "blob"
       : null;
 
-  const onLoadBlock = (owner: string, repo: string, block: Block) => {
+  const onLoadBlock = (block: Block) => {
     if (!block) return;
     router.push({
       pathname: router.pathname,
       query: {
         ...router.query,
-        blockId: getBlockId(owner, repo, block),
+        blockId: getBlockKey(block),
       },
     });
   }
@@ -99,30 +94,17 @@ export function RepoDetail(props: RepoDetailProps) {
     token: session.token as string,
   });
 
-  const [blockOwner = "githubnext", blockRepo = "blocks-examples", blockPath] = (blockId as string).split("--");
-  const blockContext = {
+  const [blockOwner = "githubnext", blockRepo = "blocks-template", blockId] = (blockKey as string).split("--");
+
+  const { data: allBlocksInfo = [] } = useGetBlocksInfo()
+  const blocksRepo = allBlocksInfo.find(block => (
+    block.owner === blockOwner && block.repo === blockRepo
+  ))
+  const block = {
+    ...blocksRepo?.blocks?.find(block => block.id === blockId) || blocksRepo?.blocks[0] || {},
     owner: blockOwner,
     repo: blockRepo,
-  };
-
-  const {
-    data: blocksInfo,
-    status: blocksStatus,
-    error: blocksError,
-  } = useFileContent({
-    owner: blockOwner,
-    repo: blockRepo,
-    token: session.token as string,
-    path: "package.json",
-  });
-  const blocksInfoParsed = blocksInfo?.content
-    ? JSON.parse(blocksInfo.content)
-    : {};
-  const blocks = blocksInfoParsed?.blocks || [];
-  const block = blocks.find(block => {
-    return getBlockId(blockOwner, blockRepo, block) === blockId;
-  })
-
+  } as Block
   const fileInfo = files?.find((d) => d.path === path);
   const size = fileInfo?.size || 0;
   const fileSizeLimit = 100000; // 200KB
@@ -185,12 +167,12 @@ export function RepoDetail(props: RepoDetailProps) {
                 alignItems="center"
               >
                 <BlockPicker
-                  blocks={(blocks || []).filter(
+                  blocks={(blocksRepo?.blocks || []).filter(
                     (d) => d.type === (isFolder ? "folder" : "file")
                   )}
                   isFolder={isFolder}
                   path={path as string}
-                  onChange={(block) => onLoadBlock(blockOwner, blockRepo, block)}
+                  onChange={onLoadBlock}
                   value={block}
                 />
                 {/* {blockType !== defaultBlock && (
@@ -205,19 +187,17 @@ export function RepoDetail(props: RepoDetailProps) {
               </Box>
             </div>
           </div>
-          {!!block &&
+          {!!block.id &&
             repoFilesStatus !== "loading" &&
             (isFolder ? (
               <FolderBlock
-                key={block.entry}
+                key={block.id}
                 allFiles={files}
                 theme={(theme as string) || "light"}
-                blockContext={blockContext}
                 context={{
                   folder: "",
                   ...context,
                 }}
-                dependencies={blocksInfoParsed.dependencies}
                 block={block}
                 session={session}
               />
@@ -227,15 +207,13 @@ export function RepoDetail(props: RepoDetailProps) {
               </div>
             ) : (
               <FileBlock
-                key={block.entry}
+                key={block.id}
                 context={{
                   file: "",
                   ...context,
                 }}
                 theme={(theme as string) || "light"}
                 block={block}
-                dependencies={blocksInfoParsed.dependencies}
-                blockContext={blockContext}
                 session={session}
               />
             ))}

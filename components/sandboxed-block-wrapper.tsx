@@ -1,46 +1,25 @@
-import { getFileContent, RepoContext, RepoFiles } from "ghapi";
-import { useCallback, useMemo } from "react";
 import { FileContext, FolderContext } from "@githubnext/utils";
-import { SandboxedBlock } from "@githubnext/utils";
+import { RepoFiles } from "ghapi";
+import { SandboxedBlock } from "./sandboxed-block";
 
 interface SandboxedBlockWrapperProps {
   block: Block;
-  blockContext: RepoContext;
   contents?: string;
   theme: string;
   tree?: RepoFiles;
   context: FileContext | FolderContext;
-  dependencies: Record<string, string>;
   metadata: any;
-  session: Session;
 }
 
 export function SandboxedBlockWrapper(props: SandboxedBlockWrapperProps) {
   const {
     block,
-    blockContext,
     metadata,
     contents,
     theme,
     tree,
-    dependencies,
     context,
-    session,
   } = props;
-
-  const getFileContentForPath = useCallback(
-    async (path: string) => {
-      const res = await getFileContent({
-        repo: blockContext.repo,
-        owner: blockContext.owner,
-        fileRef: "main",
-        token: session.token,
-        path: path.slice(1),
-      });
-      return res.content;
-    },
-    [context.repo, context.owner, context.sha, session.token]
-  );
 
   const fileContext = {
     ...context,
@@ -57,14 +36,11 @@ export function SandboxedBlockWrapper(props: SandboxedBlockWrapperProps) {
   return (
     <div className="sandbox-wrapper h-full w-full">
       <SandboxedBlock
-        getFileContent={getFileContentForPath}
+        block={block}
         contents={contents}
         tree={tree}
         context={fileContext}
-        dependencies={dependencies}
-        block={block}
         metadata={metadata}
-        session={session}
       />
     </div>
   );

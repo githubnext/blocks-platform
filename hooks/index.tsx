@@ -256,3 +256,35 @@ export function useSearchRepos(params: SearchContextWithToken) {
     retry: false,
   });
 }
+
+interface BlocksInfo {
+  owner: string,
+  repo: string,
+  full_name: string,
+  id: number,
+  html_url: string,
+  description: string,
+  stars: number,
+  watchers: number,
+  language: string,
+  topics: string[],
+  blocks: Block[],
+  release: {
+    tag_name: string,
+    name: string,
+    tarball_url: string,
+    zipball_url: string,
+    published_at: string,
+    browser_download_url: string
+  }
+}
+
+export function useGetBlocksInfo() {
+  return useQuery<BlocksInfo[]>(["blocks-info"], () => {
+    const url = "https://blocks-marketplace.vercel.app/blocks-processed-full.json"
+    return fetch(url).then(res => res.json())
+  }, {
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
+}

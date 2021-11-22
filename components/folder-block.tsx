@@ -8,9 +8,7 @@ import { FolderContext } from "@githubnext/utils";
 interface FolderBlockProps {
   allFiles: RepoFiles;
   theme: string;
-  blockContext: RepoContext;
   context: FolderContext;
-  dependencies: Record<string, string>;
   block: Block;
   session: Session;
 }
@@ -20,22 +18,20 @@ export function FolderBlock(props: FolderBlockProps) {
     context,
     theme,
     block,
-    dependencies,
     allFiles,
     session,
-    blockContext,
   } = props;
   const { repo, owner, path, sha } = context;
 
-  const blockId =
-    `${blockContext.owner}/${blockContext.repo}__${block.entry}`.replace(
+  const blockKey =
+    `${block.owner}/${block.repo}__${block.id}`.replace(
       /\//g,
       "__"
     );
   const { metadata, onUpdateMetadata } = useMetadata({
     owner: owner as string,
     repo: repo as string,
-    metadataPath: block.entry && `.github/blocks/folder/${blockId}`,
+    metadataPath: block.entry && `.github/blocks/folder/${blockKey}`,
     filePath: path,
     token: session.token as string,
   });
@@ -55,11 +51,8 @@ export function FolderBlock(props: FolderBlockProps) {
             block={block}
             theme={theme}
             context={{ ...context, folder: name }}
-            blockContext={blockContext}
-            dependencies={dependencies}
             tree={data}
             metadata={metadata}
-            session={session}
             // @ts-ignore
             onUpdateMetadata={onUpdateMetadata}
           />

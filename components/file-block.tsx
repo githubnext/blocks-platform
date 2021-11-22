@@ -7,15 +7,13 @@ import { ErrorBoundary } from "./error-boundary";
 
 interface FileBlockProps {
   theme: string;
-  blockContext: RepoContext;
   context: FileContext;
-  dependencies: Record<string, string>;
   block: Block;
   session: Session;
 }
 
 export function FileBlock(props: FileBlockProps) {
-  const { context, theme, block, dependencies, session, blockContext } = props;
+  const { context, theme, block, session } = props;
   const { repo, owner, path, sha } = context;
 
   const { data } = useFileContent({
@@ -29,15 +27,15 @@ export function FileBlock(props: FileBlockProps) {
 
   const code = content;
 
-  const blockId =
-    `${blockContext.owner}/${blockContext.repo}__${block.entry}`.replace(
+  const blockKey =
+    `${block.owner}/${block.repo}__${block.id}`.replace(
       /\//g,
       "__"
     );
   const { metadata, onUpdateMetadata } = useMetadata({
     owner: owner as string,
     repo: repo as string,
-    metadataPath: block.entry && `.github/blocks/file/${blockId}`,
+    metadataPath: block.entry && `.github/blocks/file/${blockKey}`,
     filePath: path,
     token: session.token as string,
   });
@@ -67,11 +65,8 @@ export function FileBlock(props: FileBlockProps) {
             block={block}
             theme={theme}
             context={{ ...context, file: name }}
-            blockContext={blockContext}
-            dependencies={dependencies}
             contents={code}
             metadata={metadata}
-            session={session}
           />
         </div>
       </ErrorBoundary>

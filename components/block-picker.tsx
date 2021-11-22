@@ -24,7 +24,7 @@ export default function BlockPicker(props: BlockPickerProps) {
     if (!relevantBlocks?.find((v) => v?.entry === value?.entry)) {
       onChange(relevantBlocks[0]);
     }
-  }, [value, relevantBlocks?.map((d) => d.entry).join(",")]);
+  }, [value, relevantBlocks?.map((d) => d.id).join(",")]);
 
   return (
     <SelectMenu>

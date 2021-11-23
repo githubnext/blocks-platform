@@ -49,7 +49,7 @@ export function SearchAutocomplete<T extends object>(
   let { buttonProps } = useButton(clearButtonProps, clearButtonRef);
 
   return (
-    <div className="inline-flex flex-col relative mt-4">
+    <div className="flex flex-col relative w-full">
       {props.label && (
         <label
           {...labelProps}
@@ -59,15 +59,14 @@ export function SearchAutocomplete<T extends object>(
         </label>
       )}
       <div
-        className={`relative px-2 inline-flex items-center rounded-md overflow-hidden shadow-sm border-2 ${
-          state.isFocused ? "border-pink-500" : "border-gray-300"
+        className={`relative px-2 inline-flex items-center overflow-hidden shadow-sm border-2 ${
+          state.isFocused ? "border-blue-600" : "border-gray-300"
         }`}
       >
-        {/* <GoSearch aria-hidden="true" className="w-5 h-5 text-gray-500" /> */}
         <input
           {...inputProps}
           ref={inputRef}
-          className="outline-none pl-1 py-1 appearance-none pr-6"
+          className="outline-none pl-1 py-1 appearance-none pr-6 flex-1"
         />
         <div className="absolute right-0 top-0 bottom-0 px-2 flex items-center justify-center">
           {props.loadingState === "loading" ||

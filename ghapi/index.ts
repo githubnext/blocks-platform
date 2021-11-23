@@ -21,7 +21,6 @@ export interface UseFolderContentParams extends RepoContextWithToken {
 
 export interface SearchContext {
   query: string;
-  user: string;
 }
 
 export interface SearchContextWithToken extends SearchContext {
@@ -216,7 +215,7 @@ export async function getRepoFiles(
 export async function searchRepos(
   params: SearchContextWithToken
 ): Promise<string[]> {
-  const { query, user, token } = params;
+  const { query, token } = params;
   if (query !== "") {
     const url = `https://api.github.com/search/repositories?q=${query}+in:name&sort=stars&order=desc&per_page=10`;
     // const urlOnlyPrivateRepos = `https://api.github.com/search/repositories?q=${query}+in:name+user:${user}&per_page=10`;

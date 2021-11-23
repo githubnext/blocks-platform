@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
-import Downshift from "downshift";
+import React from "react";
 import Router from "next/router";
-import { useSearchRepos } from "hooks";
-import { useDebounce, useMeasure } from "react-use";
+import { Item, useAsyncList } from "react-stately";
+import { SearchAutocomplete } from "./search-autocomplete";
 
 const items = ["githubnext/blocks-examples", "githubnext/blocks-tutorial"];
 
@@ -12,102 +11,51 @@ interface SearchDropdownProps {
 
 export default function SearchDropdown(props: SearchDropdownProps) {
   const { session } = props;
-  const [value, setValue] = useState("");
-  const [debouncedValue, setDebouncedValue] = useState("");
-  const [filteredItems, setFilteredItems] = useState([]);
+  let list = useAsyncList<{ repo: string }>({
+    async load({ signal, cursor, filterText }) {
+      if (!filterText)
+        return {
+          items: items.map((i) => ({ repo: i })),
+          cursor,
+        };
+      const url = `https://api.github.com/search/repositories?q=${filterText}+in:name&sort=stars&order=desc&per_page=10`;
+      const res = await fetch(cursor || url, {
+        headers: {
+          Authorization: `token ${session.token}`,
+        },
+        signal,
+      });
 
-  const handleStateChange = (changes) => {
-    if (changes.hasOwnProperty("selectedItem")) {
-      // setValue(changes.selectedItem);
-      Router.push(`/${changes.selectedItem}`);
-      setValue("");
-    } else if (changes.hasOwnProperty("inputValue")) {
-      setValue(changes.inputValue);
-    }
-  };
+      const { items: searchItems } = await res.json();
+      const data = (searchItems as RepoItem[]).map((item) => {
+        return {
+          repo: item.full_name,
+        };
+      });
 
-  // debounce the input value
-  const [, cancel] = useDebounce(
-    () => {
-      setDebouncedValue(value);
+      return {
+        items: data,
+        cursor: null,
+      };
     },
-    80,
-    [value]
-  );
-
-  // search for repos that match the debounced value
-  const {
-    data: searchQuery,
-    status: searchQueryStatus,
-    error: searchQueryError,
-  } = useSearchRepos({
-    user: session.user.name,
-    query: debouncedValue,
-    token: session.token as string,
   });
 
-  // update the filtered items list
-  useEffect(() => {
-    if (searchQuery) {
-      setFilteredItems(searchQuery);
-    }
-  }, [searchQuery]);
-
   return (
-    <Downshift selectedItem={value} onStateChange={handleStateChange}>
-      {({
-        getInputProps,
-        getItemProps,
-        getMenuProps,
-        getLabelProps,
-        getToggleButtonProps,
-        inputValue,
-        highlightedIndex,
-        selectedItem,
-        isOpen,
-      }) => (
-        <div className="inline-block w-80">
-          <div className="relative">
-            <input
-              className="pl-2 text-black rounded w-full h-8"
-              {...getInputProps({
-                // isOpen: isOpen,
-                placeholder: "Search repos",
-              })}
-            />
-          </div>
-          <div style={{ position: "absolute" }}>
-            <ul
-              {...getMenuProps({
-                open: isOpen,
-              })}
-              className="rounded-b w-80 text-black"
-            >
-              {isOpen &&
-                filteredItems.map((item: any, index) => (
-                  <li
-                    className={`w-full h-10 px-2 py-2 flex align-middle items-center cursor-pointer
-                      border-b border-l  border-r border-solid border-gray-300 
-                      ${highlightedIndex === index ? "bg-blue-600" : "bg-white"}
-                      ${
-                        highlightedIndex === index ? "text-white" : "text-black"
-                      }
-                      ${selectedItem === item ? "font-bold" : "font-normal"}
-                      ${index === filteredItems.length - 1 ? "rounded-b" : null}
-                      `}
-                    {...getItemProps({
-                      key: `${item.value}${index}`,
-                      item,
-                      index,
-                    })}
-                  >
-                    {item}
-                  </li>
-                ))}
-            </ul>
-          </div>
-        </div>
-      )}
-    </Downshift>
+    <div className="bg-white w-[280px] text-black">
+      <SearchAutocomplete
+        placeholder="Search GitHub repositories"
+        items={list.items}
+        inputValue={list.filterText}
+        onInputChange={list.setFilterText}
+        loadingState={list.loadingState}
+        onLoadMore={list.loadMore}
+        onSelectionChange={(repo) => {
+          if (!repo) return;
+          Router.push(`/${repo}`);
+        }}
+      >
+        {(item) => <Item key={item.repo}>{item.repo}</Item>}
+      </SearchAutocomplete>
+    </div>
   );
 }

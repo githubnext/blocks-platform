@@ -8,11 +8,6 @@ export default function Sandbox() {
         cursor = cursor.replace(/^http:\/\//i, "https://");
       }
 
-      // If no cursor is available, then we're loading the first page,
-      // filtering the results returned via a query string that
-      // mirrors the input text.
-      // Otherwise, the cursor is the next URL to load,
-      // as returned from the previous page.
       let res = await fetch(
         cursor || `https://swapi.dev/api/people/?search=${filterText}`,
         { signal }
@@ -27,9 +22,9 @@ export default function Sandbox() {
   });
   return (
     <div className="p-4">
-      <div className="w-[300px]">
+      <div className="w-full">
         <SearchAutocomplete
-          placeholder="Search for blocks"
+          placeholder="Search GitHub repositories"
           items={list.items}
           inputValue={list.filterText}
           onInputChange={list.setFilterText}

@@ -31,7 +31,7 @@ export function ListBox(props: ListBoxProps) {
     <ul
       {...listBoxProps}
       ref={listBoxRef}
-      className="max-h-72 overflow-auto outline-none"
+      className="max-h-72 overflow-auto outline-none p-1"
     >
       {[...state.collection].map((item) =>
         item.type === "section" ? (

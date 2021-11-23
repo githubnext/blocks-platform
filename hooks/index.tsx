@@ -17,8 +17,6 @@ import {
   RepoContextWithToken,
   UseFolderContentParams,
   getFileContentsAndDependencies,
-  SearchContextWithToken,
-  searchRepos,
   getRepoTimeline,
 } from "ghapi";
 
@@ -124,7 +122,7 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
       },
       sha: sha,
     });
-  } catch (e) { }
+  } catch (e) {}
 }
 
 export function useUpdateFileContents(
@@ -210,7 +208,9 @@ export function useRepoInfo(params: RepoContextWithToken) {
   });
 }
 
-export function useRepoTimeline(params: RepoContextWithToken & { path: string }) {
+export function useRepoTimeline(
+  params: RepoContextWithToken & { path: string }
+) {
   return useQuery(["timeline", params], () => getRepoTimeline(params), {
     enabled:
       Boolean(params.repo) && Boolean(params.owner) && Boolean(params.token),
@@ -249,42 +249,39 @@ export function useBlockContentAndDependencies(params: UseFileContentParams) {
   );
 }
 
-export function useSearchRepos(params: SearchContextWithToken) {
-  return useQuery(["search-repos", params], () => searchRepos(params), {
-    enabled: Boolean(params.user) && Boolean(params.token),
-    refetchOnWindowFocus: false,
-    retry: false,
-  });
-}
-
 interface BlocksInfo {
-  owner: string,
-  repo: string,
-  full_name: string,
-  id: number,
-  html_url: string,
-  description: string,
-  stars: number,
-  watchers: number,
-  language: string,
-  topics: string[],
-  blocks: Block[],
+  owner: string;
+  repo: string;
+  full_name: string;
+  id: number;
+  html_url: string;
+  description: string;
+  stars: number;
+  watchers: number;
+  language: string;
+  topics: string[];
+  blocks: Block[];
   release: {
-    tag_name: string,
-    name: string,
-    tarball_url: string,
-    zipball_url: string,
-    published_at: string,
-    browser_download_url: string
-  }
+    tag_name: string;
+    name: string;
+    tarball_url: string;
+    zipball_url: string;
+    published_at: string;
+    browser_download_url: string;
+  };
 }
 
 export function useGetBlocksInfo() {
-  return useQuery<BlocksInfo[]>(["blocks-info"], () => {
-    const url = "https://blocks-marketplace.vercel.app/blocks-processed-full.json"
-    return fetch(url).then(res => res.json())
-  }, {
-    refetchOnWindowFocus: false,
-    retry: false,
-  });
+  return useQuery<BlocksInfo[]>(
+    ["blocks-info"],
+    () => {
+      const url =
+        "https://blocks-marketplace.vercel.app/blocks-processed-full.json";
+      return fetch(url).then((res) => res.json());
+    },
+    {
+      refetchOnWindowFocus: false,
+      retry: false,
+    }
+  );
 }

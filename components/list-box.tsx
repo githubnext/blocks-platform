@@ -1,4 +1,4 @@
-import { GiCheckMark } from "react-icons/gi";
+import { GoCheck } from "react-icons/go";
 import type { AriaListBoxOptions } from "@react-aria/listbox";
 import type { ListState } from "react-stately";
 import type { Node, LoadingState } from "@react-types/shared";
@@ -102,9 +102,7 @@ function Option({ item, state }: OptionProps) {
       } ${isSelected ? "font-bold" : ""}`}
     >
       {item.rendered}
-      {isSelected && (
-        <GiCheckMark aria-hidden="true" className="w-5 h-5 text-blue-600" />
-      )}
+      {isSelected && <GoCheck aria-hidden="true" className="text-blue-600" />}
     </li>
   );
 }

@@ -41,8 +41,9 @@ export default function SearchDropdown(props: SearchDropdownProps) {
   });
 
   return (
-    <div className="bg-white w-[280px] text-black">
+    <div className="w-full lg:w-[280px]">
       <SearchAutocomplete
+        className="combo-dark"
         placeholder="Search GitHub repositories"
         items={list.items}
         inputValue={list.filterText}

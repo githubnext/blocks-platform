@@ -257,3 +257,19 @@ html,
     /* purposely ignored */
   }
 }
+
+.combo-dark {
+  @apply rounded bg-transparent;
+
+  .combo-input-wrap {
+    @apply bg-gray-800 border border-gray-700 rounded;
+  }
+
+  input {
+    @apply bg-gray-800 text-white rounded;
+  }
+
+  .combo-spinner {
+    @apply text-blue-400;
+  }
+}

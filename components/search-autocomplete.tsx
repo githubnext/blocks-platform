@@ -14,6 +14,7 @@ export { Item } from "react-stately";
 interface AutocompleteProps<T> extends ComboBoxProps<T> {
   loadingState?: LoadingState;
   onLoadMore?: () => void;
+  className?: string;
 }
 
 export function SearchAutocomplete<T extends object>(
@@ -53,7 +54,7 @@ export function SearchAutocomplete<T extends object>(
   let { buttonProps } = useButton(clearButtonProps, clearButtonRef);
 
   return (
-    <div className="flex flex-col relative w-full">
+    <div className={`flex flex-col relative w-full ${props.className}`}>
       {props.label && (
         <label
           {...labelProps}
@@ -63,21 +64,21 @@ export function SearchAutocomplete<T extends object>(
         </label>
       )}
       <div
-        className={`relative px-2 inline-flex items-center overflow-hidden shadow-sm border-2 ${
-          state.isFocused ? "border-blue-600" : "border-gray-300"
+        className={`relative px-2 inline-flex items-center overflow-hidden shadow-sm border-2 combo-input-wrap ${
+          state.isFocused ? "is-focused border-blue-600" : "border-gray-300"
         }`}
       >
         <input
           {...inputProps}
           ref={inputRef}
-          className="outline-none pl-1 py-1 appearance-none pr-6 flex-1"
+          className="outline-none pl-1 py-1 appearance-none pr-6 flex-1 combo-input"
         />
         <div className="absolute right-0 top-0 bottom-0 px-2 flex items-center justify-center">
           {props.loadingState === "loading" ||
           props.loadingState === "filtering" ? (
             <CgSpinner
               aria-hidden="true"
-              className="text-blue-700 animate-spin pointer-events-none"
+              className="combo-spinner text-blue-700 animate-spin pointer-events-none"
             />
           ) : (
             <button

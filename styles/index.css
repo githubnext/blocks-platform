@@ -265,6 +265,10 @@ html,
     @apply bg-gray-800 border border-gray-700 rounded;
   }
 
+  .combo-input-wrap.is-focused {
+    @apply border-blue-500;
+  }
+
   input {
     @apply bg-gray-800 text-white rounded;
   }

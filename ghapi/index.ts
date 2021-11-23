@@ -21,7 +21,6 @@ export interface UseFolderContentParams extends RepoContextWithToken {
 
 export interface SearchContext {
   query: string;
-  user: string;
 }
 
 export interface SearchContextWithToken extends SearchContext {
@@ -211,32 +210,6 @@ export async function getRepoFiles(
   }
   const { files } = await res.json();
   return files;
-}
-
-export async function searchRepos(
-  params: SearchContextWithToken
-): Promise<string[]> {
-  const { query, user, token } = params;
-  if (query !== "") {
-    const url = `https://api.github.com/search/repositories?q=${query}+in:name&sort=stars&order=desc&per_page=10`;
-    // const urlOnlyPrivateRepos = `https://api.github.com/search/repositories?q=${query}+in:name+user:${user}&per_page=10`;
-    const res = await fetch(url, {
-      headers: {
-        Authorization: `token ${token}`,
-      },
-    });
-    if (res.status !== 200) {
-      const error = await res.json();
-      throw new Error(error.message);
-    }
-    const { items: searchItems } = await res.json();
-    const data = (searchItems as RepoItem[]).map((item) => {
-      return item.full_name;
-    });
-    return data;
-  } else {
-    return [];
-  }
 }
 
 import { Endpoints } from "@octokit/types";

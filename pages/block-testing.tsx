@@ -1,5 +1,5 @@
 import { FileContext, FolderContext } from "@githubnext/utils"
-import { SandboxedBlock } from "components/sandboxed-block"
+import { BundleCode, SandboxedBlock } from "components/sandboxed-block"
 import { RepoFiles } from "ghapi"
 import { useEffect, useState } from "react"
 
@@ -9,7 +9,7 @@ interface BlockTestingProps {
   tree?: RepoFiles;
   metadata?: any;
   context: FileContext | FolderContext
-  bundleCode: string;
+  bundleCode: BundleCode[];
 }
 
 const BlockTesting = ({ }) => {

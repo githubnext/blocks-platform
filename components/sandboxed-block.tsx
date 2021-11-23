@@ -2,7 +2,7 @@ import { SandpackRunner } from "@codesandbox/sandpack-react/dist/cjs/index.js";
 import { FileContext, FolderContext, RepoFiles } from "@githubnext/utils";
 import React from "react";
 
-interface BundleCode { name: string, content: string }
+export interface BundleCode { name: string, content: string }
 interface SandboxedBlockProps {
   block: Block;
   contents?: string;

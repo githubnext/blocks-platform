@@ -164,8 +164,8 @@ const useFetchZip = (block: Block): UseFetchZipResponse => {
 }
 
 const processBundle = (bundle: string) => {
-  // remove imports from React
-  bundle = bundle.replace(/import.*?from.*?react.*?;/g, "");
+  // remove imports from React. This might need tweaking
+  bundle = bundle.replace(/(import)([\w\s\}\{,]{3,30}?)(from\s["']react["'])/g, "");
 
   return bundle;
 }

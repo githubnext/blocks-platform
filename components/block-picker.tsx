@@ -11,6 +11,7 @@ interface BlockPickerProps {
 
 export default function BlockPicker(props: BlockPickerProps) {
   const { blocks, value, path, isFolder, onChange } = props;
+  console.log(path);
   const extension = path.split(".").slice(-1)[0];
   const relevantBlocks = blocks.filter(
     (d) =>
@@ -25,6 +26,14 @@ export default function BlockPicker(props: BlockPickerProps) {
       onChange(relevantBlocks[0]);
     }
   }, [value, relevantBlocks?.map((d) => d.id).join(",")]);
+
+
+  // default to the second block viewer if there is more than one
+  useEffect(() => {
+    if (relevantBlocks.length > 0) {
+      onChange(relevantBlocks[1]);
+    }
+  }, [path]);
 
   return (
     <SelectMenu>

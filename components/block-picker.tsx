@@ -11,7 +11,6 @@ interface BlockPickerProps {
 
 export default function BlockPicker(props: BlockPickerProps) {
   const { blocks, value, path, isFolder, onChange } = props;
-  console.log(path);
   const extension = path.split(".").slice(-1)[0];
   const relevantBlocks = blocks.filter(
     (d) =>

@@ -109,7 +109,7 @@ export function RepoDetail(props: RepoDetailProps) {
   const block = blocks.find(block => block.id === blockId) || blocksRepo?.blocks[0] || {} as Block
   const fileInfo = files?.find((d) => d.path === path);
   const size = fileInfo?.size || 0;
-  const fileSizeLimit = 100000; // 200KB
+  const fileSizeLimit = 1500000; // 1.5Mb
   const isTooLarge = size > fileSizeLimit;
 
   if (repoFilesStatus === "error" || repoInfoStatus === "error") {

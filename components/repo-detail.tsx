@@ -43,7 +43,7 @@ export function RepoDetail(props: RepoDetailProps) {
     repo: repo as string,
     owner: owner as string,
     path: path as string,
-    sha: "",
+    sha: fileRef as string
   };
 
   useEffect(() => {
@@ -111,10 +111,6 @@ export function RepoDetail(props: RepoDetailProps) {
   const size = fileInfo?.size || 0;
   const fileSizeLimit = 1500000; // 1.5Mb
   const isTooLarge = size > fileSizeLimit;
-
-  if (!isFolder) {
-    context.sha = fileInfo?.sha; // we no longer pass in sha in router query params
-  }
 
   if (repoFilesStatus === "error" || repoInfoStatus === "error") {
     const error = repoInfoError || repoFilesError;

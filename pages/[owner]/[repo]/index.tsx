@@ -15,7 +15,6 @@ export default function RepoDetailContainer() {
   const { data: session, status } = useSession({
     required: isViewingUnauthenticatedRepo,
     onUnauthenticated: () => {
-      console.log("onUnauthenticated", isViewingUnauthenticatedRepo)
       if (isViewingUnauthenticatedRepo) return
       // @ts-ignore
       signIn("github");

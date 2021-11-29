@@ -106,7 +106,7 @@ export function RepoDetail(props: RepoDetailProps) {
     repo: blockRepo,
   } as Block))
 
-  const block = blocks.find(block => block.id === blockId) || blocksRepo?.blocks[0] || {} as Block
+  const block = blocks.find(block => block.id === blockId) || blocks[0] || {} as Block
   const fileInfo = files?.find((d) => d.path === path);
   const size = fileInfo?.size || 0;
   const fileSizeLimit = 1500000; // 1.5Mb

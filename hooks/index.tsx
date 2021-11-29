@@ -154,8 +154,7 @@ export function useMetadata({
     {
       refetchOnWindowFocus: false,
       onError: () => {
-        console.info(`No metadata found at ${metadataPath}`);
-        return false
+        console.info(`%c No metadata found at ${metadataPath}`, 'background: #ddd; padding: 0.6em, font-weight: 700, color: #aaa');
       },
       useErrorBoundary: false
     }

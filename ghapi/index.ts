@@ -50,14 +50,7 @@ export async function getFileContent(
     },
   });
   if (res.status !== 200) {
-    if (res.status === 403) {
-      console.warn("File too large, will not return content");
-      return {
-        context,
-        content: "File too large, will not return content"
-      }
-    }
-    else if (res.status === 404) {
+    if (res.status === 404) {
       throw new Error(`File not found: ${owner}/${repo}: ${path}`);
     } else {
       throw new Error(

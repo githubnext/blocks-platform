@@ -43,7 +43,7 @@ export function RepoDetail(props: RepoDetailProps) {
     repo: repo as string,
     owner: owner as string,
     path: path as string,
-    sha: fileRef as string
+    sha: fileRef as string || "HEAD"
   };
 
   useEffect(() => {

@@ -45,7 +45,7 @@ export function useFileContent(
       }),
     {
       enabled:
-        Boolean(repo) && Boolean(owner) && Boolean(path) && Boolean(token),
+        Boolean(repo) && Boolean(owner) && Boolean(path),
       refetchOnWindowFocus: false,
       retry: false,
       ...config,
@@ -184,6 +184,7 @@ export function useMetadata({
   const { mutateAsync } = useUpdateFileContents({});
   const onUpdateMetadata = useCallback(
     async (contents) => {
+      if (!token) return
       const fullContents = {
         ...fullMetadata,
         [filePath]: contents,
@@ -230,7 +231,7 @@ export function useRepoTimeline(
 export function useRepoFiles(params: RepoContextWithToken) {
   return useQuery(["files", params], () => getRepoFiles(params), {
     enabled:
-      Boolean(params.repo) && Boolean(params.owner) && Boolean(params.token),
+      Boolean(params.repo) && Boolean(params.owner),
     refetchOnWindowFocus: false,
     retry: false,
   });

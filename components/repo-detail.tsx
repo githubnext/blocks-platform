@@ -14,7 +14,7 @@ import { Sidebar } from "./Sidebar";
 const BlockPicker = dynamic(() => import("./block-picker"), { ssr: false });
 
 interface RepoDetailProps {
-  session: Session;
+  session?: Session;
 }
 
 const defaultFileBlock = {
@@ -57,7 +57,7 @@ export function RepoDetail(props: RepoDetailProps) {
   } = useRepoInfo({
     repo: repo as string,
     owner: owner as string,
-    token: session.token as string,
+    token: session?.token as string,
   });
 
   const {
@@ -67,7 +67,7 @@ export function RepoDetail(props: RepoDetailProps) {
   } = useRepoFiles({
     repo: repo as string,
     owner: owner as string,
-    token: session.token as string,
+    token: session?.token as string,
   });
 
   const isFolder =
@@ -91,7 +91,7 @@ export function RepoDetail(props: RepoDetailProps) {
     repo: repo as string,
     metadataPath: `.github/blocks/all`,
     filePath: path as string,
-    token: session.token as string,
+    token: session?.token as string,
   });
 
   const [blockOwner = "githubnext", blockRepo = "blocks-examples", blockId] = (blockKey as string).split("__");

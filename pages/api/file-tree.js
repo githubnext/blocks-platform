@@ -7,7 +7,7 @@ export default async function getInfo(req, res) {
 
   const fileTreeRes = await fetch(url, {
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: token && `Bearer ${token}`,
     },
   });
   const fileTree = await fileTreeRes.json();

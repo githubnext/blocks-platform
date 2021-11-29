@@ -35,7 +35,7 @@ export async function getFileContent(
   const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${fileRef}`;
   const res = await fetch(apiUrl, {
     headers: {
-      Authorization: `token ${token}`,
+      Authorization: token && `token ${token}`,
     },
   });
   if (res.status !== 200) {
@@ -120,7 +120,7 @@ export async function getFolderContent(
 
   const res = await fetch(apiUrl, {
     headers: {
-      Authorization: `token ${token}`,
+      Authorization: token && `token ${token}`,
     },
   });
   const { tree: rawTree } = await res.json();
@@ -167,7 +167,7 @@ export async function getRepoInfo(
   const url = `https://api.github.com/repos/${owner}/${repo}`;
   const res = await fetch(url, {
     headers: {
-      Authorization: `token ${token}`,
+      Authorization: token && `token ${token}`,
     },
   });
   if (res.status !== 200) {
@@ -180,7 +180,7 @@ export async function getRepoInfo(
   const contributorsUrl = `${url}/contributors`;
   const contributorsRes = await fetch(contributorsUrl, {
     headers: {
-      Authorization: `token ${token}`,
+      Authorization: token && `token ${token}`,
     },
   });
   const contributors = await contributorsRes.json();
@@ -192,7 +192,9 @@ export async function getRepoTimeline(
   params: RepoContextWithToken & { path: string }
 ): Promise<RepoTimeline> {
   const { owner, repo, path, token } = params;
-  const url = `/api/repo-info?owner=${owner}&repo=${repo}&path=${path}&token=${token}`;
+  const url = `/api/repo-info?owner=${owner}&repo=${repo}&path=${path}&token=${
+    token || ""
+  }`;
   const res = await fetch(url);
   if (res.status !== 200) {
     const error = await res.json();
@@ -206,7 +208,7 @@ export async function getRepoFiles(
   params: RepoContextWithToken
 ): Promise<RepoFiles> {
   const { owner, repo, token } = params;
-  const url = `/api/file-tree?owner=${owner}&repo=${repo}&token=${token}`;
+  const url = `/api/file-tree?owner=${owner}&repo=${repo}&token=${token || ""}`;
   const res = await fetch(url);
   if (res.status !== 200) {
     const error = await res.json();

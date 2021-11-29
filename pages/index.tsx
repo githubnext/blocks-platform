@@ -24,13 +24,7 @@ export default function Home() {
           users could control how they interact with their content?
         </p>
         <div className="mt-10 space-x-4">
-          {session ? (
-            <Link href="/githubnext/blocks-tutorial?path=README.md">
-              <a className="inline-flex items-center px-8 py-4 text-lg border border-transparent leading-4 font-medium rounded-md shadow-sm text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                View Sample Repository
-              </a>
-            </Link>
-          ) : (
+          {!session && (
             <button
               // @ts-ignore
               onClick={() => signIn("github")}
@@ -39,6 +33,11 @@ export default function Home() {
               Sign in with GitHub
             </button>
           )}
+          <Link href="/githubnext/blocks-tutorial?path=README.md">
+            <a className="inline-flex items-center px-8 py-4 text-lg border border-transparent leading-4 font-medium rounded-md shadow-sm text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+              View Sample Repository
+            </a>
+          </Link>
         </div>
         <div className="mt-6 text-2xl tracking-tight flex items-center">
           <div className="font-light text-xl">

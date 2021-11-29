@@ -20,7 +20,7 @@ export function FileBlock(props: FileBlockProps) {
     owner: owner,
     path: path,
     fileRef: sha,
-    token: session.token as string,
+    token: session?.token as string,
   });
   const { name = "", content = "" } = data || {};
 
@@ -36,7 +36,7 @@ export function FileBlock(props: FileBlockProps) {
     repo: repo as string,
     metadataPath: block.id && `.github/blocks/file/${blockKey}`,
     filePath: path,
-    token: session.token as string,
+    token: session?.token as string,
   });
 
   useEffect(() => {

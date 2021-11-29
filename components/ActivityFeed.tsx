@@ -22,7 +22,7 @@ export const ActivityFeed = ({ context, session }: {
   } = useRepoTimeline({
     repo: repo,
     owner: owner,
-    token: session.token,
+    token: session?.token,
     path: path,
   });
 

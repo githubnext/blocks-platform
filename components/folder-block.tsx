@@ -33,7 +33,7 @@ export function FolderBlock(props: FolderBlockProps) {
     repo: repo as string,
     metadataPath: block.entry && `.github/blocks/folder/${blockKey}`,
     filePath: path,
-    token: session.token as string,
+    token: session?.token as string,
   });
 
   const data = useMemo(

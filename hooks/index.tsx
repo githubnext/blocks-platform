@@ -122,7 +122,7 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
       },
       sha: sha,
     });
-  } catch (e) {}
+  } catch (e) { }
 }
 
 export function useUpdateFileContents(
@@ -153,12 +153,21 @@ export function useMetadata({
     },
     {
       refetchOnWindowFocus: false,
+      onError: () => {
+        console.info(`No metadata found at ${metadataPath}`);
+        return false
+      },
+      useErrorBoundary: false
     }
   );
 
   const [fullMetadata, setFullMetadata] = useState<any>();
 
   useEffect(() => {
+    if (!metadataData) {
+      setFullMetadata({});
+      return
+    }
     try {
       const rawString = metadataData.content;
       const fullMetadata = JSON.parse(rawString);

@@ -50,6 +50,7 @@ export default function SearchDropdown(props: SearchDropdownProps) {
         onInputChange={list.setFilterText}
         loadingState={list.loadingState}
         onLoadMore={list.loadMore}
+        label="Search for a GitHub repository"
         onSelectionChange={(repo) => {
           if (!repo) return;
           Router.push(`/${repo}`);

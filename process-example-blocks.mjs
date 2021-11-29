@@ -66,6 +66,7 @@ async function processFiles(blocks) {
   files.forEach(async (file) => {
     const extension = file.split(".").pop()
     if (extension === "css") {
+      // import into our main css file
       cssFileContents += `@import url(".${file.slice(8)}");\n`
       const block = blocks.find(block => block.entry.includes(file.split("/").slice(1, 4).join("/")))
       if (!block) console.log("No block found for", file.split("/").slice(1, 4).join("/"))
@@ -79,6 +80,7 @@ async function processFiles(blocks) {
 }
 
 async function processCssFile(file, blockId) {
+  // scope to the specific block
   const contents = await fse.readFile(file, "utf8")
   const rulePrefix = `#example-block-${blockId}`
   const newContents = contents
@@ -88,6 +90,7 @@ async function processCssFile(file, blockId) {
 }
 
 async function processJsFile(file) {
+  // comment out .css imports
   const contents = await fse.readFile(file, "utf8")
   const newContents = contents.replace(/import.+(\.css)/g, "// import './$1'")
   await fse.writeFile(file, newContents)

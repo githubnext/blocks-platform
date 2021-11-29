@@ -37,13 +37,15 @@ export function SearchAutocomplete<T extends object>(
       inputRef,
       listBoxRef,
       popoverRef,
+      // @ts-ignore
+      "aria-label": props.label || "Search",
     },
     state
   );
 
   // Get props for the clear button from useSearchField
   let searchProps = {
-    label: props.label,
+    label: props.label || "Clear search",
     value: state.inputValue,
     onChange: (v: string) => state.setInputValue(v),
   };
@@ -64,9 +66,8 @@ export function SearchAutocomplete<T extends object>(
         </label>
       )}
       <div
-        className={`relative px-2 inline-flex items-center overflow-hidden shadow-sm border-2 combo-input-wrap ${
-          state.isFocused ? "is-focused border-blue-600" : "border-gray-300"
-        }`}
+        className={`relative px-2 inline-flex items-center overflow-hidden shadow-sm border-2 combo-input-wrap ${state.isFocused ? "is-focused border-blue-600" : "border-gray-300"
+          }`}
       >
         <input
           {...inputProps}
@@ -75,7 +76,7 @@ export function SearchAutocomplete<T extends object>(
         />
         <div className="absolute right-0 top-0 bottom-0 px-2 flex items-center justify-center">
           {props.loadingState === "loading" ||
-          props.loadingState === "filtering" ? (
+            props.loadingState === "filtering" ? (
             <CgSpinner
               aria-hidden="true"
               className="combo-spinner text-blue-700 animate-spin pointer-events-none"

@@ -86,9 +86,9 @@ const Commit = ({
           </div>
 
           <Box sx={{ mt: 1 }} className="overflow-x-hidden markdown">
-            <MDX className="opacity-80 text-xs whitespace-pre">
+            <div className="opacity-80 text-xs whitespace-pre">
               {message}
-            </MDX>
+            </div>
           </Box>
           <Box fontStyle="italic" mt={1} className="opacity-60">
             {getRelativeTime(new Date(date))}

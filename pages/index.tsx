@@ -39,12 +39,12 @@ export default function Home() {
             </a>
           </Link>
         </div>
-        <div className="mt-6 text-2xl tracking-tight flex items-center">
+        <div className="mt-6 text-2xl flex items-center">
           <div className="font-light text-xl">
             an exploration by
           </div>
           <img className="w-[1.5em] ml-2" src="/next-octocat.svg" alt="GitHub Next logo" />
-          <div className="font-bold">
+          <div className="font-bold tracking-tight">
             GitHub Next
           </div>
 

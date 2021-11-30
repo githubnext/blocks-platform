@@ -21,7 +21,7 @@ export default async function getInfo(req, res) {
 
     const commits = commitsRes.data.map((commit) => ({
       date: commit.commit.author.date,
-      username: commit.author.login,
+      username: commit.author?.login,
       message: commit.commit.message,
       url: commit.html_url,
       sha: commit.sha,

@@ -1,5 +1,6 @@
 import "styles/index.css";
 import "styles/markdown.css";
+import "./../blocks/blocks.css";
 import { useState } from "react";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider, BaseStyles } from "@primer/components";

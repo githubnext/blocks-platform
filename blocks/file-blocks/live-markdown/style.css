@@ -1,0 +1,67 @@
+
+#example-block-live-markdown-block .markdown h1 {
+  font-size: 2.25rem;
+  line-height: 1.25;
+  font-weight: 800;
+  margin-top: 1em;
+  margin-bottom: 0.5rem;
+}
+#example-block-live-markdown-block .markdown h2 {
+  font-size: 2rem;
+  line-height: 1.25;
+  font-weight: 700;
+  margin-top: 1em;
+  margin-bottom: 0.5rem;
+}
+#example-block-live-markdown-block .markdown h3 {
+  font-size: 1.5rem;
+  line-height: 1.25;
+  font-weight: 700;
+  margin-top: 1em;
+  margin-bottom: 0.5rem;
+}
+#example-block-live-markdown-block .markdown h4 {
+  font-size: 1.25rem;
+  line-height: 1.25;
+  font-weight: 700;
+  margin-top: 1em;
+  margin-bottom: 0.5rem;
+}
+#example-block-live-markdown-block .markdown h5 {
+  font-size: 1rem;
+  line-height: 1.25;
+  font-weight: 700;
+  margin-top: 1em;
+  margin-bottom: 0.5rem;
+}
+#example-block-live-markdown-block .markdown a {
+  @apply text-blue-600;
+  font-weight: 400;
+  text-decoration: none;
+}
+#example-block-live-markdown-block .markdown a:hover {
+  @apply text-blue-700;
+}
+#example-block-live-markdown-block .markdown a:active {
+  @apply text-blue-800;
+}
+#example-block-live-markdown-block .markdown a:focus {
+  @apply outline-none;
+}
+#example-block-live-markdown-block .markdown .code > pre {
+  @apply !rounded-2xl;
+  @apply !bg-gray-100;
+  @apply !my-3 !p-4 !px-5;
+}
+#example-block-live-markdown-block .markdown table {
+  @apply my-6;
+}
+#example-block-live-markdown-block .markdown thead th {
+  @apply p-2;
+  @apply py-2;
+  @apply text-left;
+  @apply bg-gray-100;
+}
+#example-block-live-markdown-block .markdown td {
+  @apply p-2;
+}

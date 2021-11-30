@@ -1,6 +1,6 @@
 import { RepoContext, RepoFiles } from "ghapi";
 import { SandboxedBlockWrapper } from "components/sandboxed-block-wrapper";
-import { useMetadata } from "hooks";
+import { useFolderContent, useMetadata } from "hooks";
 import React, { useMemo } from "react";
 import { ErrorBoundary } from "./error-boundary";
 import { FolderContext } from "@githubnext/utils";
@@ -36,10 +36,14 @@ export function FolderBlock(props: FolderBlockProps) {
     token: session?.token as string,
   });
 
-  const data = useMemo(
-    () => allFiles?.filter((d) => d.path.startsWith(path)),
-    [allFiles, path]
-  );
+  const { data } = useFolderContent({
+    repo: repo,
+    owner: owner,
+    path: path,
+    fileRef: sha,
+    token: session?.token as string,
+  });
+  const { tree = [] } = data || {};
 
   const name = path.split("/").pop();
 
@@ -51,7 +55,7 @@ export function FolderBlock(props: FolderBlockProps) {
             block={block}
             theme={theme}
             context={{ ...context, folder: name }}
-            tree={data}
+            tree={tree}
             metadata={metadata}
             // @ts-ignore
             onUpdateMetadata={onUpdateMetadata}

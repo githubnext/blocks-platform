@@ -1,5 +1,4 @@
 import { FileContext } from "@githubnext/utils";
-import MDX from "@mdx-js/runtime";
 import { Box, Link, StyledOcticon, Timeline } from "@primer/components";
 import {
   CommitIcon

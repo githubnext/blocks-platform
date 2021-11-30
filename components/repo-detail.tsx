@@ -9,7 +9,7 @@ import { ActivityFeed } from "./ActivityFeed";
 import { GitHubHeader } from "./github-header";
 import { RepoHeader } from "./repo-header";
 import { Sidebar } from "./Sidebar";
-
+import { defaultBlocksRepo } from "blocks/index"
 
 const BlockPicker = dynamic(() => import("./block-picker"), { ssr: false });
 
@@ -97,7 +97,8 @@ export function RepoDetail(props: RepoDetailProps) {
   const [blockOwner = "githubnext", blockRepo = "blocks-examples", blockId] = (blockKey as string).split("__");
 
   const { data: allBlocksInfo = [] } = useGetBlocksInfo()
-  const blocksRepo = allBlocksInfo.find(block => (
+  const isDefaultBlocks = `${blockOwner}/${blockRepo}` === "githubnext/blocks-examples"
+  const blocksRepo = isDefaultBlocks ? defaultBlocksRepo : allBlocksInfo.find(block => (
     block.owner === blockOwner && block.repo === blockRepo
   ))
   const blocks = (blocksRepo?.blocks || []).map(block => ({

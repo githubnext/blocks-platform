@@ -38,6 +38,15 @@ async function createIndexFile(blocks) {
   indexContents += `\n`
   indexContents += `export default ${JSON.stringify(blocksObject, null, 2).replace(/\"/g, "")
     }`
+
+  indexContents += `\n\n`
+  indexContents += `export const defaultBlocksRepo = ${JSON.stringify({
+    blocks,
+    full_name: "githubnext/blocks-examples",
+    html_url: "https://github.com/githubnext/blocks-examples",
+    owner: "githubnext",
+    repo: "blocks-examples",
+  }, null, 2)}`
   await fse.writeFile(indexFile, indexContents)
 }
 

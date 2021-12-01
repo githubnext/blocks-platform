@@ -806,9 +806,9 @@
   dependencies:
     tslib "^2.1.0"
 
-"@githubnext/blocks-examples@https://github.com/githubnext/blocks-examples.git#0.6.13":
+"@githubnext/blocks-examples@https://github.com/githubnext/blocks-examples.git#0.6.14":
   version "0.0.0"
-  resolved "https://github.com/githubnext/blocks-examples.git#3a7044c4f0aaf9bc3d502db8d634d7050bd22f67"
+  resolved "https://github.com/githubnext/blocks-examples.git#5b6397dd3da892e8eb72861463fca2600c21b361"
   dependencies:
     "@excalidraw/excalidraw" "^0.10.0"
     "@githubnext/utils" "^0.11.0"

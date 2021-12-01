@@ -152,9 +152,7 @@ export const defaultBlocksRepo = {
       "description": "Give feedback on a React component",
       "entry": "/src/blocks/file-blocks/annotate-react/index.tsx",
       "extensions": [
-        "js",
         "jsx",
-        "ts",
         "tsx"
       ],
       "example_file": "https://github.com/githubnext/blocks-tutorial/blob/main/Aside.jsx"

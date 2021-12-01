@@ -96,9 +96,6 @@ export function RepoDetail(props: RepoDetailProps) {
     token: session?.token as string,
   });
 
-  const defaultBlockKey = metadata[path as string]?.default || (
-    isFolder ? defaultFolderBlockKey : defaultFileBlockKey
-  )
   const [blockOwner = "githubnext", blockRepo = "blocks-examples", blockId] = (blockKey as string).split("__");
 
   const { data: allBlocksInfo = [] } = useGetBlocksInfo()
@@ -111,7 +108,18 @@ export function RepoDetail(props: RepoDetailProps) {
     owner: blockOwner,
     repo: blockRepo,
   } as Block))
-  const defaultBlock = blocks.find(block => getBlockKey(block) === defaultBlockKey)
+  const extension = (path as string).split(".").slice(-1)[0];
+  const relevantBlocks = blocks.filter(
+    (d) =>
+      d.type === (isFolder ? "folder" : "file") &&
+      (d.extensions?.includes("*") ||
+        d.extensions?.includes(extension))
+  );
+  const defaultBlockKey = metadata[path as string]?.default || (
+    getBlockKey(relevantBlocks[1])
+  )
+  const defaultBlock = blocks.find(block => getBlockKey(block) === defaultBlockKey) || relevantBlocks[1]
+  console.log(defaultBlock)
 
   const block = blocks.find(block => block.id === blockId) || blocks[0] || {} as Block
   const fileInfo = files?.find((d) => d.path === path);
@@ -181,9 +189,7 @@ export function RepoDetail(props: RepoDetailProps) {
                   alignItems="center"
                 >
                   <BlockPicker
-                    blocks={blocks.filter(
-                      (d) => d.type === (isFolder ? "folder" : "file")
-                    )}
+                    blocks={relevantBlocks}
                     defaultBlock={defaultBlock}
                     isFolder={isFolder}
                     path={path as string}

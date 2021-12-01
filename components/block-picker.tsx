@@ -12,23 +12,13 @@ interface BlockPickerProps {
 
 export default function BlockPicker(props: BlockPickerProps) {
   const { blocks, value, defaultBlock, path, isFolder, onChange } = props;
-  const extension = path.split(".").slice(-1)[0];
-  const relevantBlocks = blocks.filter(
-    (d) =>
-      !d.extensions ||
-      d.extensions.includes("*") ||
-      d.extensions.includes(extension)
-  );
 
   useEffect(() => {
     if (isFolder === null) return
     if (defaultBlock) {
       onChange(defaultBlock);
-    } else if (!relevantBlocks?.find((v) => v?.id === value?.id)) {
-      // default to the second block viewer if there is more than one
-      onChange(relevantBlocks[1] || relevantBlocks[0]);
     }
-  }, [path, relevantBlocks?.map((d) => d.id).join(","), defaultBlock?.id]);
+  }, [path, defaultBlock?.id]);
 
   return (
     <SelectMenu>
@@ -39,7 +29,7 @@ export default function BlockPicker(props: BlockPickerProps) {
       <SelectMenu.Modal>
         <SelectMenu.Header>Blocks</SelectMenu.Header>
         <SelectMenu.List>
-          {relevantBlocks.map((d) => {
+          {blocks.map((d) => {
             return (
               <SelectMenu.Item
                 as="button"

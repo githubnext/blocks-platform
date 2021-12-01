@@ -119,7 +119,11 @@ const Folder = ({
         shallow
         href={{
           pathname: router.pathname,
-          query: { ...query, path },
+          query: {
+            ...query,
+            fileRef: undefined,
+            path
+          },
         }}
       >
         <a
@@ -196,7 +200,11 @@ const File = ({
       shallow
       href={{
         pathname: router.pathname,
-        query: { ...query, path },
+        query: {
+          ...query,
+          fileRef: undefined,
+          path
+        },
       }}
     >
       <a

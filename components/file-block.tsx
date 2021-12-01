@@ -3,6 +3,7 @@ import { SandboxedBlockWrapper } from "components/sandboxed-block-wrapper";
 import { useFileContent, useMetadata } from "hooks";
 import React, { useEffect } from "react";
 import { ErrorBoundary } from "./error-boundary";
+import { UpdateCodeModal } from "./UpdateCodeModal";
 
 interface FileBlockProps {
   theme: string;
@@ -14,6 +15,7 @@ interface FileBlockProps {
 export function FileBlock(props: FileBlockProps) {
   const { context, theme, block, session } = props;
   const { repo, owner, path, sha } = context;
+  const [requestedMetadata, setRequestedMetadata] = React.useState(null);
 
   const { data } = useFileContent({
     repo: repo,
@@ -45,7 +47,7 @@ export function FileBlock(props: FileBlockProps) {
       if (event.data.codesandbox) return;
       if (event.data.type !== "update-metadata") return;
       const newMetadata = event?.data?.metadata || {};
-      onUpdateMetadata(newMetadata);
+      setRequestedMetadata(newMetadata);
     };
     window.addEventListener("message", onUpdateMetadataEvent as EventListener);
     return () => {
@@ -69,6 +71,22 @@ export function FileBlock(props: FileBlockProps) {
           />
         </div>
       </ErrorBoundary>
+
+      {!!requestedMetadata && (
+        <UpdateCodeModal
+          isLoggedIn={!!session?.token}
+          path={`.github/blocks/file/${blockKey}.json`}
+          newCode={
+            JSON.stringify({
+              ...metadata,
+              [path]: requestedMetadata
+            }, null, 2)
+          }
+          currentCode={JSON.stringify(metadata, null, 2)}
+          onSubmit={() => onUpdateMetadata(requestedMetadata)}
+          onClose={() => setRequestedMetadata(null)}
+        />
+      )}
     </div>
   );
 }

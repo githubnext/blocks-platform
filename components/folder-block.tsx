@@ -4,6 +4,7 @@ import { useFolderContent, useMetadata } from "hooks";
 import React, { useMemo } from "react";
 import { ErrorBoundary } from "./error-boundary";
 import { FolderContext } from "@githubnext/utils";
+import { UpdateCodeModal } from "./UpdateCodeModal";
 
 interface FolderBlockProps {
   allFiles: RepoFiles;
@@ -22,6 +23,7 @@ export function FolderBlock(props: FolderBlockProps) {
     session,
   } = props;
   const { repo, owner, path, sha } = context;
+  const [requestedMetadata, setRequestedMetadata] = React.useState(null);
 
   const blockKey =
     `${block.owner}/${block.repo}__${block.id}`.replace(
@@ -58,10 +60,25 @@ export function FolderBlock(props: FolderBlockProps) {
             tree={tree}
             metadata={metadata}
             // @ts-ignore
-            onUpdateMetadata={onUpdateMetadata}
+            onUpdateMetadata={setRequestedMetadata}
           />
         </div>
       </ErrorBoundary>
+      {!!requestedMetadata && (
+        <UpdateCodeModal
+          isLoggedIn={!!session?.token}
+          path={`.github/blocks/file/${blockKey}.json`}
+          newCode={
+            JSON.stringify({
+              ...metadata,
+              [path]: requestedMetadata
+            }, null, 2)
+          }
+          currentCode={JSON.stringify(metadata, null, 2)}
+          onSubmit={() => onUpdateMetadata(requestedMetadata)}
+          onClose={() => setRequestedMetadata(null)}
+        />
+      )}
     </div>
   );
 }

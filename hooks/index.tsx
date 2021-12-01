@@ -182,7 +182,7 @@ export function useMetadata({
       };
 
       await mutateAsync({
-        content: JSON.stringify(fullContents),
+        content: JSON.stringify(fullContents, null, 2),
         owner,
         repo,
         path: metadataPath,

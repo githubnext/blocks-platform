@@ -72,13 +72,13 @@ export const RepoHeader = ({
             mr={2}
             className="text-gray-500"
           />
-          <Link href="#" fontSize={3}>
+          <Link href={`https://github.com/${owner}/`} fontSize={3} target="_blank" rel="noopener">
             {owner}
           </Link>
           <Box fontSize={3} mx={1} fontWeight={300}>
             /
           </Box>
-          <Link href="#" fontSize={3} fontWeight="bold">
+          <Link href={`https://github.com/${owner}/${repo}/`} fontSize={3} fontWeight="bold" target="_blank" rel="noopener">
             {repo}
           </Link>
           <Box ml={2}>

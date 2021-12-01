@@ -1,4 +1,4 @@
-import { Box, useTheme } from "@primer/components";
+import { Box, Link, useTheme } from "@primer/components";
 import { FileBlock } from "components/file-block";
 import { FolderBlock } from "components/folder-block";
 import { useGetBlocksInfo, useMetadata, useRepoFiles, useRepoInfo } from "hooks";
@@ -168,6 +168,7 @@ export function RepoDetail(props: RepoDetailProps) {
                 className="!border-gray-200"
                 display="flex"
                 alignItems="center"
+                justifyContent="space-between"
               >
                 <BlockPicker
                   blocks={blocks.filter(
@@ -187,6 +188,14 @@ export function RepoDetail(props: RepoDetailProps) {
                 Set as default for all users
               </Button>
             )} */}
+                <Link
+                  href={`https://github.com/${context.owner}/${context.repo}/${path ? `blob/${context.sha}/${path}` : ""}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-500 mr-3 text-xs"
+                >
+                  View on GitHub
+                </Link>
               </Box>
             </div>
           </div>

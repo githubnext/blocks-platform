@@ -12,8 +12,7 @@ const flatBlock = dynamic(() => import("./file-blocks/flat.tsx"), {ssr:false});
 const iframeBlock = dynamic(() => import("./file-blocks/iframe.tsx"), {ssr:false});
 const simplePollBlock = dynamic(() => import("./file-blocks/poll.tsx"), {ssr:false});
 const chartBlock = dynamic(() => import("./file-blocks/charts/index.tsx"), {ssr:false});
-const simpleMarkdownBlock = dynamic(() => import("./file-blocks/simple-markdown/markdown.tsx"), {ssr:false});
-const liveMarkdownBlock = dynamic(() => import("./file-blocks/live-markdown/index.tsx"), {ssr:false});
+const markdownBlock = dynamic(() => import("./file-blocks/live-markdown/index.tsx"), {ssr:false});
 const reactFeedbackBlock = dynamic(() => import("./file-blocks/annotate-react/index.tsx"), {ssr:false});
 const minimapBlock = dynamic(() => import("./folder-blocks/minimap/index.tsx"), {ssr:false});
 
@@ -27,8 +26,7 @@ export default {
   'iframe-block': iframeBlock,
   'simple-poll-block': simplePollBlock,
   'chart-block': chartBlock,
-  'simple-markdown-block': simpleMarkdownBlock,
-  'live-markdown-block': liveMarkdownBlock,
+  'markdown-block': markdownBlock,
   'react-feedback-block': reactFeedbackBlock,
   'minimap-block': minimapBlock
 }
@@ -138,20 +136,9 @@ export const defaultBlocksRepo = {
     },
     {
       "type": "file",
-      "id": "simple-markdown-block",
-      "title": "Markdown block",
-      "description": "A simple markdown block",
-      "entry": "/src/blocks/file-blocks/simple-markdown/markdown.tsx",
-      "extensions": [
-        "md"
-      ],
-      "example_file": "https://github.com/githubnext/blocks-tutorial/blob/main/README.md"
-    },
-    {
-      "type": "file",
-      "id": "live-markdown-block",
-      "title": "Live Markdown",
-      "description": "View rich markdown files",
+      "id": "markdown-block",
+      "title": "Markdown",
+      "description": "View markdown files. You can also view live repo into, using Issues, Releases, and Commits custom components, as well as live code examples with CodeSandbox.",
       "entry": "/src/blocks/file-blocks/live-markdown/index.tsx",
       "extensions": [
         "md"

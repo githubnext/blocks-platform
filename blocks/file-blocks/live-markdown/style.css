@@ -1,5 +1,5 @@
 
-#example-block-live-markdown-block .markdown-body {
+#example-block-markdown-block .markdown-body {
   -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
   margin: 0;
@@ -12,18 +12,18 @@
   word-wrap: break-word;
 }
 
-#example-block-live-markdown-block .markdown-body .octicon {
+#example-block-markdown-block .markdown-body .octicon {
   display: inline-block;
   fill: currentColor;
   vertical-align: text-bottom;
 }
 
-#example-block-live-markdown-block .markdown-body h1:hover .anchor .octicon-link:before,
-#example-block-live-markdown-block .markdown-body h2:hover .anchor .octicon-link:before,
-#example-block-live-markdown-block .markdown-body h3:hover .anchor .octicon-link:before,
-#example-block-live-markdown-block .markdown-body h4:hover .anchor .octicon-link:before,
-#example-block-live-markdown-block .markdown-body h5:hover .anchor .octicon-link:before,
-#example-block-live-markdown-block .markdown-body h6:hover .anchor .octicon-link:before {
+#example-block-markdown-block .markdown-body h1:hover .anchor .octicon-link:before,
+#example-block-markdown-block .markdown-body h2:hover .anchor .octicon-link:before,
+#example-block-markdown-block .markdown-body h3:hover .anchor .octicon-link:before,
+#example-block-markdown-block .markdown-body h4:hover .anchor .octicon-link:before,
+#example-block-markdown-block .markdown-body h5:hover .anchor .octicon-link:before,
+#example-block-markdown-block .markdown-body h6:hover .anchor .octicon-link:before {
   width: 16px;
   height: 16px;
   content: " ";
@@ -33,43 +33,43 @@
   mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' version='1.1' aria-hidden='true'><path fill-rule='evenodd' d='M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z'></path></svg>");
 }
 
-#example-block-live-markdown-block .markdown-body details,
-#example-block-live-markdown-block .markdown-body figcaption,
-#example-block-live-markdown-block .markdown-body figure {
+#example-block-markdown-block .markdown-body details,
+#example-block-markdown-block .markdown-body figcaption,
+#example-block-markdown-block .markdown-body figure {
   display: block;
 }
 
-#example-block-live-markdown-block .markdown-body summary {
+#example-block-markdown-block .markdown-body summary {
   display: list-item;
 }
 
-#example-block-live-markdown-block .markdown-body a {
+#example-block-markdown-block .markdown-body a {
   background-color: transparent;
   color: #0969da;
   text-decoration: none;
 }
 
-#example-block-live-markdown-block .markdown-body a:active,
-#example-block-live-markdown-block .markdown-body a:hover {
+#example-block-markdown-block .markdown-body a:active,
+#example-block-markdown-block .markdown-body a:hover {
   outline-width: 0;
 }
 
-#example-block-live-markdown-block .markdown-body abbr[title] {
+#example-block-markdown-block .markdown-body abbr[title] {
   border-bottom: none;
   -webkit-text-decoration: underline dotted;
   text-decoration: underline dotted;
 }
 
-#example-block-live-markdown-block .markdown-body b,
-#example-block-live-markdown-block .markdown-body strong {
+#example-block-markdown-block .markdown-body b,
+#example-block-markdown-block .markdown-body strong {
   font-weight: 600;
 }
 
-#example-block-live-markdown-block .markdown-body dfn {
+#example-block-markdown-block .markdown-body dfn {
   font-style: italic;
 }
 
-#example-block-live-markdown-block .markdown-body h1 {
+#example-block-markdown-block .markdown-body h1 {
   margin: 0.67em 0;
   font-weight: 600;
   padding-bottom: 0.3em;
@@ -77,51 +77,51 @@
   border-bottom: 1px solid hsla(210, 18%, 87%, 1);
 }
 
-#example-block-live-markdown-block .markdown-body mark {
+#example-block-markdown-block .markdown-body mark {
   background-color: #ff0;
   color: #24292f;
 }
 
-#example-block-live-markdown-block .markdown-body small {
+#example-block-markdown-block .markdown-body small {
   font-size: 90%;
 }
 
-#example-block-live-markdown-block .markdown-body sub,
-#example-block-live-markdown-block .markdown-body sup {
+#example-block-markdown-block .markdown-body sub,
+#example-block-markdown-block .markdown-body sup {
   font-size: 75%;
   line-height: 0;
   position: relative;
   vertical-align: baseline;
 }
 
-#example-block-live-markdown-block .markdown-body sub {
+#example-block-markdown-block .markdown-body sub {
   bottom: -0.25em;
 }
 
-#example-block-live-markdown-block .markdown-body sup {
+#example-block-markdown-block .markdown-body sup {
   top: -0.5em;
 }
 
-#example-block-live-markdown-block .markdown-body img {
+#example-block-markdown-block .markdown-body img {
   border-style: none;
   max-width: 100%;
   box-sizing: content-box;
   background-color: #ffffff;
 }
 
-#example-block-live-markdown-block .markdown-body code,
-#example-block-live-markdown-block .markdown-body kbd,
-#example-block-live-markdown-block .markdown-body pre,
-#example-block-live-markdown-block .markdown-body samp {
+#example-block-markdown-block .markdown-body code,
+#example-block-markdown-block .markdown-body kbd,
+#example-block-markdown-block .markdown-body pre,
+#example-block-markdown-block .markdown-body samp {
   font-family: monospace, monospace;
   font-size: 1em;
 }
 
-#example-block-live-markdown-block .markdown-body figure {
+#example-block-markdown-block .markdown-body figure {
   margin: 1em 40px;
 }
 
-#example-block-live-markdown-block .markdown-body hr {
+#example-block-markdown-block .markdown-body hr {
   box-sizing: content-box;
   overflow: hidden;
   background: transparent;
@@ -133,72 +133,72 @@
   border: 0;
 }
 
-#example-block-live-markdown-block .markdown-body html [type="button"],
-#example-block-live-markdown-block .markdown-body [type="reset"],
-#example-block-live-markdown-block .markdown-body [type="submit"] {
+#example-block-markdown-block .markdown-body html [type="button"],
+#example-block-markdown-block .markdown-body [type="reset"],
+#example-block-markdown-block .markdown-body [type="submit"] {
   -webkit-appearance: button;
 }
 
-#example-block-live-markdown-block .markdown-body [type="button"]::-moz-focus-inner,
-#example-block-live-markdown-block .markdown-body [type="reset"]::-moz-focus-inner,
-#example-block-live-markdown-block .markdown-body [type="submit"]::-moz-focus-inner {
+#example-block-markdown-block .markdown-body [type="button"]::-moz-focus-inner,
+#example-block-markdown-block .markdown-body [type="reset"]::-moz-focus-inner,
+#example-block-markdown-block .markdown-body [type="submit"]::-moz-focus-inner {
   border-style: none;
   padding: 0;
 }
 
-#example-block-live-markdown-block .markdown-body [type="button"]:-moz-focusring,
-#example-block-live-markdown-block .markdown-body [type="reset"]:-moz-focusring,
-#example-block-live-markdown-block .markdown-body [type="submit"]:-moz-focusring {
+#example-block-markdown-block .markdown-body [type="button"]:-moz-focusring,
+#example-block-markdown-block .markdown-body [type="reset"]:-moz-focusring,
+#example-block-markdown-block .markdown-body [type="submit"]:-moz-focusring {
   outline: 1px dotted ButtonText;
 }
 
-#example-block-live-markdown-block .markdown-body [type="checkbox"],
-#example-block-live-markdown-block .markdown-body [type="radio"] {
+#example-block-markdown-block .markdown-body [type="checkbox"],
+#example-block-markdown-block .markdown-body [type="radio"] {
   box-sizing: border-box;
   padding: 0;
 }
 
-#example-block-live-markdown-block .markdown-body [type="number"]::-webkit-inner-spin-button,
-#example-block-live-markdown-block .markdown-body [type="number"]::-webkit-outer-spin-button {
+#example-block-markdown-block .markdown-body [type="number"]::-webkit-inner-spin-button,
+#example-block-markdown-block .markdown-body [type="number"]::-webkit-outer-spin-button {
   height: auto;
 }
 
-#example-block-live-markdown-block .markdown-body [type="search"] {
+#example-block-markdown-block .markdown-body [type="search"] {
   -webkit-appearance: textfield;
   outline-offset: -2px;
 }
 
-#example-block-live-markdown-block .markdown-body [type="search"]::-webkit-search-cancel-button,
-#example-block-live-markdown-block .markdown-body [type="search"]::-webkit-search-decoration {
+#example-block-markdown-block .markdown-body [type="search"]::-webkit-search-cancel-button,
+#example-block-markdown-block .markdown-body [type="search"]::-webkit-search-decoration {
   -webkit-appearance: none;
 }
 
-#example-block-live-markdown-block .markdown-body ::-webkit-input-placeholder {
+#example-block-markdown-block .markdown-body ::-webkit-input-placeholder {
   color: inherit;
   opacity: 0.54;
 }
 
-#example-block-live-markdown-block .markdown-body ::-webkit-file-upload-button {
+#example-block-markdown-block .markdown-body ::-webkit-file-upload-button {
   -webkit-appearance: button;
   font: inherit;
 }
 
-#example-block-live-markdown-block .markdown-body a:hover {
+#example-block-markdown-block .markdown-body a:hover {
   text-decoration: underline;
 }
 
-#example-block-live-markdown-block .markdown-body hr::before {
+#example-block-markdown-block .markdown-body hr::before {
   display: table;
   content: "";
 }
 
-#example-block-live-markdown-block .markdown-body hr::after {
+#example-block-markdown-block .markdown-body hr::after {
   display: table;
   clear: both;
   content: "";
 }
 
-#example-block-live-markdown-block .markdown-body table {
+#example-block-markdown-block .markdown-body table {
   border-spacing: 0;
   border-collapse: collapse;
   display: block;
@@ -207,20 +207,20 @@
   overflow: auto;
 }
 
-#example-block-live-markdown-block .markdown-body td,
-#example-block-live-markdown-block .markdown-body th {
+#example-block-markdown-block .markdown-body td,
+#example-block-markdown-block .markdown-body th {
   padding: 0;
 }
 
-#example-block-live-markdown-block .markdown-body details summary {
+#example-block-markdown-block .markdown-body details summary {
   cursor: pointer;
 }
 
-#example-block-live-markdown-block .markdown-body details:not([open]) > *:not(summary) {
+#example-block-markdown-block .markdown-body details:not([open]) > *:not(summary) {
   display: none !important;
 }
 
-#example-block-live-markdown-block .markdown-body kbd {
+#example-block-markdown-block .markdown-body kbd {
   display: inline-block;
   padding: 3px 5px;
   font: 11px ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
@@ -235,89 +235,89 @@
   box-shadow: inset 0 -1px 0 rgba(175, 184, 193, 0.2);
 }
 
-#example-block-live-markdown-block .markdown-body h1,
-#example-block-live-markdown-block .markdown-body h2,
-#example-block-live-markdown-block .markdown-body h3,
-#example-block-live-markdown-block .markdown-body h4,
-#example-block-live-markdown-block .markdown-body h5,
-#example-block-live-markdown-block .markdown-body h6 {
+#example-block-markdown-block .markdown-body h1,
+#example-block-markdown-block .markdown-body h2,
+#example-block-markdown-block .markdown-body h3,
+#example-block-markdown-block .markdown-body h4,
+#example-block-markdown-block .markdown-body h5,
+#example-block-markdown-block .markdown-body h6 {
   margin-top: 24px;
   margin-bottom: 16px;
   font-weight: 600;
   line-height: 1.25;
 }
 
-#example-block-live-markdown-block .markdown-body h2 {
+#example-block-markdown-block .markdown-body h2 {
   font-weight: 600;
   padding-bottom: 0.3em;
   font-size: 1.5em;
   border-bottom: 1px solid hsla(210, 18%, 87%, 1);
 }
 
-#example-block-live-markdown-block .markdown-body h3 {
+#example-block-markdown-block .markdown-body h3 {
   font-weight: 600;
   font-size: 1.25em;
 }
 
-#example-block-live-markdown-block .markdown-body h4 {
+#example-block-markdown-block .markdown-body h4 {
   font-weight: 600;
   font-size: 1em;
 }
 
-#example-block-live-markdown-block .markdown-body h5 {
+#example-block-markdown-block .markdown-body h5 {
   font-weight: 600;
   font-size: 0.875em;
 }
 
-#example-block-live-markdown-block .markdown-body h6 {
+#example-block-markdown-block .markdown-body h6 {
   font-weight: 600;
   font-size: 0.85em;
   color: #57606a;
 }
 
-#example-block-live-markdown-block .markdown-body p {
+#example-block-markdown-block .markdown-body p {
   margin-top: 0;
   margin-bottom: 10px;
 }
 
-#example-block-live-markdown-block .markdown-body blockquote {
+#example-block-markdown-block .markdown-body blockquote {
   margin: 0;
   padding: 0 1em;
   color: #57606a;
   border-left: 0.25em solid #d0d7de;
 }
 
-#example-block-live-markdown-block .markdown-body ul,
-#example-block-live-markdown-block .markdown-body ol {
+#example-block-markdown-block .markdown-body ul,
+#example-block-markdown-block .markdown-body ol {
   margin-top: 0;
   margin-bottom: 0;
   padding-left: 2em;
 }
 
-#example-block-live-markdown-block .markdown-body ol ol,
-#example-block-live-markdown-block .markdown-body ul ol {
+#example-block-markdown-block .markdown-body ol ol,
+#example-block-markdown-block .markdown-body ul ol {
   list-style-type: lower-roman;
 }
 
-#example-block-live-markdown-block .markdown-body ul ul ol,
-#example-block-live-markdown-block .markdown-body ul ol ol,
-#example-block-live-markdown-block .markdown-body ol ul ol,
-#example-block-live-markdown-block .markdown-body ol ol ol {
+#example-block-markdown-block .markdown-body ul ul ol,
+#example-block-markdown-block .markdown-body ul ol ol,
+#example-block-markdown-block .markdown-body ol ul ol,
+#example-block-markdown-block .markdown-body ol ol ol {
   list-style-type: lower-alpha;
 }
 
-#example-block-live-markdown-block .markdown-body dd {
+#example-block-markdown-block .markdown-body dd {
   margin-left: 0;
 }
 
-#example-block-live-markdown-block .markdown-body tt,
-#example-block-live-markdown-block .markdown-body code {
+#example-block-markdown-block .markdown-body tt,
+#example-block-markdown-block .markdown-body code {
   font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
     Liberation Mono, monospace;
   font-size: 12px;
 }
 
-#example-block-live-markdown-block .markdown-body pre {
+#example-block-markdown-block .markdown-body pre {
   margin-top: 0;
   margin-bottom: 0;
   font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
@@ -326,146 +326,146 @@
   word-wrap: normal;
 }
 
-#example-block-live-markdown-block .markdown-body :-ms-input-placeholder {
+#example-block-markdown-block .markdown-body :-ms-input-placeholder {
   color: #6e7781;
   opacity: 1;
 }
 
-#example-block-live-markdown-block .markdown-body ::-ms-input-placeholder {
+#example-block-markdown-block .markdown-body ::-ms-input-placeholder {
   color: #6e7781;
   opacity: 1;
 }
 
-#example-block-live-markdown-block .markdown-body ::placeholder {
+#example-block-markdown-block .markdown-body ::placeholder {
   color: #6e7781;
   opacity: 1;
 }
 
-#example-block-live-markdown-block .markdown-body .pl-c {
+#example-block-markdown-block .markdown-body .pl-c {
   color: #6e7781;
 }
 
-#example-block-live-markdown-block .markdown-body .pl-c1,
-#example-block-live-markdown-block .markdown-body .pl-s .pl-v {
+#example-block-markdown-block .markdown-body .pl-c1,
+#example-block-markdown-block .markdown-body .pl-s .pl-v {
   color: #0550ae;
 }
 
-#example-block-live-markdown-block .markdown-body .pl-e,
-#example-block-live-markdown-block .markdown-body .pl-en {
+#example-block-markdown-block .markdown-body .pl-e,
+#example-block-markdown-block .markdown-body .pl-en {
   color: #8250df;
 }
 
-#example-block-live-markdown-block .markdown-body .pl-smi,
-#example-block-live-markdown-block .markdown-body .pl-s .pl-s1 {
+#example-block-markdown-block .markdown-body .pl-smi,
+#example-block-markdown-block .markdown-body .pl-s .pl-s1 {
   color: #24292f;
 }
 
-#example-block-live-markdown-block .markdown-body .pl-ent {
+#example-block-markdown-block .markdown-body .pl-ent {
   color: #116329;
 }
 
-#example-block-live-markdown-block .markdown-body .pl-k {
+#example-block-markdown-block .markdown-body .pl-k {
   color: #cf222e;
 }
 
-#example-block-live-markdown-block .markdown-body .pl-s,
-#example-block-live-markdown-block .markdown-body .pl-pds,
-#example-block-live-markdown-block .markdown-body .pl-s .pl-pse .pl-s1,
-#example-block-live-markdown-block .markdown-body .pl-sr,
-#example-block-live-markdown-block .markdown-body .pl-sr .pl-cce,
-#example-block-live-markdown-block .markdown-body .pl-sr .pl-sre,
-#example-block-live-markdown-block .markdown-body .pl-sr .pl-sra {
+#example-block-markdown-block .markdown-body .pl-s,
+#example-block-markdown-block .markdown-body .pl-pds,
+#example-block-markdown-block .markdown-body .pl-s .pl-pse .pl-s1,
+#example-block-markdown-block .markdown-body .pl-sr,
+#example-block-markdown-block .markdown-body .pl-sr .pl-cce,
+#example-block-markdown-block .markdown-body .pl-sr .pl-sre,
+#example-block-markdown-block .markdown-body .pl-sr .pl-sra {
   color: #0a3069;
 }
 
-#example-block-live-markdown-block .markdown-body .pl-v,
-#example-block-live-markdown-block .markdown-body .pl-smw {
+#example-block-markdown-block .markdown-body .pl-v,
+#example-block-markdown-block .markdown-body .pl-smw {
   color: #953800;
 }
 
-#example-block-live-markdown-block .markdown-body .pl-bu {
+#example-block-markdown-block .markdown-body .pl-bu {
   color: #82071e;
 }
 
-#example-block-live-markdown-block .markdown-body .pl-ii {
+#example-block-markdown-block .markdown-body .pl-ii {
   color: #f6f8fa;
   background-color: #82071e;
 }
 
-#example-block-live-markdown-block .markdown-body .pl-c2 {
+#example-block-markdown-block .markdown-body .pl-c2 {
   color: #f6f8fa;
   background-color: #cf222e;
 }
 
-#example-block-live-markdown-block .markdown-body .pl-sr .pl-cce {
+#example-block-markdown-block .markdown-body .pl-sr .pl-cce {
   font-weight: bold;
   color: #116329;
 }
 
-#example-block-live-markdown-block .markdown-body .pl-ml {
+#example-block-markdown-block .markdown-body .pl-ml {
   color: #3b2300;
 }
 
-#example-block-live-markdown-block .markdown-body .pl-mh,
-#example-block-live-markdown-block .markdown-body .pl-mh .pl-en,
-#example-block-live-markdown-block .markdown-body .pl-ms {
+#example-block-markdown-block .markdown-body .pl-mh,
+#example-block-markdown-block .markdown-body .pl-mh .pl-en,
+#example-block-markdown-block .markdown-body .pl-ms {
   font-weight: bold;
   color: #0550ae;
 }
 
-#example-block-live-markdown-block .markdown-body .pl-mi {
+#example-block-markdown-block .markdown-body .pl-mi {
   font-style: italic;
   color: #24292f;
 }
 
-#example-block-live-markdown-block .markdown-body .pl-mb {
+#example-block-markdown-block .markdown-body .pl-mb {
   font-weight: bold;
   color: #24292f;
 }
 
-#example-block-live-markdown-block .markdown-body .pl-md {
+#example-block-markdown-block .markdown-body .pl-md {
   color: #82071e;
   background-color: #ffebe9;
 }
 
-#example-block-live-markdown-block .markdown-body .pl-mi1 {
+#example-block-markdown-block .markdown-body .pl-mi1 {
   color: #116329;
   background-color: #dafbe1;
 }
 
-#example-block-live-markdown-block .markdown-body .pl-mc {
+#example-block-markdown-block .markdown-body .pl-mc {
   color: #953800;
   background-color: #ffd8b5;
 }
 
-#example-block-live-markdown-block .markdown-body .pl-mi2 {
+#example-block-markdown-block .markdown-body .pl-mi2 {
   color: #eaeef2;
   background-color: #0550ae;
 }
 
-#example-block-live-markdown-block .markdown-body .pl-mdr {
+#example-block-markdown-block .markdown-body .pl-mdr {
   font-weight: bold;
   color: #8250df;
 }
 
-#example-block-live-markdown-block .markdown-body .pl-ba {
+#example-block-markdown-block .markdown-body .pl-ba {
   color: #57606a;
 }
 
-#example-block-live-markdown-block .markdown-body .pl-sg {
+#example-block-markdown-block .markdown-body .pl-sg {
   color: #8c959f;
 }
 
-#example-block-live-markdown-block .markdown-body .pl-corl {
+#example-block-markdown-block .markdown-body .pl-corl {
   text-decoration: underline;
   color: #0a3069;
 }
 
-#example-block-live-markdown-block .markdown-body [data-catalyst] {
+#example-block-markdown-block .markdown-body [data-catalyst] {
   display: block;
 }
 
-#example-block-live-markdown-block .markdown-body g-emoji {
+#example-block-markdown-block .markdown-body g-emoji {
   font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   font-size: 1em;
   font-style: normal !important;
@@ -474,166 +474,166 @@
   vertical-align: -0.075em;
 }
 
-#example-block-live-markdown-block .markdown-body g-emoji img {
+#example-block-markdown-block .markdown-body g-emoji img {
   width: 1em;
   height: 1em;
 }
 
-#example-block-live-markdown-block .markdown-body::before {
+#example-block-markdown-block .markdown-body::before {
   display: table;
   content: "";
 }
 
-#example-block-live-markdown-block .markdown-body::after {
+#example-block-markdown-block .markdown-body::after {
   display: table;
   clear: both;
   content: "";
 }
 
-#example-block-live-markdown-block .markdown-body > *:first-child {
+#example-block-markdown-block .markdown-body > *:first-child {
   margin-top: 0 !important;
 }
 
-#example-block-live-markdown-block .markdown-body > *:last-child {
+#example-block-markdown-block .markdown-body > *:last-child {
   margin-bottom: 0 !important;
 }
 
-#example-block-live-markdown-block .markdown-body a:not([href]) {
+#example-block-markdown-block .markdown-body a:not([href]) {
   color: inherit;
   text-decoration: none;
 }
 
-#example-block-live-markdown-block .markdown-body .absent {
+#example-block-markdown-block .markdown-body .absent {
   color: #cf222e;
 }
 
-#example-block-live-markdown-block .markdown-body .anchor {
+#example-block-markdown-block .markdown-body .anchor {
   float: left;
   padding-right: 4px;
   margin-left: -20px;
   line-height: 1;
 }
 
-#example-block-live-markdown-block .markdown-body .anchor:focus {
+#example-block-markdown-block .markdown-body .anchor:focus {
   outline: none;
 }
 
-#example-block-live-markdown-block .markdown-body p,
-#example-block-live-markdown-block .markdown-body blockquote,
-#example-block-live-markdown-block .markdown-body ul,
-#example-block-live-markdown-block .markdown-body ol,
-#example-block-live-markdown-block .markdown-body dl,
-#example-block-live-markdown-block .markdown-body table,
-#example-block-live-markdown-block .markdown-body pre,
-#example-block-live-markdown-block .markdown-body details {
+#example-block-markdown-block .markdown-body p,
+#example-block-markdown-block .markdown-body blockquote,
+#example-block-markdown-block .markdown-body ul,
+#example-block-markdown-block .markdown-body ol,
+#example-block-markdown-block .markdown-body dl,
+#example-block-markdown-block .markdown-body table,
+#example-block-markdown-block .markdown-body pre,
+#example-block-markdown-block .markdown-body details {
   margin-top: 0;
   margin-bottom: 16px;
 }
 
-#example-block-live-markdown-block .markdown-body blockquote > :first-child {
+#example-block-markdown-block .markdown-body blockquote > :first-child {
   margin-top: 0;
 }
 
-#example-block-live-markdown-block .markdown-body blockquote > :last-child {
+#example-block-markdown-block .markdown-body blockquote > :last-child {
   margin-bottom: 0;
 }
 
-#example-block-live-markdown-block .markdown-body sup > a::before {
+#example-block-markdown-block .markdown-body sup > a::before {
   content: "[";
 }
 
-#example-block-live-markdown-block .markdown-body sup > a::after {
+#example-block-markdown-block .markdown-body sup > a::after {
   content: "]";
 }
 
-#example-block-live-markdown-block .markdown-body h1 .octicon-link,
-#example-block-live-markdown-block .markdown-body h2 .octicon-link,
-#example-block-live-markdown-block .markdown-body h3 .octicon-link,
-#example-block-live-markdown-block .markdown-body h4 .octicon-link,
-#example-block-live-markdown-block .markdown-body h5 .octicon-link,
-#example-block-live-markdown-block .markdown-body h6 .octicon-link {
+#example-block-markdown-block .markdown-body h1 .octicon-link,
+#example-block-markdown-block .markdown-body h2 .octicon-link,
+#example-block-markdown-block .markdown-body h3 .octicon-link,
+#example-block-markdown-block .markdown-body h4 .octicon-link,
+#example-block-markdown-block .markdown-body h5 .octicon-link,
+#example-block-markdown-block .markdown-body h6 .octicon-link {
   color: #24292f;
   vertical-align: middle;
   visibility: hidden;
 }
 
-#example-block-live-markdown-block .markdown-body h1:hover .anchor,
-#example-block-live-markdown-block .markdown-body h2:hover .anchor,
-#example-block-live-markdown-block .markdown-body h3:hover .anchor,
-#example-block-live-markdown-block .markdown-body h4:hover .anchor,
-#example-block-live-markdown-block .markdown-body h5:hover .anchor,
-#example-block-live-markdown-block .markdown-body h6:hover .anchor {
+#example-block-markdown-block .markdown-body h1:hover .anchor,
+#example-block-markdown-block .markdown-body h2:hover .anchor,
+#example-block-markdown-block .markdown-body h3:hover .anchor,
+#example-block-markdown-block .markdown-body h4:hover .anchor,
+#example-block-markdown-block .markdown-body h5:hover .anchor,
+#example-block-markdown-block .markdown-body h6:hover .anchor {
   text-decoration: none;
 }
 
-#example-block-live-markdown-block .markdown-body h1:hover .anchor .octicon-link,
-#example-block-live-markdown-block .markdown-body h2:hover .anchor .octicon-link,
-#example-block-live-markdown-block .markdown-body h3:hover .anchor .octicon-link,
-#example-block-live-markdown-block .markdown-body h4:hover .anchor .octicon-link,
-#example-block-live-markdown-block .markdown-body h5:hover .anchor .octicon-link,
-#example-block-live-markdown-block .markdown-body h6:hover .anchor .octicon-link {
+#example-block-markdown-block .markdown-body h1:hover .anchor .octicon-link,
+#example-block-markdown-block .markdown-body h2:hover .anchor .octicon-link,
+#example-block-markdown-block .markdown-body h3:hover .anchor .octicon-link,
+#example-block-markdown-block .markdown-body h4:hover .anchor .octicon-link,
+#example-block-markdown-block .markdown-body h5:hover .anchor .octicon-link,
+#example-block-markdown-block .markdown-body h6:hover .anchor .octicon-link {
   visibility: visible;
 }
 
-#example-block-live-markdown-block .markdown-body h1 tt,
-#example-block-live-markdown-block .markdown-body h1 code,
-#example-block-live-markdown-block .markdown-body h2 tt,
-#example-block-live-markdown-block .markdown-body h2 code,
-#example-block-live-markdown-block .markdown-body h3 tt,
-#example-block-live-markdown-block .markdown-body h3 code,
-#example-block-live-markdown-block .markdown-body h4 tt,
-#example-block-live-markdown-block .markdown-body h4 code,
-#example-block-live-markdown-block .markdown-body h5 tt,
-#example-block-live-markdown-block .markdown-body h5 code,
-#example-block-live-markdown-block .markdown-body h6 tt,
-#example-block-live-markdown-block .markdown-body h6 code {
+#example-block-markdown-block .markdown-body h1 tt,
+#example-block-markdown-block .markdown-body h1 code,
+#example-block-markdown-block .markdown-body h2 tt,
+#example-block-markdown-block .markdown-body h2 code,
+#example-block-markdown-block .markdown-body h3 tt,
+#example-block-markdown-block .markdown-body h3 code,
+#example-block-markdown-block .markdown-body h4 tt,
+#example-block-markdown-block .markdown-body h4 code,
+#example-block-markdown-block .markdown-body h5 tt,
+#example-block-markdown-block .markdown-body h5 code,
+#example-block-markdown-block .markdown-body h6 tt,
+#example-block-markdown-block .markdown-body h6 code {
   padding: 0 0.2em;
   font-size: inherit;
 }
 
-#example-block-live-markdown-block .markdown-body ul.no-list,
-#example-block-live-markdown-block .markdown-body ol.no-list {
+#example-block-markdown-block .markdown-body ul.no-list,
+#example-block-markdown-block .markdown-body ol.no-list {
   padding: 0;
   list-style-type: none;
 }
 
-#example-block-live-markdown-block .markdown-body ol[type="1"] {
+#example-block-markdown-block .markdown-body ol[type="1"] {
   list-style-type: decimal;
 }
 
-#example-block-live-markdown-block .markdown-body ol[type="a"] {
+#example-block-markdown-block .markdown-body ol[type="a"] {
   list-style-type: lower-alpha;
 }
 
-#example-block-live-markdown-block .markdown-body ol[type="i"] {
+#example-block-markdown-block .markdown-body ol[type="i"] {
   list-style-type: lower-roman;
 }
 
-#example-block-live-markdown-block .markdown-body div > ol:not([type]) {
+#example-block-markdown-block .markdown-body div > ol:not([type]) {
   list-style-type: decimal;
 }
 
-#example-block-live-markdown-block .markdown-body ul ul,
-#example-block-live-markdown-block .markdown-body ul ol,
-#example-block-live-markdown-block .markdown-body ol ol,
-#example-block-live-markdown-block .markdown-body ol ul {
+#example-block-markdown-block .markdown-body ul ul,
+#example-block-markdown-block .markdown-body ul ol,
+#example-block-markdown-block .markdown-body ol ol,
+#example-block-markdown-block .markdown-body ol ul {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-#example-block-live-markdown-block .markdown-body li > p {
+#example-block-markdown-block .markdown-body li > p {
   margin-top: 16px;
 }
 
-#example-block-live-markdown-block .markdown-body li + li {
+#example-block-markdown-block .markdown-body li + li {
   margin-top: 0.25em;
 }
 
-#example-block-live-markdown-block .markdown-body dl {
+#example-block-markdown-block .markdown-body dl {
   padding: 0;
 }
 
-#example-block-live-markdown-block .markdown-body dl dt {
+#example-block-markdown-block .markdown-body dl dt {
   padding: 0;
   margin-top: 16px;
   font-size: 1em;
@@ -641,54 +641,54 @@
   font-weight: 600;
 }
 
-#example-block-live-markdown-block .markdown-body dl dd {
+#example-block-markdown-block .markdown-body dl dd {
   padding: 0 16px;
   margin-bottom: 16px;
 }
 
-#example-block-live-markdown-block .markdown-body table th {
+#example-block-markdown-block .markdown-body table th {
   font-weight: 600;
 }
 
-#example-block-live-markdown-block .markdown-body table th,
-#example-block-live-markdown-block .markdown-body table td {
+#example-block-markdown-block .markdown-body table th,
+#example-block-markdown-block .markdown-body table td {
   padding: 6px 13px;
   border: 1px solid #d0d7de;
 }
 
-#example-block-live-markdown-block .markdown-body table tr {
+#example-block-markdown-block .markdown-body table tr {
   background-color: #ffffff;
   border-top: 1px solid hsla(210, 18%, 87%, 1);
 }
 
-#example-block-live-markdown-block .markdown-body table tr:nth-child(2n) {
+#example-block-markdown-block .markdown-body table tr:nth-child(2n) {
   background-color: #f6f8fa;
 }
 
-#example-block-live-markdown-block .markdown-body table img {
+#example-block-markdown-block .markdown-body table img {
   background-color: transparent;
 }
 
-#example-block-live-markdown-block .markdown-body img[align="right"] {
+#example-block-markdown-block .markdown-body img[align="right"] {
   padding-left: 20px;
 }
 
-#example-block-live-markdown-block .markdown-body img[align="left"] {
+#example-block-markdown-block .markdown-body img[align="left"] {
   padding-right: 20px;
 }
 
-#example-block-live-markdown-block .markdown-body .emoji {
+#example-block-markdown-block .markdown-body .emoji {
   max-width: none;
   vertical-align: text-top;
   background-color: transparent;
 }
 
-#example-block-live-markdown-block .markdown-body span.frame {
+#example-block-markdown-block .markdown-body span.frame {
   display: block;
   overflow: hidden;
 }
 
-#example-block-live-markdown-block .markdown-body span.frame > span {
+#example-block-markdown-block .markdown-body span.frame > span {
   display: block;
   float: left;
   width: auto;
@@ -698,81 +698,81 @@
   border: 1px solid #d0d7de;
 }
 
-#example-block-live-markdown-block .markdown-body span.frame span img {
+#example-block-markdown-block .markdown-body span.frame span img {
   display: block;
   float: left;
 }
 
-#example-block-live-markdown-block .markdown-body span.frame span span {
+#example-block-markdown-block .markdown-body span.frame span span {
   display: block;
   padding: 5px 0 0;
   clear: both;
   color: #24292f;
 }
 
-#example-block-live-markdown-block .markdown-body span.align-center {
+#example-block-markdown-block .markdown-body span.align-center {
   display: block;
   overflow: hidden;
   clear: both;
 }
 
-#example-block-live-markdown-block .markdown-body span.align-center > span {
+#example-block-markdown-block .markdown-body span.align-center > span {
   display: block;
   margin: 13px auto 0;
   overflow: hidden;
   text-align: center;
 }
 
-#example-block-live-markdown-block .markdown-body span.align-center span img {
+#example-block-markdown-block .markdown-body span.align-center span img {
   margin: 0 auto;
   text-align: center;
 }
 
-#example-block-live-markdown-block .markdown-body span.align-right {
+#example-block-markdown-block .markdown-body span.align-right {
   display: block;
   overflow: hidden;
   clear: both;
 }
 
-#example-block-live-markdown-block .markdown-body span.align-right > span {
+#example-block-markdown-block .markdown-body span.align-right > span {
   display: block;
   margin: 13px 0 0;
   overflow: hidden;
   text-align: right;
 }
 
-#example-block-live-markdown-block .markdown-body span.align-right span img {
+#example-block-markdown-block .markdown-body span.align-right span img {
   margin: 0;
   text-align: right;
 }
 
-#example-block-live-markdown-block .markdown-body span.float-left {
+#example-block-markdown-block .markdown-body span.float-left {
   display: block;
   float: left;
   margin-right: 13px;
   overflow: hidden;
 }
 
-#example-block-live-markdown-block .markdown-body span.float-left span {
+#example-block-markdown-block .markdown-body span.float-left span {
   margin: 13px 0 0;
 }
 
-#example-block-live-markdown-block .markdown-body span.float-right {
+#example-block-markdown-block .markdown-body span.float-right {
   display: block;
   float: right;
   margin-left: 13px;
   overflow: hidden;
 }
 
-#example-block-live-markdown-block .markdown-body span.float-right > span {
+#example-block-markdown-block .markdown-body span.float-right > span {
   display: block;
   margin: 13px auto 0;
   overflow: hidden;
   text-align: right;
 }
 
-#example-block-live-markdown-block .markdown-body code,
-#example-block-live-markdown-block .markdown-body tt {
+#example-block-markdown-block .markdown-body code,
+#example-block-markdown-block .markdown-body tt {
   padding: 0.2em 0.4em;
   margin: 0;
   font-size: 85%;
@@ -780,20 +780,20 @@
   border-radius: 6px;
 }
 
-#example-block-live-markdown-block .markdown-body code br,
-#example-block-live-markdown-block .markdown-body tt br {
+#example-block-markdown-block .markdown-body code br,
+#example-block-markdown-block .markdown-body tt br {
   display: none;
 }
 
-#example-block-live-markdown-block .markdown-body del code {
+#example-block-markdown-block .markdown-body del code {
   text-decoration: inherit;
 }
 
-#example-block-live-markdown-block .markdown-body pre code {
+#example-block-markdown-block .markdown-body pre code {
   font-size: 100%;
 }
 
-#example-block-live-markdown-block .markdown-body pre > code {
+#example-block-markdown-block .markdown-body pre > code {
   padding: 0;
   margin: 0;
   word-break: normal;
@@ -802,17 +802,17 @@
   border: 0;
 }
 
-#example-block-live-markdown-block .markdown-body .highlight {
+#example-block-markdown-block .markdown-body .highlight {
   margin-bottom: 16px;
 }
 
-#example-block-live-markdown-block .markdown-body .highlight pre {
+#example-block-markdown-block .markdown-body .highlight pre {
   margin-bottom: 0;
   word-break: normal;
 }
 
-#example-block-live-markdown-block .markdown-body .highlight pre,
-#example-block-live-markdown-block .markdown-body pre {
+#example-block-markdown-block .markdown-body .highlight pre,
+#example-block-markdown-block .markdown-body pre {
   padding: 16px;
   overflow: auto;
   font-size: 85%;
@@ -821,8 +821,8 @@
   border-radius: 6px;
 }
 
-#example-block-live-markdown-block .markdown-body pre code,
-#example-block-live-markdown-block .markdown-body pre tt {
+#example-block-markdown-block .markdown-body pre code,
+#example-block-markdown-block .markdown-body pre tt {
   display: inline;
   max-width: auto;
   padding: 0;
@@ -834,8 +834,8 @@
   border: 0;
 }
 
-#example-block-live-markdown-block .markdown-body .csv-data td,
-#example-block-live-markdown-block .markdown-body .csv-data th {
+#example-block-markdown-block .markdown-body .csv-data td,
+#example-block-markdown-block .markdown-body .csv-data th {
   padding: 5px;
   overflow: hidden;
   font-size: 12px;
@@ -844,38 +844,38 @@
   white-space: nowrap;
 }
 
-#example-block-live-markdown-block .markdown-body .csv-data .blob-num {
+#example-block-markdown-block .markdown-body .csv-data .blob-num {
   padding: 10px 8px 9px;
   text-align: right;
   background: #ffffff;
   border: 0;
 }
 
-#example-block-live-markdown-block .markdown-body .csv-data tr {
+#example-block-markdown-block .markdown-body .csv-data tr {
   border-top: 0;
 }
 
-#example-block-live-markdown-block .markdown-body .csv-data th {
+#example-block-markdown-block .markdown-body .csv-data th {
   font-weight: 600;
   background: #f6f8fa;
   border-top: 0;
 }
 
-#example-block-live-markdown-block .markdown-body .footnotes {
+#example-block-markdown-block .markdown-body .footnotes {
   font-size: 12px;
   color: #57606a;
   border-top: 1px solid #d0d7de;
 }
 
-#example-block-live-markdown-block .markdown-body .footnotes ol {
+#example-block-markdown-block .markdown-body .footnotes ol {
   padding-left: 16px;
 }
 
-#example-block-live-markdown-block .markdown-body .footnotes li {
+#example-block-markdown-block .markdown-body .footnotes li {
   position: relative;
 }
 
-#example-block-live-markdown-block .markdown-body .footnotes li:target::before {
+#example-block-markdown-block .markdown-body .footnotes li:target::before {
   position: absolute;
   top: -8px;
   right: -8px;
@@ -887,18 +887,18 @@
   border-radius: 6px;
 }
 
-#example-block-live-markdown-block .markdown-body .footnotes li:target {
+#example-block-markdown-block .markdown-body .footnotes li:target {
   color: #24292f;
 }
 
-#example-block-live-markdown-block .markdown-body .footnotes .data-footnote-backref g-emoji {
+#example-block-markdown-block .markdown-body .footnotes .data-footnote-backref g-emoji {
   font-family: monospace;
 }
 
-#example-block-live-markdown-block .markdown-body [hidden] {
+#example-block-markdown-block .markdown-body [hidden] {
   display: none !important;
 }
 
-#example-block-live-markdown-block .markdown-body ::-webkit-calendar-picker-indicator {
+#example-block-markdown-block .markdown-body ::-webkit-calendar-picker-indicator {
   filter: invert(50%);
 }

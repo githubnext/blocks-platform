@@ -25,3 +25,7 @@ You'll need a GitHub PAT to load data from the API. Add that to an .env.local fi
 GITHUB_SECRET=X
 GITHUB_ID=X
 ```
+
+## Syncing example Blocks
+
+Our example blocks are pulled in via a `preinstall` & `postinstall` script. To update, push a new tag in the blocks-examples repo and bump the version number in [package.json:13](package.json:13).

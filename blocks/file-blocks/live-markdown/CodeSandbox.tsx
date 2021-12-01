@@ -3,14 +3,15 @@ import LZString from "lz-string"
 
 export const CodeSandbox = ({
   children,
-  height = "20em",
+  language = "js",
   dependencies,
 }: {
-  height: string | number;
   children: ReactNode;
+  language?: string;
   dependencies?: string[];
 }) => {
   const [url, setUrl] = useState("");
+  console.log(children);
   const parameters = getParameters({
     files: {
       "index.js": {
@@ -29,6 +30,7 @@ export const CodeSandbox = ({
   });
 
   const getSandboxUrl = async () => {
+    console.log(parameters);
     const url = `https://codesandbox.io/api/v1/sandboxes/define?parameters=${parameters}&json=1`;
     const res = await fetch(url);
     const data = await res.json();
@@ -45,10 +47,7 @@ export const CodeSandbox = ({
     <div className="w-full h-full mt-3 mb-10">
       {!!url && (
         <iframe
-          className="w-full outline-none"
-          style={{
-            height
-          }}
+          className="w-full h-[20em] outline-none"
           src={url}
           title="CodeSandbox"
           sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"

@@ -5,28 +5,28 @@ import dynamic from "next/dynamic";
 
 const codeBlock = dynamic(() => import("./file-blocks/code/index.tsx"), {ssr:false});
 const excalidrawBlock = dynamic(() => import("./file-blocks/excalidraw.tsx"), {ssr:false});
-const htmlBlock = dynamic(() => import("./file-blocks/html.tsx"), {ssr:false});
 const cssBlock = dynamic(() => import("./file-blocks/css.tsx"), {ssr:false});
 const DModelBlock = dynamic(() => import("./file-blocks/3d-files.tsx"), {ssr:false});
 const flatBlock = dynamic(() => import("./file-blocks/flat.tsx"), {ssr:false});
 const iframeBlock = dynamic(() => import("./file-blocks/iframe.tsx"), {ssr:false});
 const simplePollBlock = dynamic(() => import("./file-blocks/poll.tsx"), {ssr:false});
 const chartBlock = dynamic(() => import("./file-blocks/charts/index.tsx"), {ssr:false});
-const markdownBlock = dynamic(() => import("./file-blocks/live-markdown/index.tsx"), {ssr:false});
+const simpleMarkdownBlock = dynamic(() => import("./file-blocks/simple-markdown/markdown.tsx"), {ssr:false});
+const liveMarkdownBlock = dynamic(() => import("./file-blocks/live-markdown/index.tsx"), {ssr:false});
 const reactFeedbackBlock = dynamic(() => import("./file-blocks/annotate-react/index.tsx"), {ssr:false});
 const minimapBlock = dynamic(() => import("./folder-blocks/minimap/index.tsx"), {ssr:false});
 
 export default {
   'code-block': codeBlock,
   'excalidraw-block': excalidrawBlock,
-  'html-block': htmlBlock,
   'css-block': cssBlock,
   '3d-model-block': DModelBlock,
   'flat-block': flatBlock,
   'iframe-block': iframeBlock,
   'simple-poll-block': simplePollBlock,
   'chart-block': chartBlock,
-  'markdown-block': markdownBlock,
+  'simple-markdown-block': simpleMarkdownBlock,
+  'live-markdown-block': liveMarkdownBlock,
   'react-feedback-block': reactFeedbackBlock,
   'minimap-block': minimapBlock
 }
@@ -41,8 +41,7 @@ export const defaultBlocksRepo = {
       "entry": "/src/blocks/file-blocks/code/index.tsx",
       "extensions": [
         "*"
-      ],
-      "example_file": "https://github.com/githubnext/blocks-tutorial/blob/main/Button.jsx"
+      ]
     },
     {
       "type": "file",
@@ -52,19 +51,7 @@ export const defaultBlocksRepo = {
       "entry": "/src/blocks/file-blocks/excalidraw.tsx",
       "extensions": [
         "excalidraw"
-      ],
-      "example_file": "https://github.com/githubnext/blocks-tutorial/blob/main/drawing.excalidraw"
-    },
-    {
-      "type": "file",
-      "id": "html-block",
-      "title": "HTML block",
-      "description": "View HTML content",
-      "entry": "/src/blocks/file-blocks/html.tsx",
-      "extensions": [
-        "html"
-      ],
-      "example_file": "https://github.com/githubnext/blocks-tutorial/blob/main/photos.html"
+      ]
     },
     {
       "type": "file",
@@ -74,8 +61,7 @@ export const defaultBlocksRepo = {
       "entry": "/src/blocks/file-blocks/css.tsx",
       "extensions": [
         "css"
-      ],
-      "example_file": "https://github.com/githubnext/blocks-tutorial/blob/main/global.css"
+      ]
     },
     {
       "type": "file",
@@ -86,8 +72,7 @@ export const defaultBlocksRepo = {
       "extensions": [
         "gltf",
         "glb"
-      ],
-      "example_file": "https://github.com/githubnext/blocks-tutorial/blob/main/avocado.glb"
+      ]
     },
     {
       "type": "file",
@@ -98,8 +83,7 @@ export const defaultBlocksRepo = {
       "extensions": [
         "csv",
         "json"
-      ],
-      "example_file": "https://github.com/githubnext/blocks-tutorial/blob/main/data.csv"
+      ]
     },
     {
       "type": "file",
@@ -109,8 +93,7 @@ export const defaultBlocksRepo = {
       "entry": "/src/blocks/file-blocks/iframe.tsx",
       "extensions": [
         "iframe"
-      ],
-      "example_file": "https://github.com/githubnext/blocks-tutorial/blob/main/figma.iframe"
+      ]
     },
     {
       "type": "file",
@@ -120,8 +103,7 @@ export const defaultBlocksRepo = {
       "entry": "/src/blocks/file-blocks/poll.tsx",
       "extensions": [
         "json"
-      ],
-      "example_file": "https://github.com/githubnext/blocks-tutorial/blob/main/poll.json"
+      ]
     },
     {
       "type": "file",
@@ -136,14 +118,23 @@ export const defaultBlocksRepo = {
     },
     {
       "type": "file",
-      "id": "markdown-block",
-      "title": "Markdown",
-      "description": "View markdown files. You can also view live repo into, using Issues, Releases, and Commits custom components, as well as live code examples with CodeSandbox.",
+      "id": "simple-markdown-block",
+      "title": "Markdown block",
+      "description": "A simple markdown block",
+      "entry": "/src/blocks/file-blocks/simple-markdown/markdown.tsx",
+      "extensions": [
+        "md"
+      ]
+    },
+    {
+      "type": "file",
+      "id": "live-markdown-block",
+      "title": "Live Markdown",
+      "description": "View rich markdown files",
       "entry": "/src/blocks/file-blocks/live-markdown/index.tsx",
       "extensions": [
         "md"
-      ],
-      "example_file": "https://github.com/githubnext/blocks-tutorial/blob/main/README.md"
+      ]
     },
     {
       "type": "file",
@@ -152,18 +143,18 @@ export const defaultBlocksRepo = {
       "description": "Give feedback on a React component",
       "entry": "/src/blocks/file-blocks/annotate-react/index.tsx",
       "extensions": [
+        "js",
         "jsx",
+        "ts",
         "tsx"
-      ],
-      "example_file": "https://github.com/githubnext/blocks-tutorial/blob/main/Aside.jsx"
+      ]
     },
     {
       "type": "folder",
       "id": "minimap-block",
       "title": "Minimap",
       "description": "A visualization of your folders and files",
-      "entry": "/src/blocks/folder-blocks/minimap/index.tsx",
-      "example_file": "https://github.com/githubnext/blocks-tutorial"
+      "entry": "/src/blocks/folder-blocks/minimap/index.tsx"
     }
   ],
   "full_name": "githubnext/blocks-examples",

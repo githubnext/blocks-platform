@@ -194,7 +194,7 @@ export function RepoDetail(props: RepoDetailProps) {
                     onChange={onLoadBlock}
                     value={block}
                   />
-                  {blockKey !== defaultBlockKey && (
+                  {blockKey !== defaultBlockKey && session?.token && (
                     <Button
                       fontSize="1"
                       ml={2}

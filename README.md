@@ -28,4 +28,6 @@ GITHUB_ID=X
 
 ## Syncing example Blocks
 
-Our example blocks are pulled in via a `preinstall` & `postinstall` script. To update, push a new tag in the blocks-examples repo and bump the version number in [package.json:13](package.json:13).
+To keep loading snappy, our example blocks are pulled in via a `preinstall` & `postinstall` script. To update, push a new tag in the blocks-examples repo and bump the version number in [package.json:13](package.json:13).
+
+Upon install, the example blocks are synced to the `/blocks` folder (which is completely auto-generated), along with an `index.js` file that exports the blocks and an `index.css` file that exports the styles.

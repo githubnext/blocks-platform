@@ -20,12 +20,6 @@ import {
   getRepoTimeline,
 } from "ghapi";
 
-// get env variable
-const GITHUB_PAT = process.env.NEXT_PUBLIC_GITHUB_PAT;
-export const octokit = new Octokit({
-  // AUTH GOES HERE
-  auth: GITHUB_PAT,
-});
 
 export function useFileContent(
   params: UseFileContentParams,
@@ -82,11 +76,15 @@ interface UseUpdateFileContentParams extends RepoContext {
   content: string;
   path: string;
   sha: string;
+  token?: string;
 }
 
 async function updateFileContents(params: UseUpdateFileContentParams) {
   const contentEncoded = Base64.encode(params.content);
   let sha = params.sha;
+  const octokit = new Octokit({
+    auth: params.token,
+  });
 
   if (sha === "latest") {
     try {
@@ -112,14 +110,6 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
       path: params.path,
       message: `feat: updated ${params.path} programatically`,
       content: contentEncoded,
-      committer: {
-        name: `GitHub Block Bot`,
-        email: "fake@fake.com",
-      },
-      author: {
-        name: `GitHub Block Bot`,
-        email: "fake@fake.com",
-      },
       sha: sha,
     });
   } catch (e) { }
@@ -176,6 +166,7 @@ export function useMetadata({
       setFullMetadata({});
     }
   }, [metadataData]);
+
   const metadata = useMemo(
     () => fullMetadata?.[filePath] || {},
     [fullMetadata, filePath]
@@ -196,10 +187,11 @@ export function useMetadata({
         repo,
         path: metadataPath,
         sha: "latest",
+        token
       });
       setFullMetadata(fullContents);
     },
-    [mutateAsync, owner, repo, metadataPath, filePath]
+    [mutateAsync, owner, repo, metadataPath, filePath, token]
   );
 
   return {

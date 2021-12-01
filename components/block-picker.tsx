@@ -4,13 +4,14 @@ import { useEffect } from "react";
 interface BlockPickerProps {
   blocks: Block[];
   value: Block;
+  defaultBlock?: Block;
   isFolder?: boolean;
   path: string;
   onChange: (newType: Block) => void;
 }
 
 export default function BlockPicker(props: BlockPickerProps) {
-  const { blocks, value, path, isFolder, onChange } = props;
+  const { blocks, value, defaultBlock, path, isFolder, onChange } = props;
   const extension = path.split(".").slice(-1)[0];
   const relevantBlocks = blocks.filter(
     (d) =>
@@ -21,18 +22,13 @@ export default function BlockPicker(props: BlockPickerProps) {
 
   useEffect(() => {
     if (isFolder === null) return
-    if (!relevantBlocks?.find((v) => v?.id === value?.id)) {
-      onChange(relevantBlocks[0]);
+    if (defaultBlock) {
+      onChange(defaultBlock);
+    } else if (!relevantBlocks?.find((v) => v?.id === value?.id)) {
+      // default to the second block viewer if there is more than one
+      onChange(relevantBlocks[1] || relevantBlocks[0]);
     }
-  }, [value, relevantBlocks?.map((d) => d.id).join(",")]);
-
-
-  // default to the second block viewer if there is more than one
-  useEffect(() => {
-    if (relevantBlocks.length > 0) {
-      onChange(relevantBlocks[1]);
-    }
-  }, [path]);
+  }, [path, relevantBlocks?.map((d) => d.id).join(","), defaultBlock?.id]);
 
   return (
     <SelectMenu>

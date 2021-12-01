@@ -34,7 +34,7 @@ export function FileBlock(props: FileBlockProps) {
   const { metadata, onUpdateMetadata } = useMetadata({
     owner: owner as string,
     repo: repo as string,
-    metadataPath: block.id && `.github/blocks/file/${blockKey}`,
+    metadataPath: block.id && `.github/blocks/file/${blockKey}.json`,
     filePath: path,
     token: session?.token as string,
   });

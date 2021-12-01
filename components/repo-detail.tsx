@@ -1,4 +1,4 @@
-import { Box, Link, useTheme } from "@primer/components";
+import { Box, Button, Link, useTheme } from "@primer/components";
 import { FileBlock } from "components/file-block";
 import { FolderBlock } from "components/folder-block";
 import { useGetBlocksInfo, useMetadata, useRepoFiles, useRepoInfo } from "hooks";
@@ -32,6 +32,7 @@ const getBlockKey = (block: Block) => (
   [block?.owner, block?.repo, block?.id || ""].join("__")
 )
 const defaultFileBlockKey = getBlockKey(defaultFileBlock)
+const defaultFolderBlockKey = getBlockKey(defaultFolderBlock)
 export function RepoDetail(props: RepoDetailProps) {
   const { session } = props;
   const router = useRouter();
@@ -75,6 +76,7 @@ export function RepoDetail(props: RepoDetailProps) {
       ? files?.find((d) => d.path === path)?.type !== "blob"
       : null;
 
+
   const onLoadBlock = (block: Block) => {
     if (!block) return;
     router.push({
@@ -89,11 +91,14 @@ export function RepoDetail(props: RepoDetailProps) {
   const { metadata, onUpdateMetadata } = useMetadata({
     owner: owner as string,
     repo: repo as string,
-    metadataPath: `.github/blocks/all`,
+    metadataPath: `.github/blocks/all.json`,
     filePath: path as string,
     token: session?.token as string,
   });
 
+  const defaultBlockKey = metadata[path as string]?.default || (
+    isFolder ? defaultFolderBlockKey : defaultFileBlockKey
+  )
   const [blockOwner = "githubnext", blockRepo = "blocks-examples", blockId] = (blockKey as string).split("__");
 
   const { data: allBlocksInfo = [] } = useGetBlocksInfo()
@@ -106,6 +111,7 @@ export function RepoDetail(props: RepoDetailProps) {
     owner: blockOwner,
     repo: blockRepo,
   } as Block))
+  const defaultBlock = blocks.find(block => getBlockKey(block) === defaultBlockKey)
 
   const block = blocks.find(block => block.id === blockId) || blocks[0] || {} as Block
   const fileInfo = files?.find((d) => d.path === path);
@@ -170,29 +176,44 @@ export function RepoDetail(props: RepoDetailProps) {
                 alignItems="center"
                 justifyContent="space-between"
               >
-                <BlockPicker
-                  blocks={blocks.filter(
-                    (d) => d.type === (isFolder ? "folder" : "file")
+                <Box
+                  display="flex"
+                  alignItems="center"
+                >
+                  <BlockPicker
+                    blocks={blocks.filter(
+                      (d) => d.type === (isFolder ? "folder" : "file")
+                    )}
+                    defaultBlock={defaultBlock}
+                    isFolder={isFolder}
+                    path={path as string}
+                    onChange={onLoadBlock}
+                    value={block}
+                  />
+                  {blockKey !== defaultBlockKey && (
+                    <Button
+                      fontSize="1"
+                      ml={2}
+                      onClick={() => {
+                        const newMetadata = {
+                          ...metadata,
+                          [path as string]: {
+                            ...metadata[path as string],
+                            default: blockKey
+                          }
+                        }
+                        onUpdateMetadata(newMetadata)
+                      }}
+                    >
+                      Set as default for all users
+                    </Button>
                   )}
-                  isFolder={isFolder}
-                  path={path as string}
-                  onChange={onLoadBlock}
-                  value={block}
-                />
-                {/* {blockType !== defaultBlock && (
-              <Button
-                fontSize="1"
-                ml={2}
-                onClick={() => onSetDefaultBlock(blockType)}
-              >
-                Set as default for all users
-              </Button>
-            )} */}
+                </Box>
                 <Link
                   href={`https://github.com/${context.owner}/${context.repo}/${path ? `blob/${context.sha}/${path}` : ""}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-500 mr-3 text-xs"
+                  className="!text-gray-500 mr-3 text-xs"
                 >
                   View on GitHub
                 </Link>

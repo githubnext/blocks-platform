@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from "react";
+// @ts-ignore: no types
 import { toJSON } from 'cssjson';
 import { FileBlockProps } from "@githubnext/utils";
 
@@ -6,6 +7,8 @@ export default function (props: FileBlockProps) {
   const { content } = props;
 
   useEffect(() => {
+    if (typeof document === 'undefined') return;
+
     const script = document.createElement('script');
 
     script.src = "https://cdn-tailwindcss.vercel.app"

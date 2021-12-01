@@ -855,6 +855,14 @@
     react "^17.0.2"
     zod "^3.11.6"
 
+"@githubnext/utils@^0.11.2":
+  version "0.11.2"
+  resolved "https://registry.yarnpkg.com/@githubnext/utils/-/utils-0.11.2.tgz#25e38c4d760013499aa097d335af0f67f040f32f"
+  integrity sha512-Pc2wAoC70PTbEbUWExmVOfJOHD+Jd24jWRKz0YILBia5So5bo42pMSX27Xt+lI8uZ5u53pKx9kirT5iypVe/Lg==
+  dependencies:
+    react "^17.0.2"
+    zod "^3.11.6"
+
 "@githubocto/flat-ui@^0.10.2":
   version "0.10.2"
   resolved "https://registry.yarnpkg.com/@githubocto/flat-ui/-/flat-ui-0.10.2.tgz#25ea025e662721eac7f468662436864ebf81dd4a"

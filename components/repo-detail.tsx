@@ -112,14 +112,12 @@ export function RepoDetail(props: RepoDetailProps) {
   const relevantBlocks = blocks.filter(
     (d) =>
       d.type === (isFolder ? "folder" : "file") &&
-      (d.extensions?.includes("*") ||
-        d.extensions?.includes(extension))
+      (!d.extensions || d.extensions?.includes("*") || d.extensions?.includes(extension))
   );
   const defaultBlockKey = metadata[path as string]?.default || (
-    getBlockKey(relevantBlocks[1])
+    getBlockKey(relevantBlocks[1] || relevantBlocks[0])
   )
   const defaultBlock = blocks.find(block => getBlockKey(block) === defaultBlockKey) || relevantBlocks[1]
-  console.log(defaultBlock)
 
   const block = blocks.find(block => block.id === blockId) || blocks[0] || {} as Block
   const fileInfo = files?.find((d) => d.path === path);

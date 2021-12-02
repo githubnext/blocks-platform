@@ -1,6 +1,6 @@
 import { FileContext } from "@githubnext/utils";
 import { SandboxedBlockWrapper } from "components/sandboxed-block-wrapper";
-import { useFileContent, useMetadata } from "hooks";
+import { useFileContent, useMetadata, useUpdateFileContents } from "hooks";
 import router, { useRouter } from "next/router";
 import React, { useEffect } from "react";
 import { ErrorBoundary } from "./error-boundary";
@@ -11,12 +11,15 @@ interface FileBlockProps {
   context: FileContext;
   block: Block;
   session: Session;
+  onCommit?: () => void;
 }
 
 export function FileBlock(props: FileBlockProps) {
-  const { context, theme, block, session } = props;
+  const { context, theme, block, session, onCommit } = props;
   const { repo, owner, path, sha } = context;
   const [requestedMetadata, setRequestedMetadata] = React.useState(null);
+  const [requestedFileContent, setRequestedFileContent] = React.useState(null);
+
   const router = useRouter()
   const query = router.query;
 
@@ -44,6 +47,22 @@ export function FileBlock(props: FileBlockProps) {
     token: session?.token as string,
   });
 
+  const { mutateAsync } = useUpdateFileContents({})
+  const onUpdateContent = async (newContent: string) => {
+    await mutateAsync({
+      content: newContent,
+      owner,
+      repo,
+      path,
+      sha: "latest",
+      token: session?.token as string,
+    })
+    if (onCommit) {
+      // for updating the activity feed on changes
+      onCommit();
+    }
+  }
+
   useEffect(() => {
     const onMessageEvent = (event: MessageEvent) => {
       // TODO: restrict by event.origin
@@ -56,7 +75,9 @@ export function FileBlock(props: FileBlockProps) {
           pathname: event.data.pathname,
           query: { ...query, path: event.data.path },
         })
-      }
+      } else if (event.data.type === "update-file") {
+        setRequestedFileContent(event.data.content);
+      };
     };
     window.addEventListener("message", onMessageEvent as EventListener);
     return () => {
@@ -94,6 +115,16 @@ export function FileBlock(props: FileBlockProps) {
           currentCode={JSON.stringify(metadata, null, 2)}
           onSubmit={() => onUpdateMetadata(requestedMetadata)}
           onClose={() => setRequestedMetadata(null)}
+        />
+      )}
+      {!!requestedFileContent && (
+        <UpdateCodeModal
+          isLoggedIn={!!session?.token}
+          path={path}
+          newCode={requestedFileContent}
+          currentCode={content}
+          onSubmit={() => onUpdateContent(requestedFileContent)}
+          onClose={() => setRequestedFileContent(null)}
         />
       )}
     </div>

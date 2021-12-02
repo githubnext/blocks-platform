@@ -210,13 +210,15 @@ export function useRepoInfo(params: RepoContextWithToken) {
 }
 
 export function useRepoTimeline(
-  params: RepoContextWithToken & { path: string }
+  params: RepoContextWithToken & { path: string },
+  config?: UseQueryOptions<any>
 ) {
-  return useQuery(["timeline", params], () => getRepoTimeline(params), {
+  return useQuery(["timeline", params, config?.queryKey], () => getRepoTimeline(params), {
     enabled:
       Boolean(params.repo) && Boolean(params.owner) && Boolean(params.token),
     refetchOnWindowFocus: false,
     retry: false,
+    ...config,
   });
 }
 

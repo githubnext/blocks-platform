@@ -18,7 +18,7 @@ export default function BlockPicker(props: BlockPickerProps) {
     if (defaultBlock) {
       onChange(defaultBlock);
     }
-  }, [path, defaultBlock?.id]);
+  }, [path, isFolder, defaultBlock?.id]);
 
   return (
     <SelectMenu>

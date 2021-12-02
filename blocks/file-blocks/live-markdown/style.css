@@ -591,6 +591,10 @@
   font-size: inherit;
 }
 
+#example-block-markdown-block .markdown-body ul,
+#example-block-markdown-block .markdown-body ol {
+  list-style: disc;
+}
 #example-block-markdown-block .markdown-body ul.no-list,
 #example-block-markdown-block .markdown-body ol.no-list {
   padding: 0;

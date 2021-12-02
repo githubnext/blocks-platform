@@ -1,10 +1,11 @@
 import { RepoContext, RepoFiles } from "ghapi";
 import { SandboxedBlockWrapper } from "components/sandboxed-block-wrapper";
 import { useFolderContent, useMetadata } from "hooks";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { ErrorBoundary } from "./error-boundary";
 import { FolderContext } from "@githubnext/utils";
 import { UpdateCodeModal } from "./UpdateCodeModal";
+import { useRouter } from "next/router";
 
 interface FolderBlockProps {
   allFiles: RepoFiles;
@@ -24,6 +25,8 @@ export function FolderBlock(props: FolderBlockProps) {
   } = props;
   const { repo, owner, path, sha } = context;
   const [requestedMetadata, setRequestedMetadata] = React.useState(null);
+  const router = useRouter()
+  const query = router.query
 
   const blockKey =
     `${block.owner}/${block.repo}__${block.id}`.replace(
@@ -37,6 +40,29 @@ export function FolderBlock(props: FolderBlockProps) {
     filePath: path,
     token: session?.token as string,
   });
+
+  useEffect(() => {
+    const onMessageEvent = (event: MessageEvent) => {
+      // TODO: restrict by event.origin
+      if (event.data.codesandbox) return;
+      if (event.data.type === "update-metadata") {
+        const newMetadata = event?.data?.metadata || {};
+        setRequestedMetadata(newMetadata);
+      } else if (event.data.type === "navigate-to-path") {
+        router.push({
+          pathname: event.data.pathname,
+          query: { ...query, path: event.data.path },
+        })
+      }
+    };
+    window.addEventListener("message", onMessageEvent as EventListener);
+    return () => {
+      window.removeEventListener(
+        "message",
+        onMessageEvent as EventListener
+      );
+    };
+  }, [onUpdateMetadata]);
 
   const { data } = useFolderContent({
     repo: repo,

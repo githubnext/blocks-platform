@@ -1,6 +1,7 @@
 import { FileContext } from "@githubnext/utils";
 import { SandboxedBlockWrapper } from "components/sandboxed-block-wrapper";
 import { useFileContent, useMetadata } from "hooks";
+import router, { useRouter } from "next/router";
 import React, { useEffect } from "react";
 import { ErrorBoundary } from "./error-boundary";
 import { UpdateCodeModal } from "./UpdateCodeModal";
@@ -16,6 +17,8 @@ export function FileBlock(props: FileBlockProps) {
   const { context, theme, block, session } = props;
   const { repo, owner, path, sha } = context;
   const [requestedMetadata, setRequestedMetadata] = React.useState(null);
+  const router = useRouter()
+  const query = router.query;
 
   const { data } = useFileContent({
     repo: repo,
@@ -42,18 +45,24 @@ export function FileBlock(props: FileBlockProps) {
   });
 
   useEffect(() => {
-    const onUpdateMetadataEvent = (event: MessageEvent) => {
+    const onMessageEvent = (event: MessageEvent) => {
       // TODO: restrict by event.origin
       if (event.data.codesandbox) return;
-      if (event.data.type !== "update-metadata") return;
-      const newMetadata = event?.data?.metadata || {};
-      setRequestedMetadata(newMetadata);
+      if (event.data.type === "update-metadata") {
+        const newMetadata = event?.data?.metadata || {};
+        setRequestedMetadata(newMetadata);
+      } else if (event.data.type === "navigate-to-path") {
+        router.push({
+          pathname: event.data.pathname,
+          query: { ...query, path: event.data.path },
+        })
+      }
     };
-    window.addEventListener("message", onUpdateMetadataEvent as EventListener);
+    window.addEventListener("message", onMessageEvent as EventListener);
     return () => {
       window.removeEventListener(
         "message",
-        onUpdateMetadataEvent as EventListener
+        onMessageEvent as EventListener
       );
     };
   }, [onUpdateMetadata]);

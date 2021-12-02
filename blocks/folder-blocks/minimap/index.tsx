@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 // @ts-ignore
 import { Tree } from "./Tree.jsx"
 import { FolderBlockProps, getNestedFileTree, } from "@githubnext/utils";
 
 export default function (props: FolderBlockProps) {
-  const { tree } = props;
+  const { tree, onNavigateToPath } = props;
 
   const data = useMemo(() => {
     const nestedTree = getNestedFileTree(tree)[0]
@@ -21,6 +21,9 @@ export default function (props: FolderBlockProps) {
     }} >
       <Tree
         data={data}
+        onClickFile={(path: string) => {
+          onNavigateToPath(path);
+        }}
       />
     </div>
   );

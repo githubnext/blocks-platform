@@ -28,6 +28,14 @@ export function ExampleBlock(props: ExampleBlockProps) {
       metadata: newMetadata,
     }, "*")
   }, [])
+  const onNavigateToPath = useCallback((path) => {
+    if (typeof window === "undefined") return
+    window.postMessage({
+      type: "navigate-to-path",
+      context,
+      path: path,
+    }, "*")
+  }, [])
 
   const Component = components[block.id]
 
@@ -48,6 +56,7 @@ export function ExampleBlock(props: ExampleBlockProps) {
         metadata={metadata}
         context={context}
         onUpdateMetadata={onUpdateMetadata}
+        onNavigateToPath={onNavigateToPath}
       />
     </div>
   );

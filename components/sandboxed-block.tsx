@@ -97,12 +97,19 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
           metadata: newMetadata
         }, "*")
       }
+      const onNavigateToPath = (path) => {
+        window.parent.postMessage({
+          type: "navigate-to-path",
+          context: ${JSON.stringify(context)},
+          path: path
+        }, "*")
+      }
 
       export default function WrappedBlock() {
         return <Block context={${JSON.stringify(
       context
     )}} content={${JSON.stringify(contents)}} tree={${JSON.stringify(tree)}} metadata={${JSON.stringify(metadata)
-      }} onUpdateMetadata={onUpdateMetadata} />
+      }} onUpdateMetadata={onUpdateMetadata} onNavigateToPath={onNavigateToPath} />
       }`;
 
     return (

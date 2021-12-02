@@ -135,7 +135,7 @@ const Folder = ({
           }}
         >
           <button
-            className="mr-2 text-sm pl-3 py-2"
+            className="mr-2 text-sm pl-3 py-2 hover:text-indigo-700"
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();

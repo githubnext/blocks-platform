@@ -33,7 +33,7 @@ export async function getFileContent(
   const { repo, owner, path, fileRef, token } = params;
 
   const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${fileRef}`;
-  
+
   const context = {
     download_url: apiUrl,
     file: path.split("/").pop() || "",
@@ -43,7 +43,7 @@ export async function getFileContent(
     sha: fileRef || "",
     username: "mona",
   };
-  
+
   const res = await fetch(apiUrl, {
     headers: {
       Authorization: token && `token ${token}`,
@@ -58,7 +58,7 @@ export async function getFileContent(
       );
     }
   }
-  
+
   const resObject = await res.json();
   const encodedContent = resObject.content;
   const content = Buffer.from(encodedContent, "base64").toString("utf8");
@@ -219,5 +219,5 @@ export async function getRepoFiles(
   return files;
 }
 
-import { Endpoints } from "@octokit/types";import { IoWarning } from "react-icons/io5";
-
+import { Endpoints } from "@octokit/types";
+import { IoWarning } from "react-icons/io5";

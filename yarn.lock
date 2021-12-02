@@ -855,10 +855,10 @@
     react "^17.0.2"
     zod "^3.11.6"
 
-"@githubnext/utils@^0.11.2":
-  version "0.11.2"
-  resolved "https://registry.yarnpkg.com/@githubnext/utils/-/utils-0.11.2.tgz#25e38c4d760013499aa097d335af0f67f040f32f"
-  integrity sha512-Pc2wAoC70PTbEbUWExmVOfJOHD+Jd24jWRKz0YILBia5So5bo42pMSX27Xt+lI8uZ5u53pKx9kirT5iypVe/Lg==
+"@githubnext/utils@^0.11.3":
+  version "0.11.3"
+  resolved "https://registry.yarnpkg.com/@githubnext/utils/-/utils-0.11.3.tgz#6ef132296fc38a8267473dc40beb21db9b948a94"
+  integrity sha512-nCu0RkRYgpDiiqGgpC6gX98bZXr8zqY6l3cXpb3WqzNk5ZUpAGWLIer82gIMLN9x/uWyYkRM3Lyal40pSWXVFw==
   dependencies:
     react "^17.0.2"
     zod "^3.11.6"

@@ -169,7 +169,7 @@ export function useMetadata({
 
   const { mutateAsync } = useUpdateFileContents({});
   const onUpdateMetadata = useCallback(
-    async (contents, overridePath) => {
+    async (contents, overridePath = null) => {
       if (!token) return
 
       await mutateAsync({

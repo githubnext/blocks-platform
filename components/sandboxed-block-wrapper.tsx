@@ -58,7 +58,6 @@ export function SandboxedBlockWrapper(props: SandboxedBlockWrapperProps) {
         tree={tree}
         context={fileContext}
         metadata={metadata}
-        isEmbedded={isEmbedded}
       />
     </div>
   );

@@ -51,8 +51,8 @@ export function ExampleBlock(props: ExampleBlockProps) {
     <div className="w-full h-full" id={`example-block-${block.id}`}>
       <Component
         block={block}
-        content={contents}
-        tree={tree}
+        content={contents || ""}
+        tree={tree || []}
         metadata={metadata}
         context={context}
         onUpdateMetadata={onUpdateMetadata}

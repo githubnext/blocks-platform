@@ -1,5 +1,5 @@
 import { Button, SelectMenu } from "@primer/components";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface BlockPickerProps {
   blocks: Block[];
@@ -13,12 +13,17 @@ interface BlockPickerProps {
 export default function BlockPicker(props: BlockPickerProps) {
   const { blocks, value, defaultBlock, path, isFolder, onChange } = props;
 
+  const [hasLoaded, setHasLoaded] = useState(false);
   useEffect(() => {
-    if (isFolder === null) return
     if (defaultBlock) {
-      onChange(defaultBlock);
+      // ignore on initial load
+      if (!hasLoaded) {
+        setHasLoaded(true);
+      } else {
+        onChange(defaultBlock);
+      }
     }
-  }, [path, isFolder, defaultBlock?.id]);
+  }, [path]);
 
   return (
     <SelectMenu>

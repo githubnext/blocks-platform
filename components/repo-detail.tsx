@@ -4,7 +4,7 @@ import { FolderBlock } from "components/folder-block";
 import { useGetBlocksInfo, useMetadata, useRepoFiles, useRepoInfo } from "hooks";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ActivityFeed } from "./ActivityFeed";
 import { GitHubHeader } from "./github-header";
 import { RepoHeader } from "./repo-header";
@@ -39,6 +39,9 @@ export function RepoDetail(props: RepoDetailProps) {
   const { setColorMode } = useTheme();
   const { blockKey = "" } = router.query;
   const { repo, owner, path = "", theme, fileRef } = router.query;
+
+  // for updating the activity feed on file changes
+  const [commitsIteration, setCommitsIteration] = useState(0);
 
   const context = {
     repo: repo as string,
@@ -255,6 +258,7 @@ export function RepoDetail(props: RepoDetailProps) {
                 theme={(theme as string) || "light"}
                 block={block}
                 session={session}
+                onCommit={() => setCommitsIteration(v => v + 1)}
               />
             ))}
         </div>
@@ -263,6 +267,7 @@ export function RepoDetail(props: RepoDetailProps) {
           <ActivityFeed
             context={context}
             session={session}
+            commitsIteration={commitsIteration}
           />
         </div>
       </div>

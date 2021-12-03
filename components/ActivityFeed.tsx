@@ -8,9 +8,10 @@ import { useRepoTimeline } from "hooks";
 import { useRouter } from "next/router";
 import { Avatar } from "./Avatar";
 
-export const ActivityFeed = ({ context, session }: {
+export const ActivityFeed = ({ context, session, commitsIteration }: {
   context: Omit<FileContext, "file">,
-  session: Session
+  session: Session,
+  commitsIteration: number
 }) => {
   const { owner, repo, path } = context;
 
@@ -23,6 +24,9 @@ export const ActivityFeed = ({ context, session }: {
     owner: owner,
     token: session?.token,
     path: path,
+  }, {
+    // for updating on file changes
+    queryKey: [commitsIteration]
   });
 
   const commits = timelineData?.commits || [];

@@ -36,6 +36,14 @@ export function ExampleBlock(props: ExampleBlockProps) {
       path: path,
     }, "*")
   }, [])
+  const onRequestUpdateContent = useCallback((content) => {
+    if (typeof window === "undefined") return
+    window.postMessage({
+      type: "update-file",
+      context,
+      content,
+    }, "*")
+  }, [])
 
   const Component = components[block.id]
 
@@ -57,6 +65,7 @@ export function ExampleBlock(props: ExampleBlockProps) {
         context={context}
         onUpdateMetadata={onUpdateMetadata}
         onNavigateToPath={onNavigateToPath}
+        onRequestUpdateContent={onRequestUpdateContent}
       />
     </div>
   );

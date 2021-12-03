@@ -104,13 +104,26 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
           path: path
         }, "*")
       }
+      const onRequestUpdateContent = (content) => {
+        window.parent.postMessage({
+          type: "update-file",
+          context: ${JSON.stringify(context)},
+          content: content
+        }, "*")
+      }
 
       export default function WrappedBlock() {
-        return <Block context={${JSON.stringify(
-      context
-    )}} content={${JSON.stringify(contents)}} tree={${JSON.stringify(tree)}} metadata={${JSON.stringify(metadata)
-      }} onUpdateMetadata={onUpdateMetadata} onNavigateToPath={onNavigateToPath} />
-      }`;
+        return (
+          <Block
+            context={${JSON.stringify(context)}}
+            content={${JSON.stringify(contents)}}
+            tree={${JSON.stringify(tree)}}
+            metadata={${JSON.stringify(metadata)}}
+            onUpdateMetadata={onUpdateMetadata}
+            onNavigateToPath={onNavigateToPath}
+            onRequestUpdateContent={onRequestUpdateContent}
+          />
+      )}`;
 
     return (
       <SandpackRunner

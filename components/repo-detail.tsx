@@ -1,6 +1,4 @@
 import { Box, Button, Link, useTheme } from "@primer/components";
-import { FileBlock } from "components/file-block";
-import { FolderBlock } from "components/folder-block";
 import { useGetBlocksInfo, useMetadata, useRepoFiles, useRepoInfo } from "hooks";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
@@ -10,6 +8,7 @@ import { GitHubHeader } from "./github-header";
 import { RepoHeader } from "./repo-header";
 import { Sidebar } from "./Sidebar";
 import { defaultBlocksRepo } from "blocks/index"
+import { GeneralBlock } from "./general-block";
 
 const BlockPicker = dynamic(() => import("./block-picker"), { ssr: false });
 
@@ -232,27 +231,16 @@ export function RepoDetail(props: RepoDetailProps) {
           </div>
           {!!block.id &&
             repoFilesStatus !== "loading" &&
-            (isFolder ? (
-              <FolderBlock
-                key={block.id}
-                allFiles={files}
-                theme={(theme as string) || "light"}
-                context={{
-                  folder: "",
-                  ...context,
-                }}
-                block={block}
-                session={session}
-              />
-            ) : isTooLarge ? (
+            (isTooLarge ? (
               <div className="italic p-4 pt-40 text-center mx-auto text-gray-600">
                 Oh boy, that's a honkin file! It's {size / 1000} KBs.
               </div>
             ) : (
-              <FileBlock
+              <GeneralBlock
                 key={block.id}
+                // @ts-ignore
                 context={{
-                  file: "",
+                  [block.type]: "",
                   ...context,
                 }}
                 theme={(theme as string) || "light"}

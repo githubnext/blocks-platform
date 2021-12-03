@@ -1,5 +1,6 @@
 import { SandpackRunner } from "@codesandbox/sandpack-react/dist/cjs/index.js";
 import { FileContext, FolderContext, RepoFiles } from "@githubnext/utils";
+import { uniqueId } from "lodash";
 import React from "react";
 
 export interface BundleCode { name: string, content: string }
@@ -94,7 +95,10 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
         window.parent.postMessage({
           type: "update-metadata",
           context: ${JSON.stringify(context)},
-          metadata: newMetadata
+          metadata: newMetadata,
+          path: context.path,
+          block,
+          current: metadata
         }, "*")
       }
       const onNavigateToPath = (path) => {
@@ -104,7 +108,8 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
           path: path
         }, "*")
       }
-      const onRequestUpdateContent = (content) => {
+      export default function WrappedBlock() {
+        const onRequestUpdateContent = (content) => {
         window.parent.postMessage({
           type: "update-file",
           context: ${JSON.stringify(context)},
@@ -112,18 +117,135 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
         }, "*")
       }
 
+      let uniqueId = 0
+      const getUniqueId = () => {
+        uniqueId++
+        return uniqueId
+      }
+      const onRequestGitHubData = React.useCallback((requestType, config) => {
+        const id = "${uniqueId("github-data--request--")}--" + getUniqueId()
+        window.parent.postMessage({
+          type: "github-data--request",
+          context,
+          id,
+          requestType,
+          config,
+        }, "*")
+
+        return new Promise((resolve, reject) => {
+          const onMessage = (event: MessageEvent) => {
+            if (event.data.type !== "github-data--response") return
+            if (event.data.id !== id) return
+            window.removeEventListener("message", onMessage)
+            resolve(event.data.data)
+          }
+          window.addEventListener("message", onMessage)
+          const maxDelay = 1000 * 60 * 5
+          window.setTimeout(() => {
+            window.removeEventListener("message", onMessage)
+            reject(new Error("Timeout"))
+          }, maxDelay)
+        })
+      }, [])
+
       export default function WrappedBlock() {
+        return <Block
+          context={${JSON.stringify(
+      context
+    )}}
+          content={${JSON.stringify(contents)}}
+          tree={${JSON.stringify(tree)}}
+          metadata={${JSON.stringify(metadata)
+      }}
+          onUpdateMetadata={onUpdateMetadata}
+          onNavigateToPath={onNavigateToPath}
+          onRequestUpdateContent={onRequestUpdateContent}
+          onRequestGitHubData={onRequestGitHubData}
+          BlockComponent={BlockComponent}
+        />
+      }
+
+      const BlockComponent = ({block, path, tree, ...props}) => {
+        const [contents, setContents] = React.useState<string | undefined>(undefined)
+        const [metadata, setMetadata] = React.useState<any | undefined>(undefined)
+
+        const getData = async () => {
+          if (block.type !== "file") return
+          const data = await props.onRequestGitHubData("file-content", {
+            owner: props.context.owner,
+            repo: props.context.repo,
+            path: path,
+            fileRef: props.context.fileRef,
+          })
+          setContents(data.content)
+        }
+        const getMetadata = async () => {
+          if (metadata) return
+          const data = await props.onRequestGitHubData("metadata", {
+            owner: props.context.owner,
+            repo: props.context.repo,
+            block: block,
+            path: path,
+          })
+          setMetadata(data)
+        }
+        useEffect(() => { getData() }, [path, block.id])
+        useEffect(() => { getMetadata() }, [path, block.id])
+
+        useEffect(() => {
+          // listen for updated metadata
+          const onMessageEvent = async (event: MessageEvent) => {
+            if (event.data.type === "updated-metadata") {
+              getMetadata()
+            }
+          };
+          window.addEventListener("message", onMessageEvent as EventListener);
+          return () => {
+            window.removeEventListener(
+              "message",
+              onMessageEvent as EventListener
+            );
+          };
+        }, []);
+
+        if (block.type === "file" && !contents) return (
+          <div className="p-10">
+            Loading...
+          </div>
+        )
+        if (!block.id) return null
+
+        const name = path.split("/").pop();
+
         return (
           <Block
-            context={${JSON.stringify(context)}}
-            content={${JSON.stringify(contents)}}
-            tree={${JSON.stringify(tree)}}
-            metadata={${JSON.stringify(metadata)}}
-            onUpdateMetadata={onUpdateMetadata}
-            onNavigateToPath={onNavigateToPath}
-            onRequestUpdateContent={onRequestUpdateContent}
-          />
-      )}`;
+            block={block}
+            theme={"light"}
+            context={{ ...props.context, path, file: name, folder: name }}
+            contents={contents}
+            tree={tree}
+            metadata={metadata}
+            isEmbedded
+          onUpdateMetadata={onUpdateMetadata}
+          onNavigateToPath={onNavigateToPath}
+          BlockComponent={BlockComponent}
+        />
+          <ErrorBoundary key={path}>
+            <div className="overflow-y-auto flex-1">
+              <SandboxedBlockWrapper
+                block={block}
+                theme={"light"}
+                context={{ ...props.context, path, file: name, folder: name }}
+                contents={contents}
+                tree={tree}
+                metadata={metadata}
+                isEmbedded
+              />
+            </div>
+          </ErrorBoundary>
+        )
+      }
+  `;
 
     return (
       <SandpackRunner

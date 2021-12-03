@@ -10,6 +10,7 @@ interface SandboxedBlockWrapperProps {
   tree?: RepoFiles;
   context: FileContext | FolderContext;
   metadata: any;
+  isEmbedded?: boolean;
 }
 
 const exampleBlocksRepo = "githubnext/blocks-examples";
@@ -21,6 +22,7 @@ export function SandboxedBlockWrapper(props: SandboxedBlockWrapperProps) {
     theme,
     tree,
     context,
+    isEmbedded = false,
   } = props;
 
   const fileContext = {
@@ -43,6 +45,7 @@ export function SandboxedBlockWrapper(props: SandboxedBlockWrapperProps) {
         tree={tree}
         context={fileContext}
         metadata={metadata}
+        isEmbedded={isEmbedded}
       />
     )
   }
@@ -55,6 +58,7 @@ export function SandboxedBlockWrapper(props: SandboxedBlockWrapperProps) {
         tree={tree}
         context={fileContext}
         metadata={metadata}
+        isEmbedded={isEmbedded}
       />
     </div>
   );

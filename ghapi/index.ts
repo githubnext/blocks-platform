@@ -12,6 +12,7 @@ export interface RepoContextWithToken extends RepoContext {
 export interface UseFileContentParams extends RepoContextWithToken {
   path: string;
   fileRef?: string;
+  cache?: string;
 }
 
 export interface UseFolderContentParams extends RepoContextWithToken {
@@ -30,9 +31,9 @@ export interface SearchContextWithToken extends SearchContext {
 export async function getFileContent(
   params: UseFileContentParams
 ): Promise<FileData> {
-  const { repo, owner, path, fileRef, token } = params;
+  const { repo, owner, path, fileRef, token, cache } = params;
 
-  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${fileRef}`;
+  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${fileRef}&cache=${params.cache}`;
 
   const context = {
     download_url: apiUrl,
@@ -109,6 +110,50 @@ export async function getFileContentsAndDependencies(
   }
 
   return [file, ...otherFiles];
+}
+
+export async function getMainBranch(
+  params: RepoContextWithToken
+): Promise<string> {
+  const { repo, owner, token } = params;
+
+  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/branches/main`;
+
+  const res = await fetch(apiUrl, {
+    headers: {
+      Authorization: token && `token ${token}`,
+    },
+  });
+  if (res.status !== 200) {
+    throw new Error(
+      `Error fetching main branch: ${owner}/${repo}\n${await res.text()}`
+    );
+  }
+
+  const resObject = await res.json();
+  console.log(resObject);
+  return resObject.name;
+}
+export async function getLatestSha(
+  params: RepoContextWithToken
+): Promise<string> {
+  const { repo, owner, token } = params;
+
+  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/branches/main`;
+
+  const res = await fetch(apiUrl, {
+    headers: {
+      Authorization: token && `token ${token}`,
+    },
+  });
+  if (res.status !== 200) {
+    throw new Error(
+      `Error fetching main branch: ${owner}/${repo}\n${await res.text()}`
+    );
+  }
+
+  const resObject = await res.json();
+  return resObject.commit.sha;
 }
 
 export async function getFolderContent(

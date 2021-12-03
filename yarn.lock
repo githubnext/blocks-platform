@@ -806,9 +806,9 @@
   dependencies:
     tslib "^2.1.0"
 
-"@githubnext/blocks-examples@https://github.com/githubnext/blocks-examples.git#0.6.23":
+"@githubnext/blocks-examples@https://github.com/githubnext/blocks-examples.git#0.6.24":
   version "0.0.0"
-  resolved "https://github.com/githubnext/blocks-examples.git#4d0cbfa36f5eaf70a15f0fcaf3ed2804e80d8fe1"
+  resolved "https://github.com/githubnext/blocks-examples.git#bc68653a991d106c58ce8cda95ceadabf57477da"
   dependencies:
     "@excalidraw/excalidraw" "^0.10.0"
     "@githubnext/utils" "^0.11.1"
@@ -841,6 +841,7 @@
     react-image-annotation "^0.9.10"
     react-json-editor-ajrm "^2.5.13"
     react-query "^3.32.1"
+    react-select "^5.2.1"
     react-syntax-highlighter "^15.4.4"
     react-use "^17.3.1"
     recharts "^2.1.6"

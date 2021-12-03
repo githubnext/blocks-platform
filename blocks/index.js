@@ -15,6 +15,7 @@ const chartBlock = dynamic(() => import("./file-blocks/charts/index.tsx"), {ssr:
 const markdownBlock = dynamic(() => import("./file-blocks/live-markdown/index.tsx"), {ssr:false});
 const reactFeedbackBlock = dynamic(() => import("./file-blocks/annotate-react/index.tsx"), {ssr:false});
 const minimapBlock = dynamic(() => import("./folder-blocks/minimap/index.tsx"), {ssr:false});
+const dashboardBlock = dynamic(() => import("./folder-blocks/dashboard/index.tsx"), {ssr:false});
 
 export default {
   'code-block': codeBlock,
@@ -28,7 +29,8 @@ export default {
   'chart-block': chartBlock,
   'markdown-block': markdownBlock,
   'react-feedback-block': reactFeedbackBlock,
-  'minimap-block': minimapBlock
+  'minimap-block': minimapBlock,
+  'dashboard-block': dashboardBlock
 }
 
 export const defaultBlocksRepo = {
@@ -162,6 +164,14 @@ export const defaultBlocksRepo = {
       "title": "Minimap",
       "description": "A visualization of your folders and files",
       "entry": "/src/blocks/folder-blocks/minimap/index.tsx",
+      "example_path": "https://github.com/githubnext/blocks-tutorial"
+    },
+    {
+      "type": "folder",
+      "id": "dashboard-block",
+      "title": "Dashboard",
+      "description": "A dashboard of Blocks",
+      "entry": "/src/blocks/folder-blocks/dashboard/index.tsx",
       "example_path": "https://github.com/githubnext/blocks-tutorial"
     }
   ],

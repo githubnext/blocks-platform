@@ -122,33 +122,34 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
         uniqueId++
         return uniqueId
       }
-      const onRequestGitHubData = React.useCallback((requestType, config) => {
-        const id = "${uniqueId("github-data--request--")}--" + getUniqueId()
-        window.parent.postMessage({
-          type: "github-data--request",
-          context,
-          id,
-          requestType,
-          config,
-        }, "*")
-
-        return new Promise((resolve, reject) => {
-          const onMessage = (event: MessageEvent) => {
-            if (event.data.type !== "github-data--response") return
-            if (event.data.id !== id) return
-            window.removeEventListener("message", onMessage)
-            resolve(event.data.data)
-          }
-          window.addEventListener("message", onMessage)
-          const maxDelay = 1000 * 60 * 5
-          window.setTimeout(() => {
-            window.removeEventListener("message", onMessage)
-            reject(new Error("Timeout"))
-          }, maxDelay)
-        })
-      }, [])
 
       export default function WrappedBlock() {
+        const onRequestGitHubData = React.useCallback((requestType, config) => {
+          const id = "${uniqueId("github-data--request--")}--" + getUniqueId()
+          window.parent.postMessage({
+            type: "github-data--request",
+            context,
+            id,
+            requestType,
+            config,
+          }, "*")
+
+          return new Promise((resolve, reject) => {
+            const onMessage = (event: MessageEvent) => {
+              if (event.data.type !== "github-data--response") return
+              if (event.data.id !== id) return
+              window.removeEventListener("message", onMessage)
+              resolve(event.data.data)
+            }
+            window.addEventListener("message", onMessage)
+            const maxDelay = 1000 * 60 * 5
+            window.setTimeout(() => {
+              window.removeEventListener("message", onMessage)
+              reject(new Error("Timeout"))
+            }, maxDelay)
+          })
+        }, [])
+
         return <Block
           context={${JSON.stringify(
       context
@@ -166,8 +167,8 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
       }
 
       const BlockComponent = ({block, path, tree, ...props}) => {
-        const [contents, setContents] = React.useState<string | undefined>(undefined)
-        const [metadata, setMetadata] = React.useState<any | undefined>(undefined)
+        const [contents, setContents] = React.useState(undefined)
+        const [metadata, setMetadata] = React.useState(undefined)
 
         const getData = async () => {
           if (block.type !== "file") return
@@ -189,21 +190,21 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
           })
           setMetadata(data)
         }
-        useEffect(() => { getData() }, [path, block.id])
-        useEffect(() => { getMetadata() }, [path, block.id])
+        React.useEffect(() => { getData() }, [path, block.id])
+        React.useEffect(() => { getMetadata() }, [path, block.id])
 
-        useEffect(() => {
+        React.useEffect(() => {
           // listen for updated metadata
           const onMessageEvent = async (event: MessageEvent) => {
             if (event.data.type === "updated-metadata") {
               getMetadata()
             }
           };
-          window.addEventListener("message", onMessageEvent as EventListener);
+          window.addEventListener("message", onMessageEvent);
           return () => {
             window.removeEventListener(
               "message",
-              onMessageEvent as EventListener
+              onMessageEvent
             );
           };
         }, []);
@@ -230,19 +231,6 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
           onNavigateToPath={onNavigateToPath}
           BlockComponent={BlockComponent}
         />
-          <ErrorBoundary key={path}>
-            <div className="overflow-y-auto flex-1">
-              <SandboxedBlockWrapper
-                block={block}
-                theme={"light"}
-                context={{ ...props.context, path, file: name, folder: name }}
-                contents={contents}
-                tree={tree}
-                metadata={metadata}
-                isEmbedded
-              />
-            </div>
-          </ErrorBoundary>
         )
       }
   `;

@@ -215,7 +215,7 @@ export function useRepoTimeline(
 ) {
   return useQuery(["timeline", params, config?.queryKey], () => getRepoTimeline(params), {
     enabled:
-      Boolean(params.repo) && Boolean(params.owner) && Boolean(params.token),
+      Boolean(params.repo) && Boolean(params.owner),
     refetchOnWindowFocus: false,
     retry: false,
     ...config,

@@ -37,7 +37,7 @@ export function RepoDetail(props: RepoDetailProps) {
   const { session } = props;
   const router = useRouter();
   const { setColorMode } = useTheme();
-  const { blockKey = defaultFileBlockKey } = router.query;
+  const { blockKey = "" } = router.query;
   const { repo, owner, path = "", theme, fileRef } = router.query;
 
   // for updating the activity feed on file changes
@@ -77,7 +77,7 @@ export function RepoDetail(props: RepoDetailProps) {
   const isFolder =
     repoFilesStatus === "success"
       ? files?.find((d) => d.path === path)?.type !== "blob"
-      : null;
+      : (path as string).split(".").length > 1
 
 
   const onLoadBlock = (block: Block) => {
@@ -99,7 +99,9 @@ export function RepoDetail(props: RepoDetailProps) {
     token: session?.token as string,
   });
 
-  const [blockOwner = "githubnext", blockRepo = "blocks-examples", blockId] = (blockKey as string).split("__");
+  let [blockOwner = "githubnext", blockRepo = "blocks-examples", blockId] = (blockKey as string).split("__");
+  if (!blockOwner) blockOwner = "githubnext";
+  if (!blockRepo) blockRepo = "blocks-examples";
 
   const { data: allBlocksInfo = [] } = useGetBlocksInfo()
   const isDefaultBlocks = `${blockOwner}/${blockRepo}` === "githubnext/blocks-examples"
@@ -121,6 +123,7 @@ export function RepoDetail(props: RepoDetailProps) {
     getBlockKey(relevantBlocks[1] || relevantBlocks[0])
   )
   const defaultBlock = blocks.find(block => getBlockKey(block) === defaultBlockKey) || relevantBlocks[1]
+  blockId = blockId || defaultBlock?.id || (isFolder ? defaultFolderBlock.id : defaultFileBlock.id)
 
   const block = blocks.find(block => block.id === blockId) || blocks[0] || {} as Block
   const fileInfo = files?.find((d) => d.path === path);

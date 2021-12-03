@@ -10,8 +10,8 @@
   "dependencies": {
     "@codesandbox/sandpack-react": "^0.1.20",
     "@excalidraw/excalidraw": "^0.10.0",
-    "@githubnext/blocks-examples": "https://github.com/githubnext/blocks-examples.git#0.6.23",
-    "@githubnext/utils": "^0.11.3",
+    "@githubnext/blocks-examples": "https://github.com/githubnext/blocks-examples.git#0.6.24",
+    "@githubnext/utils": "^0.12.3",
     "@githubocto/flat-ui": "^0.10.2",
     "@mdx-js/runtime": "^1.6.22",
     "@octokit/rest": "^18.12.0",
@@ -92,6 +92,7 @@
     "npm-watch": "^0.11.0",
     "papaparse": "^5.3.1",
     "react-error-boundary": "^3.1.4",
+    "react-select": "^5.2.1",
     "react-use": "^17.3.1",
     "recharts": "^2.1.6"
   }

@@ -74,15 +74,12 @@ const Commit = ({
         <Timeline.Body className={`${isSelected ? '!text-white' : ''}`}>
           <div className={`flex justify-between -mt-1`}>
             <Box sx={{ mr: 2, mt: 1 }}>
-              <Link
+              <Box
                 display="inline"
-                href={`http://github.com/${username}`}
                 sx={{ fontWeight: "bold", color: "inherit", mr: 1 }}
-                muted
-                target="_blank"
               >
                 {username}
-              </Link>
+              </Box>
               <span className="opacity-80">pushed a commit</span>
             </Box>
             <Avatar username={username} />

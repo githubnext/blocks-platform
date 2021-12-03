@@ -150,46 +150,37 @@ export function useMetadata({
     }
   );
 
-  const [fullMetadata, setFullMetadata] = useState<any>();
+  const [metadata, setMetadata] = useState<any>({});
 
   useEffect(() => {
     if (!metadataData) {
-      setFullMetadata({});
+      setMetadata({});
       return
     }
     try {
       const rawString = metadataData.content;
-      const fullMetadata = JSON.parse(rawString);
-      setFullMetadata(fullMetadata);
+      const metadata = JSON.parse(rawString);
+      setMetadata(metadata);
     } catch (e) {
       console.error(e);
-      setFullMetadata({});
+      setMetadata({});
     }
   }, [metadataData]);
 
-  const metadata = useMemo(
-    () => fullMetadata?.[filePath] || {},
-    [fullMetadata, filePath]
-  );
-
   const { mutateAsync } = useUpdateFileContents({});
   const onUpdateMetadata = useCallback(
-    async (contents) => {
+    async (contents, overridePath = null) => {
       if (!token) return
-      const fullContents = {
-        ...fullMetadata,
-        [filePath]: contents,
-      };
 
       await mutateAsync({
-        content: JSON.stringify(fullContents, null, 2),
+        content: JSON.stringify(contents, null, 2),
         owner,
         repo,
-        path: metadataPath,
+        path: overridePath || metadataPath,
         sha: "latest",
         token
       });
-      setFullMetadata(fullContents);
+      setMetadata(contents);
     },
     [mutateAsync, owner, repo, metadataPath, filePath, token]
   );

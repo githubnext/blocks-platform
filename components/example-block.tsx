@@ -110,11 +110,12 @@ export function ExampleBlock(props: ExampleBlockProps) {
 import { ErrorBoundary } from "./error-boundary";
 import { SandboxedBlockWrapper } from "./sandboxed-block-wrapper";
 import { uniqueId } from "lodash";
-const BlockComponent = ({ block, path, tree, ...props }: (FileBlockProps | FolderBlockProps) & {
+type BlockComponentProps = FileBlockProps & FolderBlockProps & {
   block: Block,
   path: string,
-  tree: RepoFiles
-}) => {
+  tree: RepoFiles,
+}
+const BlockComponent = ({ block, path, tree, ...props }: BlockComponentProps) => {
   const [contents, setContents] = useState<string | undefined>(undefined)
   const [metadata, setMetadata] = useState<any | undefined>(undefined)
 

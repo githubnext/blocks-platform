@@ -856,10 +856,10 @@
     react "^17.0.2"
     zod "^3.11.6"
 
-"@githubnext/utils@^0.11.3":
-  version "0.11.3"
-  resolved "https://registry.yarnpkg.com/@githubnext/utils/-/utils-0.11.3.tgz#6ef132296fc38a8267473dc40beb21db9b948a94"
-  integrity sha512-nCu0RkRYgpDiiqGgpC6gX98bZXr8zqY6l3cXpb3WqzNk5ZUpAGWLIer82gIMLN9x/uWyYkRM3Lyal40pSWXVFw==
+"@githubnext/utils@^0.12.1":
+  version "0.12.1"
+  resolved "https://registry.yarnpkg.com/@githubnext/utils/-/utils-0.12.1.tgz#2f91e86848314814cf1047383afb5e30aed4a921"
+  integrity sha512-iVnBaMUSnKIM2ZFf/Rki2/Q4B0i5qcwuFlLW8MkOp2mCH/ll21DMgdP8VvuzoY12CbczuTlMlVsa02s+TrX91A==
   dependencies:
     react "^17.0.2"
     zod "^3.11.6"

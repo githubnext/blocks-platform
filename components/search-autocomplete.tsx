@@ -5,9 +5,11 @@ import { useComboBox, useFilter, useButton, useSearchField } from "react-aria";
 import type { LoadingState } from "@react-types/shared";
 import { CgSpinner } from "react-icons/cg";
 import { GoX } from "react-icons/go";
+import { useDebounce } from "use-debounce";
 
 import { ListBox } from "components/list-box";
 import { Popover } from "components/popover";
+import { useUpdateEffect } from "@react-aria/utils";
 
 export { Item } from "react-stately";
 
@@ -15,16 +17,30 @@ interface AutocompleteProps<T> extends ComboBoxProps<T> {
   loadingState?: LoadingState;
   onLoadMore?: () => void;
   className?: string;
+  debounceMs?: number;
 }
 
 export function SearchAutocomplete<T extends object>(
   props: AutocompleteProps<T>
 ) {
+  const [inputValue, setInputValue] = React.useState("");
+  const { debounceMs = 0, onInputChange } = props;
+
+  const [debouncedInputValue] = useDebounce(inputValue, debounceMs);
+
+  useUpdateEffect(() => {
+    onInputChange(debouncedInputValue);
+  }, [debouncedInputValue]);
+
   let { contains } = useFilter({ sensitivity: "base" });
   let state = useComboBoxState({
     ...props,
     defaultFilter: contains,
     menuTrigger: "focus",
+    inputValue,
+    onInputChange: (value) => {
+      setInputValue(value);
+    },
   });
 
   let inputRef = React.useRef(null);
@@ -66,8 +82,9 @@ export function SearchAutocomplete<T extends object>(
         </label>
       )}
       <div
-        className={`relative px-2 inline-flex items-center overflow-hidden shadow-sm border-2 combo-input-wrap ${state.isFocused ? "is-focused border-blue-600" : "border-gray-300"
-          }`}
+        className={`relative px-2 inline-flex items-center overflow-hidden shadow-sm border-2 combo-input-wrap ${
+          state.isFocused ? "is-focused border-blue-600" : "border-gray-300"
+        }`}
       >
         <input
           {...inputProps}
@@ -76,7 +93,7 @@ export function SearchAutocomplete<T extends object>(
         />
         <div className="absolute right-0 top-0 bottom-0 px-2 flex items-center justify-center">
           {props.loadingState === "loading" ||
-            props.loadingState === "filtering" ? (
+          props.loadingState === "filtering" ? (
             <CgSpinner
               aria-hidden="true"
               className="combo-spinner text-blue-700 animate-spin pointer-events-none"

@@ -324,8 +324,8 @@ export function useManageBlock({
   ))
   const blocks = (blocksRepo?.blocks || []).map(block => ({
     ...block,
-    owner: blockOwner,
-    repo: blockRepo,
+    owner: blocksRepo.owner,
+    repo: blocksRepo.repo,
   } as Block))
   const extension = (path as string).split(".").slice(-1)[0];
   const relevantBlocks = blocks.filter(

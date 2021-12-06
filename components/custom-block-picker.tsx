@@ -32,7 +32,7 @@ export const CustomBlockPicker = ({
     <div className="w-full h-full overflow-auto p-10 pb-20 bg-[#e9f2f2]">
       <div className="w-full flex pb-4 items-center">
         <div className="flex-1">
-          {/* Search for a Block */}
+          {/* for horizontal spacing */}
         </div>
         <div className="flex-[2]">
           <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
@@ -86,7 +86,7 @@ const BlocksList = ({ repos, onChange }) => {
 
 const Block = ({ block, onSelect }) => {
   return (
-    <button className="p-5 px-6 text-left bg-white hover:bg-indigo-500 focus:outline-none focus:bg-indigo-600 hover:text-white focus:text-white shadow mb-4 rounded-xl"
+    <button className="py-5 px-6 text-left bg-white hover:bg-indigo-500 focus:outline-none focus:bg-indigo-600 hover:text-white focus:text-white shadow mb-4 rounded-xl"
       onClick={onSelect}>
       <div className="font-semibold mb-1 text-lg">
         {block.title}

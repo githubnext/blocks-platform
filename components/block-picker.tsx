@@ -5,13 +5,12 @@ interface BlockPickerProps {
   blocks: Block[];
   value: Block;
   defaultBlock?: Block;
-  isFolder?: boolean;
   path: string;
   onChange: (newType: Block) => void;
 }
 
 export default function BlockPicker(props: BlockPickerProps) {
-  const { blocks, value, defaultBlock, path, isFolder, onChange } = props;
+  const { blocks, value, defaultBlock, path, onChange } = props;
 
   const [hasLoaded, setHasLoaded] = useState(false);
   useEffect(() => {

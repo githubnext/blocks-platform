@@ -1,5 +1,5 @@
 import { Box, Button, Link, useTheme } from "@primer/components";
-import { useGetBlocksInfo, useMetadata, useRepoFiles, useRepoInfo } from "hooks";
+import { getBlockKey, useGetBlocksInfo, useManageBlock, useMetadata, useRepoFiles, useRepoInfo } from "hooks";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -7,7 +7,6 @@ import { ActivityFeed } from "./ActivityFeed";
 import { GitHubHeader } from "./github-header";
 import { RepoHeader } from "./repo-header";
 import { Sidebar } from "./Sidebar";
-import { defaultBlocksRepo } from "blocks/index"
 import { GeneralBlock } from "./general-block";
 
 const BlockPicker = dynamic(() => import("./block-picker"), { ssr: false });
@@ -16,27 +15,10 @@ interface RepoDetailProps {
   session?: Session;
 }
 
-const defaultFileBlock = {
-  id: "file-block",
-  owner: "githubnext",
-  repo: "blocks-examples"
-} as Block
-
-const defaultFolderBlock = {
-  id: "minimap-block",
-  owner: "githubnext",
-  repo: "blocks-examples"
-} as Block
-const getBlockKey = (block: Block) => (
-  [block?.owner, block?.repo, block?.id || ""].join("__")
-)
-const defaultFileBlockKey = getBlockKey(defaultFileBlock)
-const defaultFolderBlockKey = getBlockKey(defaultFolderBlock)
 export function RepoDetail(props: RepoDetailProps) {
   const { session } = props;
   const router = useRouter();
   const { setColorMode } = useTheme();
-  const { blockKey = "" } = router.query;
   const { repo, owner, path = "", theme, fileRef } = router.query;
 
   // for updating the activity feed on file changes
@@ -79,17 +61,6 @@ export function RepoDetail(props: RepoDetailProps) {
       : (path as string).split(".").length > 1
 
 
-  const onLoadBlock = (block: Block) => {
-    if (!block) return;
-    router.push({
-      pathname: router.pathname,
-      query: {
-        ...router.query,
-        blockKey: getBlockKey(block),
-      },
-    });
-  }
-
   const { metadata, onUpdateMetadata } = useMetadata({
     owner: owner as string,
     repo: repo as string,
@@ -98,33 +69,20 @@ export function RepoDetail(props: RepoDetailProps) {
     token: session?.token as string,
   });
 
-  let [blockOwner = "githubnext", blockRepo = "blocks-examples", blockId] = (blockKey as string).split("__");
-  if (!blockOwner) blockOwner = "githubnext";
-  if (!blockRepo) blockRepo = "blocks-examples";
+  const {
+    block,
+    setBlock,
+    blockOptions,
+    defaultBlock,
+  } = useManageBlock({
+    path: path as string,
+    storedDefaultBlock: metadata[path as string]?.default,
+    isFolder,
+  })
+  const blockKey = getBlockKey(block);
+  const defaultBlockKey = getBlockKey(defaultBlock);
+  const isDefaultBlock = defaultBlockKey === blockKey;
 
-  const { data: allBlocksInfo = [] } = useGetBlocksInfo()
-  const isDefaultBlocks = `${blockOwner}/${blockRepo}` === "githubnext/blocks-examples"
-  const blocksRepo = isDefaultBlocks ? defaultBlocksRepo : allBlocksInfo.find(block => (
-    block.owner === blockOwner && block.repo === blockRepo
-  ))
-  const blocks = (blocksRepo?.blocks || []).map(block => ({
-    ...block,
-    owner: blockOwner,
-    repo: blockRepo,
-  } as Block))
-  const extension = (path as string).split(".").slice(-1)[0];
-  const relevantBlocks = blocks.filter(
-    (d) =>
-      d.type === (isFolder ? "folder" : "file") &&
-      (!d.extensions || d.extensions?.includes("*") || d.extensions?.includes(extension))
-  );
-  const defaultBlockKey = metadata[path as string]?.default || (
-    getBlockKey(relevantBlocks[1] || relevantBlocks[0])
-  )
-  const defaultBlock = blocks.find(block => getBlockKey(block) === defaultBlockKey) || relevantBlocks[1]
-  blockId = blockId || defaultBlock?.id || (isFolder ? defaultFolderBlock.id : defaultFileBlock.id)
-
-  const block = blocks.find(block => block.id === blockId) || blocks[0] || {} as Block
   const fileInfo = files?.find((d) => d.path === path);
   const size = fileInfo?.size || 0;
   const fileSizeLimit = 1500000; // 1.5Mb
@@ -192,14 +150,13 @@ export function RepoDetail(props: RepoDetailProps) {
                   alignItems="center"
                 >
                   <BlockPicker
-                    blocks={relevantBlocks}
+                    blocks={blockOptions}
                     defaultBlock={defaultBlock}
-                    isFolder={isFolder}
                     path={path as string}
-                    onChange={onLoadBlock}
+                    onChange={setBlock}
                     value={block}
                   />
-                  {blockKey !== defaultBlockKey && session?.token && (
+                  {!isDefaultBlock && session?.token && (
                     <Button
                       fontSize="1"
                       ml={2}

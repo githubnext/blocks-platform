@@ -19,6 +19,8 @@ import {
   getFileContentsAndDependencies,
   getRepoTimeline,
 } from "ghapi";
+import { defaultBlocksRepo } from "blocks/index"
+import { useRouter } from "next/router";
 
 
 export function useFileContent(
@@ -278,4 +280,81 @@ export function useGetBlocksInfo() {
       retry: false,
     }
   );
+}
+
+
+const defaultFileBlock = {
+  id: "file-block",
+  owner: "githubnext",
+  repo: "blocks-examples"
+} as Block
+
+const defaultFolderBlock = {
+  id: "minimap-block",
+  owner: "githubnext",
+  repo: "blocks-examples"
+} as Block
+export const getBlockKey = (block: Block) => (
+  [block?.owner, block?.repo, block?.id || ""].join("__")
+)
+const defaultFileBlockKey = getBlockKey(defaultFileBlock)
+const defaultFolderBlockKey = getBlockKey(defaultFolderBlock)
+interface UseManageBlockParams {
+  path: string;
+  storedDefaultBlock: string;
+  isFolder: boolean;
+}
+export function useManageBlock({
+  path,
+  storedDefaultBlock,
+  isFolder,
+}: UseManageBlockParams) {
+  const router = useRouter();
+  const { blockKey = "" } = router.query;
+
+  let [blockOwner = defaultFileBlock.owner, blockRepo = defaultFileBlock.repo, blockId] = (blockKey as string).split("__");
+  if (!blockOwner) blockOwner = defaultFileBlock.owner;
+  if (!blockRepo) blockRepo = defaultFileBlock.repo;
+
+  const { data: allBlocksInfo = [] } = useGetBlocksInfo()
+  const isDefaultBlocksRepo = `${blockOwner}/${blockRepo}` === `${defaultFileBlock.owner}/${defaultFileBlock.repo}`
+  const blocksRepo = isDefaultBlocksRepo ? defaultBlocksRepo : allBlocksInfo.find(block => (
+    block.owner === blockOwner && block.repo === blockRepo
+  ))
+  const blocks = (blocksRepo?.blocks || []).map(block => ({
+    ...block,
+    owner: blockOwner,
+    repo: blockRepo,
+  } as Block))
+  const extension = (path as string).split(".").slice(-1)[0];
+  const relevantBlocks = blocks.filter(
+    (d) =>
+      d.type === (isFolder ? "folder" : "file") &&
+      (!d.extensions || d.extensions?.includes("*") || d.extensions?.includes(extension))
+  );
+  const defaultBlockKey = storedDefaultBlock || (
+    getBlockKey(relevantBlocks[1] || relevantBlocks[0])
+  )
+  const defaultBlock = blocks.find(block => getBlockKey(block) === defaultBlockKey) || relevantBlocks[1]
+  blockId = blockId || defaultBlock?.id || (isFolder ? defaultFolderBlock.id : defaultFileBlock.id)
+
+  const block = blocks.find(block => block.id === blockId) || blocks[0] || {} as Block
+
+  const setBlock = (block: Block) => {
+    if (!block) return;
+    router.push({
+      pathname: router.pathname,
+      query: {
+        ...router.query,
+        blockKey: getBlockKey(block),
+      },
+    });
+  }
+
+  return {
+    block,
+    setBlock,
+    blockOptions: relevantBlocks,
+    defaultBlock,
+  }
 }

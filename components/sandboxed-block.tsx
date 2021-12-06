@@ -108,22 +108,22 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
           path: path
         }, "*")
       }
+
       export default function WrappedBlock() {
         const onRequestUpdateContent = (content) => {
-        window.parent.postMessage({
-          type: "update-file",
-          context: ${JSON.stringify(context)},
-          content: content
-        }, "*")
-      }
+          window.parent.postMessage({
+            type: "update-file",
+            context: ${JSON.stringify(context)},
+            content: content
+          }, "*")
+        }
 
-      let uniqueId = 0
-      const getUniqueId = () => {
-        uniqueId++
-        return uniqueId
-      }
+        let uniqueId = 0
+        const getUniqueId = () => {
+          uniqueId++
+          return uniqueId
+        }
 
-      export default function WrappedBlock() {
         const onRequestGitHubData = React.useCallback((requestType, config) => {
           const id = "${uniqueId("github-data--request--")}--" + getUniqueId()
           window.parent.postMessage({

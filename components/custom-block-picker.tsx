@@ -1,5 +1,6 @@
 import { Link } from "@primer/components";
 import { EyeIcon, StarFillIcon } from "@primer/octicons-react";
+import { getRelativeTime } from "lib/date-utils";
 import { useEffect, useMemo, useState } from "react";
 
 interface CustomBlockPickerProps {
@@ -62,7 +63,7 @@ const BlocksList = ({ repos, onChange }) => {
                 {repo.full_name}
               </a>
             </Link>
-            <div className="flex space-x-3 text-gray-500 text-sm my-3">
+            <div className="flex space-x-3 text-gray-500 text-sm my-2">
               <div className="flex items-center">
                 <StarFillIcon className="mr-1" />
                 {repo.stars}
@@ -70,6 +71,17 @@ const BlocksList = ({ repos, onChange }) => {
               <div className="flex items-center">
                 <EyeIcon className="mr-1" />
                 {repo.watchers}
+              </div>
+            </div>
+            <div className="flex space-x-3 text-gray-500 text-sm">
+
+              <div className="text-gray">
+                Last release: <span className="font-mono">
+                  {repo.release.tag_name}
+                </span>
+                <div className="italic">
+                  {getRelativeTime(new Date(repo.release.published_at))}
+                </div>
               </div>
             </div>
           </div>

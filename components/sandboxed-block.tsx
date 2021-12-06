@@ -96,20 +96,21 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
           type: "update-metadata",
           context: ${JSON.stringify(context)},
           metadata: newMetadata,
-          path: context.path,
-          block,
-          current: metadata
+          path: ${JSON.stringify(context.path)},
+          block: ${JSON.stringify(block)},
+          current: ${JSON.stringify(metadata)},
         }, "*")
       }
       const onNavigateToPath = (path) => {
         window.parent.postMessage({
           type: "navigate-to-path",
           context: ${JSON.stringify(context)},
-          path: path
+          path: ${JSON.stringify(context.path)},
         }, "*")
       }
 
       export default function WrappedBlock() {
+
         const onRequestUpdateContent = (content) => {
           window.parent.postMessage({
             type: "update-file",

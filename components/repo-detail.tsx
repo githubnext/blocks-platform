@@ -8,6 +8,7 @@ import { GitHubHeader } from "./github-header";
 import { RepoHeader } from "./repo-header";
 import { Sidebar } from "./Sidebar";
 import { GeneralBlock } from "./general-block";
+import { CustomBlockPicker } from "./custom-block-picker";
 
 const BlockPicker = dynamic(() => import("./block-picker"), { ssr: false });
 
@@ -20,6 +21,7 @@ export function RepoDetail(props: RepoDetailProps) {
   const router = useRouter();
   const { setColorMode } = useTheme();
   const { repo, owner, path = "", theme, fileRef } = router.query;
+  const [isChoosingCustomBlock, setIsChoosingCustomBlock] = useState(false);
 
   // for updating the activity feed on file changes
   const [commitsIteration, setCommitsIteration] = useState(0);
@@ -74,11 +76,16 @@ export function RepoDetail(props: RepoDetailProps) {
     setBlock,
     blockOptions,
     defaultBlock,
+    allBlocks,
   } = useManageBlock({
     path: path as string,
     storedDefaultBlock: metadata[path as string]?.default,
     isFolder,
   })
+  const setBlockLocal = (block: Block) => {
+    setIsChoosingCustomBlock(false);
+    setBlock(block);
+  }
   const blockKey = getBlockKey(block);
   const defaultBlockKey = getBlockKey(defaultBlock);
   const isDefaultBlock = defaultBlockKey === blockKey;
@@ -153,8 +160,10 @@ export function RepoDetail(props: RepoDetailProps) {
                     blocks={blockOptions}
                     defaultBlock={defaultBlock}
                     path={path as string}
-                    onChange={setBlock}
+                    onChange={setBlockLocal}
                     value={block}
+                    isChoosingCustomBlock={isChoosingCustomBlock}
+                    setIsChoosingCustomBlock={setIsChoosingCustomBlock}
                   />
                   {!isDefaultBlock && session?.token && (
                     <Button
@@ -186,26 +195,28 @@ export function RepoDetail(props: RepoDetailProps) {
               </Box>
             </div>
           </div>
-          {!!block.id &&
-            repoFilesStatus !== "loading" &&
-            (isTooLarge ? (
-              <div className="italic p-4 pt-40 text-center mx-auto text-gray-600">
-                Oh boy, that's a honkin file! It's {size / 1000} KBs.
-              </div>
-            ) : (
-              <GeneralBlock
-                key={block.id}
-                // @ts-ignore
-                context={{
-                  [block.type]: "",
-                  ...context,
-                }}
-                theme={(theme as string) || "light"}
-                block={block}
-                session={session}
-                onCommit={() => setCommitsIteration(v => v + 1)}
-              />
-            ))}
+          {isChoosingCustomBlock ? (
+            <CustomBlockPicker allBlocks={allBlocks} onChange={setBlockLocal} path={path as string} isFolder={isFolder} />
+          ) : !!block.id &&
+          repoFilesStatus !== "loading" &&
+          (isTooLarge ? (
+            <div className="italic p-4 pt-40 text-center mx-auto text-gray-600">
+              Oh boy, that's a honkin file! It's {size / 1000} KBs.
+            </div>
+          ) : (
+            <GeneralBlock
+              key={block.id}
+              // @ts-ignore
+              context={{
+                [block.type]: "",
+                ...context,
+              }}
+              theme={(theme as string) || "light"}
+              block={block}
+              session={session}
+              onCommit={() => setCommitsIteration(v => v + 1)}
+            />
+          ))}
         </div>
 
         <div className="flex-none hidden lg:block w-80 h-full border-l border-gray-200">

@@ -11,6 +11,7 @@ interface SearchDropdownProps {
 
 export default function SearchDropdown(props: SearchDropdownProps) {
   const { session } = props;
+
   let list = useAsyncList<{ repo: string }>({
     async load({ signal, cursor, filterText }) {
       if (!filterText)
@@ -19,10 +20,13 @@ export default function SearchDropdown(props: SearchDropdownProps) {
           cursor,
         };
       const url = `https://api.github.com/search/repositories?q=${filterText}+in:name&sort=stars&order=desc&per_page=10`;
+      const headers = session
+        ? {
+            Authorization: `token ${session.token}`,
+          }
+        : {};
       const res = await fetch(cursor || url, {
-        headers: {
-          Authorization: `token ${session.token}`,
-        },
+        headers,
         signal,
       });
 
@@ -43,6 +47,7 @@ export default function SearchDropdown(props: SearchDropdownProps) {
   return (
     <div className="w-full lg:w-[280px]">
       <SearchAutocomplete
+        debounceMs={400}
         className="combo-dark"
         placeholder="Search GitHub repositories"
         items={list.items}

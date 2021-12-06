@@ -316,9 +316,10 @@ export function useManageBlock({
   if (!blockOwner) blockOwner = defaultFileBlock.owner;
   if (!blockRepo) blockRepo = defaultFileBlock.repo;
 
-  const { data: allBlocksInfo = [] } = useGetBlocksInfo()
-  const isDefaultBlocksRepo = `${blockOwner}/${blockRepo}` === `${defaultFileBlock.owner}/${defaultFileBlock.repo}`
-  const blocksRepo = isDefaultBlocksRepo ? defaultBlocksRepo : allBlocksInfo.find(block => (
+  const { data: allBlocks = [] } = useGetBlocksInfo()
+  // const isDefaultBlocksRepo = `${blockOwner}/${blockRepo}` === `${defaultFileBlock.owner}/${defaultFileBlock.repo}`
+  const isDefaultBlocksRepo = true
+  const blocksRepo = isDefaultBlocksRepo ? defaultBlocksRepo : allBlocks.find(block => (
     block.owner === blockOwner && block.repo === blockRepo
   ))
   const blocks = (blocksRepo?.blocks || []).map(block => ({
@@ -338,7 +339,22 @@ export function useManageBlock({
   const defaultBlock = blocks.find(block => getBlockKey(block) === defaultBlockKey) || relevantBlocks[1]
   blockId = blockId || defaultBlock?.id || (isFolder ? defaultFolderBlock.id : defaultFileBlock.id)
 
-  const block = blocks.find(block => block.id === blockId) || blocks[0] || {} as Block
+  const allBlocksFlat = allBlocks.flatMap(repo => repo.blocks.map(block => ({
+    ...block,
+    owner: repo.owner,
+    repo: repo.repo,
+  } as Block)))
+
+  const block = blocks.find(block => block.id === blockId)
+    || allBlocksFlat.find(block => block.id === blockId)
+    || blocks[0]
+    || {} as Block
+
+  let blockOptions = relevantBlocks
+  if (block && !blocks.find(block => block.id === blockId)) {
+    // Add the custom block to the list
+    blockOptions.push({ ...block, title: `Custom: ${block.title}` })
+  }
 
   const setBlock = (block: Block) => {
     if (!block) return;
@@ -356,5 +372,6 @@ export function useManageBlock({
     setBlock,
     blockOptions: relevantBlocks,
     defaultBlock,
+    allBlocks,
   }
 }

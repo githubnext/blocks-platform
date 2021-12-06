@@ -6,11 +6,14 @@ interface BlockPickerProps {
   value: Block;
   defaultBlock?: Block;
   path: string;
+  isChoosingCustomBlock: boolean;
+  setIsChoosingCustomBlock: (isChoosingCustomBlock: boolean) => void;
   onChange: (newType: Block) => void;
 }
 
+const customBlockId = "custom";
 export default function BlockPicker(props: BlockPickerProps) {
-  const { blocks, value, defaultBlock, path, onChange } = props;
+  const { blocks, value, defaultBlock, path, isChoosingCustomBlock, setIsChoosingCustomBlock, onChange } = props;
 
   const [hasLoaded, setHasLoaded] = useState(false);
   useEffect(() => {
@@ -27,7 +30,7 @@ export default function BlockPicker(props: BlockPickerProps) {
   return (
     <SelectMenu>
       <Button ml={3} as="summary">
-        Block: {value?.title}
+        {isChoosingCustomBlock ? "Custom Block" : `Block: ${value?.title}`}
       </Button>
 
       <SelectMenu.Modal>
@@ -39,6 +42,7 @@ export default function BlockPicker(props: BlockPickerProps) {
                 as="button"
                 key={d.entry}
                 onClick={(e) => {
+                  setIsChoosingCustomBlock(false);
                   onChange(d);
                 }}
               >
@@ -46,6 +50,14 @@ export default function BlockPicker(props: BlockPickerProps) {
               </SelectMenu.Item>
             );
           })}
+          <SelectMenu.Item
+            as="button"
+            onClick={() => {
+              setIsChoosingCustomBlock(true);
+            }}
+          >
+            Choose a custom Block
+          </SelectMenu.Item>
         </SelectMenu.List>
       </SelectMenu.Modal>
     </SelectMenu>

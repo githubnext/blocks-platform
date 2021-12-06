@@ -6,10 +6,10 @@ import type { LoadingState } from "@react-types/shared";
 import { CgSpinner } from "react-icons/cg";
 import { GoX } from "react-icons/go";
 import { useDebounce } from "use-debounce";
+import { useUpdateEffect } from "react-use";
 
 import { ListBox } from "components/list-box";
 import { Popover } from "components/popover";
-import { useUpdateEffect } from "@react-aria/utils";
 
 export { Item } from "react-stately";
 

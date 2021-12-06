@@ -806,9 +806,9 @@
   dependencies:
     tslib "^2.1.0"
 
-"@githubnext/blocks-examples@https://github.com/githubnext/blocks-examples.git#0.6.24":
+"@githubnext/blocks-examples@https://github.com/githubnext/blocks-examples.git#0.6.26":
   version "0.0.0"
-  resolved "https://github.com/githubnext/blocks-examples.git#bc68653a991d106c58ce8cda95ceadabf57477da"
+  resolved "https://github.com/githubnext/blocks-examples.git#26e4b42eb3fc96140fe5889efa131ca0cbb69895"
   dependencies:
     "@excalidraw/excalidraw" "^0.10.0"
     "@githubnext/utils" "^0.11.1"
@@ -821,6 +821,7 @@
     "@react-three/fiber" "^7.0.19"
     "@types/d3" "^7.1.0"
     "@types/lz-string" "^1.3.34"
+    "@types/p5" "^1.3.1"
     "@types/papaparse" "^5.3.1"
     assert "^2.0.0"
     buffer "^6.0.3"
@@ -834,6 +835,7 @@
     lodash.isempty "^4.4.0"
     lodash.isobject "^3.0.2"
     lz-string "^1.4.4"
+    p5 "^1.4.0"
     papaparse "^5.3.1"
     react "^17.0.0"
     react-dom "^17.0.0"

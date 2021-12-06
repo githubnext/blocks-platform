@@ -9,11 +9,11 @@ const htmlBlock = dynamic(() => import("./file-blocks/html.tsx"), {ssr:false});
 const cssBlock = dynamic(() => import("./file-blocks/css.tsx"), {ssr:false});
 const DModelBlock = dynamic(() => import("./file-blocks/3d-files.tsx"), {ssr:false});
 const flatBlock = dynamic(() => import("./file-blocks/flat.tsx"), {ssr:false});
-const iframeBlock = dynamic(() => import("./file-blocks/iframe.tsx"), {ssr:false});
 const simplePollBlock = dynamic(() => import("./file-blocks/poll.tsx"), {ssr:false});
 const chartBlock = dynamic(() => import("./file-blocks/charts/index.tsx"), {ssr:false});
 const markdownBlock = dynamic(() => import("./file-blocks/live-markdown/index.tsx"), {ssr:false});
 const reactFeedbackBlock = dynamic(() => import("./file-blocks/annotate-react/index.tsx"), {ssr:false});
+const processing = dynamic(() => import("./file-blocks/processing.tsx"), {ssr:false});
 const minimapBlock = dynamic(() => import("./folder-blocks/minimap/index.tsx"), {ssr:false});
 const dashboardBlock = dynamic(() => import("./folder-blocks/dashboard/index.tsx"), {ssr:false});
 
@@ -24,11 +24,11 @@ export default {
   'css-block': cssBlock,
   '3d-model-block': DModelBlock,
   'flat-block': flatBlock,
-  'iframe-block': iframeBlock,
   'simple-poll-block': simplePollBlock,
   'chart-block': chartBlock,
   'markdown-block': markdownBlock,
   'react-feedback-block': reactFeedbackBlock,
+  'processing': processing,
   'minimap-block': minimapBlock,
   'dashboard-block': dashboardBlock
 }
@@ -104,17 +104,6 @@ export const defaultBlocksRepo = {
     },
     {
       "type": "file",
-      "id": "iframe-block",
-      "title": "Iframe block",
-      "description": "An iframe block",
-      "entry": "/src/blocks/file-blocks/iframe.tsx",
-      "extensions": [
-        "iframe"
-      ],
-      "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/figma.iframe"
-    },
-    {
-      "type": "file",
       "id": "simple-poll-block",
       "title": "Poll block",
       "description": "View simple polls beautifully",
@@ -157,6 +146,17 @@ export const defaultBlocksRepo = {
         "tsx"
       ],
       "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/Aside.jsx"
+    },
+    {
+      "type": "file",
+      "id": "processing",
+      "title": "Processing sketch viewer",
+      "description": "View your p5.js sketches",
+      "entry": "/src/blocks/file-blocks/processing.tsx",
+      "extensions": [
+        "js"
+      ],
+      "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/processing-sketch.js"
     },
     {
       "type": "folder",

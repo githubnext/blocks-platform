@@ -14,8 +14,10 @@ const chartBlock = dynamic(() => import("./file-blocks/charts/index.tsx"), {ssr:
 const markdownBlock = dynamic(() => import("./file-blocks/live-markdown/index.tsx"), {ssr:false});
 const reactFeedbackBlock = dynamic(() => import("./file-blocks/annotate-react/index.tsx"), {ssr:false});
 const processing = dynamic(() => import("./file-blocks/processing.tsx"), {ssr:false});
+const sentenceEncoder = dynamic(() => import("./file-blocks/sentence-encoder.tsx"), {ssr:false});
 const minimapBlock = dynamic(() => import("./folder-blocks/minimap/index.tsx"), {ssr:false});
 const dashboardBlock = dynamic(() => import("./folder-blocks/dashboard/index.tsx"), {ssr:false});
+const codeTourBlock = dynamic(() => import("./folder-blocks/code-tour/index.tsx"), {ssr:false});
 
 export default {
   'code-block': codeBlock,
@@ -29,8 +31,10 @@ export default {
   'markdown-block': markdownBlock,
   'react-feedback-block': reactFeedbackBlock,
   'processing': processing,
+  'sentence-encoder': sentenceEncoder,
   'minimap-block': minimapBlock,
-  'dashboard-block': dashboardBlock
+  'dashboard-block': dashboardBlock,
+  'code-tour-block': codeTourBlock
 }
 
 export const defaultBlocksRepo = {
@@ -159,6 +163,17 @@ export const defaultBlocksRepo = {
       "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/processing-sketch.js"
     },
     {
+      "type": "file",
+      "id": "sentence-encoder",
+      "title": "Sentence encoder",
+      "description": "Experiment with your sentence-encoder",
+      "entry": "/src/blocks/file-blocks/sentence-encoder.tsx",
+      "extensions": [
+        "json"
+      ],
+      "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/queries.json"
+    },
+    {
       "type": "folder",
       "id": "minimap-block",
       "title": "Minimap",
@@ -172,6 +187,14 @@ export const defaultBlocksRepo = {
       "title": "Dashboard",
       "description": "A dashboard of Blocks",
       "entry": "/src/blocks/folder-blocks/dashboard/index.tsx",
+      "example_path": "https://github.com/githubnext/blocks-tutorial"
+    },
+    {
+      "type": "folder",
+      "id": "code-tour-block",
+      "title": "Code Tour",
+      "description": "Create documented tours of your code",
+      "entry": "/src/blocks/folder-blocks/code-tour/index.tsx",
       "example_path": "https://github.com/githubnext/blocks-tutorial"
     }
   ],

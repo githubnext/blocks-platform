@@ -1,0 +1,21 @@
+{
+  "tours": [
+    {
+      "name": "Code",
+      "steps": [
+        {
+          "name": "This is where the code gets rendered",
+          "description": "",
+          "path": "blocks/file-blocks/code/index.tsx",
+          "query": "10-18"
+        },
+        {
+          "name": "These are the code styles",
+          "description": "",
+          "path": "blocks/file-blocks/code/style.css",
+          "query": ""
+        }
+      ]
+    }
+  ]
+}

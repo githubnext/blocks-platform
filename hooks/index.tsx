@@ -346,10 +346,14 @@ export function useManageBlock({
     repo: repo.repo,
   } as Block)))
 
-  const block = blocks.find(block => block.id === blockId)
+  let block = blocks.find(block => block.id === blockId)
     || allBlocksFlat.find(block => block.id === blockId)
     || blocks[0]
     || {} as Block
+
+  if (isFolder && block.type !== "folder" || !isFolder && block.type !== "file") {
+    block = defaultBlock
+  }
 
   let blockOptions = relevantBlocks
   if (block && !blocks.find(block => block.id === blockId)) {

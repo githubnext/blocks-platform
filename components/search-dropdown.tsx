@@ -3,7 +3,7 @@ import Router from "next/router";
 import { Item, useAsyncList } from "react-stately";
 import { SearchAutocomplete } from "./search-autocomplete";
 
-const items = ["githubnext/blocks-examples", "githubnext/blocks-tutorial"];
+const items = ["githubnext/blocks-examples", "githubnext/blocks-tutorial", "the-pudding/data", "paperjs/paper.js", "d3/d3-geo", "metafizzy/zdog", "pmndrs/react-spring"];
 
 interface SearchDropdownProps {
   session: Session;
@@ -22,8 +22,8 @@ export default function SearchDropdown(props: SearchDropdownProps) {
       const url = `https://api.github.com/search/repositories?q=${filterText}+in:name&sort=stars&order=desc&per_page=10`;
       const headers = session
         ? {
-            Authorization: `token ${session.token}`,
-          }
+          Authorization: `token ${session.token}`,
+        }
         : {};
       const res = await fetch(cursor || url, {
         headers,

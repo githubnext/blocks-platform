@@ -334,9 +334,10 @@ export function useManageBlock({
       (!d.extensions || d.extensions?.includes("*") || d.extensions?.includes(extension))
   );
   const defaultBlockKey = storedDefaultBlock || (
-    getBlockKey(relevantBlocks[1] || relevantBlocks[0])
+    getBlockKey(blocks.find(block => block.id === overrideDefaultBlocks[extension]) || relevantBlocks[1] || relevantBlocks[0])
   )
-  const defaultBlock = blocks.find(block => getBlockKey(block) === defaultBlockKey) || relevantBlocks[1]
+  const defaultBlock = blocks.find(block => getBlockKey(block) === defaultBlockKey)
+    || relevantBlocks[1]
   blockId = blockId || defaultBlock?.id || (isFolder ? defaultFolderBlock.id : defaultFileBlock.id)
 
   const allBlocksFlat = allBlocks.flatMap(repo => repo.blocks.map(block => ({
@@ -374,4 +375,9 @@ export function useManageBlock({
     defaultBlock,
     allBlocks,
   }
+}
+const overrideDefaultBlocks = {
+  json: "code-block",
+  js: "code-block",
+  ts: "code-block",
 }

@@ -11,7 +11,6 @@ interface BlockPickerProps {
   onChange: (newType: Block) => void;
 }
 
-const customBlockId = "custom";
 export default function BlockPicker(props: BlockPickerProps) {
   const { blocks, value, defaultBlock, path, isChoosingCustomBlock, setIsChoosingCustomBlock, onChange } = props;
 
@@ -28,8 +27,8 @@ export default function BlockPicker(props: BlockPickerProps) {
   }, [path]);
 
   return (
-    <SelectMenu>
-      <Button ml={3} as="summary">
+    <SelectMenu className="relative" ml={3} >
+      <Button as="summary">
         {isChoosingCustomBlock ? "Custom Block" : `Block: ${value?.title}`}
       </Button>
 
@@ -41,6 +40,7 @@ export default function BlockPicker(props: BlockPickerProps) {
               <SelectMenu.Item
                 as="button"
                 key={d.entry}
+                selected={!isChoosingCustomBlock && d.id === value?.id}
                 onClick={(e) => {
                   setIsChoosingCustomBlock(false);
                   onChange(d);
@@ -52,11 +52,12 @@ export default function BlockPicker(props: BlockPickerProps) {
           })}
           <SelectMenu.Item
             as="button"
+            className="bg-[#E9F2F2] hover:bg-[#E9F2F2] text-[#596c6c] font-medium pl-0 py-3"
             onClick={() => {
               setIsChoosingCustomBlock(true);
             }}
           >
-            Choose a custom Block
+            ✨ Choose a custom Block ✨
           </SelectMenu.Item>
         </SelectMenu.List>
       </SelectMenu.Modal>

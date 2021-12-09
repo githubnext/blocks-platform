@@ -18,7 +18,7 @@ export const ActivityFeed = ({
 }) => {
   const { owner, repo, path } = context;
 
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
 
   const {
     data: timelineData,

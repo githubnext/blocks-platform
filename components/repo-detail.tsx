@@ -219,7 +219,7 @@ export function RepoDetail(props: RepoDetailProps) {
           ))}
         </div>
 
-        <div className="flex-none hidden lg:block w-80 h-full border-l border-gray-200">
+        <div className="flex-none hidden lg:block h-full border-l border-gray-200">
           <ActivityFeed
             context={context}
             session={session}

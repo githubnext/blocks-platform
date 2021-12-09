@@ -19,6 +19,9 @@ module.exports = {
           900: "#24292e",
         },
       },
+      transitionProperty: {
+        width: "width",
+      },
     },
   },
   variants: {

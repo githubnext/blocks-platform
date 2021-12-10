@@ -3,7 +3,7 @@ import { NextOctocat } from "./next-octocat";
 import SearchDropdown from "./search-dropdown";
 
 interface GitHubHeaderProps {
-  session: Session;
+  token: string
 }
 
 export const GitHubHeader = (props: GitHubHeaderProps) => {
@@ -18,7 +18,7 @@ export const GitHubHeader = (props: GitHubHeaderProps) => {
           </Link>
         </div>
         <div className="flex-1">
-          <SearchDropdown session={props.session} />
+          <SearchDropdown token={props.token} />
         </div>
       </div>
       <p className="text-sm opacity-50 mt-2 lg:mt-0 lg:ml-4">

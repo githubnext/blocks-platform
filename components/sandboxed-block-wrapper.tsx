@@ -1,5 +1,6 @@
 import { FileContext, FolderContext } from "@githubnext/utils";
 import { RepoFiles } from "ghapi";
+import { memo, useMemo } from "react";
 import { SandboxedBlock } from "components/sandboxed-block"
 import { ExampleBlock } from "components/example-block"
 
@@ -14,7 +15,7 @@ interface SandboxedBlockWrapperProps {
 }
 
 const exampleBlocksRepo = "githubnext/blocks-examples";
-export function SandboxedBlockWrapper(props: SandboxedBlockWrapperProps) {
+export const SandboxedBlockWrapper = memo(function SandboxedBlockWrapper(props: SandboxedBlockWrapperProps) {
   const {
     block,
     metadata,
@@ -25,10 +26,10 @@ export function SandboxedBlockWrapper(props: SandboxedBlockWrapperProps) {
     isEmbedded = false,
   } = props;
 
-  const fileContext = {
+  const fileContext = useMemo(() => ({
     ...context,
     theme,
-  } as any;
+  }), [context, theme])
 
   if (
     (!contents && block.type === "file") ||
@@ -61,4 +62,4 @@ export function SandboxedBlockWrapper(props: SandboxedBlockWrapperProps) {
       />
     </div>
   );
-}
+})

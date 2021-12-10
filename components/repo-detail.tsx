@@ -1,8 +1,8 @@
 import { Box, Button, Link, useTheme } from "@primer/components";
-import { getBlockKey, useGetBlocksInfo, useManageBlock, useMetadata, useRepoFiles, useRepoInfo } from "hooks";
+import { getBlockKey, useManageBlock, useMetadata, useRepoFiles, useRepoInfo } from "hooks";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { ActivityFeed } from "./ActivityFeed";
 import { GitHubHeader } from "./github-header";
 import { RepoHeader } from "./repo-header";
@@ -13,25 +13,22 @@ import { CustomBlockPicker } from "./custom-block-picker";
 const BlockPicker = dynamic(() => import("./block-picker"), { ssr: false });
 
 interface RepoDetailProps {
-  session?: Session;
+  token: string
 }
 
 export function RepoDetail(props: RepoDetailProps) {
-  const { session } = props;
+  const { token } = props;
   const router = useRouter();
   const { setColorMode } = useTheme();
   const { repo, owner, path = "", theme, fileRef } = router.query;
   const [isChoosingCustomBlock, setIsChoosingCustomBlock] = useState(false);
 
-  // for updating the activity feed on file changes
-  const [commitsIteration, setCommitsIteration] = useState(0);
-
-  const context = {
+  const context = useMemo(() => ({
     repo: repo as string,
     owner: owner as string,
     path: path as string,
     sha: fileRef as string || "HEAD"
-  };
+  }), [repo, owner, path, fileRef]);
 
   useEffect(() => {
     setColorMode(theme === "dark" ? "night" : "day");
@@ -44,7 +41,7 @@ export function RepoDetail(props: RepoDetailProps) {
   } = useRepoInfo({
     repo: repo as string,
     owner: owner as string,
-    token: session?.token as string,
+    token,
   });
 
   const {
@@ -54,7 +51,7 @@ export function RepoDetail(props: RepoDetailProps) {
   } = useRepoFiles({
     repo: repo as string,
     owner: owner as string,
-    token: session?.token as string,
+    token,
   });
 
   const isFolder =
@@ -68,11 +65,11 @@ export function RepoDetail(props: RepoDetailProps) {
     repo: repo as string,
     metadataPath: `.github/blocks/all.json`,
     filePath: path as string,
-    token: session?.token as string,
+    token,
   });
 
   const {
-    block,
+    block: rawBlock,
     setBlock,
     blockOptions,
     defaultBlock,
@@ -82,6 +79,12 @@ export function RepoDetail(props: RepoDetailProps) {
     storedDefaultBlock: metadata[path as string]?.default,
     isFolder,
   })
+
+  const block = useMemo(() => rawBlock, [
+    rawBlock.owner,
+    rawBlock.repo,
+    rawBlock.id,
+  ])
   const setBlockLocal = (block: Block) => {
     setIsChoosingCustomBlock(false);
     setBlock(block);
@@ -94,6 +97,13 @@ export function RepoDetail(props: RepoDetailProps) {
   const size = fileInfo?.size || 0;
   const fileSizeLimit = 1500000; // 1.5Mb
   const isTooLarge = size > fileSizeLimit;
+
+  // for updating the activity feed on file changes
+  const [commitsIteration, setCommitsIteration] = useState(0);
+
+  const onCommit = useCallback(() => {
+    setCommitsIteration((prev) => prev + 1);
+  }, []);
 
   if (repoFilesStatus === "error" || repoInfoStatus === "error") {
     const error = repoInfoError || repoFilesError;
@@ -111,7 +121,7 @@ export function RepoDetail(props: RepoDetailProps) {
 
   return (
     <div className="flex flex-col w-full h-screen overflow-hidden">
-      <GitHubHeader session={session} />
+      <GitHubHeader token={token} />
       <RepoHeader
         owner={owner as string}
         repo={repo as string}
@@ -165,7 +175,7 @@ export function RepoDetail(props: RepoDetailProps) {
                     isChoosingCustomBlock={isChoosingCustomBlock}
                     setIsChoosingCustomBlock={setIsChoosingCustomBlock}
                   />
-                  {!isDefaultBlock && session?.token && (
+                  {!isDefaultBlock && token && (
                     <Button
                       fontSize="1"
                       ml={2}
@@ -207,14 +217,11 @@ export function RepoDetail(props: RepoDetailProps) {
             <GeneralBlock
               key={block.id}
               // @ts-ignore
-              context={{
-                [block.type]: "",
-                ...context,
-              }}
+              context={context}
               theme={(theme as string) || "light"}
               block={block}
-              session={session}
-              onCommit={() => setCommitsIteration(v => v + 1)}
+              token={token}
+              onCommit={onCommit}
             />
           ))}
         </div>
@@ -222,7 +229,7 @@ export function RepoDetail(props: RepoDetailProps) {
         <div className="flex-none hidden lg:block h-full border-l border-gray-200">
           <ActivityFeed
             context={context}
-            session={session}
+            token={token}
             commitsIteration={commitsIteration}
           />
         </div>

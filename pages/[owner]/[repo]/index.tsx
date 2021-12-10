@@ -33,7 +33,7 @@ export default function RepoDetailContainer() {
 
   if (isViewingUnauthenticatedRepo || (status === "authenticated" && session)) {
     // @ts-ignore
-    return <RepoDetail session={session} />;
+    return <RepoDetail token={session.token} />;
   }
 
   // TODO: Handle errors here

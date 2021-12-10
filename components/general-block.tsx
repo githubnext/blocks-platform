@@ -3,7 +3,7 @@ import { SandboxedBlockWrapper } from "components/sandboxed-block-wrapper";
 import { getFileContent } from "ghapi";
 import { useFileContent, useFolderContent, useMetadata, useUpdateFileContents } from "hooks";
 import { useRouter } from "next/router";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { ErrorBoundary } from "./error-boundary";
 import { UpdateCodeModal } from "./UpdateCodeModal";
 
@@ -11,7 +11,7 @@ interface GeneralBlockProps {
   theme: string;
   context: FileContext | FolderContext;
   block: Block;
-  session: Session;
+  token: string;
   onCommit?: () => void;
 }
 
@@ -20,7 +20,7 @@ export function GeneralBlock(props: GeneralBlockProps) {
     context,
     theme,
     block,
-    session,
+    token,
     onCommit,
   } = props;
   const { repo, owner, path, sha } = context;
@@ -39,12 +39,12 @@ export function GeneralBlock(props: GeneralBlockProps) {
     repo: repo as string,
     metadataPath: block.entry && getMetadataPath(block, path),
     filePath: path,
-    token: session?.token as string,
+    token: token,
   });
   const type = block.type
 
   const getGitHubData = async (type, config) => {
-    const data = await fetchGitHubData(type, { ...config, token: session?.token });
+    const data = await fetchGitHubData(type, { ...config, token: token });
     return data;
   }
 
@@ -56,7 +56,7 @@ export function GeneralBlock(props: GeneralBlockProps) {
       repo,
       path,
       sha: "latest",
-      token: session?.token as string,
+      token: token as string,
     })
     if (onCommit) {
       // for updating the activity feed on changes
@@ -104,22 +104,27 @@ export function GeneralBlock(props: GeneralBlockProps) {
     owner: owner,
     path: path,
     fileRef: sha,
-    token: session?.token as string,
+    token: token as string,
   });
-  const { tree = [] } = treeData || {};
+  const tree = useMemo(() => treeData?.tree || [], [treeData]);
 
   const { data: fileData } = useFileContent(type === "file" && {
     repo: repo,
     owner: owner,
     path: path,
     fileRef: sha,
-    token: session?.token as string,
+    token: token as string,
   });
   const { content = "" } = fileData || {};
 
   const code = content;
 
   const name = path.split("/").pop();
+
+  const updatedContext = useMemo(() => ({
+    ...context,
+    [type]: name
+  }) as FileContext | FolderContext, [context, name, type])
 
   return (
     <div className="flex flex-col" style={{
@@ -130,7 +135,7 @@ export function GeneralBlock(props: GeneralBlockProps) {
           <SandboxedBlockWrapper
             block={block}
             theme={theme}
-            context={{ ...context, [type]: name }}
+            context={updatedContext}
             tree={tree}
             contents={code}
             metadata={metadata}
@@ -139,7 +144,7 @@ export function GeneralBlock(props: GeneralBlockProps) {
       </ErrorBoundary>
       {!!requestedMetadata && (
         <UpdateCodeModal
-          isLoggedIn={!!session?.token}
+          isLoggedIn={!!token}
           path={`.github/blocks/${type}/${blockKey}.json`}
           newCode={JSON.stringify(requestedMetadata, null, 2)}
           currentCode={requestedMetadataExisting || JSON.stringify(metadata, null, 2)}
@@ -157,7 +162,7 @@ export function GeneralBlock(props: GeneralBlockProps) {
       )}
       {!!requestedFileContent && (
         <UpdateCodeModal
-          isLoggedIn={!!session?.token}
+          isLoggedIn={!!token}
           path={path}
           newCode={requestedFileContent}
           currentCode={content}

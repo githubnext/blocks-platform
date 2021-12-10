@@ -6,11 +6,11 @@ import { SearchAutocomplete } from "./search-autocomplete";
 const items = ["githubnext/blocks-examples", "githubnext/blocks-tutorial", "the-pudding/data", "paperjs/paper.js", "d3/d3-geo", "metafizzy/zdog", "pmndrs/react-spring"];
 
 interface SearchDropdownProps {
-  session: Session;
+  token: string
 }
 
 export default function SearchDropdown(props: SearchDropdownProps) {
-  const { session } = props;
+  const { token } = props;
 
   let list = useAsyncList<{ repo: string }>({
     async load({ signal, cursor, filterText }) {
@@ -20,9 +20,9 @@ export default function SearchDropdown(props: SearchDropdownProps) {
           cursor,
         };
       const url = `https://api.github.com/search/repositories?q=${filterText}+in:name&sort=stars&order=desc&per_page=10`;
-      const headers = session
+      const headers = token
         ? {
-          Authorization: `token ${session.token}`,
+          Authorization: `token ${token}`,
         }
         : {};
       const res = await fetch(cursor || url, {

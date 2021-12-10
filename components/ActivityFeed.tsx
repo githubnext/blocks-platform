@@ -9,11 +9,11 @@ import { Avatar } from "./Avatar";
 
 export const ActivityFeed = ({
   context,
-  session,
+  token,
   commitsIteration,
 }: {
   context: Omit<FileContext, "file">;
-  session: Session;
+  token: string;
   commitsIteration: number;
 }) => {
   const { owner, repo, path } = context;
@@ -28,7 +28,7 @@ export const ActivityFeed = ({
     {
       repo: repo,
       owner: owner,
-      token: session?.token,
+      token,
       path: path,
     },
     {
@@ -41,9 +41,8 @@ export const ActivityFeed = ({
 
   return (
     <div
-      className={`h-full overflow-auto ${
-        open ? "w-80" : "w-12"
-      } transition-width duration-200`}
+      className={`h-full overflow-auto ${open ? "w-80" : "w-12"
+        } transition-width duration-200`}
     >
       <div className="flex flex-col h-full">
         <div className="flex flex-row align-middle border-b border-gray-200 items-center py-3 bg-gray-50">
@@ -53,9 +52,8 @@ export const ActivityFeed = ({
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className={`h-4 w-4 ${
-                open ? "rotate-180" : ""
-              } transition duration-200 ease-in-out text-gray-600`}
+              className={`h-4 w-4 ${open ? "rotate-180" : ""
+                } transition duration-200 ease-in-out text-gray-600`}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -100,9 +98,8 @@ const Commit = ({
   const router = useRouter();
   return (
     <button
-      className={`text-left px-2 cursor-pointer ${
-        isSelected ? "bg-indigo-500 text-white" : "hover:bg-indigo-50"
-      }`}
+      className={`text-left px-2 cursor-pointer ${isSelected ? "bg-indigo-500 text-white" : "hover:bg-indigo-50"
+        }`}
       onClick={() => {
         let { fileRef, ...newQuery } = router.query;
         if (!isSelected) newQuery.fileRef = sha;
@@ -114,11 +111,10 @@ const Commit = ({
     >
       <Timeline.Item>
         <Timeline.Badge
-          className={`transition-transform ${
-            isSelected
+          className={`transition-transform ${isSelected
               ? "!bg-indigo-500 !text-white !border-indigo-200 transform scale-110"
               : ""
-          }`}
+            }`}
         >
           <StyledOcticon icon={CommitIcon} />
         </Timeline.Badge>

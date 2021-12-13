@@ -1,7 +1,7 @@
 import { SandpackRunner } from "@codesandbox/sandpack-react/dist/cjs/index.js";
 import { FileContext, FolderContext, RepoFiles } from "@githubnext/utils";
-import { uniqueId } from "lodash";
-import React from "react";
+import uniqueId from "lodash/uniqueId";
+import React, { useEffect, useRef } from "react";
 
 export interface BundleCode { name: string, content: string }
 interface SandboxedBlockProps {
@@ -13,6 +13,10 @@ interface SandboxedBlockProps {
   bundleCode?: BundleCode[];
   renderLoading?: React.ReactNode;
   renderError?: React.ReactNode;
+  onRequestUpdateMetadata: (newMetadata: any, path: string, block: Block, currentMetadata: any) => void;
+  onRequestUpdateContent: (newContent: string) => void;
+  onRequestGitHubData: (type: string, config: any, id: string) => Promise<any>;
+  onNavigateToPath: (path: string) => void;
 }
 
 const stateStyles = {
@@ -38,11 +42,35 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
     bundleCode,
     renderLoading = DefaultLoadingState,
     renderError = DefaultErrorState,
+    onRequestUpdateMetadata,
+    onRequestUpdateContent,
+    onRequestGitHubData,
+    onNavigateToPath,
   } = props;
   const state = useFetchZip(block);
+  const id = useRef(uniqueId("sandboxed-block-"));
 
   const status = state.status
   const blockContent = bundleCode || state.value;
+
+  useEffect(() => {
+    const onMessage = (event) => {
+      if (event.data.id === id.current) {
+        const { data } = event;
+        if (data.type === "update-metadata") {
+          onRequestUpdateMetadata(data.metadata, data.path, data.block, data.currentMetadata);
+        } else if (data.type === "update-file") {
+          onRequestUpdateContent(data.content);
+        } else if (data.type === "navigate-to-path") {
+          onNavigateToPath(data.path);
+        } else if (data.type === "request-github-data") {
+          onRequestGitHubData(data.requestType, data.config, data.id);
+        }
+      }
+    }
+    addEventListener("message", onMessage)
+    return () => removeEventListener("message", onMessage);
+  }, [])
 
   if (!blockContent) return renderLoading as JSX.Element;
   if (status === "loading") return renderLoading as JSX.Element;
@@ -94,18 +122,21 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
       const onUpdateMetadata = (newMetadata) => {
         window.parent.postMessage({
           type: "update-metadata",
+          id: "${id.current}",
           context: ${JSON.stringify(context)},
           metadata: newMetadata,
           path: ${JSON.stringify(context.path)},
           block: ${JSON.stringify(block)},
-          current: ${JSON.stringify(metadata)},
+          currentMetadata: ${JSON.stringify(metadata)},
         }, "*")
       }
+
       const onNavigateToPath = (path) => {
         window.parent.postMessage({
           type: "navigate-to-path",
+          id: "${id.current}",
           context: ${JSON.stringify(context)},
-          path: ${JSON.stringify(context.path)},
+          path,
         }, "*")
       }
 
@@ -114,6 +145,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
         const onRequestUpdateContent = (content) => {
           window.parent.postMessage({
             type: "update-file",
+            id: "${id.current}",
             context: ${JSON.stringify(context)},
             content: content
           }, "*")
@@ -126,11 +158,13 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
         }
 
         const onRequestGitHubData = React.useCallback((requestType, config) => {
-          const id = "${uniqueId("github-data--request--")}--" + getUniqueId()
+          // for responses to this specific request
+          const requestId = "${uniqueId("github-data--request--")}--" + getUniqueId()
           window.parent.postMessage({
             type: "github-data--request",
+            id: "${id.current}",
             context,
-            id,
+            requestId,
             requestType,
             config,
           }, "*")
@@ -247,11 +281,13 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
         options={{
           showNavigator: false,
         }}
+        autorun
       />
     );
   }
   return null;
 }
+
 
 type UseFetchZipResponse = {
   value: BundleCode[] | null;

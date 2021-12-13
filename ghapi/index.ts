@@ -206,7 +206,7 @@ type listRepoFilesResponse =
   Endpoints["GET /repos/{owner}/{repo}/git/trees/{tree_sha}"]["response"];
 export type RepoFiles = listRepoFilesResponse["data"]["tree"];
 
-export async function getRepoInfo(
+export async function getRepoInfoWithContributors(
   params: RepoContextWithToken
 ): Promise<RepoInfo> {
   const { owner, repo, token } = params;
@@ -265,4 +265,25 @@ export async function getRepoFiles(
 }
 
 import { Endpoints } from "@octokit/types";
-import { IoWarning } from "react-icons/io5";
+
+export async function getRepoInfo(
+  params: RepoContextWithToken
+): Promise<string> {
+  const { repo, owner, token } = params;
+
+  const apiUrl = `https://api.github.com/repos/${owner}/${repo}`;
+
+  const res = await fetch(apiUrl, {
+    headers: {
+      Authorization: token && `token ${token}`,
+    },
+  });
+  if (res.status !== 200) {
+    throw new Error(
+      `Error fetching repo info: ${owner}/${repo}\n${await res.text()}`
+    );
+  }
+
+  const resObject = await res.json();
+  return resObject;
+}

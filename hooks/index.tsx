@@ -11,7 +11,7 @@ import {
   UseFileContentParams,
   getFileContent,
   getFolderContent,
-  getRepoInfo,
+  getRepoInfoWithContributors,
   getRepoFiles,
   RepoContext,
   RepoContextWithToken,
@@ -194,7 +194,7 @@ export function useMetadata({
 }
 
 export function useRepoInfo(params: RepoContextWithToken) {
-  return useQuery(["info", params], () => getRepoInfo(params), {
+  return useQuery(["info", params], () => getRepoInfoWithContributors(params), {
     enabled:
       Boolean(params.repo) && Boolean(params.owner) && Boolean(params.token),
     refetchOnWindowFocus: false,

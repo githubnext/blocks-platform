@@ -1,6 +1,6 @@
 import { FileContext, FolderContext } from "@githubnext/utils";
 import { SandboxedBlockWrapper } from "components/sandboxed-block-wrapper";
-import { getFileContent } from "ghapi";
+import { getFileContent, getRepoInfo } from "ghapi";
 import { useFileContent, useFolderContent, useMetadata, useUpdateFileContents } from "hooks";
 import { useRouter } from "next/router";
 import React, { useEffect, useMemo } from "react";
@@ -206,6 +206,17 @@ const fetchGitHubData = async (type, config) => {
       })
       const fullMetadata = JSON.parse((res.content || "{}") as string);
       return fullMetadata || {}
+    } catch (e) {
+      return {}
+    }
+  } else if (type === "repo-info") {
+    try {
+      const res = await getRepoInfo({
+        owner: config.owner,
+        repo: config.repo,
+        token: config.token,
+      })
+      return res
     } catch (e) {
       return {}
     }

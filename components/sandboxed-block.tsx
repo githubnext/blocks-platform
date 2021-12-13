@@ -1,4 +1,4 @@
-import { SandpackRunner } from "@codesandbox/sandpack-react/dist/cjs/index.js";
+import { SandpackProvider, SandpackPreview, useSandpack } from "@codesandbox/sandpack-react/dist/cjs/index.js";
 import { FileContext, FolderContext, RepoFiles } from "@githubnext/utils";
 import uniqueId from "lodash/uniqueId";
 import React, { useEffect, useRef } from "react";
@@ -273,23 +273,26 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
   `;
 
     return (
-      <SandpackRunner
+      <SandpackProvider
         template="react"
-        code={injectedSource}
         customSetup={{
           dependencies: {},
-          files: otherFiles,
-        }}
-        options={{
-          showNavigator: false,
+          files: {
+            ...otherFiles,
+            "/App.js": injectedSource,
+          }
         }}
         autorun
-      />
+      >
+        <SandpackPreview
+          showOpenInCodeSandbox={false}
+          showRefreshButton={false}
+        />
+      </SandpackProvider>
     );
   }
   return null;
 }
-
 
 type UseFetchZipResponse = {
   value: BundleCode[] | null;

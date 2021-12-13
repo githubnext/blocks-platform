@@ -12,7 +12,7 @@ interface SandboxedBlockWrapperProps {
   context: FileContext | FolderContext;
   metadata: any;
   isEmbedded?: boolean;
-  onRequestUpdateMetadata: (newMetadata: any, path: string, block: Block, currentMetadata: any) => void;
+  onUpdateMetadata: (newMetadata: any, path: string, block: Block, currentMetadata: any) => void;
   onRequestUpdateContent: (newContent: string) => void;
   onRequestGitHubData: (type: string, config: any, id: string) => Promise<any>;
   onNavigateToPath: (path: string) => void;
@@ -28,7 +28,7 @@ export const SandboxedBlockWrapper = memo(function SandboxedBlockWrapper(props: 
     tree,
     context,
     isEmbedded = false,
-    onRequestUpdateMetadata,
+    onUpdateMetadata,
     onRequestUpdateContent,
     onRequestGitHubData,
     onNavigateToPath,
@@ -55,7 +55,7 @@ export const SandboxedBlockWrapper = memo(function SandboxedBlockWrapper(props: 
         context={fileContext}
         metadata={metadata}
         isEmbedded={isEmbedded}
-        onUpdateMetadata={onRequestUpdateMetadata}
+        onUpdateMetadata={onUpdateMetadata}
         onRequestUpdateContent={onRequestUpdateContent}
         onRequestGitHubData={onRequestGitHubData}
         onNavigateToPath={onNavigateToPath}
@@ -71,7 +71,7 @@ export const SandboxedBlockWrapper = memo(function SandboxedBlockWrapper(props: 
         tree={tree}
         context={fileContext}
         metadata={metadata}
-        onRequestUpdateMetadata={onRequestUpdateMetadata}
+        onUpdateMetadata={onUpdateMetadata}
         onRequestUpdateContent={onRequestUpdateContent}
         onRequestGitHubData={onRequestGitHubData}
         onNavigateToPath={onNavigateToPath}

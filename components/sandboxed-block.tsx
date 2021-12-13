@@ -13,7 +13,7 @@ interface SandboxedBlockProps {
   bundleCode?: BundleCode[];
   renderLoading?: React.ReactNode;
   renderError?: React.ReactNode;
-  onRequestUpdateMetadata: (newMetadata: any, path: string, block: Block, currentMetadata: any) => void;
+  onUpdateMetadata: (newMetadata: any, path: string, block: Block, currentMetadata: any) => void;
   onRequestUpdateContent: (newContent: string) => void;
   onRequestGitHubData: (type: string, config: any, id: string) => Promise<any>;
   onNavigateToPath: (path: string) => void;
@@ -42,7 +42,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
     bundleCode,
     renderLoading = DefaultLoadingState,
     renderError = DefaultErrorState,
-    onRequestUpdateMetadata,
+    onUpdateMetadata,
     onRequestUpdateContent,
     onRequestGitHubData,
     onNavigateToPath,
@@ -60,7 +60,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
         const originRegex = new RegExp(/^https:\/\/\d{1,4}-\d{1,4}-\d{1,4}-sandpack.codesandbox.io$/)
         if (!originRegex.test(origin)) return;
         if (data.type === "update-metadata") {
-          onRequestUpdateMetadata(data.metadata, data.path, data.block, data.currentMetadata);
+          onUpdateMetadata(data.metadata, data.path, data.block, data.currentMetadata);
         } else if (data.type === "update-file") {
           onRequestUpdateContent(data.content);
         } else if (data.type === "navigate-to-path") {

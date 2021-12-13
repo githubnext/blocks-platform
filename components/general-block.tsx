@@ -131,7 +131,7 @@ export function GeneralBlock(props: GeneralBlockProps) {
             tree={tree}
             contents={code}
             metadata={metadata}
-            onRequestUpdateMetadata={onRequestUpdateMetadata}
+            onUpdateMetadata={onRequestUpdateMetadata}
             onRequestUpdateContent={onRequestUpdateContent}
             onRequestGitHubData={onRequestGitHubData}
             onNavigateToPath={onNavigateToPath}

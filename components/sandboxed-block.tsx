@@ -56,7 +56,9 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
   useEffect(() => {
     const onMessage = (event) => {
       if (event.data.id === id.current) {
-        const { data } = event;
+        const { data, origin } = event;
+        const originRegex = new RegExp(/^https:\/\/\d{1,4}-\d{1,4}-\d{1,4}-sandpack.codesandbox.io$/)
+        if (!originRegex.test(origin)) return;
         if (data.type === "update-metadata") {
           onRequestUpdateMetadata(data.metadata, data.path, data.block, data.currentMetadata);
         } else if (data.type === "update-file") {

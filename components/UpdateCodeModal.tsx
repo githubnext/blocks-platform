@@ -60,11 +60,16 @@ export const UpdateCodeModal = ({
                     We'll create a commit to update the <pre className="inline bg-gray-100 py-1 p-2 rounded-md">{path}</pre> file.
                   </>}
                 </p>
-                {files.map(({ oldRevision, newRevision, type, hunks }) => (
-                  <Diff key={oldRevision + '-' + newRevision} viewType="split" diffType={type} hunks={hunks}>
-                    {hunks => hunks.map(hunk => <Hunk key={hunk.content} hunk={hunk} />)}
-                  </Diff>
-                ))}
+                <div className="overflow-y-auto" style={{
+                  maxHeight: "calc(100vh - 27em)",
+                  minHeight: "20em"
+                }}>
+                  {files.map(({ oldRevision, newRevision, type, hunks }) => (
+                    <Diff key={oldRevision + '-' + newRevision} viewType="split" diffType={type} hunks={hunks}>
+                      {hunks => hunks.map(hunk => <Hunk key={hunk.content} hunk={hunk} />)}
+                    </Diff>
+                  ))}
+                </div>
               </AlertDialog.Description>
 
               <div className="space-x-3 flex justify-end">

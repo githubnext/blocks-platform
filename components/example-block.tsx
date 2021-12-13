@@ -11,6 +11,10 @@ interface ExampleBlockProps {
   metadata?: any;
   context: FileContext | FolderContext;
   isEmbedded?: boolean;
+  onUpdateMetadata: (newMetadata: any, path: string, block: Block, currentMetadata: any) => void;
+  onRequestUpdateContent: (newContent: string) => void;
+  onRequestGitHubData: (type: string, config: any, id: string) => Promise<any>;
+  onNavigateToPath: (path: string) => void;
 }
 
 export function ExampleBlock(props: ExampleBlockProps) {
@@ -21,62 +25,11 @@ export function ExampleBlock(props: ExampleBlockProps) {
     metadata = {},
     context,
     isEmbedded = false,
+    onUpdateMetadata,
+    onRequestUpdateContent,
+    onRequestGitHubData,
+    onNavigateToPath,
   } = props;
-
-  const onUpdateMetadata = useCallback((newMetadata) => {
-    if (typeof window === "undefined") return
-    window.postMessage({
-      type: "update-metadata",
-      context,
-      metadata: newMetadata,
-      path: context.path,
-      block,
-      current: metadata
-    }, "*")
-  }, [metadata])
-  const onNavigateToPath = useCallback((path) => {
-    if (typeof window === "undefined") return
-    window.postMessage({
-      type: "navigate-to-path",
-      context,
-      path: path,
-    }, "*")
-  }, [])
-  const onRequestUpdateContent = useCallback((content) => {
-    if (typeof window === "undefined") return
-    window.postMessage({
-      type: "update-file",
-      context,
-      content,
-    }, "*")
-  }, [])
-  const onRequestGitHubData = useCallback((requestType, config) => {
-    if (typeof window === "undefined") return
-    const id = uniqueId("github-data--request")
-    window.postMessage({
-      type: "github-data--request",
-      context,
-      id,
-      requestType,
-      config,
-    }, "*")
-
-    return new Promise((resolve, reject) => {
-      const onMessage = (event: MessageEvent) => {
-        if (event.data.type !== "github-data--response") return
-        if (event.data.id !== id) return
-        window.removeEventListener("message", onMessage)
-        resolve(event.data.data)
-      }
-      window.addEventListener("message", onMessage)
-      const maxDelay = 1000 * 60 * 5
-      window.setTimeout(() => {
-        window.removeEventListener("message", onMessage)
-        reject(new Error("Timeout"))
-      }, maxDelay)
-    })
-
-  }, [])
 
   const Component = components[block.id]
 
@@ -115,13 +68,20 @@ type BlockComponentProps = FileBlockProps & FolderBlockProps & {
   path: string,
   tree: RepoFiles,
 }
-const BlockComponent = ({ block, path, tree, ...props }: BlockComponentProps) => {
+const BlockComponent = ({
+  block,
+  path,
+  tree,
+  onUpdateMetadata,
+  onRequestUpdateContent,
+  onRequestGitHubData,
+  onNavigateToPath, ...props }: BlockComponentProps) => {
   const [contents, setContents] = useState<string | undefined>(undefined)
   const [metadata, setMetadata] = useState<any | undefined>(undefined)
 
   const getData = async () => {
     if (block.type !== "file") return
-    const data = await props.onRequestGitHubData("file-content", {
+    const data = await onRequestGitHubData("file-content", {
       owner: props.context.owner,
       repo: props.context.repo,
       path: path,
@@ -131,7 +91,7 @@ const BlockComponent = ({ block, path, tree, ...props }: BlockComponentProps) =>
   }
   const getMetadata = async () => {
     if (metadata) return
-    const data = await props.onRequestGitHubData("metadata", {
+    const data = await onRequestGitHubData("metadata", {
       owner: props.context.owner,
       repo: props.context.repo,
       block: block,
@@ -146,7 +106,6 @@ const BlockComponent = ({ block, path, tree, ...props }: BlockComponentProps) =>
     // listen for updated metadata
     const onMessageEvent = async (event: MessageEvent) => {
       if (event.data.type === "updated-metadata") {
-        console.log("UPDATED")
         getMetadata()
       }
     };
@@ -170,14 +129,17 @@ const BlockComponent = ({ block, path, tree, ...props }: BlockComponentProps) =>
 
   return (
     <ErrorBoundary key={path}>
-      <SandboxedBlockWrapper
+      <ExampleBlock
         block={block}
-        theme={"light"}
         context={{ ...props.context, path, file: name, folder: name }}
         contents={contents}
         tree={tree}
         metadata={metadata}
         isEmbedded
+        onUpdateMetadata={onUpdateMetadata}
+        onRequestUpdateContent={onRequestUpdateContent}
+        onRequestGitHubData={onRequestGitHubData}
+        onNavigateToPath={onNavigateToPath}
       />
     </ErrorBoundary>
   )

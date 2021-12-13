@@ -64,40 +64,32 @@ export function GeneralBlock(props: GeneralBlockProps) {
     }
   }
 
-  useEffect(() => {
-    const onMessageEvent = async (event: MessageEvent) => {
-      // TODO: restrict by event.origin
-      if (event.data.codesandbox) return;
-      if (event.data.type === "update-metadata") {
-        const newMetadata = event?.data?.metadata || {};
-        setRequestedMetadata(newMetadata);
-        setRequestedMetadataExisting(JSON.stringify(event?.data?.current || "{}", null, 2));
-        setRequestedMetadataPath(event?.data?.path);
-        setRequestedMetadataPathFull(getMetadataPath(event?.data?.block, event?.data?.path))
-      } else if (event.data.type === "navigate-to-path") {
-        router.push({
-          pathname: event.data.pathname,
-          query: { ...query, path: event.data.path },
-        })
-      } else if (event.data.type === "update-file") {
-        setRequestedFileContent(event.data.content);
-      } else if (event.data.type === "github-data--request") {
-        const data = await getGitHubData(event.data.requestType, event.data.config);
-        window.postMessage({
-          type: "github-data--response",
-          id: event.data.id,
-          data,
-        }, "*");
-      }
-    };
-    window.addEventListener("message", onMessageEvent as EventListener);
-    return () => {
-      window.removeEventListener(
-        "message",
-        onMessageEvent as EventListener
-      );
-    };
-  }, [onUpdateMetadata]);
+  const onRequestUpdateMetadata = async (newMetadata: any, path: string, block: Block, currentMetadata: any) => {
+    setRequestedMetadata(newMetadata);
+    setRequestedMetadataExisting(JSON.stringify(currentMetadata || "{}", null, 2));
+    setRequestedMetadataPath(path);
+    setRequestedMetadataPathFull(getMetadataPath(block, path))
+  }
+  const onNavigateToPath = (path: string) => {
+    router.push({
+      pathname: router.pathname,
+      query: { ...query, path: path },
+    }, null, { shallow: true })
+  }
+
+  const onRequestUpdateContent = async (newContent: string) => {
+    setRequestedFileContent(newContent);
+  }
+
+  const onRequestGitHubData = async (type, config, id) => {
+    const data = await getGitHubData(type, config);
+    window.postMessage({
+      type: "github-data--response",
+      id,
+      data,
+    }, "*");
+    return data
+  }
 
   const { data: treeData } = useFolderContent(type === "folder" && {
     repo: repo,
@@ -139,6 +131,10 @@ export function GeneralBlock(props: GeneralBlockProps) {
             tree={tree}
             contents={code}
             metadata={metadata}
+            onUpdateMetadata={onRequestUpdateMetadata}
+            onRequestUpdateContent={onRequestUpdateContent}
+            onRequestGitHubData={onRequestGitHubData}
+            onNavigateToPath={onNavigateToPath}
           />
         </div>
       </ErrorBoundary>
@@ -174,14 +170,14 @@ export function GeneralBlock(props: GeneralBlockProps) {
   );
 }
 
-const getBlockKey = block => (
-  `${block.owner}/${block.repo}__${block.id}`.replace(
+const getBlockKey = (block) => (
+  `${block?.owner}/${block?.repo}__${block?.id}`.replace(
     /\//g,
     "__"
   )
 )
 const getMetadataPath = (block, path) => (
-  `.github/blocks/${block.type}/${getBlockKey(block)}/${encodeURIComponent(path)}.json`
+  `.github/blocks/${block?.type}/${getBlockKey(block)}/${encodeURIComponent(path)}.json`
 )
 
 const fetchGitHubData = async (type, config) => {

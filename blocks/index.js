@@ -15,8 +15,8 @@ const markdownBlock = dynamic(() => import("./file-blocks/live-markdown/index.ts
 const reactFeedbackBlock = dynamic(() => import("./file-blocks/annotate-react/index.tsx"), {ssr:false});
 const processing = dynamic(() => import("./file-blocks/processing.tsx"), {ssr:false});
 const sentenceEncoder = dynamic(() => import("./file-blocks/sentence-encoder.tsx"), {ssr:false});
-const minimapBlock = dynamic(() => import("./folder-blocks/minimap/index.tsx"), {ssr:false});
 const homepage = dynamic(() => import("./folder-blocks/homepage/index.tsx"), {ssr:false});
+const minimapBlock = dynamic(() => import("./folder-blocks/minimap/index.tsx"), {ssr:false});
 const dashboardBlock = dynamic(() => import("./folder-blocks/dashboard/index.tsx"), {ssr:false});
 const codeTourBlock = dynamic(() => import("./folder-blocks/code-tour/index.tsx"), {ssr:false});
 
@@ -33,8 +33,8 @@ export default {
   'react-feedback-block': reactFeedbackBlock,
   'processing': processing,
   'sentence-encoder': sentenceEncoder,
-  'minimap-block': minimapBlock,
   'homepage': homepage,
+  'minimap-block': minimapBlock,
   'dashboard-block': dashboardBlock,
   'code-tour-block': codeTourBlock
 }
@@ -177,19 +177,19 @@ export const defaultBlocksRepo = {
     },
     {
       "type": "folder",
-      "id": "minimap-block",
-      "title": "Minimap",
-      "description": "A visualization of your folders and files",
-      "entry": "/src/blocks/folder-blocks/minimap/index.tsx",
-      "example_path": "https://github.com/githubnext/blocks-tutorial"
-    },
-    {
-      "type": "folder",
       "id": "homepage",
       "title": "Homepage",
       "description": "The homepage of your repo",
       "entry": "/src/blocks/folder-blocks/homepage/index.tsx",
       "example_path": "https://github.com/wattenberger/kumiko"
+    },
+    {
+      "type": "folder",
+      "id": "minimap-block",
+      "title": "Minimap",
+      "description": "A visualization of your folders and files",
+      "entry": "/src/blocks/folder-blocks/minimap/index.tsx",
+      "example_path": "https://github.com/githubnext/blocks-tutorial"
     },
     {
       "type": "folder",

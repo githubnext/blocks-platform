@@ -38,6 +38,6 @@ export const getRelativeTime = (d) => {
   if (monthsAgo < 12) {
     return `${monthsAgo} months ago`;
   }
-  const yearsAgo = timeYear.count(now, d);
-  return `${yearsAgo} years ago`;
+  const yearsAgo = timeYear.count(d, now);
+  return `${yearsAgo} year${yearsAgo === 1 ? "" : "s"} ago`;
 };

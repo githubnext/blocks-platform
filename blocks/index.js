@@ -8,6 +8,7 @@ const excalidrawBlock = dynamic(() => import("./file-blocks/excalidraw.tsx"), {s
 const htmlBlock = dynamic(() => import("./file-blocks/html.tsx"), {ssr:false});
 const cssBlock = dynamic(() => import("./file-blocks/css.tsx"), {ssr:false});
 const imageBlock = dynamic(() => import("./file-blocks/image.tsx"), {ssr:false});
+const jsonBlock = dynamic(() => import("./file-blocks/json.tsx"), {ssr:false});
 const DModelBlock = dynamic(() => import("./file-blocks/3d-files.tsx"), {ssr:false});
 const flatBlock = dynamic(() => import("./file-blocks/flat.tsx"), {ssr:false});
 const simplePollBlock = dynamic(() => import("./file-blocks/poll.tsx"), {ssr:false});
@@ -27,6 +28,7 @@ export default {
   'html-block': htmlBlock,
   'css-block': cssBlock,
   'image-block': imageBlock,
+  'json-block': jsonBlock,
   '3d-model-block': DModelBlock,
   'flat-block': flatBlock,
   'simple-poll-block': simplePollBlock,
@@ -102,6 +104,17 @@ export const defaultBlocksRepo = {
         "svg"
       ],
       "example_path": "https://github.com/pmndrs/react-spring/blob/HEAD/assets/projects/aragon.png?raw=true"
+    },
+    {
+      "type": "file",
+      "id": "json-block",
+      "title": "Object explorer",
+      "description": "An interactive view of JSON objects",
+      "entry": "/src/blocks/file-blocks/json.tsx",
+      "extensions": [
+        "json"
+      ],
+      "example_path": "https://github.com/d3/d3-geo/blob/main/package.json"
     },
     {
       "type": "file",

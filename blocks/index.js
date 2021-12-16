@@ -112,7 +112,11 @@ export const defaultBlocksRepo = {
       "description": "An interactive view of JSON objects",
       "entry": "/src/blocks/file-blocks/json.tsx",
       "extensions": [
-        "json"
+        "json",
+        "webmanifest",
+        "prettierrc",
+        "yaml",
+        "yml"
       ],
       "example_path": "https://github.com/d3/d3-geo/blob/main/package.json"
     },

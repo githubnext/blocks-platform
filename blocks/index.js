@@ -7,6 +7,7 @@ const codeBlock = dynamic(() => import("./file-blocks/code/index.tsx"), {ssr:fal
 const excalidrawBlock = dynamic(() => import("./file-blocks/excalidraw.tsx"), {ssr:false});
 const htmlBlock = dynamic(() => import("./file-blocks/html.tsx"), {ssr:false});
 const cssBlock = dynamic(() => import("./file-blocks/css.tsx"), {ssr:false});
+const imageBlock = dynamic(() => import("./file-blocks/image.tsx"), {ssr:false});
 const DModelBlock = dynamic(() => import("./file-blocks/3d-files.tsx"), {ssr:false});
 const flatBlock = dynamic(() => import("./file-blocks/flat.tsx"), {ssr:false});
 const simplePollBlock = dynamic(() => import("./file-blocks/poll.tsx"), {ssr:false});
@@ -25,6 +26,7 @@ export default {
   'excalidraw-block': excalidrawBlock,
   'html-block': htmlBlock,
   'css-block': cssBlock,
+  'image-block': imageBlock,
   '3d-model-block': DModelBlock,
   'flat-block': flatBlock,
   'simple-poll-block': simplePollBlock,
@@ -70,7 +72,8 @@ export const defaultBlocksRepo = {
       "description": "View HTML content",
       "entry": "/src/blocks/file-blocks/html.tsx",
       "extensions": [
-        "html"
+        "html",
+        "svelte"
       ],
       "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/photos.html"
     },
@@ -84,6 +87,21 @@ export const defaultBlocksRepo = {
         "css"
       ],
       "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/global.css"
+    },
+    {
+      "type": "file",
+      "id": "image-block",
+      "title": "Image block",
+      "description": "View images",
+      "entry": "/src/blocks/file-blocks/image.tsx",
+      "extensions": [
+        "png",
+        "jpg",
+        "jpeg",
+        "gif",
+        "svg"
+      ],
+      "example_path": "https://github.com/pmndrs/react-spring/blob/HEAD/assets/projects/aragon.png?raw=true"
     },
     {
       "type": "file",
@@ -137,7 +155,8 @@ export const defaultBlocksRepo = {
       "description": "View markdown files. You can also view live repo into, using Issues, Releases, and Commits custom components, as well as live code examples with CodeSandbox.",
       "entry": "/src/blocks/file-blocks/live-markdown/index.tsx",
       "extensions": [
-        "md"
+        "md",
+        "mdx"
       ],
       "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/README.md"
     },

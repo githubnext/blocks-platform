@@ -381,7 +381,6 @@ export function useManageBlock({
   }
 }
 const overrideDefaultBlocks = {
-  json: "code-block",
   js: "code-block",
   ts: "code-block",
 }

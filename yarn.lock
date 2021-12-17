@@ -8271,10 +8271,10 @@ match-sorter@^6.0.2, match-sorter@^6.3.0:
     "@babel/runtime" "^7.12.5"
     remove-accents "0.4.2"
 
-matter-js@^0.17.1:
-  version "0.17.1"
-  resolved "https://registry.yarnpkg.com/matter-js/-/matter-js-0.17.1.tgz#b30ac4c708116258fbcaacd2efd8a94e34a91c7f"
-  integrity sha512-pSquoENJgvSAlQGcA0s5UkmEohGXZaUww2g3B6qG87x0iEcVf+aigMXn5UkFPdnh6w3B+C4vXSLaYqhHwKrOLA==
+matter-js@^0.18.0:
+  version "0.18.0"
+  resolved "https://registry.yarnpkg.com/matter-js/-/matter-js-0.18.0.tgz#083ced04eb6768f7664dc7ca8948a10e46ad3ed6"
+  integrity sha512-/ZVem4WygUnbmo/iE4oHZpZS97btfBtYy5Iwn1396vUZU7YhgVEN8J4UWwfZwY1ZqoTYlPgjvSw9WXauuXL0mg==
 
 md5.js@^1.3.4:
   version "1.3.5"

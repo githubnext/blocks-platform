@@ -33,7 +33,7 @@
     "fs-extra": "^10.0.0",
     "js-base64": "^3.7.2",
     "lodash": "^4.17.21",
-    "matter-js": "^0.17.1",
+    "matter-js": "^0.18.0",
     "next": "latest",
     "next-auth": "^4.0.2",
     "parse-github-url": "^1.0.2",

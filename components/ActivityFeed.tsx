@@ -45,7 +45,14 @@ export const ActivityFeed = ({
         } transition-width duration-200`}
     >
       <div className="flex flex-col h-full">
-        <div className="flex flex-row align-middle border-b border-gray-200 items-center py-3 bg-gray-50">
+
+        <Box
+          bg="canvas.subtle"
+          borderBottom="1px solid"
+          display="flex"
+          alignItems="center"
+          className="flex-none py-3 !border-gray-200"
+        >
           <div
             className="cursor-pointer flex align-center ml-4 mr-4"
             onClick={() => setOpen(!open)}
@@ -67,7 +74,7 @@ export const ActivityFeed = ({
             </svg>
           </div>
           <div className="font-semibold text-gray-600 p-px">Commits</div>
-        </div>
+        </Box>
         <Timeline>
           {commits.map((item) => (
             <Commit
@@ -112,8 +119,8 @@ const Commit = ({
       <Timeline.Item>
         <Timeline.Badge
           className={`transition-transform ${isSelected
-              ? "!bg-indigo-500 !text-white !border-indigo-200 transform scale-110"
-              : ""
+            ? "!bg-indigo-500 !text-white !border-indigo-200 transform scale-110"
+            : ""
             }`}
         >
           <StyledOcticon icon={CommitIcon} />

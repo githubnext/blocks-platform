@@ -49,6 +49,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
   } = props;
   const state = useFetchZip(block);
   const id = useRef(uniqueId("sandboxed-block-"));
+  const sandpackWrapper = useRef<HTMLDivElement>(null);
 
   const status = state.status
   const blockContent = bundleCode || state.value;
@@ -57,6 +58,22 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
     const onMessage = (event) => {
       if (event.data.id === id.current) {
         const { data, origin } = event;
+
+        // handle messages from generic block wrapper
+        const currentDomain = window.location.origin;
+        if (origin === currentDomain) {
+          if (data.type === "github-data--response") {
+            const iframe = sandpackWrapper.current?.querySelector("iframe");
+            if (!iframe) return;
+            iframe.contentWindow.postMessage({
+              type: "github-data--response",
+              ...data,
+            }, "*");
+          }
+          return
+        }
+
+        // handle messages from the sandboxed block
         const originRegex = new RegExp(/^https:\/\/\d{1,4}-\d{1,4}-\d{1,4}-sandpack.codesandbox.io$/)
         if (!originRegex.test(origin)) return;
         if (data.type === "update-metadata") {
@@ -65,7 +82,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
           onRequestUpdateContent(data.content);
         } else if (data.type === "navigate-to-path") {
           onNavigateToPath(data.path);
-        } else if (data.type === "request-github-data") {
+        } else if (data.type === "github-data--request") {
           onRequestGitHubData(data.requestType, data.config, data.id);
         }
       }
@@ -163,7 +180,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
           // for responses to this specific request
           const requestId = "${uniqueId("github-data--request--")}--" + getUniqueId()
           window.parent.postMessage({
-            type: "request-github-data",
+            type: "github-data--request",
             id: "${id.current}",
             context: ${JSON.stringify(context)},
             requestId,
@@ -174,7 +191,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
           return new Promise((resolve, reject) => {
             const onMessage = (event: MessageEvent) => {
               if (event.data.type !== "github-data--response") return
-              if (event.data.id !== id) return
+              if (event.data.id !== "${id.current}") return
               window.removeEventListener("message", onMessage)
               resolve(event.data.data)
             }
@@ -274,22 +291,25 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
   `;
 
     return (
-      <SandpackProvider
-        template="react"
-        customSetup={{
-          dependencies: {},
-          files: {
-            ...otherFiles,
-            "/App.js": injectedSource,
-          }
-        }}
-        autorun
-      >
-        <SandpackPreview
-          showOpenInCodeSandbox={false}
-          showRefreshButton={false}
-        />
-      </SandpackProvider>
+      <div ref={sandpackWrapper} className="w-full h-full">
+        <SandpackProvider
+          template="react"
+          customSetup={{
+            dependencies: {},
+            files: {
+              ...otherFiles,
+              "/App.js": injectedSource,
+            }
+          }}
+          autorun
+        >
+          <SandpackPreview
+            showOpenInCodeSandbox={false}
+            showRefreshButton={false}
+
+          />
+        </SandpackProvider>
+      </div>
     );
   }
   return null;

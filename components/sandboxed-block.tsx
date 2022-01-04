@@ -163,9 +163,9 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
           // for responses to this specific request
           const requestId = "${uniqueId("github-data--request--")}--" + getUniqueId()
           window.parent.postMessage({
-            type: "github-data--request",
+            type: "request-github-data",
             id: "${id.current}",
-            context,
+            context: ${JSON.stringify(context)},
             requestId,
             requestType,
             config,
@@ -264,10 +264,11 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
             tree={tree}
             metadata={metadata}
             isEmbedded
-          onUpdateMetadata={onUpdateMetadata}
-          onNavigateToPath={onNavigateToPath}
-          BlockComponent={BlockComponent}
-        />
+            onUpdateMetadata={onUpdateMetadata}
+            onNavigateToPath={onNavigateToPath}
+            onRequestUpdateContent={onRequestUpdateContent}
+            onRequestGitHubData={onRequestGitHubData}
+          />
         )
       }
   `;

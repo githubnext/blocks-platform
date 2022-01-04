@@ -45,9 +45,20 @@ const BlockTesting = ({ }) => {
   )
   return (
     <div className="sandbox-wrapper h-full w-full">
-      <SandboxedBlock {...props} />
+      <SandboxedBlock
+        {...props}
+        {...dummyProps}
+      />
     </div>
   )
 }
 
 export default BlockTesting
+
+const dummyProps = {
+  onUpdateMetadata: () => console.log(`onUpdateMetadata called, but not implemented in this local sandbox`),
+  onNavigateToPath: () => console.log(`onNavigateToPath called, but not implemented in this local sandbox`),
+  onRequestUpdateContent: () => console.log(`onRequestUpdateContent called, but not implemented in this local sandbox`),
+  onRequestGitHubData: () => console.log(`onRequestGitHubData called, but not implemented in this local sandbox`),
+  BlockComponent: null
+}

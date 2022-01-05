@@ -45,6 +45,7 @@ const BlockTesting = ({ }) => {
   )
   return (
     <div className="sandbox-wrapper h-full w-full">
+      {/* @ts-ignore */}
       <SandboxedBlock
         {...props}
         {...dummyProps}
@@ -60,5 +61,4 @@ const dummyProps = {
   onNavigateToPath: () => console.log(`onNavigateToPath called, but not implemented in this local sandbox`),
   onRequestUpdateContent: () => console.log(`onRequestUpdateContent called, but not implemented in this local sandbox`),
   onRequestGitHubData: () => console.log(`onRequestGitHubData called, but not implemented in this local sandbox`),
-  BlockComponent: null
 }

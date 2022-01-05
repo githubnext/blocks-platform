@@ -61,8 +61,6 @@ export function ExampleBlock(props: ExampleBlockProps) {
 
 
 import { ErrorBoundary } from "./error-boundary";
-import { SandboxedBlockWrapper } from "./sandboxed-block-wrapper";
-import { uniqueId } from "lodash";
 type BlockComponentProps = FileBlockProps & FolderBlockProps & {
   block: Block,
   path: string,
@@ -137,9 +135,9 @@ const BlockComponent = ({
         metadata={metadata}
         isEmbedded
         onUpdateMetadata={onUpdateMetadata}
+        onNavigateToPath={onNavigateToPath}
         onRequestUpdateContent={onRequestUpdateContent}
         onRequestGitHubData={onRequestGitHubData}
-        onNavigateToPath={onNavigateToPath}
       />
     </ErrorBoundary>
   )

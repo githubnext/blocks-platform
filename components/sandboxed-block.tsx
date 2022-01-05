@@ -216,77 +216,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
           onNavigateToPath={onNavigateToPath}
           onRequestUpdateContent={onRequestUpdateContent}
           onRequestGitHubData={onRequestGitHubData}
-          BlockComponent={BlockComponent}
         />
-      }
-
-      const BlockComponent = ({block, path, tree, ...props}) => {
-        const [contents, setContents] = React.useState(undefined)
-        const [metadata, setMetadata] = React.useState(undefined)
-
-        const getData = async () => {
-          if (block.type !== "file") return
-          const data = await props.onRequestGitHubData("file-content", {
-            owner: props.context.owner,
-            repo: props.context.repo,
-            path: path,
-            fileRef: props.context.fileRef,
-          })
-          setContents(data.content)
-        }
-        const getMetadata = async () => {
-          if (metadata) return
-          const data = await props.onRequestGitHubData("metadata", {
-            owner: props.context.owner,
-            repo: props.context.repo,
-            block: block,
-            path: path,
-          })
-          setMetadata(data)
-        }
-        React.useEffect(() => { getData() }, [path, block.id])
-        React.useEffect(() => { getMetadata() }, [path, block.id])
-
-        React.useEffect(() => {
-          // listen for updated metadata
-          const onMessageEvent = async (event: MessageEvent) => {
-            if (event.data.type === "updated-metadata") {
-              getMetadata()
-            }
-          };
-          window.addEventListener("message", onMessageEvent);
-          return () => {
-            window.removeEventListener(
-              "message",
-              onMessageEvent
-            );
-          };
-        }, []);
-
-        if (block.type === "file" && !contents) return (
-          <div className="p-10">
-            Loading...
-          </div>
-        )
-        if (!block.id) return null
-
-        const name = path.split("/").pop();
-
-        return (
-          <Block
-            block={block}
-            theme={"light"}
-            context={{ ...props.context, path, file: name, folder: name }}
-            contents={contents}
-            tree={tree}
-            metadata={metadata}
-            isEmbedded
-            onUpdateMetadata={onUpdateMetadata}
-            onNavigateToPath={onNavigateToPath}
-            onRequestUpdateContent={onRequestUpdateContent}
-            onRequestGitHubData={onRequestGitHubData}
-          />
-        )
       }
   `;
 

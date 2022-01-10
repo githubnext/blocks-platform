@@ -28,6 +28,9 @@ html,
 #__primerPortalRoot__ {
   z-index: 99999;
 }
+[data-portal-root="true"] {
+  height: 100%;
+}
 div[role="alertdialog"] {
   width: auto;
   max-width: min(80vw, 70em);

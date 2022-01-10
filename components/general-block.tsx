@@ -64,11 +64,11 @@ export function GeneralBlock(props: GeneralBlockProps) {
     }
   }
 
-  const onRequestUpdateMetadata = async (newMetadata: any, path: string, block: Block, currentMetadata: any) => {
+  const onRequestUpdateMetadata = async (newMetadata: any, pathToUpdate = path, blockToUpdate = block, currentMetadata = metadata) => {
     setRequestedMetadata(newMetadata);
     setRequestedMetadataExisting(JSON.stringify(currentMetadata || "{}", null, 2));
-    setRequestedMetadataPath(path);
-    setRequestedMetadataPathFull(getMetadataPath(block, path))
+    setRequestedMetadataPath(pathToUpdate);
+    setRequestedMetadataPathFull(getMetadataPath(blockToUpdate, pathToUpdate))
   }
   const onNavigateToPath = (path: string) => {
     router.push({

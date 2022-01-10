@@ -16,11 +16,12 @@ export default function App({
   return (
     <QueryClientProvider client={queryClient} contextSharing={true}>
       <Hydrate state={pageProps.dehydratedState}>
-        <BaseStyles />
         <ThemeProvider>
-          <SessionProvider session={session}>
-            <Component {...pageProps} />
-          </SessionProvider>
+          <BaseStyles>
+            <SessionProvider session={session}>
+              <Component {...pageProps} />
+            </SessionProvider>
+          </BaseStyles>
         </ThemeProvider>
       </Hydrate>
     </QueryClientProvider>

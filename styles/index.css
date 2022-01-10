@@ -21,9 +21,17 @@
 body,
 html,
 #__next {
+  @apply font-sans;
   height: 100%;
 }
 
+#__primerPortalRoot__ {
+  z-index: 99999;
+}
+div[role="alertdialog"] {
+  width: auto;
+  max-width: min(80vw, 70em);
+}
 .code.light {
   .hljs {
     color: #24292e;

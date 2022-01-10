@@ -1,4 +1,5 @@
 import "styles/index.css";
+import "styles/primer-blocks.scss";
 import "styles/markdown.css";
 import "./../blocks/blocks.css";
 import { useState } from "react";

@@ -105,7 +105,7 @@ const Commit = ({
   const router = useRouter();
   return (
     <button
-      className={`text-left px-2 cursor-pointer ${isSelected ? "bg-indigo-500 text-white" : "hover:bg-indigo-50"
+      className={`text-left px-2 cursor-pointer ${isSelected ? "bg-[#0A69DA] text-white" : "hover:bg-indigo-50"
         }`}
       onClick={() => {
         let { fileRef, ...newQuery } = router.query;
@@ -119,7 +119,7 @@ const Commit = ({
       <Timeline.Item>
         <Timeline.Badge
           className={`transition-transform ${isSelected
-            ? "!bg-indigo-500 !text-white !border-indigo-200 transform scale-110"
+            ? "!bg-[#0A69DA] !text-white !border-indigo-200 transform scale-110"
             : ""
             }`}
         >

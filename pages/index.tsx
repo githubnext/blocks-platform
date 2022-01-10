@@ -13,11 +13,11 @@ export default function Home() {
   return (
     <div className="h-screen flex items-center justify-center bg-gradient-to-t from-indigo-100 to-indigo-50">
       <div className="w-full px-4 lg:px-0 flex flex-col items-center justify-center z-10">
-        <h1 className="text-[10vw] font-black tracking-tighter text-gray-800 leading-[0.8em]">
-          <span className="font-thin">
-            GitHub
+        <h1 className="text-[10vw] font-bold tracking-tighter text-gray-800 leading-[0.8em]">
+          GitHub
+          <span className="font-light ml-5">
+            Blocks
           </span>
-          Blocks
         </h1>
         <p className="text-2xl tracking-[0.01em] font-light text-gray-500 leading-8 mt-7 max-w-2xl text-center mx-auto">
           What GitHub would look and feel like if end

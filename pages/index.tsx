@@ -45,7 +45,10 @@ export default function Home() {
           </div>
           <img className="w-[1.5em] ml-2" src="/next-octocat.svg" alt="GitHub Next logo" />
           <div className="font-bold tracking-tight">
-            GitHub Next
+            GitHub
+            <span className="font-normal ml-1">
+              Next
+            </span>
           </div>
 
         </div>

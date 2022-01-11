@@ -10,7 +10,7 @@
   "dependencies": {
     "@codesandbox/sandpack-react": "^0.10.2",
     "@excalidraw/excalidraw": "^0.10.0",
-    "@githubnext/blocks-examples": "https://github.com/githubnext/blocks-examples.git#0.7.26",
+    "@githubnext/blocks-examples": "https://github.com/githubnext/blocks-examples.git#0.7.27",
     "@githubnext/utils": "^0.12.3",
     "@githubocto/flat-ui": "^0.10.2",
     "@mdx-js/runtime": "^1.6.22",

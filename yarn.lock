@@ -822,9 +822,9 @@
     unist-util-visit "^1.0.0"
     uuid "^3.3.2"
 
-"@githubnext/blocks-examples@https://github.com/githubnext/blocks-examples.git#0.7.26":
+"@githubnext/blocks-examples@https://github.com/githubnext/blocks-examples.git#0.7.27":
   version "0.0.0"
-  resolved "https://github.com/githubnext/blocks-examples.git#50e0437ed8ccdb99c251775d1bc973076fa669ec"
+  resolved "https://github.com/githubnext/blocks-examples.git#91eddc8df6c96fb0af5fcce5c6913184c89efc9a"
   dependencies:
     "@excalidraw/excalidraw" "^0.10.0"
     "@fullstackio/cq" "^6.0.9"

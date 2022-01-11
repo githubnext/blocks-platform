@@ -5,4 +5,7 @@ module.exports = {
     }
     return config;
   },
+  env: {
+    PASSWORD_PROTECT: process.env.NEXT_PUBLIC_VERCEL_ENV !== 'development',
+  }
 }

@@ -1,3 +1,4 @@
+import { withPasswordProtect } from "@storyofams/next-password-protect";
 import "styles/index.css";
 import "styles/markdown.css";
 import "./../blocks/blocks.css";
@@ -7,7 +8,7 @@ import { ThemeProvider, BaseStyles } from "@primer/components";
 import { Hydrate, QueryClient, QueryClientProvider } from "react-query";
 import "@codesandbox/sandpack-react/dist/index.css";
 
-export default function App({
+function App({
   Component,
   pageProps: { session, ...pageProps },
 }) {
@@ -27,3 +28,7 @@ export default function App({
     </QueryClientProvider>
   );
 }
+
+export default process.env.PASSWORD_PROTECT
+  ? withPasswordProtect(App)
+  : App;

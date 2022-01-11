@@ -120,6 +120,8 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
     <title>Custom block</title>
   </head>
   <body>
+    <!-- this won't load if added to the head -->
+    <link href="https://unpkg.com/@primer/css@^16.0.0/dist/primer.css" rel="stylesheet" />
     ${cssFilesString}
     <div id="root"></div>
   </body>

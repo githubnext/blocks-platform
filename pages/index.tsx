@@ -1,9 +1,10 @@
+import { withPasswordProtect } from "@storyofams/next-password-protect";
 import { AnimatedBlocks } from "components/AnimatedBlocks";
 import { FullPageLoader } from "components/full-page-loader";
 import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 
-export default function Home() {
+function Home() {
   const { data: session, status } = useSession({ required: false });
 
   if (status === "loading") {
@@ -59,3 +60,7 @@ export default function Home() {
     </div>
   );
 }
+
+export default process.env.PASSWORD_PROTECT
+  ? withPasswordProtect(Home)
+  : Home

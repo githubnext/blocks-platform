@@ -1,4 +1,3 @@
-import { withPasswordProtect } from "@storyofams/next-password-protect";
 import "styles/index.css";
 import "styles/primer-blocks.scss";
 import "styles/markdown.css";
@@ -30,6 +29,4 @@ function App({
   );
 }
 
-export default process.env.PASSWORD_PROTECT
-  ? withPasswordProtect(App)
-  : App;
+export default App;

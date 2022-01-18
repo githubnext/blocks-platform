@@ -1,5 +1,5 @@
 import { FileContext } from "@githubnext/utils";
-import { Box, Link, StyledOcticon, Timeline } from "@primer/components";
+import { Box, Label, Link, StyledOcticon, Timeline } from "@primer/components";
 import { CommitIcon } from "@primer/octicons-react";
 import { useRepoTimeline } from "hooks";
 import { getRelativeTime } from "lib/date-utils";
@@ -73,7 +73,16 @@ export const ActivityFeed = ({
               />
             </svg>
           </div>
-          <div className="font-semibold text-gray-600 p-px">Commits</div>
+          <div className="font-semibold text-gray-600 p-px flex max-w-full min-w-0 pr-2">
+            <div className="flex-none">
+              Commits
+            </div>
+            {path && (
+              <Label className="min-w-0 ml-2 flex-1 truncate leading-6" outline>
+                {path}
+              </Label>
+            )}
+          </div>
         </Box>
         <Timeline>
           {commits.map((item) => (

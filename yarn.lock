@@ -822,15 +822,15 @@
     unist-util-visit "^1.0.0"
     uuid "^3.3.2"
 
-"@githubnext/blocks-examples@https://github.com/githubnext/blocks-examples.git#0.7.27":
+"@githubnext/blocks-examples@https://github.com/githubnext/blocks-examples.git#0.7.29":
   version "0.0.0"
-  resolved "https://github.com/githubnext/blocks-examples.git#91eddc8df6c96fb0af5fcce5c6913184c89efc9a"
+  resolved "https://github.com/githubnext/blocks-examples.git#174c3cdc62886dcc4b21c866a9a64f4e61c0b12e"
   dependencies:
     "@excalidraw/excalidraw" "^0.10.0"
     "@fullstackio/cq" "^6.0.9"
     "@fullstackio/remark-cq" "^6.1.2"
     "@githubnext/utils" "^0.12.3"
-    "@githubocto/flat-ui" "^0.10.2"
+    "@githubocto/flat-ui" "^0.12.1"
     "@loadable/component" "^5.15.0"
     "@mdx-js/runtime" "^1.6.22"
     "@octokit/rest" "^18.12.0"
@@ -881,10 +881,10 @@
     react "^17.0.2"
     zod "^3.11.6"
 
-"@githubocto/flat-ui@^0.10.2":
-  version "0.10.2"
-  resolved "https://registry.yarnpkg.com/@githubocto/flat-ui/-/flat-ui-0.10.2.tgz#25ea025e662721eac7f468662436864ebf81dd4a"
-  integrity sha512-AppECr1kfQGK0YDvKs4+EwDb0B7sxb6OKdkTLpDISoMFK1tHoqFJc/xaW6WTyrYNDBoyNzx1RehF7utI/nTSbg==
+"@githubocto/flat-ui@^0.12.1":
+  version "0.12.1"
+  resolved "https://registry.yarnpkg.com/@githubocto/flat-ui/-/flat-ui-0.12.1.tgz#ae4d9c36f7d4c7ac643b95e57685e6614be47051"
+  integrity sha512-ZY6oXJxC+4WFCeAdHEd5fOMwC4uVrFE5WD9Yobd9DLfNwissMDtrCZz1/+j3WSMCMwVXGWlV0Sp9gWnNl8vStw==
   dependencies:
     "@emotion/react" "^11.4.0"
     "@primer/octicons-react" "^12.1.0"

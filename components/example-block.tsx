@@ -42,7 +42,7 @@ export function ExampleBlock(props: ExampleBlockProps) {
   )
 
   return (
-    <div className="example-block w-full h-full" id={`example-block-${block.id}`}>
+    <div className="example-block relative w-full h-full" id={`example-block-${block.id}`}>
       <Component
         block={block}
         content={contents || ""}

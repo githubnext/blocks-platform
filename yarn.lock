@@ -912,6 +912,37 @@
     twin.macro "^2.6.2"
     zustand "^3.3.3"
 
+"@githubocto/flat-ui@^0.13.1":
+  version "0.13.1"
+  resolved "https://registry.yarnpkg.com/@githubocto/flat-ui/-/flat-ui-0.13.1.tgz#04786bf4b342e15fa173ccab77fec5f3537c8852"
+  integrity sha512-tZiZEKoxIyA53qEEI4ODryJh41OADCehke5BN3+vjKqEsG4j7DXQ+Io6ABWJNSNi1QfLOdAHJZzTpJ4rIkSIyQ==
+  dependencies:
+    "@emotion/react" "^11.4.0"
+    "@primer/octicons-react" "^12.1.0"
+    "@radix-ui/react-dropdown-menu" "^0.0.10"
+    "@radix-ui/react-popover" "^0.0.8"
+    "@reach/checkbox" "^0.13.2"
+    "@tailwindcss/line-clamp" "^0.2.0"
+    "@types/dompurify" "^2.2.2"
+    "@types/lodash" "^4.0.6"
+    "@types/react-virtualized-auto-sizer" "^1.0.0"
+    "@types/react-window" "^1.8.2"
+    anchorme "^2.1.2"
+    d3 "^6.6.0"
+    date-fns "^2.19.0"
+    dompurify "^2.2.9"
+    downshift "^6.1.1"
+    immer "^8.0.2"
+    lodash "^4.17.21"
+    lodash-es "^4.17.21"
+    match-sorter "^6.3.0"
+    react-range "^1.8.7"
+    react-use "^17.2.0"
+    react-virtualized-auto-sizer "^1.0.5"
+    react-window "^1.8.6"
+    twin.macro "^2.6.2"
+    zustand "^3.3.3"
+
 "@hapi/accept@5.0.2":
   version "5.0.2"
   resolved "https://registry.yarnpkg.com/@hapi/accept/-/accept-5.0.2.tgz#ab7043b037e68b722f93f376afb05e85c0699523"

@@ -116,7 +116,7 @@ repo   # the GitHub repo
 path   # the path to the file
 ```
 
-You'll need a GitHub PAT to load data from the API. Add that to an .env.local file.
+This app uses GitHub OAuth to authenticate users, with help from the [NextAuth](https://next-auth.js.org/) package. You'll need to create an OAuth app and provide the required environment variables (app secret and app ID) to the `.env.local` file.
 
 ```
 GITHUB_SECRET=X

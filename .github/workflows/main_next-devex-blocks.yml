@@ -14,23 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-        with:
-          persist-credentials: false
 
       - name: Set up Node.js version
         uses: actions/setup-node@v1
         with:
           node-version: "16.x"
-
-      - name: Reconfigure git to use HTTP authentication
-        run: >
-          git config --global url."https://github.com/".insteadOf
-          ssh://git@github.com/
-
-      - name: yarn install & build
-        run: |
-          yarn
-          yarn build
 
       - name: "Deploy to Azure Web App"
         id: deploy-to-webapp

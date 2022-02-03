@@ -38,8 +38,9 @@ jobs:
         with:
           name: node-app
           path: |
-            .
-            !node_modules
+            .next/
+            node_modules/
+            package.json
 
   deploy:
     runs-on: ubuntu-latest

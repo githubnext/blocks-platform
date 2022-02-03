@@ -3,6 +3,7 @@
   "scripts": {
     "dev": "NEXT_PUBLIC_VERCEL_ENV=development next dev",
     "build": "next build",
+    "static": "next build && next export",
     "start": "next start",
     "preinstall": "node sync-with-example-blocks.mjs",
     "postinstall": "node process-example-blocks.mjs"

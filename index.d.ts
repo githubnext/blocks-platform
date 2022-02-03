@@ -39,9 +39,9 @@ type RepoInfo =
   import("@octokit/openapi-types").components["schemas"]["repository"];
 
 interface RepoTimeline {
-  activity: any;
+  activity?: any;
   commits: any;
-  fileChanges: any;
+  fileChanges?: any;
 }
 
 interface Block {

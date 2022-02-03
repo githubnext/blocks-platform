@@ -238,29 +238,53 @@ export async function getRepoTimeline(
   params: RepoContextWithToken & { path: string }
 ): Promise<RepoTimeline> {
   const { owner, repo, path, token } = params;
-  const url = `/api/repo-info?owner=${owner}&repo=${repo}&path=${path}&token=${
-    token || ""
-  }`;
-  const res = await fetch(url);
-  if (res.status !== 200) {
-    const error = await res.json();
+
+  const branch = "HEAD";
+  const url = `https://api.github.com/repos/${owner}/${repo}/commits?path=${path}&sha=${branch}`;
+
+  const commitsRes = await fetch(url, {
+    headers: {
+      Authorization: token && `token ${token}`,
+    },
+  });
+  const data = await commitsRes.json();
+
+  if (commitsRes.status !== 200) {
+    const error = await commitsRes.json();
     throw new Error(error.message);
   }
-  const data = await res.json();
-  return data;
+
+  const commits = data.map((commit) => ({
+    date: commit.commit.author.date,
+    username: commit.author?.login,
+    message: commit.commit.message,
+    url: commit.html_url,
+    sha: commit.sha,
+  }));
+
+  return { commits };
 }
 
 export async function getRepoFiles(
   params: RepoContextWithToken
 ): Promise<RepoFiles> {
   const { owner, repo, token } = params;
-  const url = `/api/file-tree?owner=${owner}&repo=${repo}&token=${token || ""}`;
-  const res = await fetch(url);
-  if (res.status !== 200) {
-    const error = await res.json();
+
+  const branch = "HEAD";
+  const url = `https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`;
+
+  const fileTreeRes = await fetch(url, {
+    headers: {
+      Authorization: token && `Bearer ${token}`,
+    },
+  });
+  const fileTree = await fileTreeRes.json();
+
+  if (fileTreeRes.status !== 200) {
+    const error = await fileTreeRes.json();
     throw new Error(error.message);
   }
-  const { files } = await res.json();
+  const files = fileTree.tree;
   return files;
 }
 

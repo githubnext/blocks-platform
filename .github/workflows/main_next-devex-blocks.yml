@@ -28,11 +28,11 @@ jobs:
           git config --global url."https://github.com/".insteadOf
           ssh://git@github.com/
 
-      - name: npm install, build, and test
+      - name: yarn install, build, and test
         run: |
           yarn
-          yarn build --if-present
-          yarn test --if-present
+          yarn build
+          yarn test
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2

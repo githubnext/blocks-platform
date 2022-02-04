@@ -1,1 +1,2 @@
 httpTimeout: 120000
+npmRegistryServer: "https://registry.npmjs.com"

@@ -15,29 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set up Node.js version
-        uses: actions/setup-node@v1
-        with:
-          node-version: "16.x"
-
-      - name: Reconfigure git to use HTTP authentication
-        run: >
-          git config --global url."https://github.com/".insteadOf
-          ssh://git@github.com/
-
-      - name: yarn install & build
+      - name: git push to Azure Web Apps
         run: |
-          yarn
-          yarn build
-
-      - name: package zip
-        run: zip -r web.zip package.json .next node_modules/
-
-      - name: "Deploy to Azure Web App"
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: "next-devex-blocks"
-          slot-name: "Production"
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_C29AB042F62144EBBC2EDD846D3F2740 }}
-          package: web.zip
+          git remote add azure https://${{ secrets.AZURE_GIT_USER }}:${{ secrets.AZURE_GIT_PASSWORD }}@next-devex-blocks.scm.azurewebsites.net:443/next-devex-blocks.git
+          git push azure main

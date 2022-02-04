@@ -17,8 +17,8 @@ jobs:
 
       - name: git push to Azure Web Apps
         env:
-          USER: ${{ secrets.AZURE_GIT_USER }}
-          PASS: ${{ secrets.AZURE_GIT_PASSWORD }}
+          AZURE_GIT_USER: ${{ secrets.AZURE_GIT_USER }}
+          AZURE_GIT_PASSWORD: ${{ secrets.AZURE_GIT_PASSWORD }}
         run: |
-          git remote add azure "https://$USER:$PASS@next-devex-blocks.scm.azurewebsites.net:443/next-devex-blocks.git"
+          git remote add azure "https://$AZURE_GIT_USER:$AZURE_GIT_PASSWORD@next-devex-blocks.scm.azurewebsites.net:443/next-devex-blocks.git"
           git push azure main

@@ -1,7 +1,4 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy Node.js app to Azure Web App - next-devex-blocks
+name: Deploy to Azure (next-devex-blocks)
 
 on:
   push:
@@ -15,16 +12,24 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup tmate session
-        env:
-          AZURE_GIT_USER: ${{ secrets.AZURE_GIT_USER }}
-          AZURE_GIT_PASSWORD: ${{ secrets.AZURE_GIT_PASSWORD }}
-        uses: mxschmitt/action-tmate@v3
+      - name: Set up Node.js version
+        uses: actions/setup-node@v1
+        with:
+          node-version: "16.x"
 
-      - name: git push to Azure Web Apps
-        env:
-          AZURE_GIT_USER: ${{ secrets.AZURE_GIT_USER }}
-          AZURE_GIT_PASSWORD: ${{ secrets.AZURE_GIT_PASSWORD }}
+      - name: yarn install & build
         run: |
-          git remote add azure "https://$AZURE_GIT_USER:$AZURE_GIT_PASSWORD@next-devex-blocks.scm.azurewebsites.net:443/next-devex-blocks.git"
-          git push azure main
+          yarn
+          yarn build
+
+      - name: package zip
+        run: zip -r web.zip package.json .next node_modules/
+
+      - name: "Deploy to Azure Web App"
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: "next-devex-blocks"
+          slot-name: "Production"
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+          package: web.zip

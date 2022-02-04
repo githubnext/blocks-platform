@@ -20,6 +20,14 @@ jobs:
         with:
           node-version: "16.x"
 
+      - name: yarn install & build
+        run: |
+          yarn
+          yarn build
+
+      - name: package zip
+        run: zip -r web.zip package.json .next node_modules/
+
       - name: "Deploy to Azure Web App"
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
@@ -27,3 +35,4 @@ jobs:
           app-name: "next-devex-blocks"
           slot-name: "Production"
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_C29AB042F62144EBBC2EDD846D3F2740 }}
+          package: web.zip

@@ -15,6 +15,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Setup tmate session
+        env:
+          AZURE_GIT_USER: ${{ secrets.AZURE_GIT_USER }}
+          AZURE_GIT_PASSWORD: ${{ secrets.AZURE_GIT_PASSWORD }}
+        uses: mxschmitt/action-tmate@v3
+
       - name: git push to Azure Web Apps
         env:
           AZURE_GIT_USER: ${{ secrets.AZURE_GIT_USER }}

@@ -48,7 +48,6 @@ jobs:
             ${{ runner.os }}-nextjs-${{ hashFiles('**/yarn-lock') }}-
 
       - name: yarn build
-        if: steps.cache-next.outputs.cache-hit != 'true'
         run: |
           yarn build
 

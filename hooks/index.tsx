@@ -19,9 +19,8 @@ import {
   getFileContentsAndDependencies,
   getRepoTimeline,
 } from "ghapi";
-import { defaultBlocksRepo } from "blocks/index"
+import { defaultBlocksRepo } from "blocks/index";
 import { useRouter } from "next/router";
-
 
 export function useFileContent(
   params: UseFileContentParams,
@@ -40,8 +39,7 @@ export function useFileContent(
         token,
       }),
     {
-      enabled:
-        Boolean(repo) && Boolean(owner) && Boolean(path),
+      enabled: Boolean(repo) && Boolean(owner) && Boolean(path),
       refetchOnWindowFocus: false,
       retry: false,
       ...config,
@@ -114,7 +112,7 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
       content: contentEncoded,
       sha: sha,
     });
-  } catch (e) { }
+  } catch (e) {}
 }
 
 export function useUpdateFileContents(
@@ -145,10 +143,7 @@ export function useMetadata({
     },
     {
       refetchOnWindowFocus: false,
-      onError: () => {
-        console.info(`%c No metadata found at ${metadataPath}`, 'background: #ddd; padding: 0.6em, font-weight: 700, color: #aaa');
-      },
-      useErrorBoundary: false
+      useErrorBoundary: false,
     }
   );
 
@@ -157,14 +152,13 @@ export function useMetadata({
   useEffect(() => {
     if (!metadataData) {
       setMetadata({});
-      return
+      return;
     }
     try {
       const rawString = metadataData.content;
       const metadata = JSON.parse(rawString);
       setMetadata(metadata);
     } catch (e) {
-      console.error(e);
       setMetadata({});
     }
   }, [metadataData]);
@@ -172,7 +166,7 @@ export function useMetadata({
   const { mutateAsync } = useUpdateFileContents({});
   const onUpdateMetadata = useCallback(
     async (contents, overridePath = null) => {
-      if (!token) return
+      if (!token) return;
 
       await mutateAsync({
         content: JSON.stringify(contents, null, 2),
@@ -180,7 +174,7 @@ export function useMetadata({
         repo,
         path: overridePath || metadataPath,
         sha: "latest",
-        token
+        token,
       });
       setMetadata(contents);
     },
@@ -206,19 +200,21 @@ export function useRepoTimeline(
   params: RepoContextWithToken & { path: string },
   config?: UseQueryOptions<any>
 ) {
-  return useQuery(["timeline", params, config?.queryKey], () => getRepoTimeline(params), {
-    enabled:
-      Boolean(params.repo) && Boolean(params.owner),
-    refetchOnWindowFocus: false,
-    retry: false,
-    ...config,
-  });
+  return useQuery(
+    ["timeline", params, config?.queryKey],
+    () => getRepoTimeline(params),
+    {
+      enabled: Boolean(params.repo) && Boolean(params.owner),
+      refetchOnWindowFocus: false,
+      retry: false,
+      ...config,
+    }
+  );
 }
 
 export function useRepoFiles(params: RepoContextWithToken) {
   return useQuery(["files", params], () => getRepoFiles(params), {
-    enabled:
-      Boolean(params.repo) && Boolean(params.owner),
+    enabled: Boolean(params.repo) && Boolean(params.owner),
     refetchOnWindowFocus: false,
     retry: false,
   });
@@ -282,23 +278,21 @@ export function useGetBlocksInfo() {
   );
 }
 
-
 const defaultFileBlock = {
   id: "file-block",
   owner: "githubnext",
-  repo: "blocks-examples"
-} as Block
+  repo: "blocks-examples",
+} as Block;
 
 const defaultFolderBlock = {
   id: "minimap-block",
   owner: "githubnext",
-  repo: "blocks-examples"
-} as Block
-export const getBlockKey = (block: Block) => (
-  [block?.owner, block?.repo, block?.id || ""].join("__")
-)
-const defaultFileBlockKey = getBlockKey(defaultFileBlock)
-const defaultFolderBlockKey = getBlockKey(defaultFolderBlock)
+  repo: "blocks-examples",
+} as Block;
+export const getBlockKey = (block: Block) =>
+  [block?.owner, block?.repo, block?.id || ""].join("__");
+const defaultFileBlockKey = getBlockKey(defaultFileBlock);
+const defaultFolderBlockKey = getBlockKey(defaultFolderBlock);
 interface UseManageBlockParams {
   path: string;
   storedDefaultBlock: string;
@@ -312,53 +306,81 @@ export function useManageBlock({
   const router = useRouter();
   const { blockKey = "" } = router.query;
 
-  let [blockOwner = defaultFileBlock.owner, blockRepo = defaultFileBlock.repo, blockId] = (blockKey as string).split("__");
+  let [
+    blockOwner = defaultFileBlock.owner,
+    blockRepo = defaultFileBlock.repo,
+    blockId,
+  ] = (blockKey as string).split("__");
   if (!blockOwner) blockOwner = defaultFileBlock.owner;
   if (!blockRepo) blockRepo = defaultFileBlock.repo;
 
-  const { data: allBlocks = [] } = useGetBlocksInfo()
+  const { data: allBlocks = [] } = useGetBlocksInfo();
   // const isDefaultBlocksRepo = `${blockOwner}/${blockRepo}` === `${defaultFileBlock.owner}/${defaultFileBlock.repo}`
-  const isDefaultBlocksRepo = true
-  const blocksRepo = isDefaultBlocksRepo ? defaultBlocksRepo : allBlocks.find(block => (
-    block.owner === blockOwner && block.repo === blockRepo
-  ))
-  const blocks = (blocksRepo?.blocks || []).map(block => ({
-    ...block,
-    owner: blocksRepo.owner,
-    repo: blocksRepo.repo,
-  } as Block))
+  const isDefaultBlocksRepo = true;
+  const blocksRepo = isDefaultBlocksRepo
+    ? defaultBlocksRepo
+    : allBlocks.find(
+        (block) => block.owner === blockOwner && block.repo === blockRepo
+      );
+  const blocks = (blocksRepo?.blocks || []).map(
+    (block) =>
+      ({
+        ...block,
+        owner: blocksRepo.owner,
+        repo: blocksRepo.repo,
+      } as Block)
+  );
   const extension = (path as string).split(".").slice(-1)[0];
   const relevantBlocks = blocks.filter(
     (d) =>
       d.type === (isFolder ? "folder" : "file") &&
-      (!d.extensions || d.extensions?.includes("*") || d.extensions?.includes(extension))
+      (!d.extensions ||
+        d.extensions?.includes("*") ||
+        d.extensions?.includes(extension))
   );
-  const defaultBlockKey = storedDefaultBlock || (
-    getBlockKey(blocks.find(block => block.id === overrideDefaultBlocks[extension]) || relevantBlocks[1] || relevantBlocks[0])
-  )
-  const defaultBlock = blocks.find(block => getBlockKey(block) === defaultBlockKey)
-    || relevantBlocks[1]
-  blockId = blockId || defaultBlock?.id || (isFolder ? defaultFolderBlock.id : defaultFileBlock.id)
+  const defaultBlockKey =
+    storedDefaultBlock ||
+    getBlockKey(
+      blocks.find((block) => block.id === overrideDefaultBlocks[extension]) ||
+        relevantBlocks[1] ||
+        relevantBlocks[0]
+    );
+  const defaultBlock =
+    blocks.find((block) => getBlockKey(block) === defaultBlockKey) ||
+    relevantBlocks[1];
+  blockId =
+    blockId ||
+    defaultBlock?.id ||
+    (isFolder ? defaultFolderBlock.id : defaultFileBlock.id);
 
-  const allBlocksFlat = allBlocks.flatMap(repo => repo.blocks.map(block => ({
-    ...block,
-    owner: repo.owner,
-    repo: repo.repo,
-  } as Block)))
+  const allBlocksFlat = allBlocks.flatMap((repo) =>
+    repo.blocks.map(
+      (block) =>
+        ({
+          ...block,
+          owner: repo.owner,
+          repo: repo.repo,
+        } as Block)
+    )
+  );
 
-  let block = blocks.find(block => block.id === blockId)
-    || allBlocksFlat.find(block => block.id === blockId)
-    || blocks[0]
-    || {} as Block
+  let block =
+    blocks.find((block) => block.id === blockId) ||
+    allBlocksFlat.find((block) => block.id === blockId) ||
+    blocks[0] ||
+    ({} as Block);
 
-  if (isFolder && block.type !== "folder" || !isFolder && block.type !== "file") {
-    block = defaultBlock
+  if (
+    (isFolder && block.type !== "folder") ||
+    (!isFolder && block.type !== "file")
+  ) {
+    block = defaultBlock;
   }
 
-  let blockOptions = relevantBlocks
-  if (block && !blocks.find(block => block.id === blockId)) {
+  let blockOptions = relevantBlocks;
+  if (block && !blocks.find((block) => block.id === blockId)) {
     // Add the custom block to the list
-    blockOptions.push({ ...block, title: `Custom: ${block.title}` })
+    blockOptions.push({ ...block, title: `Custom: ${block.title}` });
   }
 
   const setBlock = (block: Block) => {
@@ -370,7 +392,7 @@ export function useManageBlock({
         blockKey: getBlockKey(block),
       },
     });
-  }
+  };
 
   return {
     block,
@@ -378,9 +400,9 @@ export function useManageBlock({
     blockOptions: relevantBlocks,
     defaultBlock,
     allBlocks,
-  }
+  };
 }
 const overrideDefaultBlocks = {
   js: "code-block",
   ts: "code-block",
-}
+};

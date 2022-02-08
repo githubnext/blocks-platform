@@ -11,9 +11,7 @@ export default function (props: FileBlockProps) {
     if (p5Ref.current) {
       try {
         new p5(eval(content), p5Ref.current);
-      } catch (e) {
-        console.log(e);
-      }
+      } catch (e) {}
     }
   }, [p5Ref.current, content]);
 

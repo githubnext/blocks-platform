@@ -7,6 +7,7 @@ import { SessionProvider } from "next-auth/react";
 import { ThemeProvider, BaseStyles } from "@primer/components";
 import { Hydrate, QueryClient, QueryClientProvider } from "react-query";
 import "@codesandbox/sandpack-react/dist/index.css";
+import Head from "next/head";
 
 function App({
   Component,
@@ -16,6 +17,9 @@ function App({
 
   return (
     <QueryClientProvider client={queryClient} contextSharing={true}>
+      <Head>
+        <meta name="robots" content="noindex,nofollow" />
+      </Head>
       <Hydrate state={pageProps.dehydratedState}>
         <ThemeProvider>
           <BaseStyles>

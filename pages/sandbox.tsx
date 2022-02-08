@@ -1,5 +1,5 @@
 import { SearchAutocomplete } from "components/search-autocomplete";
-import { Item, Section, useAsyncList } from "react-stately";
+import { Item, useAsyncList } from "react-stately";
 
 export default function Sandbox() {
   let list = useAsyncList<any>({
@@ -30,32 +30,10 @@ export default function Sandbox() {
           onInputChange={list.setFilterText}
           loadingState={list.loadingState}
           onLoadMore={list.loadMore}
-          onSelectionChange={(e) => {
-            console.log("you pickedk", e);
-          }}
         >
           {(item) => <Item key={item.name}>{item.name}</Item>}
         </SearchAutocomplete>
       </div>
-      {/* <SearchAutocomplete
-        placeholder="Search for blocks"
-        items={[{ label: "foo" }]}
-      >
-        <Section title="Companies">
-          <Item>Hello</Item>
-          <Item>Tagchat</Item>
-          <Item>Yambee</Item>
-          <Item>Photobug</Item>
-          <Item>Livepath</Item>
-        </Section>
-        <Section title="People">
-          <Item>Theodor Dawber</Item>
-          <Item>Dwight Stollenberg</Item>
-          <Item>Maddalena Prettjohn</Item>
-          <Item>Maureen Fassan</Item>
-          <Item>Abbie Binyon</Item>
-        </Section>
-      </SearchAutocomplete> */}
     </div>
   );
 }

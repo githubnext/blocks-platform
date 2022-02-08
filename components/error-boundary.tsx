@@ -10,16 +10,13 @@ export class ErrorBoundary extends React.Component {
     return { hasError: true, errorMessage: error.message };
   }
 
-  componentDidCatch(error, errorInfo) {
-    console.log(error, errorInfo);
-  }
+  componentDidCatch(error, errorInfo) {}
 
   render() {
     // @ts-ignore
     if (this.state.hasError) {
       return (
         <div className="flex flex-col">
-
           <h1>Something went wrong.</h1>
           <p>
             {/* @ts-ignore */}

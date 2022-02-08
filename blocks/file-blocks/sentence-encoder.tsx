@@ -100,8 +100,6 @@ export default function (props: FileBlockProps) {
 
   useEffect(() => {
     const init = async () => {
-      console.log("initializing...");
-
       const model = await use.loadQnA();
       setModel(model);
       const result = computeEmbedding(model, input);

@@ -91,7 +91,6 @@ export async function getFileContentsAndDependencies(
   const { repo, owner, path, fileRef, token } = params;
 
   const file = await getFileContent(params);
-  console.log({ file });
   const imports = await parseStaticImports(file.content);
   // TODO: do we need to make this smarter?
   const relativeImports = imports.filter((d: Import) =>
@@ -131,7 +130,6 @@ export async function getMainBranch(
   }
 
   const resObject = await res.json();
-  console.log(resObject);
   return resObject.name;
 }
 export async function getLatestSha(

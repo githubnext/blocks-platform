@@ -11,7 +11,6 @@ export const CodeSandbox = ({
   dependencies?: string[];
 }) => {
   const [url, setUrl] = useState("");
-  console.log(children);
   const parameters = getParameters({
     files: {
       "index.js": {
@@ -29,7 +28,6 @@ export const CodeSandbox = ({
   });
 
   const getSandboxUrl = async () => {
-    console.log(parameters);
     const url = `https://codesandbox.io/api/v1/sandboxes/define?parameters=${parameters}&json=1`;
     const res = await fetch(url);
     const data = await res.json();

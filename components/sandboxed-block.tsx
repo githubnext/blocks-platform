@@ -192,6 +192,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
 
           return new Promise((resolve, reject) => {
             const onMessage = (event: MessageEvent) => {
+              if (event.origin !== ${window.location.origin}) return;
               if (event.data.type !== "github-data--response") return
               if (event.data.id !== "${id.current}") return
               window.removeEventListener("message", onMessage)

@@ -103,6 +103,7 @@ const BlockComponent = ({
   useEffect(() => {
     // listen for updated metadata
     const onMessageEvent = async (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return;
       if (event.data.type === "updated-metadata") {
         getMetadata()
       }

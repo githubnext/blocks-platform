@@ -20,6 +20,8 @@ const BlockTesting = ({ }) => {
   const [props, setProps] = useState<BlockTestingProps | null>(null)
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
+      // this would need to be their localhost, but we need to refactor all of this anyway
+      if (event.origin !== window.location.origin) return;
       if (event.data.type === "block-props") {
         const { block, contents, tree, metadata, context,
           onUpdateMetadata, onRequestUpdateContent, onRequestGitHubData, onNavigateToPath,

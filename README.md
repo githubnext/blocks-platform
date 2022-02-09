@@ -146,3 +146,5 @@ yarn add @githubnext/blocks-examples@https://github.com/githubnext/blocks-exampl
 ```
 
 That's it! Upon building, the example blocks are synced to the `/blocks` folder (which is completely auto-generated), along with an `index.js` file that exports the blocks and an `index.css` file that exports the styles.
+
+Note: the `postinstall` script also copies the Excalidraw assets to the `/public/excalidraw` folder to prevent from pulling then in from the unpkg CDN.

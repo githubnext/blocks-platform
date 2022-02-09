@@ -15,8 +15,6 @@ const simplePollBlock = dynamic(() => import("./file-blocks/poll.tsx"), {ssr:fal
 const chartBlock = dynamic(() => import("./file-blocks/charts/index.tsx"), {ssr:false});
 const markdownBlock = dynamic(() => import("./file-blocks/live-markdown/index.tsx"), {ssr:false});
 const reactFeedbackBlock = dynamic(() => import("./file-blocks/annotate-react/index.tsx"), {ssr:false});
-const processing = dynamic(() => import("./file-blocks/processing.tsx"), {ssr:false});
-const sentenceEncoder = dynamic(() => import("./file-blocks/sentence-encoder.tsx"), {ssr:false});
 const homepage = dynamic(() => import("./folder-blocks/homepage/index.tsx"), {ssr:false});
 const minimapBlock = dynamic(() => import("./folder-blocks/minimap/index.tsx"), {ssr:false});
 const dashboardBlock = dynamic(() => import("./folder-blocks/dashboard/index.tsx"), {ssr:false});
@@ -35,8 +33,6 @@ export default {
   'chart-block': chartBlock,
   'markdown-block': markdownBlock,
   'react-feedback-block': reactFeedbackBlock,
-  'processing': processing,
-  'sentence-encoder': sentenceEncoder,
   'homepage': homepage,
   'minimap-block': minimapBlock,
   'dashboard-block': dashboardBlock,
@@ -188,28 +184,6 @@ export const defaultBlocksRepo = {
         "tsx"
       ],
       "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/Aside.jsx"
-    },
-    {
-      "type": "file",
-      "id": "processing",
-      "title": "Processing sketch viewer",
-      "description": "View your p5.js sketches",
-      "entry": "/src/blocks/file-blocks/processing.tsx",
-      "extensions": [
-        "js"
-      ],
-      "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/processing-sketch.js"
-    },
-    {
-      "type": "file",
-      "id": "sentence-encoder",
-      "title": "Sentence encoder",
-      "description": "Experiment with your sentence-encoder",
-      "entry": "/src/blocks/file-blocks/sentence-encoder.tsx",
-      "extensions": [
-        "json"
-      ],
-      "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/queries.json"
     },
     {
       "type": "folder",

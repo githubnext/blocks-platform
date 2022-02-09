@@ -25,11 +25,6 @@ module.exports = {
               "worker-src 'self'",
               "style-src 'self' 'unsafe-inline'",
               [
-                "font-src",
-                // for the excalidraw Block
-                "https://unpkg.com/@excalidraw/",
-              ].join(" "),
-              [
                 "frame-src",
                 // for sandboxed embeds
                 "https://codesandbox.io/",
@@ -41,8 +36,6 @@ module.exports = {
                 // "https://raw.githubusercontent.com/",
                 // for using Tailwind styles in example Blocks
                 "https://cdn-tailwindcss.vercel.app/",
-                // for the excalidraw Block
-                "https://unpkg.com/@excalidraw/",
               ].join(" "),
               [
                 "img-src",
@@ -55,6 +48,7 @@ module.exports = {
                 "'self'",
                 // for local dev
                 isDev && "webpack://*",
+                // for fetching file contents from GitHub
                 "https://raw.githubusercontent.com/",
                 // for hitting the GitHub API
                 "https://api.github.com/",

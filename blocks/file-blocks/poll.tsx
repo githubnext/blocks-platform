@@ -1,6 +1,8 @@
 import { useState } from "react";
+// import { useUpdateFileContents, useFileContent } from "hooks";
+// import { BlockProps } from ".";
 
-import { FileBlockProps, useTailwindCdn } from "@githubnext/utils";
+import { FileBlockProps, useTailwindCdn } from '@githubnext/utils'; // to import tailwind css
 
 interface PollOptions {
   text: string;
@@ -8,7 +10,7 @@ interface PollOptions {
 }
 
 type Poll = {
-  poll: string;
+  poll: string; // title
   options: PollOptions[];
 };
 
@@ -17,14 +19,48 @@ export default function (props: FileBlockProps) {
 
   const { content } = props;
   const [poll, setPoll] = useState<Poll>(JSON.parse(content));
-  if (!poll || !poll.options)
-    return (
-      <div className="py-20 text-gray-500 w-full text-center italic">
-        No poll data found
-      </div>
-    );
+  if (!poll || !poll.options) return (
+    <div className="py-20 text-gray-500 w-full text-center italic">
+      No poll data found
+    </div>
+  )
 
   const totalVotes = poll.options.reduce((acc, cur) => acc + cur.votes, 0);
+
+  // for saving the poll file
+  /*
+    const {
+        data: dataRes,
+        status,
+        refetch,
+    } = useFileContent({
+        repo: meta.repo,
+        owner: meta.owner,
+        path: meta.path,
+    });
+
+    const { mutateAsync } = useUpdateFileContents({
+        onSuccess: () => {
+        console.log("poll saved");
+        },
+        onError: (e) => {
+        console.log("poll did NOT save, something bad happend", e);
+        },
+    });
+
+    const handleSave = async () => {
+        await mutateAsync({
+        content: JSON.stringify(poll),
+        owner: meta.owner,
+        repo: meta.repo,
+        path: dataRes[0].name,
+        // sha: meta.sha,
+        sha: dataRes[0].sha,
+        });
+
+        await refetch();
+    };
+    */
 
   return (
     <div className="w-full m-2 py-20 flex flex-col items-center">
@@ -43,6 +79,16 @@ export default function (props: FileBlockProps) {
               </div>
               <span className="mr-2">{percent}%</span>
               <span className="font-light mr-2">{option.votes} votes</span>
+              {/* <button
+                    className="bg-transparent hover:bg-blue-500 text-blue-400 hover:text-white px-2 border border-blue-500 hover:border-transparent rounded"
+                    onClick={() => {
+                    poll.options[index].votes += 1;
+                    setPoll(poll);
+                    handleSave();
+                    }}
+                >
+                    Vote
+                </button> */}
             </div>
           </div>
         );

@@ -21,6 +21,7 @@ async function init() {
   const blocks = blocksPackageJson.blocks
   await createIndexFile(blocks)
   await processFiles(blocks)
+  await copyExcalidrawAssetsToLocal()
 }
 
 init();
@@ -103,4 +104,16 @@ async function processJsFile(file) {
   const contents = await fse.readFile(file, "utf8")
   const newContents = contents.replace(/import.+(\.css)/g, "// import './$1'")
   await fse.writeFile(file, newContents)
+}
+
+async function copyExcalidrawAssetsToLocal() {
+  const folderNames = [
+    "excalidraw-assets",
+    "excalidraw-assets-dev",
+  ]
+  const fromPath = "./node_modules/@excalidraw/excalidraw/dist/"
+  const toPath = "./public/excalidraw/"
+  for (const folderName of folderNames) {
+    await fse.copy(fromPath + folderName, toPath + folderName)
+  }
 }

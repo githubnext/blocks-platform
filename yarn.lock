@@ -700,15 +700,15 @@
     unist-util-visit "^1.0.0"
     uuid "^3.3.2"
 
-"@githubnext/blocks-examples@https://github.com/githubnext/blocks-examples.git#0.7.34":
+"@githubnext/blocks-examples@https://github.com/githubnext/blocks-examples.git#0.7.35":
   version "0.0.0"
-  resolved "https://github.com/githubnext/blocks-examples.git#ab9588f1dad74c5279b112f8ac3de78ca114fea2"
+  resolved "https://github.com/githubnext/blocks-examples.git#4d2ab01fde76cb84a43f2030c00a1b37b6550aa1"
   dependencies:
     "@excalidraw/excalidraw" "^0.10.0"
     "@fullstackio/cq" "^6.0.9"
     "@fullstackio/remark-cq" "^6.1.2"
     "@githubnext/utils" "^0.12.3"
-    "@githubocto/flat-ui" "^0.13.4"
+    "@githubocto/flat-ui" "^0.13.5"
     "@loadable/component" "^5.15.0"
     "@mdx-js/runtime" "^1.6.22"
     "@octokit/rest" "^18.12.0"
@@ -754,10 +754,10 @@
     react "^17.0.2"
     zod "^3.11.6"
 
-"@githubocto/flat-ui@^0.13.4":
-  version "0.13.4"
-  resolved "https://registry.yarnpkg.com/@githubocto/flat-ui/-/flat-ui-0.13.4.tgz#1d4aaf7df469aba4509ae06519825915ecfc8808"
-  integrity sha512-RuM7TjQZK52Inu9uwQ73vs17hOoXfIsOmCLA7ye61Dd2u1j18EaDqdWnI36NVIxcUWA+p0Lw7kRmfPb2YdmYaA==
+"@githubocto/flat-ui@^0.13.5":
+  version "0.13.5"
+  resolved "https://registry.yarnpkg.com/@githubocto/flat-ui/-/flat-ui-0.13.5.tgz#65a03c07ab070c105b804917288ecbf5b9c3e894"
+  integrity sha512-3xFW2hNi5Mj0HuH+qoU8BvcBW6bmvG1e0sPw7pmITxKMNQhRQFEP3vOXwvHmEvqi5JNcjxe+W7NKA+53Ijx5+w==
   dependencies:
     "@emotion/react" "^11.4.0"
     "@primer/octicons-react" "^12.1.0"
@@ -769,12 +769,12 @@
     "@types/lodash" "^4.0.6"
     "@types/react-virtualized-auto-sizer" "^1.0.0"
     "@types/react-window" "^1.8.2"
-    anchorme "^2.1.2"
     d3 "^6.6.0"
     date-fns "^2.19.0"
     dompurify "^2.2.9"
     downshift "^6.1.1"
     immer "^9.0.12"
+    linkify-it "^3.0.3"
     lodash "^4.17.21"
     lodash-es "^4.17.21"
     match-sorter "^6.3.0"
@@ -3324,11 +3324,6 @@ agentkeepalive@^3.3.0:
   integrity sha512-e0L/HNe6qkQ7H19kTlRRqUibEAwDK5AFk6y3PtMsuut2VAH6+Q4xZml1tNDJD7kSAyqmbG/K08K5WEJYtUrSlQ==
   dependencies:
     humanize-ms "^1.2.1"
-
-anchorme@^2.1.2:
-  version "2.1.2"
-  resolved "https://registry.yarnpkg.com/anchorme/-/anchorme-2.1.2.tgz#4abc7e128a8a42d0036a61ebb9b18bbc032fa52a"
-  integrity sha512-2iPY3kxDDZvtRzauqKDb4v7a5sTF4GZ+esQTY8nGYvmhAtGTeFPMn4cRnvyWS1qmtPTP0Mv8hyLOp9l3ZzWMKg==
 
 ansi-align@^2.0.0:
   version "2.0.0"
@@ -6776,6 +6771,13 @@ lines-and-columns@^1.1.6:
   resolved "https://registry.yarnpkg.com/lines-and-columns/-/lines-and-columns-1.2.4.tgz#eca284f75d2965079309dc0ad9255abb2ebc1632"
   integrity sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==
 
+linkify-it@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/linkify-it/-/linkify-it-3.0.3.tgz#a98baf44ce45a550efb4d49c769d07524cc2fa2e"
+  integrity sha512-ynTsyrFSdE5oZ/O9GEf00kPngmOfVwazR5GKDq6EYfhlpFug3J2zybX56a2PRRpc9P+FuSoGNAwjlbDs9jJBPQ==
+  dependencies:
+    uc.micro "^1.0.1"
+
 load-json-file@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/load-json-file/-/load-json-file-1.1.0.tgz#956905708d58b4bab4c2261b04f59f31c99374c0"
@@ -9600,6 +9602,11 @@ ua-parser-js@^0.7.30:
   version "0.7.31"
   resolved "https://registry.yarnpkg.com/ua-parser-js/-/ua-parser-js-0.7.31.tgz#649a656b191dffab4f21d5e053e27ca17cbff5c6"
   integrity sha512-qLK/Xe9E2uzmYI3qLeOmI0tEOt+TBBQyUIAh4aAgU05FVYzeZrKUdkAZfBNVGRaHVgV0TDkdEngJSw/SyQchkQ==
+
+uc.micro@^1.0.1:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/uc.micro/-/uc.micro-1.0.6.tgz#9c411a802a409a91fc6cf74081baba34b24499ac"
+  integrity sha512-8Y75pvTYkLJW2hWQHXxoqRgV7qb9B+9vFEtidML+7koHUFapnVJAZ6cKs+Qjz5Aw3aZWHMC6u0wJE3At+nSGwA==
 
 unbox-primitive@^1.0.1:
   version "1.0.1"

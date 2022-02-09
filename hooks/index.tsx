@@ -16,7 +16,6 @@ import {
   RepoContext,
   RepoContextWithToken,
   UseFolderContentParams,
-  getFileContentsAndDependencies,
   getRepoTimeline,
 } from "ghapi";
 import { defaultBlocksRepo } from "blocks/index";
@@ -112,7 +111,7 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
       content: contentEncoded,
       sha: sha,
     });
-  } catch (e) {}
+  } catch (e) { }
 }
 
 export function useUpdateFileContents(
@@ -220,27 +219,6 @@ export function useRepoFiles(params: RepoContextWithToken) {
   });
 }
 
-export function useBlockContentAndDependencies(params: UseFileContentParams) {
-  const { repo, owner, path, fileRef = "main", token } = params;
-
-  return useQuery(
-    ["block-content-and-dependencies", params],
-    () =>
-      getFileContentsAndDependencies({
-        repo,
-        owner,
-        path,
-        fileRef,
-        token,
-      }),
-    {
-      enabled: Boolean(repo) && Boolean(owner) && Boolean(path),
-      refetchOnWindowFocus: false,
-      retry: false,
-    }
-  );
-}
-
 interface BlocksInfo {
   owner: string;
   repo: string;
@@ -320,15 +298,15 @@ export function useManageBlock({
   const blocksRepo = isDefaultBlocksRepo
     ? defaultBlocksRepo
     : allBlocks.find(
-        (block) => block.owner === blockOwner && block.repo === blockRepo
-      );
+      (block) => block.owner === blockOwner && block.repo === blockRepo
+    );
   const blocks = (blocksRepo?.blocks || []).map(
     (block) =>
-      ({
-        ...block,
-        owner: blocksRepo.owner,
-        repo: blocksRepo.repo,
-      } as Block)
+    ({
+      ...block,
+      owner: blocksRepo.owner,
+      repo: blocksRepo.repo,
+    } as Block)
   );
   const extension = (path as string).split(".").slice(-1)[0];
   const relevantBlocks = blocks.filter(
@@ -342,8 +320,8 @@ export function useManageBlock({
     storedDefaultBlock ||
     getBlockKey(
       blocks.find((block) => block.id === overrideDefaultBlocks[extension]) ||
-        relevantBlocks[1] ||
-        relevantBlocks[0]
+      relevantBlocks[1] ||
+      relevantBlocks[0]
     );
   const defaultBlock =
     blocks.find((block) => getBlockKey(block) === defaultBlockKey) ||
@@ -356,11 +334,11 @@ export function useManageBlock({
   const allBlocksFlat = allBlocks.flatMap((repo) =>
     repo.blocks.map(
       (block) =>
-        ({
-          ...block,
-          owner: repo.owner,
-          repo: repo.repo,
-        } as Block)
+      ({
+        ...block,
+        owner: repo.owner,
+        repo: repo.repo,
+      } as Block)
     )
   );
 

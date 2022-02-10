@@ -62,9 +62,9 @@ module.exports = {
             key: "Strict-Transport-Security",
             value: "max-age=63072000; includeSubDomains; preload",
           }, {
-            //   key: "X-Frame-Options",
-            //   value: "SAMEORIGIN",
-            // }, {
+            key: "X-Frame-Options",
+            value: "SAMEORIGIN",
+          }, {
             key: "X-XSS-Protection",
             value: "0",
           }, {

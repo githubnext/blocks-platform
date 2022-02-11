@@ -18,10 +18,12 @@ export default function (props: FileBlockProps) {
     } catch (e) {
       try {
         const csvData = csvParse(content);
+        console.log({ csvData })
         setModifiedData(csvData);
         setIsDirty(false)
         return csvData;
       } catch (e) {
+        console.log(e)
         return [];
       }
     }

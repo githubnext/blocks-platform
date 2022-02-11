@@ -4,11 +4,13 @@
     "dev": "NEXT_PUBLIC_VERCEL_ENV=development next dev",
     "build": "next build",
     "static": "next build && next export",
-    "start": "next start"
+    "start": "next start",
+    "preinstall": "node sync-with-example-blocks.mjs",
+    "postinstall": "node process-example-blocks.mjs"
   },
   "dependencies": {
     "@codesandbox/sandpack-react": "^0.10.2",
-    "@githubnext/blocks-examples": "https://github.com/githubnext/blocks-examples.git#0.7.44",
+    "@githubnext/blocks-examples": "https://github.com/githubnext/blocks-examples.git#0.7.45",
     "@githubnext/utils": "^0.12.3",
     "@octokit/rest": "^18.12.0",
     "@primer/components": "^30.3.0",

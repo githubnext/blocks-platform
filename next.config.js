@@ -32,11 +32,11 @@ module.exports = {
               [
                 "script-src",
                 "'self'",
-                "'unsafe-eval'",
+                isDev && "'unsafe-eval'",
                 // "https://raw.githubusercontent.com/",
                 // for using Tailwind styles in example Blocks
                 "https://cdn-tailwindcss.vercel.app/",
-              ].join(" "),
+              ].filter(Boolean).join(" "),
               [
                 "img-src",
                 "'self'",

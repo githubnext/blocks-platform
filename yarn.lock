@@ -678,9 +678,9 @@
     unist-util-visit "^1.0.0"
     uuid "^3.3.2"
 
-"@githubnext/blocks-examples@https://github.com/githubnext/blocks-examples.git#0.7.37":
+"@githubnext/blocks-examples@https://github.com/githubnext/blocks-examples.git#0.7.43":
   version "0.0.0"
-  resolved "https://github.com/githubnext/blocks-examples.git#ea308876f75c4d3fcd1e23f5c88577a8c64caca0"
+  resolved "https://github.com/githubnext/blocks-examples.git#e438267a409a7a2bf02c8fcdc0437a599bd88929"
   dependencies:
     "@codesandbox/sandpack-react" "^0.13.13"
     "@excalidraw/excalidraw" "^0.10.0"
@@ -709,6 +709,7 @@
     lodash.isempty "^4.4.0"
     lodash.isobject "^3.0.2"
     lodash.uniqueid "^4.0.1"
+    lz-string "^1.4.4"
     papaparse "^5.3.1"
     react "^17.0.0"
     react-dom "^17.0.0"
@@ -718,6 +719,7 @@
     react-json-view "^1.21.3"
     react-query "^3.32.1"
     react-select "^5.2.1"
+    react-syntax-highlighter "^15.4.5"
     react-use "^17.3.1"
     recharts "^2.1.6"
     three "^0.134.0"
@@ -6959,7 +6961,7 @@ react-style-singleton@^2.1.0:
     invariant "^2.2.4"
     tslib "^1.0.0"
 
-react-syntax-highlighter@^15.4.4:
+react-syntax-highlighter@^15.4.4, react-syntax-highlighter@^15.4.5:
   version "15.4.5"
   resolved "https://registry.yarnpkg.com/react-syntax-highlighter/-/react-syntax-highlighter-15.4.5.tgz#db900d411d32a65c8e90c39cd64555bf463e712e"
   integrity sha512-RC90KQTxZ/b7+9iE6s9nmiFLFjWswUcfULi4GwVzdFVKVMQySkJWBuOmJFfjwjMVCo0IUUuJrWebNKyviKpwLQ==

@@ -74,7 +74,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
         }
 
         // handle messages from the sandboxed block
-        const originRegex = new RegExp(/^https:\/\/\d{1,4}-\d{1,4}-\d{1,4}-sandpack.codesandbox.io$/)
+        const originRegex = new RegExp(/^https:\/\/\d{1,4}-\d{1,4}-\d{1,4}-sandpack\.codesandbox\.io$/)
         if (!originRegex.test(origin)) return;
         if (data.type === "update-metadata") {
           onUpdateMetadata(data.metadata, data.path, data.block, data.currentMetadata);

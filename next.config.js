@@ -1,4 +1,4 @@
-const isDev = process.env.NODE_ENV !== 'production'
+const isDev = process.env.NODE_ENV !== "production";
 module.exports = {
   webpack: (config, { isServer }) => {
     if (!isServer) {
@@ -7,12 +7,12 @@ module.exports = {
     return config;
   },
   env: {
-    PASSWORD_PROTECT: process.env.NEXT_PUBLIC_VERCEL_ENV !== 'development',
+    PASSWORD_PROTECT: process.env.NEXT_PUBLIC_VERCEL_ENV !== "development",
   },
   async headers() {
     return [
       {
-        source: '/:path*',
+        source: "/:path*",
         headers: [
           {
             key: "Content-Security-Policy",
@@ -36,7 +36,9 @@ module.exports = {
                 // "https://raw.githubusercontent.com/",
                 // for using Tailwind styles in example Blocks
                 "https://cdn-tailwindcss.vercel.app/",
-              ].filter(Boolean).join(" "),
+              ]
+                .filter(Boolean)
+                .join(" "),
               [
                 "img-src",
                 "'self'",
@@ -53,26 +55,32 @@ module.exports = {
                 // for hitting the GitHub API
                 "https://api.github.com/",
                 // for getting the source code for custom Blocks
-                "https://blocks-marketplace.vercel.app/",
+                "https://next-devex-blocks-marketplace.azurewebsites.net/",
                 // for sandboxes in the MDX Block
                 "https://codesandbox.io/api/v1/sandboxes/",
-              ].filter(Boolean).join(" "),
+              ]
+                .filter(Boolean)
+                .join(" "),
             ].join(";"),
-          }, {
+          },
+          {
             key: "Strict-Transport-Security",
             value: "max-age=63072000; includeSubDomains; preload",
-          }, {
+          },
+          {
             key: "X-Frame-Options",
             value: "SAMEORIGIN",
-          }, {
+          },
+          {
             key: "X-XSS-Protection",
             value: "0",
-          }, {
+          },
+          {
             key: "X-Content-Type-Options",
             value: "nosniff",
           },
         ],
       },
-    ]
+    ];
   },
-}
+};

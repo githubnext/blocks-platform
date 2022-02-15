@@ -1,19 +1,31 @@
-import { SandpackProvider, SandpackPreview, useSandpack } from "@codesandbox/sandpack-react/dist/cjs/index.js";
+import {
+  SandpackProvider,
+  SandpackPreview,
+  useSandpack,
+} from "@codesandbox/sandpack-react/dist/cjs/index.js";
 import { FileContext, FolderContext, RepoFiles } from "@githubnext/utils";
 import uniqueId from "lodash/uniqueId";
 import React, { useEffect, useRef } from "react";
 
-export interface BundleCode { name: string, content: string }
+export interface BundleCode {
+  name: string;
+  content: string;
+}
 interface SandboxedBlockProps {
   block: Block;
   contents?: string;
   tree?: RepoFiles;
   metadata?: any;
-  context: FileContext | FolderContext
+  context: FileContext | FolderContext;
   bundleCode?: BundleCode[];
   renderLoading?: React.ReactNode;
   renderError?: React.ReactNode;
-  onUpdateMetadata: (newMetadata: any, path: string, block: Block, currentMetadata: any) => void;
+  onUpdateMetadata: (
+    newMetadata: any,
+    path: string,
+    block: Block,
+    currentMetadata: any
+  ) => void;
   onRequestUpdateContent: (newContent: string) => void;
   onRequestGitHubData: (type: string, config: any, id: string) => Promise<any>;
   onNavigateToPath: (path: string) => void;
@@ -27,8 +39,8 @@ const stateStyles = {
   display: "flex",
   justifyContent: "center",
   fontSize: "0.9em",
-  color: "#7D7D7E"
-}
+  color: "#7D7D7E",
+};
 const DefaultLoadingState = <div style={stateStyles}>Loading...</div>;
 const DefaultErrorState = <div style={stateStyles}>Error...</div>;
 
@@ -51,7 +63,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
   const id = useRef(uniqueId("sandboxed-block-"));
   const sandpackWrapper = useRef<HTMLDivElement>(null);
 
-  const status = state.status
+  const status = state.status;
   const blockContent = bundleCode || state.value;
 
   useEffect(() => {
@@ -65,19 +77,29 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
           if (data.type === "github-data--response") {
             const iframe = sandpackWrapper.current?.querySelector("iframe");
             if (!iframe) return;
-            iframe.contentWindow.postMessage({
-              type: "github-data--response",
-              ...data,
-            }, "*");
+            iframe.contentWindow.postMessage(
+              {
+                type: "github-data--response",
+                ...data,
+              },
+              "*"
+            );
           }
-          return
+          return;
         }
 
         // handle messages from the sandboxed block
-        const originRegex = new RegExp(/^https:\/\/\d{1,4}-\d{1,4}-\d{1,4}-sandpack\.codesandbox\.io$/)
+        const originRegex = new RegExp(
+          /^https:\/\/\d{1,4}-\d{1,4}-\d{1,4}-sandpack\.codesandbox\.io$/
+        );
         if (!originRegex.test(origin)) return;
         if (data.type === "update-metadata") {
-          onUpdateMetadata(data.metadata, data.path, data.block, data.currentMetadata);
+          onUpdateMetadata(
+            data.metadata,
+            data.path,
+            data.block,
+            data.currentMetadata
+          );
         } else if (data.type === "update-file") {
           onRequestUpdateContent(data.content);
         } else if (data.type === "navigate-to-path") {
@@ -86,10 +108,10 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
           onRequestGitHubData(data.requestType, data.config, data.id);
         }
       }
-    }
-    addEventListener("message", onMessage)
+    };
+    addEventListener("message", onMessage);
     return () => removeEventListener("message", onMessage);
-  }, [])
+  }, []);
 
   if (!blockContent) return renderLoading as JSX.Element;
   if (status === "loading") return renderLoading as JSX.Element;
@@ -99,20 +121,27 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
   if (status === "success" && blockContent) {
     const fileName = (block.entry.split("/").pop() || "index.js")
       .replace(".ts", ".js")
-      .replace(".jsx", ".js")
+      .replace(".jsx", ".js");
     const contentWithUpdatedNames = blockContent.map(({ name, content }) => ({
       name: name.slice(block.id.length + 1),
       content,
-    }))
-    const scriptFile = contentWithUpdatedNames?.find(f => f.name === fileName)
-    const mainContent = scriptFile?.content || ""
-    const otherFilesContent = contentWithUpdatedNames.filter(f => f.name !== fileName)
+    }));
+    const scriptFile = contentWithUpdatedNames?.find(
+      (f) => f.name === fileName
+    );
+    const mainContent = scriptFile?.content || "";
+    const otherFilesContent = contentWithUpdatedNames.filter(
+      (f) => f.name !== fileName
+    );
 
-    const cssFiles = otherFilesContent.filter(f => f.name.endsWith(".css"));
-    const cssFilesString = cssFiles.map(f => `<style>${f.content}</style>`).join("\n");
-    const otherFilesContentProcessed = [{
-      name: "/public/index.html",
-      content: `<!DOCTYPE html>
+    const cssFiles = otherFilesContent.filter((f) => f.name.endsWith(".css"));
+    const cssFilesString = cssFiles
+      .map((f) => `<style>${f.content}</style>`)
+      .join("\n");
+    const otherFilesContentProcessed = [
+      {
+        name: "/public/index.html",
+        content: `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8">
@@ -125,14 +154,18 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
     ${cssFilesString}
     <div id="root"></div>
   </body>
-</html>`
-    },
-    ...otherFilesContent.filter(f => !f.name.endsWith(".css"))]
+</html>`,
+      },
+      ...otherFilesContent.filter((f) => !f.name.endsWith(".css")),
+    ];
 
-    let otherFiles = otherFilesContentProcessed.reduce((acc, { name, content }) => {
-      acc[name] = content;
-      return acc;
-    }, {} as any)
+    let otherFiles = otherFilesContentProcessed.reduce(
+      (acc, { name, content }) => {
+        acc[name] = content;
+        return acc;
+      },
+      {} as any
+    );
 
     const injectedSource = `
       import React from "react";
@@ -180,7 +213,9 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
 
         const onRequestGitHubData = React.useCallback((requestType, config) => {
           // for responses to this specific request
-          const requestId = "${uniqueId("github-data--request--")}--" + getUniqueId()
+          const requestId = "${uniqueId(
+            "github-data--request--"
+          )}--" + getUniqueId()
           window.parent.postMessage({
             type: "github-data--request",
             id: "${id.current}",
@@ -208,13 +243,10 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
         }, [])
 
         return <Block
-          context={${JSON.stringify(
-      context
-    )}}
+          context={${JSON.stringify(context)}}
           content={${JSON.stringify(contents)}}
           tree={${JSON.stringify(tree)}}
-          metadata={${JSON.stringify(metadata)
-      }}
+          metadata={${JSON.stringify(metadata)}}
           onUpdateMetadata={onUpdateMetadata}
           onNavigateToPath={onNavigateToPath}
           onRequestUpdateContent={onRequestUpdateContent}
@@ -232,14 +264,13 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
             files: {
               ...otherFiles,
               "/App.js": injectedSource,
-            }
+            },
           }}
           autorun
         >
           <SandpackPreview
             showOpenInCodeSandbox={false}
             showRefreshButton={false}
-
           />
         </SandpackProvider>
       </div>
@@ -251,12 +282,12 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
 type UseFetchZipResponse = {
   value: BundleCode[] | null;
   status: "loading" | "error" | "success";
-}
+};
 const useFetchZip = (block: Block): UseFetchZipResponse => {
   if (!block.owner || !block.repo || !block.id) {
     return { value: null, status: "success" };
   }
-  const url = `https://blocks-marketplace.vercel.app/api/get-block-content?owner=${block.owner}&repo=${block.repo}&id=${block.id}`
+  const url = `https://next-devex-blocks-marketplace.azurewebsites.net/api/get-block-content?owner=${block.owner}&repo=${block.repo}&id=${block.id}`;
   const [state, setState] = React.useState<UseFetchZipResponse>({
     value: null,
     status: "loading",
@@ -270,7 +301,7 @@ const useFetchZip = (block: Block): UseFetchZipResponse => {
       return;
     }
     try {
-      const res = await fetch(url)
+      const res = await fetch(url);
 
       const allContent = await res.json();
 
@@ -284,14 +315,19 @@ const useFetchZip = (block: Block): UseFetchZipResponse => {
         value: null,
       });
     }
-  }
-  React.useEffect(() => { fetchContentForBlock() }, [url]);
+  };
+  React.useEffect(() => {
+    fetchContentForBlock();
+  }, [url]);
   return state;
-}
+};
 
 const processBundle = (bundle: string) => {
   // remove imports from React. This might need tweaking
-  bundle = bundle.replace(/(import)([\w\s\}\{,]{3,30}?)(from\s["']react["'])/g, "");
+  bundle = bundle.replace(
+    /(import)([\w\s\}\{,]{3,30}?)(from\s["']react["'])/g,
+    ""
+  );
 
   return bundle;
-}
+};

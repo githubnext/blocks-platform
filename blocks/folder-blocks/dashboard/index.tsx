@@ -31,7 +31,7 @@ export default function (props: FolderBlockProps) {
   }
 
   const getBlocks = async () => {
-    const url = "https://next-devex-blocks-marketplace.azurewebsites.net/blocks-processed-full.json"
+    const url = "https://blocks-marketplace.vercel.app/blocks-processed-full.json"
     const res = await fetch(url)
       .then(res => res.json())
     const exampleBlocks = res.find((d: any) => d.full_name === "githubnext/blocks-examples")?.blocks || []
@@ -119,6 +119,7 @@ export default function (props: FolderBlockProps) {
           ) : (
             <div style={{
               width: "100%",
+              height: "100%",
               flex: 1,
               overflow: "auto",
             }}>

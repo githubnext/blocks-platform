@@ -52,7 +52,7 @@ jobs:
           yarn build
 
       - name: package zip
-        run: zip -r web.zip package.json .next node_modules/
+        run: zip -r web.zip package.json .next node_modules/ public/
 
       - name: "Deploy to Azure Web App"
         id: deploy-to-webapp

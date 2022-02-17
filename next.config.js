@@ -1,5 +1,10 @@
 const isDev = process.env.NODE_ENV !== "production";
 module.exports = {
+  swcMinify: true,
+  compiler: {
+    // ssr and displayName are configured by default
+    styledComponents: true,
+  },
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback.fs = false;

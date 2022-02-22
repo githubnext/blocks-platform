@@ -1,7 +1,7 @@
 import { withPasswordProtect } from "@storyofams/next-password-protect";
 import { AnimatedBlocks } from "components/AnimatedBlocks";
 import { FullPageLoader } from "components/full-page-loader";
-import { signIn, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 
 function Home() {

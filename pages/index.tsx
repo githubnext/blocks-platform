@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 
 function Home() {
-  const { data: session, status } = useSession({ required: true });
+  const { status } = useSession({ required: true });
 
   if (status === "loading") {
     return <FullPageLoader />;

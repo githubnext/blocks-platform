@@ -246,7 +246,7 @@ export function useGetBlocksInfo() {
     ["blocks-info"],
     () => {
       const url =
-        "https://next-devex-blocks-marketplace.azurewebsites.net/blocks-processed-full.json";
+        "https://next-devex-blocks-marketplace.azurewebsites.net/api/blocks";
       return fetch(url).then((res) => res.json());
     },
     {

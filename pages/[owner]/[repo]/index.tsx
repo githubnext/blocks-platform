@@ -1,4 +1,3 @@
-import { withPasswordProtect } from "@storyofams/next-password-protect";
 import { FullPageLoader } from "components/full-page-loader";
 import { RepoDetail } from "components/repo-detail";
 import { useSession } from "next-auth/react";
@@ -21,6 +20,4 @@ function RepoDetailContainer() {
   return null;
 }
 
-export default process.env.PASSWORD_PROTECT
-  ? withPasswordProtect(RepoDetailContainer)
-  : RepoDetailContainer;
+export default RepoDetailContainer;

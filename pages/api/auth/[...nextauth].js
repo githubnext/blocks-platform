@@ -23,6 +23,9 @@ export default NextAuth({
       session.token = token.accessToken;
       return session;
     },
+    async signIn({ profile }) {
+      return profile && profile.site_admin;
+    },
     async jwt({ token, account }) {
       if (account) {
         token.accessToken = account.access_token;

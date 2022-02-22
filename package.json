@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@codesandbox/sandpack-react": "^0.10.2",
-    "@githubnext/blocks-examples": "https://github.com/githubnext/blocks-examples.git#0.7.50",
+    "@githubnext/blocks-examples": "https://github.com/githubnext/blocks-examples.git#0.7.51",
     "@githubnext/utils": "^0.12.3",
     "@octokit/rest": "^18.12.0",
     "@primer/components": "^30.3.0",
@@ -18,7 +18,6 @@
     "@primer/octicons-react": "^16.0.0",
     "@radix-ui/react-alert-dialog": "^0.1.1",
     "@radix-ui/react-tooltip": "^0.1.1",
-    "@storyofams/next-password-protect": "^1.5.14",
     "@tailwindcss/forms": "^0.3.4",
     "cssjson": "^2.1.3",
     "d3": "^7.1.1",

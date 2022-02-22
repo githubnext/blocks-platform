@@ -1,4 +1,3 @@
-import { withPasswordProtect } from "@storyofams/next-password-protect";
 import { AnimatedBlocks } from "components/AnimatedBlocks";
 import { FullPageLoader } from "components/full-page-loader";
 import { useSession } from "next-auth/react";
@@ -49,4 +48,4 @@ function Home() {
   );
 }
 
-export default process.env.PASSWORD_PROTECT ? withPasswordProtect(Home) : Home;
+export default Home;

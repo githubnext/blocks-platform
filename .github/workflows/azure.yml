@@ -59,6 +59,6 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: "githubnext-blocks"
-          slot-name: "githubnext-blocks-staging"
+          slot-name: "staging"
           publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
           package: web.zip

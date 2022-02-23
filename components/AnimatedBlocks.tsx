@@ -1,6 +1,7 @@
 import { range } from "d3"
 import Matter from "matter-js"
 import { useEffect, useRef } from "react";
+import debounce from "lodash/debounce";
 
 const shapeTypes = ["circle", "rectangle", "polygon"];
 const colors = [
@@ -13,9 +14,9 @@ export const AnimatedBlocks = () => {
 
   const startSimulation = () => {
     if (!canvas.current) return
-    const ratio = window.devicePixelRatio
-    const width = window.innerWidth * ratio
-    const height = window.innerHeight * ratio
+
+    let width = window.innerWidth
+    let height = window.innerHeight
 
     var Engine = Matter.Engine,
       Render = Matter.Render,
@@ -36,10 +37,15 @@ export const AnimatedBlocks = () => {
         height: height,
         background: "transparent",
         wireframes: false,
-        pixelRatio: ratio,
       }
     });
+
     scaleCanvas(canvas.current, render.context, window.innerWidth, window.innerHeight)
+
+    width = canvas.current.width
+    height = canvas.current.height
+
+    const ratio = window.devicePixelRatio || 1
 
     const shapes = range(0, numberOfBlocks).map(i => {
       const type = shapeTypes[Math.floor(Math.random() * shapeTypes.length)]
@@ -50,13 +56,13 @@ export const AnimatedBlocks = () => {
         polygon: [width / (2 * ratio), 0, 6, mass]
       }[type]
       return {
-        x: width / (2 * ratio),
+        x: width / 2,
         y: 0,
         type,
         args,
         mass,
         color: colors[Math.floor(Math.random() * colors.length)],
-        r: 100,
+        r: 100 * ratio,
       }
     })
 
@@ -77,7 +83,7 @@ export const AnimatedBlocks = () => {
     })
     const ground = Bodies.rectangle(0, height, width, height, { isStatic: true });
     const wallLeft = Bodies.rectangle(-1, 0, 2, height, { isStatic: true });
-    const wallRight = Bodies.rectangle(width / 2 + 1, 0, 2, height, { isStatic: true });
+    const wallRight = Bodies.rectangle(width / ratio + 2, 0, 2, height, { isStatic: true });
 
     Composite.add(engine.world, [ground, wallLeft, wallRight]);
 
@@ -87,7 +93,16 @@ export const AnimatedBlocks = () => {
 
     Runner.run(runner, engine);
   }
-  useEffect(startSimulation, [])
+  useEffect(() => {
+    startSimulation()
+    const onResize = debounce(() => {
+      startSimulation()
+    }, 300)
+    window.addEventListener("resize", onResize)
+    return () => {
+      window.removeEventListener("resize", onResize)
+    }
+  }, [])
 
   return (
     <div className="relative w-screen h-screen">
@@ -95,6 +110,7 @@ export const AnimatedBlocks = () => {
     </div >
   )
 }
+
 
 // grabbed from https://gist.github.com/callumlocke/cc258a193839691f60dd
 export const scaleCanvas = (canvas, context, width, height) => {

@@ -1,4 +1,4 @@
-name: Deploy to Azure (next-devex-blocks)
+name: Deploy to Azure (githubnext-blocks-staging)
 
 on:
   push:
@@ -58,7 +58,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: "next-devex-blocks"
-          slot-name: "Production"
+          app-name: "githubnext-blocks"
+          slot-name: "githubnext-blocks-staging"
           publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
           package: web.zip

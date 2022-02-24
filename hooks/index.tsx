@@ -356,7 +356,7 @@ export function useManageBlock({
   }
 
   let blockOptions = relevantBlocks;
-  if (block && !blocks.find((block) => block.id === blockId)) {
+  if (block && !blockOptions.some((b) => b.id === block.id)) {
     // Add the custom block to the list
     blockOptions.push({ ...block, title: `Custom: ${block.title}` });
   }

@@ -57,7 +57,7 @@ export function RepoDetail(props: RepoDetailProps) {
   const isFolder =
     repoFilesStatus === "success"
       ? files?.find((d) => d.path === path)?.type !== "blob"
-      : !(path as string).includes(".") // if there's an extender it's a file
+      : !(path as string).includes(".") // if there's an extension it's a file
 
 
   const { metadata, onUpdateMetadata } = useMetadata({

@@ -328,7 +328,9 @@ export function useManageBlock({
   const blockFromMetadata = tryToGetBlockFromKey(storedDefaultBlock)
   let fallbackDefaultBlock = overrideDefaultBlocks[extension]
     ? relevantExampleBlocksInfo.find((b) => b.id === overrideDefaultBlocks[extension])
-    : relevantExampleBlocksInfo.slice(0, 2).pop()
+    // the first example block is always the code block,
+    // so let's default to the second one, when available
+    : relevantExampleBlocksInfo[1] || relevantExampleBlocksInfo[0];
 
   if (
     !fallbackDefaultBlock

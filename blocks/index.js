@@ -4,7 +4,7 @@
 import dynamic from "next/dynamic";
 
 const codeBlock = dynamic(() => import("./file-blocks/code/index.tsx"), {ssr:false});
-const excalidrawBlock = dynamic(() => import("./file-blocks/excalidraw.tsx"), {ssr:false});
+const excalidrawBlock = dynamic(() => import("./file-blocks/excalidraw/index.tsx"), {ssr:false});
 const htmlBlock = dynamic(() => import("./file-blocks/html.tsx"), {ssr:false});
 const cssBlock = dynamic(() => import("./file-blocks/css.tsx"), {ssr:false});
 const imageBlock = dynamic(() => import("./file-blocks/image.tsx"), {ssr:false});
@@ -55,7 +55,7 @@ export const defaultBlocksRepo = {
       "id": "excalidraw-block",
       "title": "Drawing block",
       "description": "A whiteboard tool",
-      "entry": "/src/blocks/file-blocks/excalidraw.tsx",
+      "entry": "/src/blocks/file-blocks/excalidraw/index.tsx",
       "extensions": [
         "excalidraw"
       ],

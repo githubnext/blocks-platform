@@ -9,6 +9,7 @@ import { RepoHeader } from "./repo-header";
 import { Sidebar } from "./Sidebar";
 import { GeneralBlock } from "./general-block";
 import { CustomBlockPicker } from "./custom-block-picker";
+import { UpdateCodeModal } from "./UpdateCodeModal";
 
 const BlockPicker = dynamic(() => import("./block-picker"), { ssr: false });
 
@@ -22,6 +23,8 @@ export function RepoDetail(props: RepoDetailProps) {
   const { setColorMode } = useTheme();
   const { repo, owner, path = "", theme, fileRef } = router.query;
   const [isChoosingCustomBlock, setIsChoosingCustomBlock] = useState(false);
+  const [requestedMetadata, setRequestedMetadata] = useState(null);
+
 
   const context = useMemo(() => ({
     repo: repo as string,
@@ -187,7 +190,7 @@ export function RepoDetail(props: RepoDetailProps) {
                             default: blockKey
                           }
                         }
-                        onUpdateMetadata(newMetadata)
+                        setRequestedMetadata(newMetadata);
                       }}
                     >
                       Set as default for all users
@@ -234,6 +237,18 @@ export function RepoDetail(props: RepoDetailProps) {
           />
         </div>
       </div>
+      {!!requestedMetadata && (
+        <UpdateCodeModal
+          isLoggedIn={!!token}
+          path={`.github/blocks/all.json`}
+          newCode={JSON.stringify(requestedMetadata, null, 2)}
+          currentCode={JSON.stringify(metadata, null, 2)}
+          onSubmit={() => {
+            onUpdateMetadata(requestedMetadata, `.github/blocks/all.json`)
+          }}
+          onClose={() => setRequestedMetadata(null)}
+        />
+      )}
     </div>
   );
 }

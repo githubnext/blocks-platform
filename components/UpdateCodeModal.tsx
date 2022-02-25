@@ -1,5 +1,4 @@
-import { Button, ButtonPrimary, ConfirmationDialog, Dialog, Link } from '@primer/components';
-import * as AlertDialog from '@radix-ui/react-alert-dialog';
+import { ConfirmationDialog, Link } from '@primer/components';
 import { Diff, Hunk, parseDiff } from 'react-diff-view';
 import "react-diff-view/style/index.css";
 import { diffAsText } from "unidiff";

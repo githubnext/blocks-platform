@@ -1,4 +1,5 @@
 const isDev = process.env.NODE_ENV !== "production";
+
 module.exports = {
   webpack: (config, { isServer }) => {
     if (!isServer) {
@@ -52,7 +53,7 @@ module.exports = {
                 // for hitting the GitHub API
                 "https://api.github.com/",
                 // for getting the source code for custom Blocks
-                "https://next-devex-blocks-marketplace.azurewebsites.net/",
+                process.env.NEXT_PUBLIC_MARKETPLACE_URL,
                 // for sandboxes in the MDX Block
                 "https://codesandbox.io/api/v1/sandboxes/",
               ]

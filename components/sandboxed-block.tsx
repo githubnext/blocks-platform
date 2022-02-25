@@ -288,7 +288,7 @@ const useFetchZip = (block: Block): UseFetchZipResponse => {
   if (!block.owner || !block.repo || !block.id) {
     return { value: null, status: "success" };
   }
-  const url = `https://next-devex-blocks-marketplace.azurewebsites.net/api/get-block-content?owner=${block.owner}&repo=${block.repo}&id=${block.id}`;
+  const url = `${process.env.NEXT_PUBLIC_MARKETPLACE_URL}/api/get-block-content?owner=${block.owner}&repo=${block.repo}&id=${block.id}`;
   const [state, setState] = React.useState<UseFetchZipResponse>({
     value: null,
     status: "loading",

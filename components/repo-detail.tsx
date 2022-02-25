@@ -1,5 +1,11 @@
 import { Box, Button, Link, useTheme } from "@primer/components";
-import { getBlockKey, useManageBlock, useMetadata, useRepoFiles, useRepoInfo } from "hooks";
+import {
+  getBlockKey,
+  useManageBlock,
+  useMetadata,
+  useRepoFiles,
+  useRepoInfo,
+} from "hooks";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useEffect, useState, useMemo, useCallback } from "react";
@@ -14,7 +20,7 @@ import { UpdateCodeModal } from "./UpdateCodeModal";
 const BlockPicker = dynamic(() => import("./block-picker"), { ssr: false });
 
 interface RepoDetailProps {
-  token: string
+  token: string;
 }
 
 export function RepoDetail(props: RepoDetailProps) {
@@ -25,13 +31,15 @@ export function RepoDetail(props: RepoDetailProps) {
   const [isChoosingCustomBlock, setIsChoosingCustomBlock] = useState(false);
   const [requestedMetadata, setRequestedMetadata] = useState(null);
 
-
-  const context = useMemo(() => ({
-    repo: repo as string,
-    owner: owner as string,
-    path: path as string,
-    sha: fileRef as string || "HEAD"
-  }), [repo, owner, path, fileRef]);
+  const context = useMemo(
+    () => ({
+      repo: repo as string,
+      owner: owner as string,
+      path: path as string,
+      sha: (fileRef as string) || "HEAD",
+    }),
+    [repo, owner, path, fileRef]
+  );
 
   useEffect(() => {
     setColorMode(theme === "dark" ? "night" : "day");
@@ -60,8 +68,7 @@ export function RepoDetail(props: RepoDetailProps) {
   const isFolder =
     repoFilesStatus === "success"
       ? files?.find((d) => d.path === path)?.type !== "blob"
-      : !(path as string).includes(".") // if there's an extension it's a file
-
+      : !(path as string).includes("."); // if there's an extension it's a file
 
   const { metadata, onUpdateMetadata } = useMetadata({
     owner: owner as string,
@@ -76,22 +83,21 @@ export function RepoDetail(props: RepoDetailProps) {
     setBlock,
     blockOptions,
     defaultBlock,
-    allBlocks,
+    allBlocksInfo,
   } = useManageBlock({
     path: path as string,
     storedDefaultBlock: metadata[path as string]?.default,
     isFolder,
-  })
+  });
 
-  const block = useMemo(() => rawBlock, [
-    rawBlock.owner,
-    rawBlock.repo,
-    rawBlock.id,
-  ])
+  const block = useMemo(
+    () => rawBlock,
+    [rawBlock.owner, rawBlock.repo, rawBlock.id]
+  );
   const setBlockLocal = (block: Block) => {
     setIsChoosingCustomBlock(false);
     setBlock(block);
-  }
+  };
   const blockKey = getBlockKey(block);
   const defaultBlockKey = getBlockKey(defaultBlock);
   const isDefaultBlock = defaultBlockKey === blockKey;
@@ -165,10 +171,7 @@ export function RepoDetail(props: RepoDetailProps) {
                 alignItems="center"
                 justifyContent="space-between"
               >
-                <Box
-                  display="flex"
-                  alignItems="center"
-                >
+                <Box display="flex" alignItems="center">
                   <BlockPicker
                     blocks={blockOptions}
                     defaultBlock={defaultBlock}
@@ -187,9 +190,9 @@ export function RepoDetail(props: RepoDetailProps) {
                           ...metadata,
                           [path as string]: {
                             ...metadata[path as string],
-                            default: blockKey
-                          }
-                        }
+                            default: blockKey,
+                          },
+                        };
                         setRequestedMetadata(newMetadata);
                       }}
                     >
@@ -198,7 +201,9 @@ export function RepoDetail(props: RepoDetailProps) {
                   )}
                 </Box>
                 <Link
-                  href={`https://github.com/${context.owner}/${context.repo}/${path ? `blob/${context.sha}/${path}` : ""}`}
+                  href={`https://github.com/${context.owner}/${context.repo}/${
+                    path ? `blob/${context.sha}/${path}` : ""
+                  }`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="!text-gray-500 mr-3 text-xs"
@@ -209,24 +214,31 @@ export function RepoDetail(props: RepoDetailProps) {
             </div>
           </div>
           {isChoosingCustomBlock ? (
-            <CustomBlockPicker allBlocks={allBlocks} onChange={setBlockLocal} path={path as string} isFolder={isFolder} />
-          ) : !!block.id &&
-          repoFilesStatus !== "loading" &&
-          (isTooLarge ? (
-            <div className="italic p-4 pt-40 text-center mx-auto text-gray-600">
-              Oh boy, that's a honkin file! It's {size / 1000} KBs.
-            </div>
-          ) : (
-            <GeneralBlock
-              key={block.id}
-              // @ts-ignore
-              context={context}
-              theme={(theme as string) || "light"}
-              block={block}
-              token={token}
-              onCommit={onCommit}
+            <CustomBlockPicker
+              allBlocks={allBlocksInfo}
+              onChange={setBlockLocal}
+              path={path as string}
+              isFolder={isFolder}
             />
-          ))}
+          ) : (
+            !!block.id &&
+            repoFilesStatus !== "loading" &&
+            (isTooLarge ? (
+              <div className="italic p-4 pt-40 text-center mx-auto text-gray-600">
+                Oh boy, that's a honkin file! It's {size / 1000} KBs.
+              </div>
+            ) : (
+              <GeneralBlock
+                key={block.id}
+                // @ts-ignore
+                context={context}
+                theme={(theme as string) || "light"}
+                block={block}
+                token={token}
+                onCommit={onCommit}
+              />
+            ))
+          )}
         </div>
 
         <div className="flex-none hidden lg:block h-full border-l border-gray-200">
@@ -244,7 +256,7 @@ export function RepoDetail(props: RepoDetailProps) {
           newCode={JSON.stringify(requestedMetadata, null, 2)}
           currentCode={JSON.stringify(metadata, null, 2)}
           onSubmit={() => {
-            onUpdateMetadata(requestedMetadata, `.github/blocks/all.json`)
+            onUpdateMetadata(requestedMetadata, `.github/blocks/all.json`);
           }}
           onClose={() => setRequestedMetadata(null)}
         />

@@ -2,20 +2,42 @@ import { SandpackProvider, SandpackPreview } from "@codesandbox/sandpack-react";
 import { FileBlockProps } from "@githubnext/utils";
 import { useMemo } from "react";
 import "styled-components";
-// import './.css'"
+// import './.css'";
+
+const indexHtml = `
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom block</title>
+  </head>
+  <body>
+    <!-- this won't load if added to the head -->
+    <script type="module" src="https://cdn.skypack.dev/twind/shim"></script>
+    <link href="https://unpkg.com/@primer/css@^16.0.0/dist/primer.css" rel="stylesheet" />
+    <div id="root"></div>
+  </body>
+</html>
+`;
 
 export default (props: FileBlockProps) => {
-
-  const files = useMemo(() => ({
-    "/App.js": getAppCode(props),
-    "/styles.css": styles
-  }), [props.content])
+  const files = useMemo(
+    () => ({
+      "/App.js": getAppCode(props),
+      "/public/index.html": indexHtml,
+      "/styles.css": styles,
+    }),
+    [props.content]
+  );
 
   return (
-    <div style={{
-      width: "100%",
-      height: "100%",
-    }}>
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+      }}
+    >
       <SandpackProvider
         template="react"
         customSetup={{
@@ -27,7 +49,7 @@ export default (props: FileBlockProps) => {
             "@githubnext/utils": "^0.13.1",
             "lz-string": "^1.4.4",
           },
-          files: files
+          files: files,
         }}
         autorun
       >
@@ -37,16 +59,14 @@ export default (props: FileBlockProps) => {
         />
       </SandpackProvider>
     </div>
-  )
-}
+  );
+};
 
-
-const getAppCode = (props: FileBlockProps) => (
+const getAppCode = (props: FileBlockProps) =>
   `import MDX from "@mdx-js/runtime";
 import { Avatar, Box, StateLabel } from "@primer/components";
 import "styled-components";
 import SyntaxHighlighter from "react-syntax-highlighter";
-import { useTailwindCdn } from "@githubnext/utils";
 import LZString from "lz-string"
 
 import {
@@ -65,7 +85,6 @@ export const MarkdownContext = createContext({
 });
 export default function App(props) {
   const { context, content } = ${JSON.stringify(props)}
-  useTailwindCdn()
 
   const [repoInfo, setRepoInfo] = useState({
     issues: [],
@@ -392,8 +411,7 @@ function compress(input) {
 function getParameters(parameters) {
   return compress(JSON.stringify(parameters));
 }
-`
-)
+`;
 
 // dropping in here until we figure out how to properly import this in the prototype
 const styles = `.markdown-body {
@@ -1307,4 +1325,4 @@ const styles = `.markdown-body {
 .markdown-body ::-webkit-calendar-picker-indicator {
   filter: invert(50%);
 }
-`
+`;

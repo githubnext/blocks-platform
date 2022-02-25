@@ -678,15 +678,15 @@
     unist-util-visit "^1.0.0"
     uuid "^3.3.2"
 
-"@githubnext/blocks-examples@https://github.com/githubnext/blocks-examples.git#0.7.54":
+"@githubnext/blocks-examples@https://github.com/githubnext/blocks-examples.git#0.7.55":
   version "0.0.0"
-  resolved "https://github.com/githubnext/blocks-examples.git#379cc0a15f2a53b4815f9d4b5921dea9ed41e719"
+  resolved "https://github.com/githubnext/blocks-examples.git#11775759fb621c4a1d8a69f54ff80061d6a1a294"
   dependencies:
     "@codesandbox/sandpack-react" "^0.13.13"
     "@excalidraw/excalidraw" "^0.10.0"
     "@fullstackio/cq" "^6.0.9"
     "@fullstackio/remark-cq" "^6.1.2"
-    "@githubnext/utils" "^0.13.1"
+    "@githubnext/utils" "^0.15.0"
     "@githubocto/flat-ui" "^0.13.4"
     "@loadable/component" "^5.15.0"
     "@octokit/rest" "^18.12.0"
@@ -724,22 +724,14 @@
     recharts "^2.1.6"
     three "^0.134.0"
 
-"@githubnext/utils@^0.12.3":
-  version "0.12.3"
-  resolved "https://registry.yarnpkg.com/@githubnext/utils/-/utils-0.12.3.tgz#06b5f9013e0aa0f4e1d740b61d29dce0c260995d"
-  integrity sha512-X75FWy7NIGcHu1OWGqMgWCvO6hcNz32A2FZxJRYvlVtHJLueDcMHboH920WbgQ9443mGxsCSkvHBZb8r6HtF9w==
-  dependencies:
-    react "^17.0.2"
-    zod "^3.11.6"
-
-"@githubnext/utils@^0.13.1":
-  version "0.13.1"
-  resolved "https://registry.yarnpkg.com/@githubnext/utils/-/utils-0.13.1.tgz#3b07967841f9db3008028cb7e5ecc361727fc7f5"
-  integrity sha512-IkFActYIUiqZA0dV8n2uElUf5EDiQbXGlUtkhpGNHXqHOvTzu46e8+A1NQrIxTQ3voWK0HeD7hvSCyI6NiWIfQ==
+"@githubnext/utils@^0.15.0":
+  version "0.15.0"
+  resolved "https://registry.yarnpkg.com/@githubnext/utils/-/utils-0.15.0.tgz#a6ca88829908b95c404c32a60fbdb78e4daa0dc1"
+  integrity sha512-hf2cSAQY/iijwSvAoq992nx/wgVV40LlR6z2XkXMJuy8AlD0tsThsnL+B3ObbZS6FYkExSv1b4/N+4YZrQRmmA==
   dependencies:
     "@types/lodash.uniqueid" "^4.0.6"
+    git-url-parse "^11.6.0"
     lodash.uniqueid "^4.0.1"
-    react "^17.0.2"
     zod "^3.11.6"
 
 "@githubocto/flat-ui@^0.13.4":

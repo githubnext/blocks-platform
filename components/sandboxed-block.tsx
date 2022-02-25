@@ -150,7 +150,6 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
   </head>
   <body>
     <!-- this won't load if added to the head -->
-    <script type="module" src="https://cdn.skypack.dev/twind/shim"></script>
     <link href="https://unpkg.com/@primer/css@^16.0.0/dist/primer.css" rel="stylesheet" />
     ${cssFilesString}
     <div id="root"></div>
@@ -259,6 +258,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
     return (
       <div ref={sandpackWrapper} className="w-full h-full">
         <SandpackProvider
+          externalResources={["https://cdn.tailwindcss.com"]}
           template="react"
           customSetup={{
             dependencies: {},

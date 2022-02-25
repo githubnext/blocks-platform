@@ -245,8 +245,7 @@ export function useGetBlocksInfo() {
   return useQuery<BlocksInfo[]>(
     ["blocks-info"],
     () => {
-      const url =
-        "https://next-devex-blocks-marketplace.azurewebsites.net/api/blocks";
+      const url = `${process.env.NEXT_PUBLIC_MARKETPLACE_URL}/api/blocks`;
       return fetch(url).then((res) => res.json());
     },
     {

@@ -101,6 +101,16 @@ This repo contains the source code for a [prototype app](https://blocks.githubne
 
 ### Developing locally
 
+You'll need some environment variables to get started.
+
+This app uses GitHub OAuth to authenticate users, with help from the [NextAuth](https://next-auth.js.org/) package. You'll need to create an OAuth app and provide the required environment variables (app secret and app ID) to the `.env.local` file.
+
+```
+GITHUB_SECRET=X
+GITHUB_ID=X
+NEXT_PUBLIC_MARKETPLACE_URL="https://blocks-marketplace.githubnext.com"
+```
+
 To start working:
 
 ```bash
@@ -114,13 +124,6 @@ In the browser, you can choose the file on GitHub to view with url params:
 owner  # the GitHub org
 repo   # the GitHub repo
 path   # the path to the file
-```
-
-This app uses GitHub OAuth to authenticate users, with help from the [NextAuth](https://next-auth.js.org/) package. You'll need to create an OAuth app and provide the required environment variables (app secret and app ID) to the `.env.local` file.
-
-```
-GITHUB_SECRET=X
-GITHUB_ID=X
 ```
 
 ### Deploying to production

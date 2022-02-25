@@ -10,7 +10,7 @@ This sounds like a lot of work to build, right? With such an enthusiastic & acti
 
 In our exploration we've created a first version of this API that let's anyone create their own custom Blocks.
 
-> 🚀🚀🚀 Check out the Demo: [github-blocks.vercel.app](https://github-blocks.vercel.app)
+> 🚀🚀🚀 Check out the Demo: [blocks.githubnext.com](https://blocks.githubnext.com/)
 
 ## GitHub Blocks API
 
@@ -97,7 +97,7 @@ To reduce the cognitive load associated with writing file and folder Block compo
 
 > 📣 Read this if you're part of the team creating the GitHub Blocks projects.
 
-This repo contains the source code for a [prototype app](github-blocks.vercel.app/) that demos the GitHub Blocks project.
+This repo contains the source code for a [prototype app](https://blocks.githubnext.com/) that demos the GitHub Blocks project.
 
 ### Developing locally
 

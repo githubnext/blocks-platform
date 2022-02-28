@@ -9,27 +9,20 @@ export const CodeSandbox = ({
   children: string;
   dependencies?: string[];
 }) => {
-  const files = useMemo(
-    () => ({
-      "/App.js": children,
-    }),
-    [children]
-  );
+  const files = useMemo(() => ({
+    "/App.js": children,
+  }), [children]);
 
-  const parsedDependencies = useMemo(
-    () => parseDependencies(dependencies || []),
-    [dependencies]
-  );
+  const parsedDependencies = useMemo(() => (
+    parseDependencies(dependencies || [])
+  ), [dependencies]);
 
   return (
-    <div
-      style={{
-        width: "100%",
-        height: "100%",
-      }}
-    >
+    <div style={{
+      width: "100%",
+      height: "100%",
+    }}>
       <SandpackProvider
-        externalResources={["https://cdn.tailwindcss.com"]}
         template="react"
         customSetup={{
           dependencies: parsedDependencies,
@@ -43,7 +36,7 @@ export const CodeSandbox = ({
         />
       </SandpackProvider>
     </div>
-  );
+  )
 };
 
 const parseDependencies = (dependencies: string[]): Record<string, string> => {

@@ -678,15 +678,15 @@
     unist-util-visit "^1.0.0"
     uuid "^3.3.2"
 
-"@githubnext/blocks-examples@https://github.com/githubnext/blocks-examples.git#0.7.58":
+"@githubnext/blocks-examples@https://github.com/githubnext/blocks-examples.git#0.7.60":
   version "0.0.0"
-  resolved "https://github.com/githubnext/blocks-examples.git#617177248643732f4d1f4178c8786084f975179a"
+  resolved "https://github.com/githubnext/blocks-examples.git#5b063e19fbafe7e4f4e866a1bd902f733aa0fabc"
   dependencies:
     "@codesandbox/sandpack-react" "^0.13.13"
     "@excalidraw/excalidraw" "^0.10.0"
     "@fullstackio/cq" "^6.0.9"
     "@fullstackio/remark-cq" "^6.1.2"
-    "@githubnext/utils" "^0.15.1"
+    "@githubnext/utils" "^0.15.2"
     "@githubocto/flat-ui" "^0.13.4"
     "@loadable/component" "^5.15.0"
     "@octokit/rest" "^18.12.0"
@@ -723,16 +723,6 @@
     react-use "^17.3.1"
     recharts "^2.1.6"
     three "^0.134.0"
-
-"@githubnext/utils@^0.15.1":
-  version "0.15.1"
-  resolved "https://registry.yarnpkg.com/@githubnext/utils/-/utils-0.15.1.tgz#2c7fd21bebb24ea3203ee632012b3c57db9d07c2"
-  integrity sha512-7Et5MK+YBmGWAVfJcDKm0z80vFzHEpu8LdV4c6bDC1DP4PQ4XHdn/s3+AnBBV/Zme3DIFrgwNwd+0kD7QGa/og==
-  dependencies:
-    "@types/lodash.uniqueid" "^4.0.6"
-    git-url-parse "^11.6.0"
-    lodash.uniqueid "^4.0.1"
-    zod "^3.11.6"
 
 "@githubnext/utils@^0.15.2":
   version "0.15.2"

@@ -6,7 +6,6 @@ interface TrackParams {
 
 export function track(params: TrackParams) {
   const { url, event, payload } = params;
-  if (typeof window == "undefined") return;
 
   if (process.env.NODE_ENV === "development") {
     console.info("Analytics Disabled in development", params);

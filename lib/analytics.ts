@@ -1,10 +1,11 @@
+import wretch from "wretch";
 interface TrackParams {
   url: string;
   event: string;
   payload?: object;
 }
 
-export function track(params: TrackParams) {
+export async function track(params: TrackParams) {
   const { url, event, payload } = params;
 
   if (process.env.NODE_ENV === "development") {
@@ -12,11 +13,8 @@ export function track(params: TrackParams) {
     return;
   }
 
-  return fetch({
-    url: "https://octo-metrics.azurewebsites.net/api/CaptureEvent",
-    method: "POST",
-    // @ts-ignore
-    body: JSON.stringify({
+  return wretch("https://octo-metrics.azurewebsites.net/api/CaptureEvent").post(
+    {
       container: "blocks.githubnext.com",
       event,
       payload: {
@@ -28,6 +26,6 @@ export function track(params: TrackParams) {
         language: navigator.language,
         ...payload,
       },
-    }),
-  });
+    }
+  );
 }

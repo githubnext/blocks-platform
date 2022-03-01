@@ -56,6 +56,8 @@ module.exports = {
                 process.env.NEXT_PUBLIC_MARKETPLACE_URL,
                 // for sandboxes in the MDX Block
                 "https://codesandbox.io/api/v1/sandboxes/",
+                // for Analytics
+                "https://octo-metrics.azurewebsites.net/api/CaptureEvent",
               ]
                 .filter(Boolean)
                 .join(" "),

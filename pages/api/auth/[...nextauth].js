@@ -1,6 +1,8 @@
 import NextAuth from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 
+const USER_ALLOW_LIST = ["krzysztof-cieslak"];
+
 export default NextAuth({
   secret: process.env.NEXT_AUTH_SECRET,
   providers: [
@@ -24,7 +26,9 @@ export default NextAuth({
       return session;
     },
     async signIn({ profile }) {
-      return profile && profile.site_admin;
+      const isHubber = profile.site_admin;
+      const isGuest = USER_ALLOW_LIST.includes(profile.login);
+      return isHubber || isGuest;
     },
     async jwt({ token, account }) {
       if (account) {

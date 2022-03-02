@@ -1,6 +1,8 @@
 import NextAuth from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 
+const USER_ALLOW_LIST = ["krzysztof-cieslak"];
+
 export default NextAuth({
   secret: process.env.NEXT_AUTH_SECRET,
   providers: [
@@ -24,7 +26,8 @@ export default NextAuth({
       return session;
     },
     async signIn({ profile }) {
-      return profile && profile.site_admin;
+      if (!profile) throw new Error("Invalid credentials. Hubbers only.");
+      return profile.site_admin || USER_ALLOW_LIST.includes(profile.login);
     },
     async jwt({ token, account }) {
       if (account) {

@@ -2,18 +2,45 @@ import "styles/index.css";
 import "styles/primer-blocks.scss";
 import "styles/markdown.css";
 import "./../blocks/blocks.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider, BaseStyles } from "@primer/components";
 import { Hydrate, QueryClient, QueryClientProvider } from "react-query";
 import "@codesandbox/sandpack-react/dist/index.css";
 import Head from "next/head";
+import { useRouter } from "next/router";
+import { track } from "../lib/analytics";
 
-function App({
-  Component,
-  pageProps: { session, ...pageProps },
-}) {
+function App({ Component, pageProps: { session, ...pageProps } }) {
   const [queryClient] = useState(() => new QueryClient());
+
+  const router = useRouter();
+
+  useEffect(() => {
+    const handleRouteChange = (url, { shallow }) => {
+      if (shallow) return;
+      let queryParams = url.split("?")[1];
+      const parsed = new URLSearchParams(queryParams);
+      const blockKey = parsed.get("blockKey");
+      const path = parsed.get("path");
+      if (path && blockKey) {
+        track({
+          url,
+          event: "block-view",
+          payload: {
+            blockKey,
+            path,
+          },
+        });
+      }
+    };
+
+    router.events.on("routeChangeComplete", handleRouteChange);
+
+    return () => {
+      router.events.off("routeChangeComplete", handleRouteChange);
+    };
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient} contextSharing={true}>

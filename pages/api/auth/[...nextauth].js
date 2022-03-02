@@ -26,8 +26,9 @@ export default NextAuth({
       return session;
     },
     async signIn({ profile }) {
-      if (!profile) throw new Error("Invalid credentials. Hubbers only.");
-      return profile.site_admin || USER_ALLOW_LIST.includes(profile.login);
+      const isHubber = profile.site_admin;
+      const isGuest = USER_ALLOW_LIST.includes(profile.login);
+      return isHubber || isGuest;
     },
     async jwt({ token, account }) {
       if (account) {

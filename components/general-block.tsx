@@ -50,8 +50,9 @@ export function GeneralBlock(props: GeneralBlockProps) {
 
   const { mutateAsync } = useUpdateFileContents({
     onSuccess: async () => {
+      await queryClient.invalidateQueries("file")
       await queryClient.invalidateQueries("timeline");
-      console.info("✅ Refreshed timeline");
+      console.info("✅ Refreshed timeline and file");
     }
   })
   const onUpdateContent = async (newContent: string) => {
@@ -107,10 +108,13 @@ export function GeneralBlock(props: GeneralBlockProps) {
     path: path,
     fileRef: sha,
     token: token as string,
+  }, {
+    cacheTime: 0
   });
   const { content = "" } = fileData || {};
 
   const code = content;
+
 
   const name = path.split("/").pop();
 

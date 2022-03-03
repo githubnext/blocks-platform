@@ -29,13 +29,15 @@ export interface SearchContextWithToken extends SearchContext {
 export async function getFileContent(
   params: UseFileContentParams
 ): Promise<FileData> {
-  const { repo, owner, path, fileRef, token, cache } = params;
+  const { repo, owner, path, fileRef, token } = params;
 
-  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${fileRef}&cache=${params.cache}`;
+  let apiUrl = !fileRef || fileRef === "HEAD" ? `https://api.github.com/repos/${owner}/${repo}/contents/${path}` : `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${fileRef}`;
+
+  const file = path.split("/").pop() || "";
 
   const context = {
     download_url: apiUrl,
-    file: path.split("/").pop() || "",
+    file,
     path: path,
     repo: repo,
     owner: owner,
@@ -61,6 +63,7 @@ export async function getFileContent(
   const resObject = await res.json();
   const encodedContent = resObject.content;
   const content = Buffer.from(encodedContent, "base64").toString("utf8");
+
 
   return {
     content,
@@ -194,12 +197,13 @@ export async function getRepoTimeline(
 ): Promise<RepoTimeline> {
   const { owner, repo, path, token } = params;
 
-  const branch = "HEAD";
-  const url = `https://api.github.com/repos/${owner}/${repo}/commits?path=${path}&sha=${branch}`;
+  const randomQueryParamName = `${Math.random()}`;
+
+  const url = `https://api.github.com/repos/${owner}/${repo}/commits?path=${path}&${randomQueryParamName}=""`;
 
   const commitsRes = await fetch(url, {
     headers: {
-      Authorization: token && `token ${token}`,
+      Authorization: token && `token ${token}`
     },
   });
   const data = await commitsRes.json();

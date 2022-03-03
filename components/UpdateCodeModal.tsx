@@ -1,4 +1,4 @@
-import { ConfirmationDialog, Link } from '@primer/components';
+import { ConfirmationDialog, Flash, Link, Text } from '@primer/components';
 import { Diff, Hunk, parseDiff } from 'react-diff-view';
 import "react-diff-view/style/index.css";
 import { diffAsText } from "unidiff";
@@ -37,7 +37,7 @@ export const UpdateCodeModal = ({
           onClose();
         }}>
         {isLoggedIn ? (
-          <>
+          <div className="border border-gray-200 rounded-md p-4">
             <p className="pb-4 text-lg">
               {isMetadata ? <>
                 We store Block metadata in the <pre className="inline bg-gray-100 py-1 p-2 rounded-md">.github/blocks/</pre> folder. To update it, we'll create a commit for that metadata file.
@@ -55,8 +55,11 @@ export const UpdateCodeModal = ({
                 </Diff>
               ))}
             </div>
-          </>
-
+            <Flash variant="warning">
+              <Text fontWeight="bold">Warning:</Text>
+              {" "}this will only work if you have write access to the current repo.
+            </Flash>
+          </div>
         ) : (
           <p className="pb-4 text-lg">
             Hop over to <Link href="/">the homepage</Link> to sign in before you make any changes to this repo.

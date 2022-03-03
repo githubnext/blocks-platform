@@ -28,7 +28,7 @@ export function useFileContent(
   const { repo, owner, path, fileRef = "main", token } = params;
 
   return useQuery(
-    ["file", params, config?.queryKey],
+    ["file", params],
     () =>
       getFileContent({
         repo,
@@ -85,6 +85,7 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
     auth: params.token,
   });
 
+  // todo(use client side SHA which we already have for this update)
   if (sha === "latest") {
     try {
       const { data, status } = await octokit.repos.getContent({
@@ -103,7 +104,7 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
   }
 
   try {
-    await octokit.repos.createOrUpdateFileContents({
+    const res = await octokit.repos.createOrUpdateFileContents({
       owner: params.owner,
       repo: params.repo,
       path: params.path,
@@ -111,6 +112,7 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
       content: contentEncoded,
       sha: sha,
     });
+    return res.data
   } catch (e) { }
 }
 
@@ -202,6 +204,7 @@ export function useRepoTimeline(
     ["timeline", params],
     () => getRepoTimeline(params),
     {
+      cacheTime: 0,
       enabled: Boolean(params.repo) && Boolean(params.owner),
       refetchOnWindowFocus: false,
       retry: false

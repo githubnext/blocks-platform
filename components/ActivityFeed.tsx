@@ -111,7 +111,7 @@ const Commit = ({
       }}
     >
       <a
-        className={`text-left px-2 cursor-pointer ${
+        className={`text-left px-2 cursor-pointer overflow-hidden ${
           isSelected ? "bg-[#0A69DA] text-white" : "hover:bg-indigo-50"
         }`}
       >

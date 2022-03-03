@@ -11,32 +11,20 @@ import { Avatar } from "@primer/components";
 export const ActivityFeed = ({
   context,
   token,
-  commitsIteration,
 }: {
   context: Omit<FileContext, "file">;
   token: string;
-  commitsIteration: number;
 }) => {
   const { owner, repo, path } = context;
 
   const [open, setOpen] = useState(true);
 
-  const {
-    data: timelineData,
-    status: timelineStatus,
-    error: timelineError,
-  } = useRepoTimeline(
-    {
-      repo: repo,
-      owner: owner,
-      token,
-      path: path,
-    },
-    {
-      // for updating on file changes
-      queryKey: [commitsIteration],
-    }
-  );
+  const { data: timelineData } = useRepoTimeline({
+    repo: repo,
+    owner: owner,
+    token,
+    path: path,
+  });
 
   const commits = timelineData?.commits || [];
 

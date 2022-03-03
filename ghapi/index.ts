@@ -31,7 +31,8 @@ export async function getFileContent(
 ): Promise<FileData> {
   const { repo, owner, path, fileRef, token } = params;
 
-  let apiUrl = !fileRef || fileRef === "HEAD" ? `https://api.github.com/repos/${owner}/${repo}/contents/${path}` : `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${fileRef}`;
+  const query = fileRef && fileRef !== "HEAD" ? `?ref=${fileRef}` : "";
+  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}${query}`;
 
   const file = path.split("/").pop() || "";
 
@@ -63,7 +64,6 @@ export async function getFileContent(
   const resObject = await res.json();
   const encodedContent = resObject.content;
   const content = Buffer.from(encodedContent, "base64").toString("utf8");
-
 
   return {
     content,
@@ -203,7 +203,7 @@ export async function getRepoTimeline(
 
   const commitsRes = await fetch(url, {
     headers: {
-      Authorization: token && `token ${token}`
+      Authorization: token && `token ${token}`,
     },
   });
   const data = await commitsRes.json();

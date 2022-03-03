@@ -104,7 +104,7 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
   }
 
   try {
-    const res = await octokit.repos.createOrUpdateFileContents({
+    await octokit.repos.createOrUpdateFileContents({
       owner: params.owner,
       repo: params.repo,
       path: params.path,
@@ -112,8 +112,7 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
       content: contentEncoded,
       sha: sha,
     });
-    return res.data
-  } catch (e) { }
+  } catch (e) {}
 }
 
 export function useUpdateFileContents(
@@ -200,16 +199,12 @@ export function useRepoInfo(params: RepoContextWithToken) {
 export function useRepoTimeline(
   params: RepoContextWithToken & { path: string }
 ) {
-  return useQuery(
-    ["timeline", params],
-    () => getRepoTimeline(params),
-    {
-      cacheTime: 0,
-      enabled: Boolean(params.repo) && Boolean(params.owner),
-      refetchOnWindowFocus: false,
-      retry: false
-    }
-  );
+  return useQuery(["timeline", params], () => getRepoTimeline(params), {
+    cacheTime: 0,
+    enabled: Boolean(params.repo) && Boolean(params.owner),
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
 }
 
 export function useRepoFiles(params: RepoContextWithToken) {
@@ -286,11 +281,11 @@ export function useManageBlock({
   const { data: allBlocksInfo = [] } = useGetBlocksInfo();
   const exampleBlocks = (exampleBlocksInfo?.blocks || []).map(
     (block) =>
-    ({
-      ...block,
-      owner: exampleBlocksInfo.owner,
-      repo: exampleBlocksInfo.repo,
-    } as Block)
+      ({
+        ...block,
+        owner: exampleBlocksInfo.owner,
+        repo: exampleBlocksInfo.repo,
+      } as Block)
   );
   const extension = (path as string).split(".").slice(-1)[0];
   const relevantExampleBlocksInfo = exampleBlocks.filter(
@@ -303,16 +298,17 @@ export function useManageBlock({
 
   // find default block
   const tryToGetBlockFromKey = (key = ""): Block | null => {
-    let [
-      blockOwner,
-      blockRepo,
-      blockId,
-    ] = (key).split("__");
+    let [blockOwner, blockRepo, blockId] = key.split("__");
     if (!blockOwner) blockOwner = defaultFileBlock.owner;
     if (!blockRepo) blockRepo = defaultFileBlock.repo;
-    const isDefaultBlocksRepo = `${blockOwner}/${blockRepo}` === `${defaultFileBlock.owner}/${defaultFileBlock.repo}`
-    if (isDefaultBlocksRepo) return relevantExampleBlocksInfo.find((b) => b.id === blockId);
-    const customBlocksInfo = allBlocksInfo.find((b) => b.owner === blockOwner && b.repo === blockRepo);
+    const isDefaultBlocksRepo =
+      `${blockOwner}/${blockRepo}` ===
+      `${defaultFileBlock.owner}/${defaultFileBlock.repo}`;
+    if (isDefaultBlocksRepo)
+      return relevantExampleBlocksInfo.find((b) => b.id === blockId);
+    const customBlocksInfo = allBlocksInfo.find(
+      (b) => b.owner === blockOwner && b.repo === blockRepo
+    );
     const block = customBlocksInfo?.blocks.find((b) => b.id === blockId);
     if (!block) return null;
     if (isFolder !== (block.type === "folder")) return null;
@@ -320,27 +316,29 @@ export function useManageBlock({
       ...block,
       owner: customBlocksInfo.owner,
       repo: customBlocksInfo.repo,
-    }
-  }
+    };
+  };
 
   // first, default to block from url param
-  const blockInUrl = tryToGetBlockFromKey(blockKey as string)
-  const blockFromMetadata = tryToGetBlockFromKey(storedDefaultBlock)
+  const blockInUrl = tryToGetBlockFromKey(blockKey as string);
+  const blockFromMetadata = tryToGetBlockFromKey(storedDefaultBlock);
   let fallbackDefaultBlock = overrideDefaultBlocks[extension]
-    ? relevantExampleBlocksInfo.find((b) => b.id === overrideDefaultBlocks[extension])
-    // the first example block is always the code block,
-    // so let's default to the second one, when available
-    : relevantExampleBlocksInfo[1] || relevantExampleBlocksInfo[0];
+    ? relevantExampleBlocksInfo.find(
+        (b) => b.id === overrideDefaultBlocks[extension]
+      )
+    : // the first example block is always the code block,
+      // so let's default to the second one, when available
+      relevantExampleBlocksInfo[1] || relevantExampleBlocksInfo[0];
 
   if (
-    !fallbackDefaultBlock
-    || isFolder !== (fallbackDefaultBlock.type === "folder")
+    !fallbackDefaultBlock ||
+    isFolder !== (fallbackDefaultBlock.type === "folder")
   ) {
     fallbackDefaultBlock = isFolder ? defaultFolderBlock : defaultFileBlock;
   }
 
-  const defaultBlock = blockFromMetadata || fallbackDefaultBlock
-  const block = blockInUrl || defaultBlock
+  const defaultBlock = blockFromMetadata || fallbackDefaultBlock;
+  const block = blockInUrl || defaultBlock;
 
   let blockOptions = relevantExampleBlocksInfo;
   if (block && !blockOptions.some((b) => b.id === block.id)) {

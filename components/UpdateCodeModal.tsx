@@ -38,13 +38,13 @@ export const UpdateCodeModal = ({
         }}>
         {isLoggedIn ? (
           <div className="border border-gray-200 rounded-md p-4">
-            <p className="pb-4 text-lg">
+            <div className="pb-4 text-lg">
               {isMetadata ? <>
                 We store Block metadata in the <pre className="inline bg-gray-100 py-1 p-2 rounded-md">.github/blocks/</pre> folder. To update it, we'll create a commit for that metadata file.
               </> : <>
                 We'll create a commit to update the <pre className="inline bg-gray-100 py-1 p-2 rounded-md">{path}</pre> file.
               </>}
-            </p>
+            </div>
             <div className="overflow-y-auto" style={{
               maxHeight: "calc(100vh - 27em)",
               minHeight: "20em"

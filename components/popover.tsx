@@ -27,7 +27,7 @@ export function Popover(props: PopoverProps) {
       <div
         {...overlayProps}
         ref={popoverRef}
-        className="absolute z-10 top-full w-full shadow-lg border border-gray-300 bg-white rounded-md mt-2"
+        className="absolute z-[100] top-full w-full shadow-lg border border-gray-300 bg-white rounded-md mt-2"
       >
         {children}
         <DismissButton onDismiss={onClose} />

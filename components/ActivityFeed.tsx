@@ -1,5 +1,6 @@
 import { FileContext } from "@githubnext/utils";
-import { Box, Label, Link, StyledOcticon, Timeline } from "@primer/components";
+import { Box, Label, StyledOcticon, Text, Timeline } from "@primer/components";
+import Link from "next/link";
 import { CommitIcon } from "@primer/octicons-react";
 import { useRepoTimeline } from "hooks";
 import { getRelativeTime } from "lib/date-utils";
@@ -112,56 +113,52 @@ const Commit = ({
 }) => {
   const router = useRouter();
   return (
-    <button
-      className={`text-left px-2 cursor-pointer ${
-        isSelected ? "bg-[#0A69DA] text-white" : "hover:bg-indigo-50"
-      }`}
-      onClick={() => {
-        let { fileRef, ...newQuery } = router.query;
-        if (!isSelected) newQuery.fileRef = sha;
-        router.push({
-          pathname: router.pathname,
-          query: newQuery,
-        });
+    <Link
+      shallow
+      href={{
+        query: {
+          ...router.query,
+          fileRef: sha,
+        },
       }}
     >
-      <Timeline.Item>
-        <Timeline.Badge
-          className={`transition-transform ${
-            isSelected
-              ? "!bg-[#0A69DA] !text-white !border-indigo-200 transform scale-110"
-              : ""
-          }`}
-        >
-          <StyledOcticon icon={CommitIcon} />
-        </Timeline.Badge>
-        <Timeline.Body className={`${isSelected ? "!text-white" : ""}`}>
-          <div className={`flex justify-between -mt-1`}>
-            <Box sx={{ mr: 2, mt: 1 }}>
-              <Box
-                display="inline"
-                sx={{ fontWeight: "bold", color: "inherit", mr: 1 }}
-              >
-                {username}
-              </Box>
-              <span className="opacity-80">pushed a commit</span>
-            </Box>
-            <div className="flex-shrink-0">
-              <Avatar
-                src={`https://avatars.githubusercontent.com/${username}`}
-                alt={username}
-              />
-            </div>
-          </div>
+      <a
+        className={`text-left px-2 cursor-pointer ${
+          isSelected ? "bg-[#0A69DA] text-white" : "hover:bg-indigo-50"
+        }`}
+      >
+        <Timeline.Item>
+          <Timeline.Badge
+            className={`transition-transform ${
+              isSelected
+                ? "!bg-[#0A69DA] !text-white !border-indigo-200 transform scale-110"
+                : ""
+            }`}
+          >
+            <StyledOcticon icon={CommitIcon} />
+          </Timeline.Badge>
+          <Timeline.Body className={`${isSelected ? "!text-white" : ""}`}>
+            <div>
+              <Text fontWeight="medium" as="p">
+                {message}
+              </Text>
+              <div className="mt-1 flex items-center gap-1">
+                <Avatar
+                  size={20}
+                  className="!w-[20px] float-none"
+                  src={`https://avatars.githubusercontent.com/${username}`}
+                  alt={username}
+                />
 
-          <Box sx={{ mt: 1 }} className="overflow-x-hidden markdown">
-            <div className="opacity-80 text-xs whitespace-pre">{message}</div>
-          </Box>
-          <Box fontStyle="italic" mt={1} className="opacity-60">
-            {getRelativeTime(new Date(date))}
-          </Box>
-        </Timeline.Body>
-      </Timeline.Item>
-    </button>
+                <Text fontWeight="bold" fontSize="12px" as="span">
+                  {username}
+                </Text>
+                <Text fontSize="12px">{getRelativeTime(new Date(date))}</Text>
+              </div>
+            </div>
+          </Timeline.Body>
+        </Timeline.Item>
+      </a>
+    </Link>
   );
 };

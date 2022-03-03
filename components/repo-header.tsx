@@ -1,6 +1,12 @@
-import { Box, StyledOcticon, UnderlineNav, Link } from "@primer/components";
+import {
+  Box,
+  StyledOcticon,
+  UnderlineNav,
+  Link,
+  AvatarStack,
+  Avatar,
+} from "@primer/components";
 import React from "react";
-import { Avatar, AvatarList } from "components/Avatar";
 import { BiCaretDown } from "react-icons/bi";
 
 import {
@@ -11,8 +17,6 @@ import {
   GitPullRequestIcon,
   GraphIcon,
   IssueOpenedIcon,
-  LogoGithubIcon,
-  MarkGithubIcon,
   PlayIcon,
   ProjectIcon,
   RepoForkedIcon,
@@ -72,21 +76,36 @@ export const RepoHeader = ({
             mr={2}
             className="text-gray-500"
           />
-          <Link href={`https://github.com/${owner}/`} fontSize={3} target="_blank" rel="noopener">
+          <Link
+            href={`https://github.com/${owner}/`}
+            fontSize={3}
+            target="_blank"
+            rel="noopener"
+          >
             {owner}
           </Link>
           <Box fontSize={3} mx={1} fontWeight={300}>
             /
           </Box>
-          <Link href={`https://github.com/${owner}/${repo}/`} fontSize={3} fontWeight="bold" target="_blank" rel="noopener">
+          <Link
+            href={`https://github.com/${owner}/${repo}/`}
+            fontSize={3}
+            fontWeight="bold"
+            target="_blank"
+            rel="noopener"
+          >
             {repo}
           </Link>
           <Box ml={2}>
-            <AvatarList>
+            <AvatarStack>
               {contributors?.map((contributor) => (
-                <Avatar key={contributor.login} username={contributor.login} size="small" />
+                <Avatar
+                  alt={contributor.login}
+                  key={contributor.login}
+                  src={`https://avatars.githubusercontent.com/${contributor.login}`}
+                />
               ))}
-            </AvatarList>
+            </AvatarStack>
           </Box>
         </Box>
 

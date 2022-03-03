@@ -5,7 +5,7 @@ import { useRepoTimeline } from "hooks";
 import { getRelativeTime } from "lib/date-utils";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { Avatar } from "./Avatar";
+import { Avatar } from "@primer/components";
 
 export const ActivityFeed = ({
   context,
@@ -41,11 +41,11 @@ export const ActivityFeed = ({
 
   return (
     <div
-      className={`h-full overflow-auto ${open ? "w-80" : "w-12"
-        } transition-width duration-200`}
+      className={`h-full overflow-auto ${
+        open ? "w-80" : "w-12"
+      } transition-width duration-200`}
     >
       <div className="flex flex-col h-full">
-
         <Box
           bg="canvas.subtle"
           borderBottom="1px solid"
@@ -59,8 +59,9 @@ export const ActivityFeed = ({
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className={`h-4 w-4 ${open ? "rotate-180" : ""
-                } transition duration-200 ease-in-out text-gray-600`}
+              className={`h-4 w-4 ${
+                open ? "rotate-180" : ""
+              } transition duration-200 ease-in-out text-gray-600`}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -74,9 +75,7 @@ export const ActivityFeed = ({
             </svg>
           </div>
           <div className="font-semibold text-gray-600 p-px flex max-w-full min-w-0 pr-2">
-            <div className="flex-none">
-              Commits
-            </div>
+            <div className="flex-none">Commits</div>
             {path && (
               <Label className="min-w-0 ml-2 flex-1 truncate leading-6" outline>
                 {path}
@@ -114,8 +113,9 @@ const Commit = ({
   const router = useRouter();
   return (
     <button
-      className={`text-left px-2 cursor-pointer ${isSelected ? "bg-[#0A69DA] text-white" : "hover:bg-indigo-50"
-        }`}
+      className={`text-left px-2 cursor-pointer ${
+        isSelected ? "bg-[#0A69DA] text-white" : "hover:bg-indigo-50"
+      }`}
       onClick={() => {
         let { fileRef, ...newQuery } = router.query;
         if (!isSelected) newQuery.fileRef = sha;
@@ -127,10 +127,11 @@ const Commit = ({
     >
       <Timeline.Item>
         <Timeline.Badge
-          className={`transition-transform ${isSelected
-            ? "!bg-[#0A69DA] !text-white !border-indigo-200 transform scale-110"
-            : ""
-            }`}
+          className={`transition-transform ${
+            isSelected
+              ? "!bg-[#0A69DA] !text-white !border-indigo-200 transform scale-110"
+              : ""
+          }`}
         >
           <StyledOcticon icon={CommitIcon} />
         </Timeline.Badge>
@@ -145,7 +146,12 @@ const Commit = ({
               </Box>
               <span className="opacity-80">pushed a commit</span>
             </Box>
-            <Avatar username={username} />
+            <div className="flex-shrink-0">
+              <Avatar
+                src={`https://avatars.githubusercontent.com/${username}`}
+                alt={username}
+              />
+            </div>
           </div>
 
           <Box sx={{ mt: 1 }} className="overflow-x-hidden markdown">

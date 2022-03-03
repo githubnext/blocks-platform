@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 
-const USER_ALLOW_LIST = ["krzysztof-cieslak"];
+const USER_ALLOW_LIST = ["Krzysztof-Cieslak", "dsyme"];
 
 export default NextAuth({
   secret: process.env.NEXT_AUTH_SECRET,

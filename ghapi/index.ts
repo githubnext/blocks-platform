@@ -67,9 +67,7 @@ export async function getFileContent(
 
   return {
     content,
-    context,
-    // @ts-ignore
-    sha: resObject.sha
+    context
   };
 }
 

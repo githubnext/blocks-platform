@@ -4,6 +4,7 @@ import { getFileContent, getRepoInfo } from "ghapi";
 import { useFileContent, useFolderContent, useMetadata, useUpdateFileContents } from "hooks";
 import { useRouter } from "next/router";
 import React, { useEffect, useMemo } from "react";
+import { useQueryClient } from "react-query";
 import { ErrorBoundary } from "./error-boundary";
 import { UpdateCodeModal } from "./UpdateCodeModal";
 
@@ -12,7 +13,6 @@ interface GeneralBlockProps {
   context: FileContext | FolderContext;
   block: Block;
   token: string;
-  onCommit?: () => void;
 }
 
 export function GeneralBlock(props: GeneralBlockProps) {
@@ -21,8 +21,8 @@ export function GeneralBlock(props: GeneralBlockProps) {
     theme,
     block,
     token,
-    onCommit,
   } = props;
+  const queryClient = useQueryClient();
   const { repo, owner, path, sha } = context;
   const [requestedMetadata, setRequestedMetadata] = React.useState(null);
   const [requestedMetadataExisting, setRequestedMetadataExisting] = React.useState(null);
@@ -48,7 +48,12 @@ export function GeneralBlock(props: GeneralBlockProps) {
     return data;
   }
 
-  const { mutateAsync } = useUpdateFileContents({})
+  const { mutateAsync } = useUpdateFileContents({
+    onSuccess: async () => {
+      await queryClient.invalidateQueries("timeline");
+      console.info("✅ Refreshed timeline");
+    }
+  })
   const onUpdateContent = async (newContent: string) => {
     await mutateAsync({
       content: newContent,
@@ -58,10 +63,6 @@ export function GeneralBlock(props: GeneralBlockProps) {
       sha: "latest",
       token: token as string,
     })
-    if (onCommit) {
-      // for updating the activity feed on changes
-      onCommit();
-    }
   }
 
   const onRequestUpdateMetadata = async (newMetadata: any, pathToUpdate = path, blockToUpdate = block, currentMetadata = metadata) => {

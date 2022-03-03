@@ -8,7 +8,7 @@ import {
 } from "hooks";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { ActivityFeed } from "./ActivityFeed";
 import { GitHubHeader } from "./github-header";
 import { RepoHeader } from "./repo-header";
@@ -106,13 +106,6 @@ export function RepoDetail(props: RepoDetailProps) {
   const size = fileInfo?.size || 0;
   const fileSizeLimit = 1500000; // 1.5Mb
   const isTooLarge = size > fileSizeLimit;
-
-  // for updating the activity feed on file changes
-  const [commitsIteration, setCommitsIteration] = useState(0);
-
-  const onCommit = useCallback(() => {
-    setCommitsIteration((prev) => prev + 1);
-  }, []);
 
   if (repoFilesStatus === "error" || repoInfoStatus === "error") {
     const error = repoInfoError || repoFilesError;
@@ -235,18 +228,13 @@ export function RepoDetail(props: RepoDetailProps) {
                 theme={(theme as string) || "light"}
                 block={block}
                 token={token}
-                onCommit={onCommit}
               />
             ))
           )}
         </div>
 
         <div className="flex-none hidden lg:block h-full border-l border-gray-200">
-          <ActivityFeed
-            context={context}
-            token={token}
-            commitsIteration={commitsIteration}
-          />
+          <ActivityFeed context={context} token={token} />
         </div>
       </div>
       {!!requestedMetadata && (

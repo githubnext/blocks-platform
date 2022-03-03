@@ -196,17 +196,15 @@ export function useRepoInfo(params: RepoContextWithToken) {
 }
 
 export function useRepoTimeline(
-  params: RepoContextWithToken & { path: string },
-  config?: UseQueryOptions<any>
+  params: RepoContextWithToken & { path: string }
 ) {
   return useQuery(
-    ["timeline", params, config?.queryKey],
+    ["timeline", params],
     () => getRepoTimeline(params),
     {
       enabled: Boolean(params.repo) && Boolean(params.owner),
       refetchOnWindowFocus: false,
-      retry: false,
-      ...config,
+      retry: false
     }
   );
 }

@@ -67,7 +67,7 @@ export async function getFileContent(
 
   return {
     content,
-    context
+    context,
   };
 }
 

@@ -76,7 +76,7 @@ export const defaultBlocksRepo = {
     {
       "type": "file",
       "id": "css-block",
-      "title": "CSS block",
+      "title": "Styleguide block",
       "description": "View selectors in a css file",
       "entry": "/src/blocks/file-blocks/css.tsx",
       "extensions": [

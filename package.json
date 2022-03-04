@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@codesandbox/sandpack-react": "^0.10.2",
-    "@githubnext/blocks-examples": "https://github.com/githubnext/blocks-examples.git#0.7.62",
+    "@githubnext/blocks-examples": "https://github.com/githubnext/blocks-examples.git#0.7.63",
     "@githubnext/utils": "^0.15.3",
     "@octokit/rest": "^18.12.0",
     "@primer/components": "^30.3.0",

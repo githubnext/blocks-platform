@@ -19,8 +19,8 @@ module.exports = {
               "base-uri 'none'",
               "child-src 'none'",
               "frame-ancestors 'none'",
-              "worker-src 'self' blob:",
-              "object-src 'self' blob:",
+              "object-src 'self'",
+              "worker-src 'self'",
               "style-src 'self' 'unsafe-inline'",
               [
                 "frame-src",

@@ -19,7 +19,7 @@ module.exports = {
               "base-uri 'none'",
               "child-src 'none'",
               "frame-ancestors 'none'",
-              "object-src 'self'",
+              "object-src 'none'",
               "worker-src 'self'",
               "style-src 'self' 'unsafe-inline'",
               [

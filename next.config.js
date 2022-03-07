@@ -19,8 +19,8 @@ module.exports = {
               "base-uri 'none'",
               "child-src 'none'",
               "frame-ancestors 'none'",
-              "object-src 'none'",
-              "worker-src 'self'",
+              "worker-src 'self' blob:",
+              "object-src 'self' blob:",
               "style-src 'self' 'unsafe-inline'",
               [
                 "frame-src",
@@ -58,6 +58,7 @@ module.exports = {
                 "https://codesandbox.io/api/v1/sandboxes/",
                 // for Analytics
                 "https://octo-metrics.azurewebsites.net/api/CaptureEvent",
+                "blob:",
               ]
                 .filter(Boolean)
                 .join(" "),

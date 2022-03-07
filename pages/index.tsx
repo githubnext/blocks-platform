@@ -1,4 +1,3 @@
-import { AnimatedBlocks } from "components/AnimatedBlocks";
 import { FullPageLoader } from "components/full-page-loader";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -40,9 +39,6 @@ function Home() {
             <span className="font-normal ml-1">Next</span>
           </div>
         </div>
-      </div>
-      <div className="absolute inset-0 z-0">
-        <AnimatedBlocks />
       </div>
     </div>
   );

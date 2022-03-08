@@ -24,7 +24,10 @@ export const GitHubHeader = (props: GitHubHeaderProps) => {
       <p className="text-sm opacity-50 mt-2 lg:mt-0 lg:ml-4">
         GitHub Blocks is an exploratory prototype. More information about this
         project{" "}
-        <a href="" className="underline ml-1">
+        <a href="https://thehub.github.com/news/2022-03-08-blocks-githubnext-announcement"
+          className="underline ml-1"
+          target="_blank"
+          rel="noreferrer">
           {" "}
           can be found here
         </a>

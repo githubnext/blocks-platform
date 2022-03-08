@@ -678,15 +678,15 @@
     unist-util-visit "^1.0.0"
     uuid "^3.3.2"
 
-"@githubnext/blocks-examples@https://github.com/githubnext/blocks-examples.git#0.7.63":
+"@githubnext/blocks-examples@https://github.com/githubnext/blocks-examples.git#0.7.64":
   version "0.0.0"
-  resolved "https://github.com/githubnext/blocks-examples.git#6d928c0afe7b4fd02453516167197d8419c7e196"
+  resolved "https://github.com/githubnext/blocks-examples.git#16f3e87ad3c186671d9ea43373bf4ba578b6eeae"
   dependencies:
     "@codesandbox/sandpack-react" "^0.13.13"
     "@excalidraw/excalidraw" "^0.10.0"
     "@fullstackio/cq" "^6.0.9"
     "@fullstackio/remark-cq" "^6.1.2"
-    "@githubnext/utils" "^0.15.3"
+    "@githubnext/utils" "^0.15.4"
     "@githubocto/flat-ui" "^0.13.4"
     "@loadable/component" "^5.15.0"
     "@octokit/rest" "^18.12.0"
@@ -724,10 +724,10 @@
     recharts "^2.1.6"
     three "^0.134.0"
 
-"@githubnext/utils@^0.15.3":
-  version "0.15.3"
-  resolved "https://registry.yarnpkg.com/@githubnext/utils/-/utils-0.15.3.tgz#2d13e6898a0233b3cb6d3f280153bce9225021bf"
-  integrity sha512-YR8zLWrjoyEe6AdeS/BAWpUbxF2gZuahekSQdT6o1Yh15I9S69qs1d0QGdiLrK7M3hfER3ya8jpy5F+H2oiHlg==
+"@githubnext/utils@^0.15.4":
+  version "0.15.4"
+  resolved "https://registry.yarnpkg.com/@githubnext/utils/-/utils-0.15.4.tgz#24010abb242193b89be5968b4d17e8731ae52755"
+  integrity sha512-Oi6SixqnjLW+sNNqPKe5WJ8hbj3ODDVfR5Cu3Oy6EUYEKZeGF68fk+g7mDJDKYof3k2+dKOb8Pnw8UNgjzHJjw==
   dependencies:
     "@types/lodash.uniqueid" "^4.0.6"
     git-url-parse "^11.6.0"
@@ -5919,11 +5919,6 @@ match-sorter@^6.0.2, match-sorter@^6.3.0:
   dependencies:
     "@babel/runtime" "^7.12.5"
     remove-accents "0.4.2"
-
-matter-js@^0.18.0:
-  version "0.18.0"
-  resolved "https://registry.yarnpkg.com/matter-js/-/matter-js-0.18.0.tgz#083ced04eb6768f7664dc7ca8948a10e46ad3ed6"
-  integrity sha512-/ZVem4WygUnbmo/iE4oHZpZS97btfBtYy5Iwn1396vUZU7YhgVEN8J4UWwfZwY1ZqoTYlPgjvSw9WXauuXL0mg==
 
 mdn-data@2.0.14:
   version "2.0.14"

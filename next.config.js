@@ -58,6 +58,7 @@ module.exports = {
                 "https://codesandbox.io/api/v1/sandboxes/",
                 // for Analytics
                 "https://octo-metrics.azurewebsites.net/api/CaptureEvent",
+                "blob:",
               ]
                 .filter(Boolean)
                 .join(" "),

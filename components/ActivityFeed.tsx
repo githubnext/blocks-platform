@@ -1,7 +1,11 @@
 import { FileContext } from "@githubnext/utils";
 import { Box, Label, StyledOcticon, Text, Timeline } from "@primer/components";
 import Link from "next/link";
-import { CommitIcon } from "@primer/octicons-react";
+import {
+  CommitIcon,
+  SidebarCollapseIcon,
+  SidebarExpandIcon,
+} from "@primer/octicons-react";
 import { useRepoTimeline } from "hooks";
 import { getRelativeTime } from "lib/date-utils";
 import { useRouter } from "next/router";
@@ -42,27 +46,13 @@ export const ActivityFeed = ({
           alignItems="center"
           className="flex-none py-3 !border-gray-200"
         >
-          <div
+          <Box
+            color="fg.muted"
             className="cursor-pointer flex align-center ml-4 mr-4"
             onClick={() => setOpen(!open)}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className={`h-4 w-4 ${
-                open ? "rotate-180" : ""
-              } transition duration-200 ease-in-out text-gray-600`}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
-              />
-            </svg>
-          </div>
+            {open ? <SidebarCollapseIcon /> : <SidebarExpandIcon />}
+          </Box>
           <div className="font-semibold text-gray-600 p-px flex max-w-full min-w-0 pr-2">
             <div className="flex-none">Commits</div>
             {path && (

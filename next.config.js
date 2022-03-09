@@ -59,6 +59,8 @@ module.exports = {
                 "https://codesandbox.io/api/v1/sandboxes/",
                 // for Analytics
                 "https://octo-metrics.azurewebsites.net/api/CaptureEvent",
+                "https://tfhub.dev/google/tfjs-model/universal-sentence-encoder-qa-ondevice/",
+                "https://storage.googleapis.com/tfhub-tfjs-modules/google/tfjs-model/universal-sentence-encoder-qa-ondevice/",
                 "blob:",
               ]
                 .filter(Boolean)

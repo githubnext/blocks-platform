@@ -9,15 +9,9 @@
   transform: translate(-50%, -50%);
   font-style: italic;
 }
+
 #example-block-markdown-block .sp-preview-iframe {
   outline: none;
   width: 100%;
   border: none;
-}
-#example-block-markdown-block .sp-preview-container,
-#example-block-markdown-block .sp-wrapper,
-#example-block-markdown-block .sp-layout,
-#example-block-markdown-block .sp-stack,
-#example-block-markdown-block .sp-preview-iframe {
-  height: 100% !important;
 }

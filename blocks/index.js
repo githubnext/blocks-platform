@@ -15,6 +15,7 @@ const simplePollBlock = dynamic(() => import("./file-blocks/poll.tsx"), {ssr:fal
 const chartBlock = dynamic(() => import("./file-blocks/charts/index.tsx"), {ssr:false});
 const markdownBlock = dynamic(() => import("./file-blocks/live-markdown/index.tsx"), {ssr:false});
 const reactFeedbackBlock = dynamic(() => import("./file-blocks/annotate-react/index.tsx"), {ssr:false});
+const sentenceEncoderBlock = dynamic(() => import("./file-blocks/sentence-encoder.tsx"), {ssr:false});
 const minimapBlock = dynamic(() => import("./folder-blocks/minimap/index.tsx"), {ssr:false});
 const dashboardBlock = dynamic(() => import("./folder-blocks/dashboard/index.tsx"), {ssr:false});
 const codeTourBlock = dynamic(() => import("./folder-blocks/code-tour/index.tsx"), {ssr:false});
@@ -32,6 +33,7 @@ export default {
   'chart-block': chartBlock,
   'markdown-block': markdownBlock,
   'react-feedback-block': reactFeedbackBlock,
+  'sentence-encoder-block': sentenceEncoderBlock,
   'minimap-block': minimapBlock,
   'dashboard-block': dashboardBlock,
   'code-tour-block': codeTourBlock
@@ -182,6 +184,17 @@ export const defaultBlocksRepo = {
         "tsx"
       ],
       "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/Aside.jsx"
+    },
+    {
+      "type": "file",
+      "id": "sentence-encoder-block",
+      "title": "Sentence encoder block",
+      "description": "Experiment with your sentence-encoder",
+      "entry": "/src/blocks/file-blocks/sentence-encoder.tsx",
+      "extensions": [
+        "json"
+      ],
+      "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/queries.json"
     },
     {
       "type": "folder",

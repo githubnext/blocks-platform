@@ -48,6 +48,7 @@ module.exports = {
                 "'self'",
                 // for local dev
                 isDev && "webpack://*",
+                isDev && "ws://*",
                 // for fetching file contents from GitHub
                 "https://raw.githubusercontent.com/",
                 // for hitting the GitHub API

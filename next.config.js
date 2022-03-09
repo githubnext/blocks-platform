@@ -48,6 +48,7 @@ module.exports = {
                 "'self'",
                 // for local dev
                 isDev && "webpack://*",
+                isDev && "ws://*",
                 // for fetching file contents from GitHub
                 "https://raw.githubusercontent.com/",
                 // for hitting the GitHub API
@@ -58,6 +59,7 @@ module.exports = {
                 "https://codesandbox.io/api/v1/sandboxes/",
                 // for Analytics
                 "https://octo-metrics.azurewebsites.net/api/CaptureEvent",
+                "blob:",
               ]
                 .filter(Boolean)
                 .join(" "),

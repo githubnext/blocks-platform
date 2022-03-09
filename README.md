@@ -31,9 +31,15 @@ repo   # the GitHub repo
 path   # the path to the file
 ```
 
-## Deploying to production
+## Deploying to staging
 
-Just push to `main` and Vercel will handle the deployment.
+Handled automatically by our GitHub action.
+
+## Deploy to production
+
+1. Navigate to the azure project for [`githubnext-blocks/staging`](https://portal.azure.com/#@githubazure.onmicrosoft.com/resource/subscriptions/b394e68d-7472-42fd-bb1c-d73cb7f4fd3c/resourceGroups/githubnext-blocks-rg/providers/Microsoft.Web/sites/githubnext-blocks/slots/staging/appServices)
+2. Click "Swap" button
+3. Then swap" again on the sidebar
 
 ## Syncing with example Blocks
 

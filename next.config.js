@@ -59,6 +59,10 @@ module.exports = {
                 "https://codesandbox.io/api/v1/sandboxes/",
                 // for Analytics
                 "https://octo-metrics.azurewebsites.net/api/CaptureEvent",
+                // for sentence-encoder-block
+                "https://tfhub.dev/google/tfjs-model/universal-sentence-encoder-qa-ondevice/",
+                "https://storage.googleapis.com/tfhub-tfjs-modules/google/tfjs-model/universal-sentence-encoder-qa-ondevice/",
+                // for 3d-model block
                 "blob:",
               ]
                 .filter(Boolean)

@@ -1,17 +1,10 @@
 import { FileContext } from "@githubnext/utils";
 import {
-  CommitIcon,
+  GitCommitIcon,
   SidebarCollapseIcon,
   SidebarExpandIcon,
 } from "@primer/octicons-react";
-import {
-  Avatar,
-  Box,
-  Label,
-  StyledOcticon,
-  Text,
-  Timeline,
-} from "@primer/react";
+import { Avatar, Box, IconButton, Label, Text, Timeline } from "@primer/react";
 import { useRepoTimeline } from "hooks";
 import { getRelativeTime } from "lib/date-utils";
 import Link from "next/link";
@@ -50,23 +43,25 @@ export const ActivityFeed = ({
           borderBottom="1px solid"
           display="flex"
           alignItems="center"
-          className="flex-none py-3 !border-gray-200"
+          p={2}
+          borderColor="border.muted"
+          flex="none"
         >
-          <Box
-            color="fg.muted"
-            className="cursor-pointer flex align-center ml-4 mr-4"
+          <IconButton
+            icon={open ? SidebarCollapseIcon : SidebarExpandIcon}
             onClick={() => setOpen(!open)}
+            sx={{ mr: 2 }}
+          />
+          <Box
+            sx={{ fontWeight: "bold", display: "flex", alignItems: "center" }}
           >
-            {open ? <SidebarCollapseIcon /> : <SidebarExpandIcon />}
-          </Box>
-          <div className="font-semibold text-gray-600 p-px flex max-w-full min-w-0 pr-2">
             <div className="flex-none">Commits</div>
             {path && (
-              <Label className="min-w-0 ml-2 flex-1 truncate leading-6" outline>
+              <Label className="min-w-0 ml-2 flex-1 truncate leading-6">
                 {path}
               </Label>
             )}
-          </div>
+          </Box>
         </Box>
         <Timeline>
           {commits.map((item) => (
@@ -112,14 +107,8 @@ const Commit = ({
         }`}
       >
         <Timeline.Item>
-          <Timeline.Badge
-            className={`transition-transform ${
-              isSelected
-                ? "!bg-[#0A69DA] !text-white !border-indigo-200 transform scale-110"
-                : ""
-            }`}
-          >
-            <StyledOcticon icon={CommitIcon} />
+          <Timeline.Badge>
+            <GitCommitIcon />
           </Timeline.Badge>
           <Timeline.Body className={`${isSelected ? "!text-white" : ""}`}>
             <div>

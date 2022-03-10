@@ -176,8 +176,6 @@ export function RepoDetail(props: RepoDetailProps) {
                   />
                   {!isDefaultBlock && token && (
                     <Button
-                      fontSize="1"
-                      ml={2}
                       onClick={() => {
                         const newMetadata = {
                           ...metadata,
@@ -188,6 +186,7 @@ export function RepoDetail(props: RepoDetailProps) {
                         };
                         setRequestedMetadata(newMetadata);
                       }}
+                      sx={{ ml: 2 }}
                     >
                       Set as default for all users
                     </Button>

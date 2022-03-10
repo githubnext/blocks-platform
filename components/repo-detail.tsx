@@ -159,7 +159,7 @@ export function RepoDetail(props: RepoDetailProps) {
                 bg="canvas.subtle"
                 p={2}
                 borderBottom="1px solid"
-                className="!border-gray-200"
+                borderColor="border.muted"
                 display="flex"
                 alignItems="center"
                 justifyContent="space-between"

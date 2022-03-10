@@ -5,6 +5,7 @@ import {
   Link,
   AvatarStack,
   Avatar,
+  Button,
 } from "@primer/react";
 import React from "react";
 import { BiCaretDown } from "react-icons/bi";
@@ -35,12 +36,13 @@ const repoHeaderLinks = [
   ["Security", ShieldIcon],
   ["Insights", GraphIcon],
   ["Settings", GearIcon],
-];
+] as const;
+
 const repoActions = [
   ["Unwatch", EyeIcon],
-  ["Star", StarIcon],
   ["Fork", RepoForkedIcon],
-];
+  ["Star", StarIcon],
+] as const;
 
 export const RepoHeader = ({
   owner,
@@ -59,9 +61,9 @@ export const RepoHeader = ({
       borderColor="border.default"
       borderBottomWidth={1}
       borderBottomStyle="solid"
-      px={30}
-      pt={20}
-      className="flex-none"
+      px={4}
+      pt={3}
+      flex="none"
     >
       <Box
         display="flex"
@@ -69,16 +71,16 @@ export const RepoHeader = ({
         mb={2}
         justifyContent="space-between"
       >
-        <Box display="flex" alignItems="center">
+        <Box display="flex" alignItems="center" fontSize={3}>
           <StyledOcticon
             icon={RepoIcon}
-            size={17}
-            mr={2}
-            className="text-gray-500"
+            sx={{
+              mr: 2,
+              color: "fg.muted",
+            }}
           />
           <Link
             href={`https://github.com/${owner}/`}
-            fontSize={3}
             target="_blank"
             rel="noopener"
           >
@@ -89,10 +91,9 @@ export const RepoHeader = ({
           </Box>
           <Link
             href={`https://github.com/${owner}/${repo}/`}
-            fontSize={3}
-            fontWeight="bold"
             target="_blank"
             rel="noopener"
+            sx={{ fontWeight: "bold" }}
           >
             {repo}
           </Link>
@@ -111,90 +112,46 @@ export const RepoHeader = ({
 
         <Box display="flex" alignItems="center">
           {repoActions.map(([label, Icon], i) => (
-            <Box
-              key={label as string}
-              display="flex"
-              alignItems="stretch"
-              opacity={0.2}
-              mx={2}
+            <Button
+              key={label}
+              leadingIcon={Icon}
+              size="small"
+              disabled
+              sx={{ ml: 2 }}
             >
-              <Box
-                className="hover:bg-gray-100 py-[0.4em]"
-                display="flex"
-                alignItems="center"
-                borderColor="border.default"
-                borderWidth={1}
-                borderStyle="solid"
-                borderTopLeftRadius={2}
-                borderBottomLeftRadius={2}
-                px={3}
-                boxShadow="0 1px 2px 0 rgba(27,31,35,.1)"
-              >
-                <StyledOcticon
-                  icon={Icon as any}
-                  size={16}
-                  mr={1}
-                  className="text-gray-500"
-                />
-                <Box className="text-gray-700 text-xs" fontWeight="500">
-                  {label}
-                </Box>
-                {!i && (
-                  <StyledOcticon
-                    icon={BiCaretDown}
-                    size={15}
-                    ml={1}
-                    className="text-gray-500"
-                  />
-                )}
-              </Box>
-              <Box
-                display="flex"
-                alignItems="center"
-                className="text-xs"
-                borderColor="border.default"
-                bg="white"
-                borderWidth={1}
-                borderStyle="solid"
-                borderLeftWidth={0}
-                borderTopRightRadius={2}
-                borderBottomRightRadius={2}
-                py={1}
-                px={2}
-                fontWeight="500"
-                boxShadow="0 1px 2px 0 rgba(27,31,35,.1)"
-              >
-                123
-              </Box>
-            </Box>
+              {label}
+            </Button>
           ))}
         </Box>
       </Box>
 
-      <Box fontSize={14} ml={4} mb={1} className="text-gray-600">
+      <Box fontSize={1} ml={4} mb={1} color="fg.muted">
         {description}
       </Box>
 
-      <UnderlineNav className="mb-[-1px]">
+      <UnderlineNav sx={{ mb: "-1px" }}>
         {repoHeaderLinks.map(([label, Icon], i) => (
           <UnderlineNav.Link
             href="#"
-            mx={2}
-            key={label as string}
-            display="flex"
-            className={`items-center ${!i ? "" : "pointer-events-none"}`}
+            key={label}
             selected={!i}
-            opacity={!i ? 1 : 0.2}
+            sx={{
+              mx: 2,
+              display: "flex",
+              alignItems: "center",
+              pointerEvents: !i ? "initial" : "none",
+              opacity: !i ? 1 : 0.2,
+              lineHeight: 1,
+            }}
           >
             <StyledOcticon
-              icon={Icon as any}
-              size={17}
-              mr={2}
-              className="text-gray-500"
+              icon={Icon}
+              sx={{
+                mr: 2,
+                color: "fg.muted",
+              }}
             />
-            <Box fontSize={1} className="!text-gray-700">
-              {label}
-            </Box>
+            {label}
           </UnderlineNav.Link>
         ))}
       </UnderlineNav>

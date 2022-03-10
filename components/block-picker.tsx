@@ -1,4 +1,4 @@
-import { Button, SelectMenu } from "@primer/components";
+import { Button, SelectMenu } from "@primer/react";
 import { useEffect, useState } from "react";
 
 interface BlockPickerProps {

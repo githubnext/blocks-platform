@@ -43,7 +43,7 @@ export default (props: FileBlockProps) => {
         customSetup={{
           dependencies: {
             "@mdx-js/runtime": "^2.0.0-next.9",
-            "@primer/components": "^31.1.0",
+            "@primer/react": "^35.0.0",
             "react-syntax-highlighter": "^15.4.4",
             "styled-components": "^5.3.3",
             "@githubnext/utils": "^0.13.1",
@@ -64,7 +64,7 @@ export default (props: FileBlockProps) => {
 
 const getAppCode = (props: FileBlockProps) =>
   `import MDX from "@mdx-js/runtime";
-import { Avatar, Box, StateLabel } from "@primer/components";
+import { Avatar, Box, StateLabel } from "@primer/react";
 import "styled-components";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import LZString from "lz-string"

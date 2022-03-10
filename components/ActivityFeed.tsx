@@ -1,16 +1,22 @@
 import { FileContext } from "@githubnext/utils";
-import { Box, Label, StyledOcticon, Text, Timeline } from "@primer/components";
-import Link from "next/link";
 import {
   CommitIcon,
   SidebarCollapseIcon,
   SidebarExpandIcon,
 } from "@primer/octicons-react";
+import {
+  Avatar,
+  Box,
+  Label,
+  StyledOcticon,
+  Text,
+  Timeline,
+} from "@primer/react";
 import { useRepoTimeline } from "hooks";
 import { getRelativeTime } from "lib/date-utils";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { Avatar } from "@primer/components";
 
 export const ActivityFeed = ({
   context,

@@ -1,4 +1,4 @@
-import { Box, Button, Link, useTheme } from "@primer/components";
+import { Box, Button, Link, useTheme } from "@primer/react";
 import {
   getBlockKey,
   useManageBlock,

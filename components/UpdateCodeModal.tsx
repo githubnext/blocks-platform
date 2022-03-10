@@ -1,4 +1,4 @@
-import { ConfirmationDialog, Flash, Link, Text } from '@primer/components';
+import { ConfirmationDialog, Flash, Link, Text } from '@primer/react';
 import { Diff, Hunk, parseDiff } from 'react-diff-view';
 import "react-diff-view/style/index.css";
 import { diffAsText } from "unidiff";

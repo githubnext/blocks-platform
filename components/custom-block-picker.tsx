@@ -1,4 +1,4 @@
-import { Link } from "@primer/components";
+import { Link } from "@primer/react";
 import { EyeIcon, StarFillIcon } from "@primer/octicons-react";
 import { getRelativeTime } from "lib/date-utils";
 import { useEffect, useMemo, useState } from "react";

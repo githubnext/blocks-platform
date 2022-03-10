@@ -5,7 +5,7 @@ import {
   Link,
   AvatarStack,
   Avatar,
-} from "@primer/components";
+} from "@primer/react";
 import React from "react";
 import { BiCaretDown } from "react-icons/bi";
 

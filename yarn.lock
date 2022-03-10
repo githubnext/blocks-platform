@@ -685,9 +685,9 @@
     unist-util-visit "^1.0.0"
     uuid "^3.3.2"
 
-"@githubnext/blocks-examples@https://github.com/githubnext/blocks-examples.git#0.9.0":
+"@githubnext/blocks-examples@https://github.com/githubnext/blocks-examples.git#0.9.1":
   version "0.0.0"
-  resolved "https://github.com/githubnext/blocks-examples.git#c015d5a928076a867386a2dcaca91e1a09842c41"
+  resolved "https://github.com/githubnext/blocks-examples.git#cd4ebe10c0a2ddd86f1ec4ca874215f8937cf554"
   dependencies:
     "@codesandbox/sandpack-react" "^0.13.13"
     "@excalidraw/excalidraw" "^0.10.0"

@@ -35,6 +35,8 @@ path   # the path to the file
 
 Handled automatically by our GitHub action.
 
+Our staging site is [HERE](https://githubnext-blocks-staging.azurewebsites.net/githubnext/blocks-tutorial?path=README.md).
+
 ## Deploy to production
 
 1. Navigate to the azure project for [`githubnext-blocks/staging`](https://portal.azure.com/#@githubazure.onmicrosoft.com/resource/subscriptions/b394e68d-7472-42fd-bb1c-d73cb7f4fd3c/resourceGroups/githubnext-blocks-rg/providers/Microsoft.Web/sites/githubnext-blocks/slots/staging/appServices)

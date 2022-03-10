@@ -1,4 +1,4 @@
-import { Box } from "@primer/components";
+import { Box } from "@primer/react";
 import { extent, scaleLinear, timeFormat } from "d3";
 import Link from "next/link";
 import { useRouter } from "next/router";

@@ -1,4 +1,4 @@
-import { Box, Button, Link, useTheme } from "@primer/components";
+import { Box, Button, Link, useTheme } from "@primer/react";
 import {
   getBlockKey,
   useManageBlock,
@@ -159,7 +159,7 @@ export function RepoDetail(props: RepoDetailProps) {
                 bg="canvas.subtle"
                 p={2}
                 borderBottom="1px solid"
-                className="!border-gray-200"
+                borderColor="border.muted"
                 display="flex"
                 alignItems="center"
                 justifyContent="space-between"
@@ -176,8 +176,6 @@ export function RepoDetail(props: RepoDetailProps) {
                   />
                   {!isDefaultBlock && token && (
                     <Button
-                      fontSize="1"
-                      ml={2}
                       onClick={() => {
                         const newMetadata = {
                           ...metadata,
@@ -188,6 +186,7 @@ export function RepoDetail(props: RepoDetailProps) {
                         };
                         setRequestedMetadata(newMetadata);
                       }}
+                      sx={{ ml: 2 }}
                     >
                       Set as default for all users
                     </Button>

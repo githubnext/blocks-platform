@@ -3,7 +3,12 @@ import {
   SandpackPreview,
   useSandpack,
 } from "@codesandbox/sandpack-react/dist/cjs/index.js";
-import { FileContext, FolderContext, RepoFiles, bundleCodesandboxFiles } from "@githubnext/utils";
+import {
+  FileContext,
+  FolderContext,
+  RepoFiles,
+  bundleCodesandboxFiles,
+} from "@githubnext/utils";
 import uniqueId from "lodash/uniqueId";
 import React, { useEffect, useRef } from "react";
 
@@ -17,7 +22,6 @@ interface SandboxedBlockProps {
   tree?: RepoFiles;
   metadata?: any;
   context: FileContext | FolderContext;
-  bundleCode?: BundleCode[];
   renderLoading?: React.ReactNode;
   renderError?: React.ReactNode;
   onUpdateMetadata: (
@@ -51,7 +55,6 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
     tree,
     metadata = {},
     context,
-    bundleCode,
     renderLoading = DefaultLoadingState,
     renderError = DefaultErrorState,
     onUpdateMetadata,
@@ -64,7 +67,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
   const sandpackWrapper = useRef<HTMLDivElement>(null);
 
   const status = state.status;
-  const blockContent = bundleCode || state.value;
+  const blockContent = state.value;
 
   useEffect(() => {
     const onMessage = (event) => {
@@ -119,10 +122,9 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
 
   if (!contents && !tree) return null;
   if (status === "success" && blockContent) {
-
     const files = bundleCodesandboxFiles({
       block,
-      bundleCode,
+      bundleCode: blockContent,
       context,
       id: id.current,
       contents,
@@ -130,8 +132,9 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
       metadata,
     });
 
-    const filesWithConfig = { ...files,
-      '/sandbox.config.json': JSON.stringify({ infiniteLoopProtection: false })
+    const filesWithConfig = {
+      ...files,
+      "/sandbox.config.json": JSON.stringify({ infiniteLoopProtection: false }),
     };
 
     return (
@@ -141,7 +144,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
           template="react"
           customSetup={{
             dependencies: {},
-            files: filesWithConfig
+            files: filesWithConfig,
           }}
           autorun
         >

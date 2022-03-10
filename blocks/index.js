@@ -16,6 +16,7 @@ const chartBlock = dynamic(() => import("./file-blocks/charts/index.tsx"), {ssr:
 const markdownBlock = dynamic(() => import("./file-blocks/live-markdown/index.tsx"), {ssr:false});
 const reactFeedbackBlock = dynamic(() => import("./file-blocks/annotate-react/index.tsx"), {ssr:false});
 const sentenceEncoderBlock = dynamic(() => import("./file-blocks/sentence-encoder.tsx"), {ssr:false});
+const processingBlock = dynamic(() => import("./file-blocks/processing.tsx"), {ssr:false});
 const minimapBlock = dynamic(() => import("./folder-blocks/minimap/index.tsx"), {ssr:false});
 const dashboardBlock = dynamic(() => import("./folder-blocks/dashboard/index.tsx"), {ssr:false});
 const codeTourBlock = dynamic(() => import("./folder-blocks/code-tour/index.tsx"), {ssr:false});
@@ -34,6 +35,7 @@ export default {
   'markdown-block': markdownBlock,
   'react-feedback-block': reactFeedbackBlock,
   'sentence-encoder-block': sentenceEncoderBlock,
+  'processing-block': processingBlock,
   'minimap-block': minimapBlock,
   'dashboard-block': dashboardBlock,
   'code-tour-block': codeTourBlock
@@ -195,6 +197,17 @@ export const defaultBlocksRepo = {
         "json"
       ],
       "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/queries.json"
+    },
+    {
+      "type": "file",
+      "id": "processing-block",
+      "title": "Processing block",
+      "description": "Run your p5.js sketches",
+      "entry": "/src/blocks/file-blocks/processing.tsx",
+      "extensions": [
+        "js"
+      ],
+      "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/processing-sketch.js"
     },
     {
       "type": "folder",

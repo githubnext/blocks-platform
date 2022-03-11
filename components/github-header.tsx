@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { NextOctocat } from "./next-octocat";
-import SearchDropdown from "./search-dropdown";
+import { RepoSearch } from "./repo-search";
 
 interface GitHubHeaderProps {
   token: string;
@@ -17,8 +17,8 @@ export const GitHubHeader = (props: GitHubHeaderProps) => {
             </a>
           </Link>
         </div>
-        <div className="flex-1">
-          <SearchDropdown token={props.token} />
+        <div className="flex-1 min-w-[240px]">
+          <RepoSearch token={props.token} />
         </div>
       </div>
       <p className="text-sm opacity-50 mt-2 lg:mt-0 lg:ml-4">

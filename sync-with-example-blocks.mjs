@@ -10,9 +10,11 @@ async function init() {
   const dependencies = {
     ...packageJsonContent.dependencies,
     ...packageJsonContent.devDependencies,
-  }
-  const localPackageJsonContent = JSON.parse(fs.readFileSync("./package.json", "utf8"));
-  let optionalDependencies = { ...dependencies }
+  };
+  const localPackageJsonContent = JSON.parse(
+    fs.readFileSync("./package.json", "utf8")
+  );
+  let optionalDependencies = { ...dependencies };
   const localDependencies = {
     ...localPackageJsonContent.dependencies,
     ...localPackageJsonContent.devDependencies,
@@ -20,7 +22,7 @@ async function init() {
   for (const dependency in localDependencies) {
     delete optionalDependencies[dependency];
   }
-  const unneededDependencies = ["vite", "esbuild"]
+  const unneededDependencies = ["vite", "esbuild"];
   for (const dependency of unneededDependencies) {
     delete optionalDependencies[dependency];
   }
@@ -28,24 +30,28 @@ async function init() {
     ...localPackageJsonContent,
     optionalDependencies,
   };
-  fs.writeFileSync("./package.json", JSON.stringify(newLocalPackageJsonContent, null, 2));
+  fs.writeFileSync(
+    "./package.json",
+    JSON.stringify(newLocalPackageJsonContent, null, 2)
+  );
 }
 
 init();
 
-
 function fetch(url) {
   return new Promise((resolve, reject) => {
-    https.get(url, (res) => {
-      let body = "";
-      res.on("data", (chunk) => {
-        body += chunk;
+    https
+      .get(url, (res) => {
+        let body = "";
+        res.on("data", (chunk) => {
+          body += chunk;
+        });
+        res.on("end", () => {
+          resolve(body);
+        });
+      })
+      .on("error", (err) => {
+        reject(err);
       });
-      res.on("end", () => {
-        resolve(body);
-      });
-    }).on("error", (err) => {
-      reject(err);
-    });
-  })
+  });
 }

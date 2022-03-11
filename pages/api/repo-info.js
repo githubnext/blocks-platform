@@ -6,9 +6,13 @@ export default async function getInfo(req, res) {
 
   const branch = "HEAD";
 
-  const octokit = new Octokit(token ? {
-    auth: token,
-  } : {});
+  const octokit = new Octokit(
+    token
+      ? {
+          auth: token,
+        }
+      : {}
+  );
 
   try {
     const commitsRes = await octokit.repos.listCommits({

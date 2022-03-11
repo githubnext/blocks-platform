@@ -1,7 +1,12 @@
 import { FileContext, FolderContext } from "@githubnext/utils";
 import { SandboxedBlockWrapper } from "components/sandboxed-block-wrapper";
 import { getFileContent, getRepoInfo } from "ghapi";
-import { useFileContent, useFolderContent, useMetadata, useUpdateFileContents } from "hooks";
+import {
+  useFileContent,
+  useFolderContent,
+  useMetadata,
+  useUpdateFileContents,
+} from "hooks";
 import { useRouter } from "next/router";
 import React, { useEffect, useMemo } from "react";
 import { useQueryClient } from "react-query";
@@ -16,24 +21,22 @@ interface GeneralBlockProps {
 }
 
 export function GeneralBlock(props: GeneralBlockProps) {
-  const {
-    context,
-    theme,
-    block,
-    token,
-  } = props;
+  const { context, theme, block, token } = props;
   const queryClient = useQueryClient();
   const { repo, owner, path, sha } = context;
   const [requestedMetadata, setRequestedMetadata] = React.useState(null);
-  const [requestedMetadataExisting, setRequestedMetadataExisting] = React.useState(null);
-  const [requestedMetadataPath, setRequestedMetadataPath] = React.useState(null);
-  const [requestedMetadataPathFull, setRequestedMetadataPathFull] = React.useState(null);
+  const [requestedMetadataExisting, setRequestedMetadataExisting] =
+    React.useState(null);
+  const [requestedMetadataPath, setRequestedMetadataPath] =
+    React.useState(null);
+  const [requestedMetadataPathFull, setRequestedMetadataPathFull] =
+    React.useState(null);
   const [requestedFileContent, setRequestedFileContent] = React.useState(null);
 
-  const router = useRouter()
-  const query = router.query
+  const router = useRouter();
+  const query = router.query;
 
-  const blockKey = getBlockKey(block)
+  const blockKey = getBlockKey(block);
   const { metadata, onUpdateMetadata } = useMetadata({
     owner: owner as string,
     repo: repo as string,
@@ -41,20 +44,20 @@ export function GeneralBlock(props: GeneralBlockProps) {
     filePath: path,
     token: token,
   });
-  const type = block.type
+  const type = block.type;
 
   const getGitHubData = async (type, config) => {
     const data = await fetchGitHubData(type, { ...config, token: token });
     return data;
-  }
+  };
 
   const { mutateAsync } = useUpdateFileContents({
     onSuccess: async () => {
-      await queryClient.invalidateQueries("file")
+      await queryClient.invalidateQueries("file");
       await queryClient.invalidateQueries("timeline");
       console.info("✅ Refreshed timeline and file");
-    }
-  })
+    },
+  });
   const onUpdateContent = async (newContent: string) => {
     await mutateAsync({
       content: newContent,
@@ -63,70 +66,95 @@ export function GeneralBlock(props: GeneralBlockProps) {
       path,
       sha: "latest",
       token: token as string,
-    })
-  }
+    });
+  };
 
-  const onRequestUpdateMetadata = async (newMetadata: any, pathToUpdate = path, blockToUpdate = block, currentMetadata = metadata) => {
+  const onRequestUpdateMetadata = async (
+    newMetadata: any,
+    pathToUpdate = path,
+    blockToUpdate = block,
+    currentMetadata = metadata
+  ) => {
     setRequestedMetadata(newMetadata);
-    setRequestedMetadataExisting(JSON.stringify(currentMetadata || "{}", null, 2));
+    setRequestedMetadataExisting(
+      JSON.stringify(currentMetadata || "{}", null, 2)
+    );
     setRequestedMetadataPath(pathToUpdate);
-    setRequestedMetadataPathFull(getMetadataPath(blockToUpdate, pathToUpdate))
-  }
+    setRequestedMetadataPathFull(getMetadataPath(blockToUpdate, pathToUpdate));
+  };
   const onNavigateToPath = (path: string) => {
-    router.push({
-      pathname: router.pathname,
-      query: { ...query, path: path },
-    }, null, { shallow: true })
-  }
+    router.push(
+      {
+        pathname: router.pathname,
+        query: { ...query, path: path },
+      },
+      null,
+      { shallow: true }
+    );
+  };
 
   const onRequestUpdateContent = async (newContent: string) => {
     setRequestedFileContent(newContent);
-  }
+  };
 
   const onRequestGitHubData = async (type, config, id) => {
     const data = await getGitHubData(type, config);
-    window.postMessage({
-      type: "github-data--response",
-      id,
-      data,
-    }, "*");
-    return data
-  }
+    window.postMessage(
+      {
+        type: "github-data--response",
+        id,
+        data,
+      },
+      "*"
+    );
+    return data;
+  };
 
-  const { data: treeData } = useFolderContent(type === "folder" && {
-    repo: repo,
-    owner: owner,
-    path: path,
-    fileRef: sha,
-    token: token as string,
-  });
+  const { data: treeData } = useFolderContent(
+    type === "folder" && {
+      repo: repo,
+      owner: owner,
+      path: path,
+      fileRef: sha,
+      token: token as string,
+    }
+  );
   const tree = useMemo(() => treeData?.tree || [], [treeData]);
 
-  const { data: fileData } = useFileContent(type === "file" && {
-    repo: repo,
-    owner: owner,
-    path: path,
-    fileRef: sha,
-    token: token as string,
-  }, {
-    cacheTime: 0
-  });
+  const { data: fileData } = useFileContent(
+    type === "file" && {
+      repo: repo,
+      owner: owner,
+      path: path,
+      fileRef: sha,
+      token: token as string,
+    },
+    {
+      cacheTime: 0,
+    }
+  );
   const { content = "" } = fileData || {};
 
   const code = content;
 
-
   const name = path.split("/").pop();
 
-  const updatedContext = useMemo(() => ({
-    ...context,
-    [type]: name
-  }) as FileContext | FolderContext, [context, name, type])
+  const updatedContext = useMemo(
+    () =>
+      ({
+        ...context,
+        [type]: name,
+      } as FileContext | FolderContext),
+    [context, name, type]
+  );
 
   return (
-    <div className="flex flex-col" style={{
-      height: "calc(100% - 3.3em)"
-    }}>
+    <div
+      className="flex flex-col"
+      style={{
+        height: "calc(100% - 3.3em)",
+      }}
+    >
       <ErrorBoundary key={path}>
         <div className="overflow-y-auto flex-1">
           <SandboxedBlockWrapper
@@ -148,15 +176,20 @@ export function GeneralBlock(props: GeneralBlockProps) {
           isLoggedIn={!!token}
           path={`.github/blocks/${type}/${blockKey}.json`}
           newCode={JSON.stringify(requestedMetadata, null, 2)}
-          currentCode={requestedMetadataExisting || JSON.stringify(metadata, null, 2)}
+          currentCode={
+            requestedMetadataExisting || JSON.stringify(metadata, null, 2)
+          }
           onSubmit={() => {
-            onUpdateMetadata(requestedMetadata, requestedMetadataPathFull || "")
+            onUpdateMetadata(
+              requestedMetadata,
+              requestedMetadataPathFull || ""
+            );
             setTimeout(() => {
               window.postMessage({
                 type: "updated-metadata",
                 path: requestedMetadataPath,
-              })
-            }, 1000)
+              });
+            }, 1000);
           }}
           onClose={() => setRequestedMetadata(null)}
         />
@@ -175,15 +208,12 @@ export function GeneralBlock(props: GeneralBlockProps) {
   );
 }
 
-const getBlockKey = (block) => (
-  `${block?.owner}/${block?.repo}__${block?.id}`.replace(
-    /\//g,
-    "__"
-  )
-)
-const getMetadataPath = (block, path) => (
-  `.github/blocks/${block?.type}/${getBlockKey(block)}/${encodeURIComponent(path)}.json`
-)
+const getBlockKey = (block) =>
+  `${block?.owner}/${block?.repo}__${block?.id}`.replace(/\//g, "__");
+const getMetadataPath = (block, path) =>
+  `.github/blocks/${block?.type}/${getBlockKey(block)}/${encodeURIComponent(
+    path
+  )}.json`;
 
 const fetchGitHubData = async (type, config) => {
   if (type === "file-content") {
@@ -193,7 +223,7 @@ const fetchGitHubData = async (type, config) => {
       path: config.path,
       fileRef: config.fileRef || "HEAD",
       token: config.token,
-    })
+    });
     return data;
   } else if (type === "metadata") {
     try {
@@ -204,11 +234,11 @@ const fetchGitHubData = async (type, config) => {
         fileRef: "HEAD",
         cache: new Date().toString(),
         token: config.token,
-      })
+      });
       const fullMetadata = JSON.parse((res.content || "{}") as string);
-      return fullMetadata || {}
+      return fullMetadata || {};
     } catch (e) {
-      return {}
+      return {};
     }
   } else if (type === "repo-info") {
     try {
@@ -216,10 +246,10 @@ const fetchGitHubData = async (type, config) => {
         owner: config.owner,
         repo: config.repo,
         token: config.token,
-      })
-      return res
+      });
+      return res;
     } catch (e) {
-      return {}
+      return {};
     }
   }
-}
+};

@@ -1,9 +1,17 @@
-import { FileBlockProps, FileContext, FolderContext, RepoFiles } from "@githubnext/utils";
+import {
+  FileBlockProps,
+  FileContext,
+  FolderContext,
+  RepoFiles,
+} from "@githubnext/utils";
 import { useGetBlocksInfo, useRepoFiles } from "hooks";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import components from "./../blocks";
 
-export interface BundleCode { name: string, content: string }
+export interface BundleCode {
+  name: string;
+  content: string;
+}
 interface ExampleBlockProps {
   block: Block;
   contents?: string;
@@ -11,7 +19,12 @@ interface ExampleBlockProps {
   metadata?: any;
   context: FileContext | FolderContext;
   isEmbedded?: boolean;
-  onUpdateMetadata: (newMetadata: any, path: string, block: Block, currentMetadata: any) => void;
+  onUpdateMetadata: (
+    newMetadata: any,
+    path: string,
+    block: Block,
+    currentMetadata: any
+  ) => void;
   onRequestUpdateContent: (newContent: string) => void;
   onRequestGitHubData: (type: string, config: any, id: string) => Promise<any>;
   onNavigateToPath: (path: string) => void;
@@ -31,18 +44,17 @@ export function ExampleBlock(props: ExampleBlockProps) {
     onNavigateToPath,
   } = props;
 
-  const Component = components[block.id]
+  const Component = components[block.id];
 
   if (!contents && !tree) return null;
 
-  if (!Component) return (
-    <div>
-      No block found for {block.entry}
-    </div>
-  )
+  if (!Component) return <div>No block found for {block.entry}</div>;
 
   return (
-    <div className="example-block relative w-full h-full" id={`example-block-${block.id}`}>
+    <div
+      className="example-block relative w-full h-full"
+      id={`example-block-${block.id}`}
+    >
       <Component
         block={block}
         content={contents || ""}
@@ -59,13 +71,13 @@ export function ExampleBlock(props: ExampleBlockProps) {
   );
 }
 
-
 import { ErrorBoundary } from "./error-boundary";
-type BlockComponentProps = FileBlockProps & FolderBlockProps & {
-  block: Block,
-  path: string,
-  tree: RepoFiles,
-}
+type BlockComponentProps = FileBlockProps &
+  FolderBlockProps & {
+    block: Block;
+    path: string;
+    tree: RepoFiles;
+  };
 const BlockComponent = ({
   block,
   path,
@@ -73,56 +85,56 @@ const BlockComponent = ({
   onUpdateMetadata,
   onRequestUpdateContent,
   onRequestGitHubData,
-  onNavigateToPath, ...props }: BlockComponentProps) => {
-  const [contents, setContents] = useState<string | undefined>(undefined)
-  const [metadata, setMetadata] = useState<any | undefined>(undefined)
+  onNavigateToPath,
+  ...props
+}: BlockComponentProps) => {
+  const [contents, setContents] = useState<string | undefined>(undefined);
+  const [metadata, setMetadata] = useState<any | undefined>(undefined);
 
   const getData = async () => {
-    if (block.type !== "file") return
+    if (block.type !== "file") return;
     const data = await onRequestGitHubData("file-content", {
       owner: props.context.owner,
       repo: props.context.repo,
       path: path,
       fileRef: props.context.fileRef,
-    })
-    setContents(data.content)
-  }
+    });
+    setContents(data.content);
+  };
   const getMetadata = async () => {
-    if (metadata) return
+    if (metadata) return;
     const data = await onRequestGitHubData("metadata", {
       owner: props.context.owner,
       repo: props.context.repo,
       block: block,
       path: path,
-    })
-    setMetadata(data)
-  }
-  useEffect(() => { getData() }, [path, block.id])
-  useEffect(() => { getMetadata() }, [path, block.id])
+    });
+    setMetadata(data);
+  };
+  useEffect(() => {
+    getData();
+  }, [path, block.id]);
+  useEffect(() => {
+    getMetadata();
+  }, [path, block.id]);
 
   useEffect(() => {
     // listen for updated metadata
     const onMessageEvent = async (event: MessageEvent) => {
       if (event.origin !== window.location.origin) return;
       if (event.data.type === "updated-metadata") {
-        getMetadata()
+        getMetadata();
       }
     };
     window.addEventListener("message", onMessageEvent as EventListener);
     return () => {
-      window.removeEventListener(
-        "message",
-        onMessageEvent as EventListener
-      );
+      window.removeEventListener("message", onMessageEvent as EventListener);
     };
   }, []);
 
-  if (block.type === "file" && !contents) return (
-    <div className="p-10">
-      Loading...
-    </div>
-  )
-  if (!block.id) return null
+  if (block.type === "file" && !contents)
+    return <div className="p-10">Loading...</div>;
+  if (!block.id) return null;
 
   const name = path.split("/").pop();
 
@@ -141,5 +153,5 @@ const BlockComponent = ({
         onRequestGitHubData={onRequestGitHubData}
       />
     </ErrorBoundary>
-  )
-}
+  );
+};

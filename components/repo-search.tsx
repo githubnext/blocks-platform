@@ -54,7 +54,7 @@ export function RepoSearch(props: RepoSearchProps) {
             setInputValue(e.target.value);
           }}
         />
-        <Autocomplete.Overlay overlayProps={{width: 'medium'}}>
+        <Autocomplete.Overlay overlayProps={{ width: "medium" }}>
           <Autocomplete.Menu
             loading={status === "loading"}
             emptyStateText={emptyStateText}

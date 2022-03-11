@@ -56,7 +56,10 @@ export const SandboxedBlockWrapper = memo(function SandboxedBlockWrapper(
     return null;
   }
 
-  if (exampleBlocksRepo === `${block.owner}/${block.repo}`) {
+  if (
+    exampleBlocksRepo === `${block.owner}/${block.repo}` &&
+    block.sandbox === false
+  ) {
     return (
       <ExampleBlock
         block={block}

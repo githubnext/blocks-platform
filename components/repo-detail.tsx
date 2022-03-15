@@ -1,4 +1,5 @@
 import { Box, Button, Link, useTheme } from "@primer/react";
+import { default as NextLink } from "next/link";
 import {
   getBlockKey,
   useManageBlock,
@@ -16,6 +17,9 @@ import { Sidebar } from "./Sidebar";
 import { GeneralBlock } from "./general-block";
 import { CustomBlockPicker } from "./custom-block-picker";
 import { UpdateCodeModal } from "./UpdateCodeModal";
+import { FileContext, FolderContext } from "@githubnext/utils";
+import { AnimatePresence, motion } from "framer-motion";
+import { ScreenFullIcon, ScreenNormalIcon } from "@primer/octicons-react";
 
 const BlockPicker = dynamic(() => import("./block-picker"), { ssr: false });
 
@@ -27,9 +31,11 @@ export function RepoDetail(props: RepoDetailProps) {
   const { token } = props;
   const router = useRouter();
   const { setColorMode } = useTheme();
-  const { repo, owner, path = "", theme, fileRef } = router.query;
+  const { repo, owner, path = "", theme, fileRef, mode } = router.query;
   const [isChoosingCustomBlock, setIsChoosingCustomBlock] = useState(false);
   const [requestedMetadata, setRequestedMetadata] = useState(null);
+  const isFullscreen = mode === "fullscreen";
+  // need this to only animate chrome in on fullscreen mode change, but not on load
 
   const context = useMemo(
     () => ({
@@ -123,34 +129,83 @@ export function RepoDetail(props: RepoDetailProps) {
 
   return (
     <div className="flex flex-col w-full h-screen overflow-hidden">
-      <GitHubHeader token={token} />
-      <RepoHeader
-        owner={owner as string}
-        repo={repo as string}
-        // @ts-ignore
-        description={repoInfo?.description}
-        // @ts-ignore
-        contributors={repoInfo?.contributors}
-      />
+      <AnimatePresence initial={false}>
+        {!isFullscreen && (
+          <motion.div
+            initial={{ height: 0 }}
+            animate={{
+              height: "auto",
+              transition: {
+                type: "tween",
+                duration: 0.1,
+                delay: 0,
+              },
+            }}
+            exit={{
+              height: 0,
+              transition: { type: "tween", duration: 0.1, delay: 0 },
+            }}
+          >
+            {/* to prevent the search bar from showing on top of other content while animating */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: 1,
+                transition: {
+                  type: "tween",
+                  duration: 0,
+                  delay: 0,
+                },
+              }}
+              exit={{
+                opacity: 0,
+                transition: { type: "tween", duration: 0, delay: 0.1 },
+              }}
+            >
+              <GitHubHeader token={token} />
+              <RepoHeader
+                owner={owner as string}
+                repo={repo as string}
+                // @ts-ignore
+                description={repoInfo?.description}
+                // @ts-ignore
+                contributors={repoInfo?.contributors}
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <div className="flex flex-1 overflow-hidden">
-        <div className="flex-none w-80 border-r border-gray-200">
-          {repoFilesStatus === "loading" ? (
-            <div className="flex flex-col items-center justify-center h-full w-full">
-              <div className="animate-pulse flex space-y-4">
-                <div className="rounded-full bg-gray-200 h-12 w-full"></div>
-                <div className="rounded-full bg-gray-200 h-12 w-full"></div>
-                <div className="rounded-full bg-gray-200 h-12 w-full"></div>
-              </div>
-            </div>
-          ) : (
-            <Sidebar
-              owner={owner as string}
-              repo={repo as string}
-              files={files}
-              activeFilePath={path as string}
-            />
+        <AnimatePresence initial={false}>
+          {!isFullscreen && (
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{
+                width: "auto",
+                transition: { type: "tween", duration: 0.1 },
+              }}
+              exit={{ width: 0, transition: { type: "tween", duration: 0.1 } }}
+              className="flex-none w-80 border-r border-gray-200"
+            >
+              {repoFilesStatus === "loading" ? (
+                <div className="flex flex-col items-center justify-center h-full w-full">
+                  <div className="animate-pulse flex space-y-4">
+                    <div className="rounded-full bg-gray-200 h-12 w-full"></div>
+                    <div className="rounded-full bg-gray-200 h-12 w-full"></div>
+                    <div className="rounded-full bg-gray-200 h-12 w-full"></div>
+                  </div>
+                </div>
+              ) : (
+                <Sidebar
+                  owner={owner as string}
+                  repo={repo as string}
+                  files={files}
+                  activeFilePath={path as string}
+                />
+              )}
+            </motion.div>
           )}
-        </div>
+        </AnimatePresence>
 
         <div className="flex-1 overflow-hidden">
           <div className="flex-none top-0 z-10">
@@ -192,49 +247,99 @@ export function RepoDetail(props: RepoDetailProps) {
                     </Button>
                   )}
                 </Box>
+                <AnimatePresence initial={false}>
+                  {isFullscreen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{
+                        opacity: 1,
+                        y: 0,
+                        transition: {
+                          type: "tween",
+                          duration: 0.1,
+                          delay: 0.2,
+                        },
+                      }}
+                      exit={{
+                        opacity: 0,
+                        y: 5,
+                        transition: {
+                          type: "tween",
+                          duration: 0.1,
+                          delay: 0.2,
+                        },
+                      }}
+                    >
+                      <Box className="text-sm text-gray-500 ml-2">
+                        {context.owner}/{context.repo}: {path}
+                      </Box>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
                 <Link
                   href={`https://github.com/${context.owner}/${context.repo}/${
                     path ? `blob/${context.sha}/${path}` : ""
                   }`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="!text-gray-500 mr-3 text-xs"
+                  className="!text-gray-500 mr-3 ml-auto text-xs"
                 >
                   View on GitHub
                 </Link>
+                <NextLink
+                  shallow
+                  href={{
+                    pathname: router.pathname,
+                    query: {
+                      ...router.query,
+                      mode: isFullscreen ? undefined : "fullscreen",
+                    },
+                  }}
+                >
+                  <span
+                    className="text-gray-500 text-xs ml-2 mr-3 cursor-pointer"
+                    title={isFullscreen ? "Exit fullscreen" : "Make fullscreen"}
+                  >
+                    {isFullscreen ? <ScreenNormalIcon /> : <ScreenFullIcon />}
+                  </span>
+                </NextLink>
               </Box>
             </div>
           </div>
-          {isChoosingCustomBlock ? (
-            <CustomBlockPicker
-              allBlocks={allBlocksInfo}
-              onChange={setBlockLocal}
-              path={path as string}
-              isFolder={isFolder}
-            />
-          ) : (
-            !!block.id &&
-            repoFilesStatus !== "loading" &&
-            (isTooLarge ? (
-              <div className="italic p-4 pt-40 text-center mx-auto text-gray-600">
-                Oh boy, that's a honkin file! It's {size / 1000} KBs.
-              </div>
-            ) : (
-              <GeneralBlock
-                key={block.id}
-                // @ts-ignore
-                context={context}
-                theme={(theme as string) || "light"}
-                block={block}
-                token={token}
-              />
-            ))
-          )}
+          <BlockRender
+            {...{
+              isChoosingCustomBlock,
+              allBlocksInfo,
+              setBlockLocal,
+              isFolder,
+              size,
+              isTooLarge,
+              theme,
+              block,
+              token,
+            }}
+            // @ts-ignore
+            context={context}
+            path={path as string}
+            isLoaded={!!block.id && repoFilesStatus !== "loading"}
+          />
         </div>
 
-        <div className="flex-none hidden lg:block h-full border-l border-gray-200">
-          <ActivityFeed context={context} token={token} />
-        </div>
+        <AnimatePresence initial={false}>
+          {!isFullscreen && (
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{
+                width: "auto",
+                transition: { type: "tween", duration: 0.1 },
+              }}
+              exit={{ width: 0, transition: { type: "tween", duration: 0.1 } }}
+              className="flex-none hidden lg:block h-full border-l border-gray-200"
+            >
+              <ActivityFeed context={context} token={token} />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
       {!!requestedMetadata && (
         <UpdateCodeModal
@@ -249,5 +354,60 @@ export function RepoDetail(props: RepoDetailProps) {
         />
       )}
     </div>
+  );
+}
+
+function BlockRender({
+  isChoosingCustomBlock,
+  allBlocksInfo,
+  setBlockLocal,
+  path,
+  isFolder,
+  isLoaded,
+  size,
+  isTooLarge,
+  context,
+  theme,
+  block,
+  token,
+}: {
+  isChoosingCustomBlock: boolean;
+  allBlocksInfo: Block[];
+  setBlockLocal: (block: Block) => void;
+  path: string;
+  isFolder: boolean;
+  isLoaded: boolean;
+  size: number;
+  isTooLarge: boolean;
+  context: FileContext | FolderContext;
+  theme: string;
+  block: Block;
+  token: string;
+}) {
+  if (isChoosingCustomBlock)
+    return (
+      <CustomBlockPicker
+        allBlocks={allBlocksInfo}
+        onChange={setBlockLocal}
+        path={path as string}
+        isFolder={isFolder}
+      />
+    );
+  if (!isLoaded) return null;
+  if (isTooLarge)
+    return (
+      <div className="italic p-4 pt-40 text-center mx-auto text-gray-600">
+        Oh boy, that's a honkin file! It's {size / 1000} KBs.
+      </div>
+    );
+  return (
+    <GeneralBlock
+      key={block.id}
+      // @ts-ignore
+      context={context}
+      theme={(theme as string) || "light"}
+      block={block}
+      token={token}
+    />
   );
 }

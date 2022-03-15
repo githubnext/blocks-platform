@@ -1,4 +1,5 @@
 import { Box, Button, Link, useTheme } from "@primer/react";
+import { default as NextLink } from "next/link";
 import {
   getBlockKey,
   useManageBlock,
@@ -34,11 +35,6 @@ export function RepoDetail(props: RepoDetailProps) {
   const [requestedMetadata, setRequestedMetadata] = useState(null);
   const isFullscreen = mode === "fullscreen";
   // need this to only animate chrome in on fullscreen mode change, but not on load
-  const [hasMounted, setHasMounted] = useState(false);
-
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
 
   const context = useMemo(
     () => ({
@@ -132,10 +128,10 @@ export function RepoDetail(props: RepoDetailProps) {
 
   return (
     <div className="flex flex-col w-full h-screen overflow-hidden">
-      <AnimatePresence>
+      <AnimatePresence initial={false}>
         {!isFullscreen && (
           <motion.div
-            initial={hasMounted ? { height: 0 } : false}
+            initial={{ height: 0 }}
             animate={{
               height: "auto",
               transition: {
@@ -151,7 +147,7 @@ export function RepoDetail(props: RepoDetailProps) {
           >
             {/* to prevent the search bar from showing on top of other content while animating */}
             <motion.div
-              initial={hasMounted ? { opacity: 0 } : false}
+              initial={{ opacity: 0 }}
               animate={{
                 opacity: 1,
                 transition: {
@@ -179,10 +175,10 @@ export function RepoDetail(props: RepoDetailProps) {
         )}
       </AnimatePresence>
       <div className="flex flex-1 overflow-hidden">
-        <AnimatePresence>
+        <AnimatePresence initial={false}>
           {!isFullscreen && (
             <motion.div
-              initial={hasMounted ? { width: 0 } : false}
+              initial={{ width: 0 }}
               animate={{
                 width: "auto",
                 transition: { type: "tween", duration: 0.1 },
@@ -250,10 +246,10 @@ export function RepoDetail(props: RepoDetailProps) {
                     </Button>
                   )}
                 </Box>
-                <AnimatePresence>
+                <AnimatePresence initial={false}>
                   {isFullscreen && (
                     <motion.div
-                      initial={hasMounted ? { opacity: 0, y: 5 } : false}
+                      initial={{ opacity: 0, y: 5 }}
                       animate={{
                         opacity: 1,
                         y: 0,
@@ -333,10 +329,10 @@ export function RepoDetail(props: RepoDetailProps) {
           />
         </div>
 
-        <AnimatePresence>
+        <AnimatePresence initial={false}>
           {!isFullscreen && (
             <motion.div
-              initial={hasMounted ? { width: 0 } : false}
+              initial={{ width: 0 }}
               animate={{
                 width: "auto",
                 transition: { type: "tween", duration: 0.1 },

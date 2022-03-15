@@ -19,6 +19,7 @@ import { CustomBlockPicker } from "./custom-block-picker";
 import { UpdateCodeModal } from "./UpdateCodeModal";
 import { FileContext, FolderContext } from "@githubnext/utils";
 import { AnimatePresence, motion } from "framer-motion";
+import { ScreenFullIcon, ScreenNormalIcon } from "@primer/octicons-react";
 
 const BlockPicker = dynamic(() => import("./block-picker"), { ssr: false });
 
@@ -285,28 +286,23 @@ export function RepoDetail(props: RepoDetailProps) {
                 >
                   View on GitHub
                 </Link>
-                <Button
-                  fontSize="1"
-                  ml={2}
-                  onClick={() => {
-                    const newQuery = { ...router.query };
-                    if (isFullscreen) {
-                      delete newQuery.mode;
-                    } else {
-                      newQuery["mode"] = "fullscreen";
-                    }
-                    router.push(
-                      {
-                        pathname: router.pathname,
-                        query: newQuery,
-                      },
-                      null,
-                      { shallow: true }
-                    );
+                <NextLink
+                  shallow
+                  href={{
+                    pathname: router.pathname,
+                    query: {
+                      ...router.query,
+                      mode: isFullscreen ? undefined : "fullscreen",
+                    },
                   }}
                 >
-                  {isFullscreen ? "Exit fullscreen" : "Fullscreen"}
-                </Button>
+                  <span
+                    className="text-gray-500 text-xs ml-2 mr-3 cursor-pointer"
+                    title={isFullscreen ? "Exit fullscreen" : "Make fullscreen"}
+                  >
+                    {isFullscreen ? <ScreenNormalIcon /> : <ScreenFullIcon />}
+                  </span>
+                </NextLink>
               </Box>
             </div>
           </div>

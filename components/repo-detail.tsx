@@ -36,7 +36,9 @@ export function RepoDetail(props: RepoDetailProps) {
   // need this to only animate chrome in on fullscreen mode change, but not on load
   const [hasMounted, setHasMounted] = useState(false);
 
-  useEffect(() => { setHasMounted(true) }, []);
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   const context = useMemo(
     () => ({
@@ -133,15 +135,35 @@ export function RepoDetail(props: RepoDetailProps) {
       <AnimatePresence>
         {!isFullscreen && (
           <motion.div
-            initial={hasMounted ? { height: 0, } : false}
-            animate={{ height: "auto", transition: { delay: 0.4 } }}
-            exit={{ height: 0, transition: { delay: 0.4 } }}
+            initial={hasMounted ? { height: 0 } : false}
+            animate={{
+              height: "auto",
+              transition: {
+                type: "tween",
+                duration: 0.1,
+                delay: 0,
+              },
+            }}
+            exit={{
+              height: 0,
+              transition: { type: "tween", duration: 0.1, delay: 0 },
+            }}
           >
             {/* to prevent the search bar from showing on top of other content while animating */}
             <motion.div
               initial={hasMounted ? { opacity: 0 } : false}
-              animate={{ opacity: 1, transition: { duration: 0, delay: 0.45 } }}
-              exit={{ opacity: 0, transition: { duration: 0, delay: 0.52 } }}
+              animate={{
+                opacity: 1,
+                transition: {
+                  type: "tween",
+                  duration: 0,
+                  delay: 0,
+                },
+              }}
+              exit={{
+                opacity: 0,
+                transition: { type: "tween", duration: 0, delay: 0.1 },
+              }}
             >
               <GitHubHeader token={token} />
               <RepoHeader
@@ -161,9 +183,13 @@ export function RepoDetail(props: RepoDetailProps) {
           {!isFullscreen && (
             <motion.div
               initial={hasMounted ? { width: 0 } : false}
-              animate={{ width: "auto" }}
-              exit={{ width: 0 }}
-              className="flex-none w-80 border-r border-gray-200">
+              animate={{
+                width: "auto",
+                transition: { type: "tween", duration: 0.1 },
+              }}
+              exit={{ width: 0, transition: { type: "tween", duration: 0.1 } }}
+              className="flex-none w-80 border-r border-gray-200"
+            >
               {repoFilesStatus === "loading" ? (
                 <div className="flex flex-col items-center justify-center h-full w-full">
                   <div className="animate-pulse flex space-y-4">
@@ -228,8 +254,24 @@ export function RepoDetail(props: RepoDetailProps) {
                   {isFullscreen && (
                     <motion.div
                       initial={hasMounted ? { opacity: 0, y: 5 } : false}
-                      animate={{ opacity: 1, y: 0, transition: { delay: 0.8 } }}
-                      exit={{ opacity: 0, y: 5 }}
+                      animate={{
+                        opacity: 1,
+                        y: 0,
+                        transition: {
+                          type: "tween",
+                          duration: 0.1,
+                          delay: 0.2,
+                        },
+                      }}
+                      exit={{
+                        opacity: 0,
+                        y: 5,
+                        transition: {
+                          type: "tween",
+                          duration: 0.1,
+                          delay: 0.2,
+                        },
+                      }}
                     >
                       <Box className="text-sm text-gray-500 ml-2">
                         {context.owner}/{context.repo}: {path}
@@ -238,8 +280,9 @@ export function RepoDetail(props: RepoDetailProps) {
                   )}
                 </AnimatePresence>
                 <Link
-                  href={`https://github.com/${context.owner}/${context.repo}/${path ? `blob/${context.sha}/${path}` : ""
-                    }`}
+                  href={`https://github.com/${context.owner}/${context.repo}/${
+                    path ? `blob/${context.sha}/${path}` : ""
+                  }`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="!text-gray-500 mr-3 ml-auto text-xs"
@@ -250,24 +293,39 @@ export function RepoDetail(props: RepoDetailProps) {
                   fontSize="1"
                   ml={2}
                   onClick={() => {
-                    const newQuery = { ...router.query }
+                    const newQuery = { ...router.query };
                     if (isFullscreen) {
-                      delete newQuery.mode
+                      delete newQuery.mode;
                     } else {
-                      newQuery["mode"] = "fullscreen"
+                      newQuery["mode"] = "fullscreen";
                     }
-                    router.push({
-                      pathname: router.pathname,
-                      query: newQuery
-                    }, null, { shallow: true })
-                  }}>
+                    router.push(
+                      {
+                        pathname: router.pathname,
+                        query: newQuery,
+                      },
+                      null,
+                      { shallow: true }
+                    );
+                  }}
+                >
                   {isFullscreen ? "Exit fullscreen" : "Fullscreen"}
                 </Button>
               </Box>
             </div>
           </div>
           <BlockRender
-            {...{ isChoosingCustomBlock, allBlocksInfo, setBlockLocal, isFolder, size, isTooLarge, theme, block, token }}
+            {...{
+              isChoosingCustomBlock,
+              allBlocksInfo,
+              setBlockLocal,
+              isFolder,
+              size,
+              isTooLarge,
+              theme,
+              block,
+              token,
+            }}
             // @ts-ignore
             context={context}
             path={path as string}
@@ -279,17 +337,18 @@ export function RepoDetail(props: RepoDetailProps) {
           {!isFullscreen && (
             <motion.div
               initial={hasMounted ? { width: 0 } : false}
-              animate={{ width: "auto" }}
-              exit={{ width: 0 }}
-              className="flex-none hidden lg:block h-full border-l border-gray-200">
-              <ActivityFeed
-                context={context}
-                token={token}
-              />
+              animate={{
+                width: "auto",
+                transition: { type: "tween", duration: 0.1 },
+              }}
+              exit={{ width: 0, transition: { type: "tween", duration: 0.1 } }}
+              className="flex-none hidden lg:block h-full border-l border-gray-200"
+            >
+              <ActivityFeed context={context} token={token} />
             </motion.div>
           )}
         </AnimatePresence>
-      </div >
+      </div>
       {!!requestedMetadata && (
         <UpdateCodeModal
           isLoggedIn={!!token}
@@ -301,43 +360,54 @@ export function RepoDetail(props: RepoDetailProps) {
           }}
           onClose={() => setRequestedMetadata(null)}
         />
-      )
-      }
-    </div >
+      )}
+    </div>
   );
 }
 
-
 function BlockRender({
-  isChoosingCustomBlock, allBlocksInfo, setBlockLocal, path, isFolder, isLoaded, size, isTooLarge, context, theme, block, token
+  isChoosingCustomBlock,
+  allBlocksInfo,
+  setBlockLocal,
+  path,
+  isFolder,
+  isLoaded,
+  size,
+  isTooLarge,
+  context,
+  theme,
+  block,
+  token,
 }: {
-  isChoosingCustomBlock: boolean,
-  allBlocksInfo: Block[],
-  setBlockLocal: (block: Block) => void,
-  path: string,
-  isFolder: boolean,
-  isLoaded: boolean,
-  size: number,
-  isTooLarge: boolean,
-  context: FileContext | FolderContext,
-  theme: string,
-  block: Block,
-  token: string,
+  isChoosingCustomBlock: boolean;
+  allBlocksInfo: Block[];
+  setBlockLocal: (block: Block) => void;
+  path: string;
+  isFolder: boolean;
+  isLoaded: boolean;
+  size: number;
+  isTooLarge: boolean;
+  context: FileContext | FolderContext;
+  theme: string;
+  block: Block;
+  token: string;
 }) {
-  if (isChoosingCustomBlock) return (
-    <CustomBlockPicker
-      allBlocks={allBlocksInfo}
-      onChange={setBlockLocal}
-      path={path as string}
-      isFolder={isFolder}
-    />
-  )
-  if (!isLoaded) return null
-  if (isTooLarge) return (
-    <div className="italic p-4 pt-40 text-center mx-auto text-gray-600">
-      Oh boy, that's a honkin file! It's {size / 1000} KBs.
-    </div>
-  )
+  if (isChoosingCustomBlock)
+    return (
+      <CustomBlockPicker
+        allBlocks={allBlocksInfo}
+        onChange={setBlockLocal}
+        path={path as string}
+        isFolder={isFolder}
+      />
+    );
+  if (!isLoaded) return null;
+  if (isTooLarge)
+    return (
+      <div className="italic p-4 pt-40 text-center mx-auto text-gray-600">
+        Oh boy, that's a honkin file! It's {size / 1000} KBs.
+      </div>
+    );
   return (
     <GeneralBlock
       key={block.id}
@@ -347,5 +417,5 @@ function BlockRender({
       block={block}
       token={token}
     />
-  )
+  );
 }

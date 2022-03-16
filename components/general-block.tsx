@@ -50,7 +50,15 @@ export function GeneralBlock(props: GeneralBlockProps) {
     path: string,
     params: Record<string, any> = {}
   ) => {
-    const data = await getGenericData(path, params, token);
+    const data = await getGenericData(
+      path,
+      {
+        ...params,
+        // restrict to GET calls to prevent updating data
+        method: "GET",
+      },
+      token
+    );
     return data;
   };
 

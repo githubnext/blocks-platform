@@ -704,10 +704,10 @@
     lodash.uniqueid "^4.0.1"
     zod "^3.11.6"
 
-"@githubnext/utils@^0.17.0":
-  version "0.17.0"
-  resolved "https://registry.yarnpkg.com/@githubnext/utils/-/utils-0.17.0.tgz#93e53ba4508e0599de8031adf85b4f35aa859832"
-  integrity sha512-P5/Ep4Wj2R0z7fVMwOioITeDYa584zDJyZHUNePCfgoVyLo5SysUC90fXRnOgWIPJwHiONE8wJll7K4s/7syGg==
+"@githubnext/utils@^0.18.0":
+  version "0.18.0"
+  resolved "https://registry.yarnpkg.com/@githubnext/utils/-/utils-0.18.0.tgz#43e5c1909b6cabfe07c85b9c81525ebdbe04d035"
+  integrity sha512-Xsi7zUDt2vGgrHDvzDLpQWGXdyof65iV7PBWffu/cX/IJKXRG4KJ5zUt7lD7iAXYv4VOgnbmtI81B/ayt2vByQ==
   dependencies:
     "@types/lodash.uniqueid" "^4.0.6"
     lodash.uniqueid "^4.0.1"

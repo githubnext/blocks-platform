@@ -97,7 +97,7 @@ const Commit = ({
       href={{
         query: {
           ...router.query,
-          fileRef: sha,
+          fileRef: isSelected ? undefined : sha,
         },
       }}
     >

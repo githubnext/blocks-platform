@@ -1,6 +1,6 @@
 import { FileContext, FolderContext } from "@githubnext/utils";
 import { SandboxedBlockWrapper } from "components/sandboxed-block-wrapper";
-import { getFileContent, getRepoInfo } from "ghapi";
+import { getFileContent, getGenericData, getRepoInfo } from "ghapi";
 import {
   useFileContent,
   useFolderContent,
@@ -46,8 +46,11 @@ export function GeneralBlock(props: GeneralBlockProps) {
   });
   const type = block.type;
 
-  const getGitHubData = async (type, config) => {
-    const data = await fetchGitHubData(type, { ...config, token: token });
+  const getGitHubData = async (
+    path: string,
+    params: Record<string, any> = {}
+  ) => {
+    const data = await getGenericData(path, params, token);
     return data;
   };
 
@@ -97,8 +100,12 @@ export function GeneralBlock(props: GeneralBlockProps) {
     setRequestedFileContent(newContent);
   };
 
-  const onRequestGitHubData = async (type, config, id) => {
-    const data = await getGitHubData(type, config);
+  const onRequestGitHubData = async (
+    path,
+    params: Record<string, any> = {},
+    id = ""
+  ) => {
+    const data = await getGitHubData(path, params);
     window.postMessage(
       {
         type: "github-data--response",
@@ -208,9 +215,9 @@ export function GeneralBlock(props: GeneralBlockProps) {
   );
 }
 
-const getBlockKey = (block) =>
+export const getBlockKey = (block) =>
   `${block?.owner}/${block?.repo}__${block?.id}`.replace(/\//g, "__");
-const getMetadataPath = (block, path) =>
+export const getMetadataPath = (block, path) =>
   `.github/blocks/${block?.type}/${getBlockKey(block)}/${encodeURIComponent(
     path
   )}.json`;

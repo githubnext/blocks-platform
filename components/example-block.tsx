@@ -26,7 +26,11 @@ interface ExampleBlockProps {
     currentMetadata: any
   ) => void;
   onRequestUpdateContent: (newContent: string) => void;
-  onRequestGitHubData: (type: string, config: any, id: string) => Promise<any>;
+  onRequestGitHubData: (
+    path: string,
+    params?: Record<string, any>,
+    id?: string
+  ) => Promise<any>;
   onNavigateToPath: (path: string) => void;
 }
 
@@ -72,6 +76,7 @@ export function ExampleBlock(props: ExampleBlockProps) {
 }
 
 import { ErrorBoundary } from "./error-boundary";
+import { getMetadataPath } from "./general-block";
 type BlockComponentProps = FileBlockProps &
   FolderBlockProps & {
     block: Block;
@@ -93,23 +98,29 @@ const BlockComponent = ({
 
   const getData = async () => {
     if (block.type !== "file") return;
-    const data = await onRequestGitHubData("file-content", {
-      owner: props.context.owner,
-      repo: props.context.repo,
-      path: path,
-      fileRef: props.context.fileRef,
-    });
-    setContents(data.content);
+    const query =
+      props.context.sha && props.context.sha !== "HEAD"
+        ? `?ref=${props.context.sha}`
+        : "";
+    const apiUrl = `/repos/${props.context.owner}/${props.context.repo}/contents/${path}${query}`;
+    const res = await onRequestGitHubData(apiUrl);
+    const encodedContent = res.content;
+    const data = Buffer.from(encodedContent, "base64").toString("utf8");
+    setContents(data);
   };
   const getMetadata = async () => {
     if (metadata) return;
-    const data = await onRequestGitHubData("metadata", {
-      owner: props.context.owner,
-      repo: props.context.repo,
-      block: block,
-      path: path,
+    const apiUrl = `/repos/${props.context.owner}/${
+      props.context.repo
+    }/contents/${getMetadataPath(block, path)}`;
+    const res = await onRequestGitHubData(apiUrl, {
+      ref: "HEAD",
+      cache: new Date().toString(),
     });
-    setMetadata(data);
+    const encodedContent = res.content;
+    const content = Buffer.from(encodedContent, "base64").toString("utf8");
+    const fullMetadata = JSON.parse((content || "{}") as string) || {};
+    setMetadata(fullMetadata);
   };
   useEffect(() => {
     getData();

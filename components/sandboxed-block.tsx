@@ -31,7 +31,11 @@ interface SandboxedBlockProps {
     currentMetadata: any
   ) => void;
   onRequestUpdateContent: (newContent: string) => void;
-  onRequestGitHubData: (type: string, config: any, id: string) => Promise<any>;
+  onRequestGitHubData: (
+    path: string,
+    params: Record<string, any>,
+    id: string
+  ) => Promise<any>;
   onNavigateToPath: (path: string) => void;
 }
 
@@ -108,7 +112,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
         } else if (data.type === "navigate-to-path") {
           onNavigateToPath(data.path);
         } else if (data.type === "github-data--request") {
-          onRequestGitHubData(data.requestType, data.config, data.id);
+          onRequestGitHubData(data.path, (data.params = {}), (data.id = ""));
         }
       }
     };

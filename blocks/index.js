@@ -178,6 +178,7 @@ export const defaultBlocksRepo = {
       "id": "markdown-block",
       "title": "Markdown",
       "description": "View markdown files. You can also view live repo into, using Issues, Releases, and Commits custom components, as well as live code examples with CodeSandbox.",
+      "sandbox": false,
       "entry": "/src/blocks/file-blocks/live-markdown/index.tsx",
       "extensions": [
         "md",
@@ -190,6 +191,7 @@ export const defaultBlocksRepo = {
       "id": "react-feedback-block",
       "title": "React component feedback",
       "description": "Give feedback on a React component",
+      "sandbox": false,
       "entry": "/src/blocks/file-blocks/annotate-react/index.tsx",
       "extensions": [
         "jsx",
@@ -214,6 +216,7 @@ export const defaultBlocksRepo = {
       "id": "processing-block",
       "title": "Processing block",
       "description": "Run your p5.js sketches",
+      "sandbox": true,
       "entry": "/src/blocks/file-blocks/processing.tsx",
       "extensions": [
         "js"

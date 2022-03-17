@@ -50,8 +50,10 @@ export function GeneralBlock(props: GeneralBlockProps) {
     path: string,
     params: Record<string, any> = {}
   ) => {
+    // handle paths that accidentally include the domain
+    const parsedPath = path.replace("https://api.github.com", "");
     const data = await getGenericData(
-      path,
+      parsedPath,
       {
         ...params,
         // restrict to GET calls to prevent updating data

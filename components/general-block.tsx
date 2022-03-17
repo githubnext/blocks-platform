@@ -22,6 +22,7 @@ interface GeneralBlockProps {
 export function GeneralBlock(props: GeneralBlockProps) {
   const { context, theme, block, token } = props;
   const { repo, owner, path, sha } = context;
+
   const [requestedMetadata, setRequestedMetadata] = React.useState(null);
   const [requestedMetadataExisting, setRequestedMetadataExisting] =
     React.useState(null);
@@ -183,6 +184,8 @@ export function GeneralBlock(props: GeneralBlockProps) {
           onClose={() => setRequestedFileContent(null)}
           isOpen
           token={token}
+          // todo(Matt) – use actual commit SHA instead of HEAD
+          branchingDisabled={sha !== "HEAD"}
         />
       )}
     </div>

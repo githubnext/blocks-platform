@@ -31,6 +31,7 @@ interface CommitCodeDialogProps {
   repo: string;
   owner: string;
   token: string;
+  branchingDisabled?: boolean;
 }
 
 type CommitType = "main" | "branch";
@@ -41,8 +42,17 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
   const [body, setBody] = useState("");
   const [commitType, setCommitType] = useState<CommitType>("main");
   const [branchName, setBranchName] = useState("");
-  const { onClose, isOpen, currentCode, newCode, path, owner, repo, token } =
-    props;
+  const {
+    onClose,
+    isOpen,
+    currentCode,
+    newCode,
+    path,
+    owner,
+    repo,
+    token,
+    branchingDisabled,
+  } = props;
   const queryClient = useQueryClient();
 
   const {
@@ -176,7 +186,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
                 </span>
               </FormControl.Label>
             </FormControl>
-            <FormControl>
+            <FormControl disabled={branchingDisabled}>
               <Radio checked={commitType === "branch"} value="branch" />
               <FormControl.Label>
                 <GitPullRequestIcon />
@@ -184,6 +194,12 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
                   Create a new branch for this commit and start a pull request.
                 </span>
               </FormControl.Label>
+              {branchingDisabled && (
+                <FormControl.Caption>
+                  Sorry! We only allow creating a branch from the most recent
+                  version of the file.
+                </FormControl.Caption>
+              )}
             </FormControl>
           </RadioGroup>
           {commitType === "branch" && (

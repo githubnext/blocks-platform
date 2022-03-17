@@ -63,7 +63,7 @@ export default function Test() {
         isOpen={isOpen}
         onClose={handleClose}
         token={data.token as string}
-        sha="7f578b4ac77972b06170906180c38a97f6e4c408"
+        sha="0094a25d619210007e4599123fb7de5318c51c45"
         repo="tusi"
         owner="mattrothenberg"
       />

@@ -357,8 +357,8 @@ export async function createBranchAndPR(
     repo,
     head: ref,
     base: "main",
-    title: `blocks: Update ${path}`,
-    body: "This is a pull request created programatically by GitHub Blocks.",
+    title: `GitHub Blocks: Update ${path}`,
+    body: "This is a pull request created programmatically by GitHub Blocks.",
   });
   // Open PR
   console.info(`✅ Created PR`, res.data.html_url);

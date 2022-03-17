@@ -3,10 +3,12 @@ import {
   GitCommitIcon,
   GitPullRequestIcon,
 } from "@primer/octicons-react";
+
 import {
   BranchName,
   Button,
   Dialog,
+  Flash,
   FormControl,
   Radio,
   RadioGroup,
@@ -49,42 +51,51 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
     token,
   } = props;
 
-  const { mutateAsync: updateContents, status: updateContentsStatus } =
-    useUpdateFileContents({
-      onSuccess: () => {
-        onClose();
-      },
-    });
-  const { mutateAsync: createBranch, status: createBranchStatus } =
-    useCreateBranchAndPR({
-      onSuccess: (prUrl) => {
-        window.open(prUrl, "_blank");
-        onClose();
-      },
-    });
+  const {
+    mutate: updateContents,
+    status: updateContentsStatus,
+    error: updateContentsError,
+  } = useUpdateFileContents({
+    onSuccess: () => {
+      onClose();
+    },
+  });
 
-  const handleCommit = async () => {
+  const {
+    mutate: createBranch,
+    status: createBranchStatus,
+    error: createBranchError,
+  } = useCreateBranchAndPR({
+    onSuccess: (prUrl) => {
+      window.open(prUrl, "_blank");
+      onClose();
+    },
+  });
+
+  const handleCommit = () => {
     if (commitType === "branch") {
-      await createBranch({
-        owner,
-        repo,
-        ref: branchName,
-        sha,
-        token,
-        content: newCode,
-        path,
-      });
+      try {
+        createBranch({
+          owner,
+          repo,
+          ref: branchName,
+          sha,
+          token,
+          content: newCode,
+          path,
+        });
+      } catch (e) {}
     } else {
-      await updateContents({
-        owner,
-        repo,
-        // By passing latest here, we are forcing the update function to fetch
-        // the latest blob sha.
-        sha: "latest",
-        token,
-        content: newCode,
-        path,
-      });
+      try {
+        updateContents({
+          owner,
+          repo,
+          sha: "latest",
+          token,
+          content: newCode,
+          path,
+        });
+      } catch (e) {}
     }
   };
   const files = useMemo(
@@ -98,13 +109,26 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
     }
   }, [commitType]);
 
-  const isLoading = createBranchStatus === "loading";
+  const isLoading =
+    createBranchStatus === "loading" || updateContentsStatus === "loading";
 
   return (
     <Dialog isOpen={isOpen} title="Commit changes" wide onDismiss={onClose}>
       <Dialog.Header>Editing {path}</Dialog.Header>
 
       <div className="p-4">
+        {(createBranchError || updateContentsError) && (
+          <div className="mb-4">
+            <Flash variant="danger">
+              {createBranchError &&
+                (createBranchError?.message || "An unexpected error occurred.")}
+              {updateContentsError &&
+                (updateContentsError?.message ||
+                  "An unexpected error occurred.")}
+            </Flash>
+          </div>
+        )}
+
         <div
           style={{}}
           className="border rounded max-h-[400px] overflow-auto text-sm"
@@ -182,7 +206,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
           Cancel
         </Button>
         <Button
-          disabled={isLoading}
+          disabled={isLoading || (!branchName && commitType === "branch")}
           async
           type="button"
           variant="primary"

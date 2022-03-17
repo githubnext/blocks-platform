@@ -17,6 +17,9 @@ import {
   RepoContextWithToken,
   UseFolderContentParams,
   getRepoTimeline,
+  CreateBranchResponse,
+  CreateBranchParams,
+  createBranchAndPR,
 } from "ghapi";
 import { defaultBlocksRepo as exampleBlocksInfo } from "blocks/index";
 import { useRouter } from "next/router";
@@ -369,3 +372,9 @@ const overrideDefaultBlocks = {
   js: "code-block",
   ts: "code-block",
 };
+
+export function useCreateBranchAndPR(
+  config?: UseMutationOptions<CreateBranchResponse, any, CreateBranchParams>
+) {
+  return useMutation(createBranchAndPR, config);
+}

@@ -1,3 +1,4 @@
+import { Octokit } from "@octokit/rest";
 export interface RepoContext {
   repo: string;
   owner: string;
@@ -256,6 +257,7 @@ export async function getRepoFiles(
 }
 
 import { Endpoints } from "@octokit/types";
+import { Base64 } from "js-base64";
 
 export async function getRepoInfo(
   params: RepoContextWithToken
@@ -301,4 +303,76 @@ export async function getGenericData(
 
   const resObject = await res.json();
   return resObject;
+}
+
+export interface CreateBranchParams {
+  ref: string;
+  sha: string;
+  token: string;
+  owner: string;
+  repo: string;
+  content: string;
+  path: string;
+  title?: string;
+  body?: string;
+}
+
+export type CreateBranchResponse = string;
+
+export async function createBranchAndPR(
+  params: CreateBranchParams
+): Promise<string> {
+  const {
+    ref,
+    token,
+    owner,
+    repo,
+    content,
+    path,
+    sha,
+    title = `GitHub Blocks: Update ${path}`,
+    body = "This is a pull request created programmatically by GitHub Blocks.",
+  } = params;
+  const octokit = new Octokit({ auth: token });
+
+  const currentFileData = await octokit.repos.getContent({
+    owner,
+    repo,
+    path,
+  });
+
+  // @ts-ignore
+  let blobSha = currentFileData.data.sha;
+
+  // // Branch off
+  await octokit.git.createRef({
+    owner,
+    repo,
+    ref: `refs/heads/${ref}`,
+    sha,
+  });
+
+  // // Commit
+  await octokit.repos.createOrUpdateFileContents({
+    owner,
+    repo,
+    path,
+    message: `feat: updated ${params.path} programatically`,
+    content: Base64.encode(content),
+    branch: ref,
+    // @ts-ignore
+    sha: blobSha,
+  });
+
+  const res = await octokit.pulls.create({
+    owner,
+    repo,
+    head: ref,
+    base: "main",
+    title,
+    body,
+  });
+  // Open PR
+  console.info(`✅ Created PR`, res.data.html_url);
+  return res.data.html_url;
 }

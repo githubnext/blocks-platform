@@ -21,8 +21,8 @@ interface SandboxedBlockWrapperProps {
   onRequestUpdateContent: (newContent: string) => void;
   onRequestGitHubData: (
     path: string,
-    params: Record<string, any>,
-    id: string
+    params?: Record<string, any>,
+    id?: string
   ) => Promise<any>;
   onNavigateToPath: (path: string) => void;
 }

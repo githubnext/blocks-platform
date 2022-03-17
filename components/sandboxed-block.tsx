@@ -33,8 +33,8 @@ interface SandboxedBlockProps {
   onRequestUpdateContent: (newContent: string) => void;
   onRequestGitHubData: (
     path: string,
-    params: Record<string, any>,
-    id: string
+    params?: Record<string, any>,
+    id?: string
   ) => Promise<any>;
   onNavigateToPath: (path: string) => void;
 }
@@ -112,7 +112,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
         } else if (data.type === "navigate-to-path") {
           onNavigateToPath(data.path);
         } else if (data.type === "github-data--request") {
-          onRequestGitHubData(data.path, (data.params = {}), (data.id = ""));
+          onRequestGitHubData(data.path, data.params, data.id);
         }
       }
     };

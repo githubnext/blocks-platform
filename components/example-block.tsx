@@ -98,12 +98,12 @@ const BlockComponent = ({
 
   const getData = async () => {
     if (block.type !== "file") return;
-    const query =
+    const apiUrl = `/repos/${props.context.owner}/${props.context.repo}/contents/${path}`;
+    const params =
       props.context.sha && props.context.sha !== "HEAD"
-        ? `?ref=${props.context.sha}`
-        : "";
-    const apiUrl = `/repos/${props.context.owner}/${props.context.repo}/contents/${path}${query}`;
-    const res = await onRequestGitHubData(apiUrl);
+        ? { ref: props.context.sha }
+        : {};
+    const res = await onRequestGitHubData(apiUrl, params);
     const encodedContent = res.content;
     const data = Buffer.from(encodedContent, "base64").toString("utf8");
     setContents(data);

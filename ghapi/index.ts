@@ -313,6 +313,8 @@ export interface CreateBranchParams {
   repo: string;
   content: string;
   path: string;
+  title?: string;
+  body?: string;
 }
 
 export type CreateBranchResponse = string;
@@ -320,7 +322,17 @@ export type CreateBranchResponse = string;
 export async function createBranchAndPR(
   params: CreateBranchParams
 ): Promise<string> {
-  const { ref, token, owner, repo, content, path, sha } = params;
+  const {
+    ref,
+    token,
+    owner,
+    repo,
+    content,
+    path,
+    sha,
+    title = `GitHub Blocks: Update ${path}`,
+    body = "This is a pull request created programmatically by GitHub Blocks.",
+  } = params;
   const octokit = new Octokit({ auth: token });
 
   const currentFileData = await octokit.repos.getContent({
@@ -357,8 +369,8 @@ export async function createBranchAndPR(
     repo,
     head: ref,
     base: "main",
-    title: `GitHub Blocks: Update ${path}`,
-    body: "This is a pull request created programmatically by GitHub Blocks.",
+    title,
+    body,
   });
   // Open PR
   console.info(`✅ Created PR`, res.data.html_url);

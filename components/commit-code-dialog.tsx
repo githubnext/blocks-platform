@@ -3,7 +3,6 @@ import {
   GitCommitIcon,
   GitPullRequestIcon,
 } from "@primer/octicons-react";
-
 import {
   BranchName,
   Button,
@@ -13,6 +12,7 @@ import {
   Radio,
   RadioGroup,
   Text,
+  Textarea,
   TextInput,
 } from "@primer/react";
 import { useCreateBranchAndPR, useUpdateFileContents } from "hooks";
@@ -37,6 +37,8 @@ type CommitType = "main" | "branch";
 
 export function CommitCodeDialog(props: CommitCodeDialogProps) {
   const textInputRef = useRef(null);
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
   const [commitType, setCommitType] = useState<CommitType>("main");
   const [branchName, setBranchName] = useState("");
   const {
@@ -83,6 +85,8 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
           token,
           content: newCode,
           path,
+          title,
+          body,
         });
       } catch (e) {}
     } else {
@@ -182,21 +186,44 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
           </RadioGroup>
           {commitType === "branch" && (
             <div className="mt-1">
-              <FormControl>
-                <FormControl.Label visuallyHidden>
-                  New branch name
-                </FormControl.Label>
-                <TextInput
-                  ref={textInputRef}
-                  className="font-mono"
-                  leadingVisual={<GitBranchIcon />}
-                  placeholder="New branch name"
-                  value={branchName}
-                  onChange={(e) => {
-                    setBranchName(e.target.value);
-                  }}
-                />
-              </FormControl>
+              <div className="flex flex-col gap-2">
+                <FormControl>
+                  <FormControl.Label visuallyHidden>
+                    New branch name
+                  </FormControl.Label>
+                  <TextInput
+                    ref={textInputRef}
+                    className="font-mono"
+                    leadingVisual={<GitBranchIcon />}
+                    placeholder="New branch name"
+                    value={branchName}
+                    onChange={(e) => {
+                      setBranchName(e.target.value);
+                    }}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormControl.Label visuallyHidden>PR Title</FormControl.Label>
+                  <TextInput
+                    placeholder="PR Title"
+                    value={title}
+                    onChange={(e) => {
+                      setTitle(e.target.value);
+                    }}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormControl.Label visuallyHidden>PR Title</FormControl.Label>
+                  <Textarea
+                    placeholder="PR Body"
+                    rows={4}
+                    value={body}
+                    onChange={(e) => {
+                      setBody(e.target.value);
+                    }}
+                  />
+                </FormControl>
+              </div>
             </div>
           )}
         </div>

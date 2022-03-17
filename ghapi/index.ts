@@ -3,6 +3,11 @@ export interface RepoContext {
   owner: string;
 }
 
+export interface GenericContextWithToken {
+  token: string;
+  path: string;
+}
+
 export interface RepoContextWithToken extends RepoContext {
   token: string;
 }
@@ -267,6 +272,30 @@ export async function getRepoInfo(
   if (res.status !== 200) {
     throw new Error(
       `Error fetching repo info: ${owner}/${repo}\n${await res.text()}`
+    );
+  }
+
+  const resObject = await res.json();
+  return resObject;
+}
+
+export async function getGenericData(
+  path: string,
+  params: Record<string, any> = {},
+  token: string
+): Promise<string> {
+  const apiUrl = `https://api.github.com${path}`;
+
+  const res = await fetch(apiUrl, {
+    headers: {
+      Authorization: token && `token ${token}`,
+    },
+    ...params,
+  });
+
+  if (res.status !== 200) {
+    throw new Error(
+      `Error fetching generic GitHub API data: ${apiUrl}\n${await res.text()}`
     );
   }
 

@@ -19,7 +19,7 @@ import { Diff, Hunk, parseDiff } from "react-diff-view";
 import "react-diff-view/style/index.css";
 import { diffAsText } from "unidiff";
 
-interface CommitCodeModalProps {
+interface CommitCodeDialogProps {
   onClose: () => void;
   isOpen: boolean;
   newCode: string;
@@ -31,7 +31,7 @@ interface CommitCodeModalProps {
   token: string;
 }
 
-export function CommitCodeModal(props: CommitCodeModalProps) {
+export function CommitCodeDialog(props: CommitCodeDialogProps) {
   const textInputRef = useRef(null);
   const [commitType, setCommitType] = useState("main");
   const [branchName, setBranchName] = useState("");

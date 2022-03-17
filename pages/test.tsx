@@ -1,5 +1,5 @@
 import { Button } from "@primer/react";
-import { CommitCodeModal } from "components/commit-code-modal";
+import { CommitCodeDialog } from "components/commit-code-dialog";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 
@@ -55,8 +55,8 @@ export default function Test() {
 
   return (
     <div className="p-4">
-      <Button onClick={() => setIsOpen(true)}>Open Modal</Button>
-      <CommitCodeModal
+      <Button onClick={() => setIsOpen(true)}>Open Dialog</Button>
+      <CommitCodeDialog
         path="src/lib.ts"
         newCode={newCode}
         currentCode={oldCode}

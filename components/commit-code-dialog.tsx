@@ -71,6 +71,9 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
     onSuccess: (prUrl) => {
       window.open(prUrl, "_blank");
       onClose();
+      setTitle("");
+      setBody("");
+      setCommitType("main");
     },
   });
 

@@ -278,7 +278,6 @@ export async function getRepoInfo(
 
 export interface CreateBranchParams {
   ref: string;
-  sha: string;
   token: string;
   owner: string;
   repo: string;
@@ -300,12 +299,22 @@ export async function createBranchAndPR(
     repo,
     content,
     path,
-    sha,
     title = `GitHub Blocks: Update ${path}`,
     body = "This is a pull request created programmatically by GitHub Blocks.",
   } = params;
   const octokit = new Octokit({ auth: token });
+  // "SHAs" abound in this codebase, so let me explain what's going on.
+  // In order to create a new branch (a.k.a "ref"), you need the SHA of the branch you're creating it off of.
+  // We're naïvely assuming that the branch you're creating off of is the "main" branch.
 
+  // So let's get the SHA of the "main" branch.
+  const currentBranchData = await octokit.git.getRef({
+    owner,
+    repo,
+    ref: "heads/main",
+  });
+
+  // Let's also get the SHA of the *file* we're going to use when we commit on the new branch.
   const currentFileData = await octokit.repos.getContent({
     owner,
     repo,
@@ -315,15 +324,15 @@ export async function createBranchAndPR(
   // @ts-ignore
   let blobSha = currentFileData.data.sha;
 
-  // // Branch off
+  // Step 1. Create the new branch, using the SHA of the "main" branch as the base.
   await octokit.git.createRef({
     owner,
     repo,
     ref: `refs/heads/${ref}`,
-    sha,
+    sha: currentBranchData.data.object.sha,
   });
 
-  // // Commit
+  // Step 2. Commit the new file to the new branch.
   await octokit.repos.createOrUpdateFileContents({
     owner,
     repo,
@@ -335,6 +344,7 @@ export async function createBranchAndPR(
     sha: blobSha,
   });
 
+  // Step 3. Create the PR using "main" as the base.
   const res = await octokit.pulls.create({
     owner,
     repo,
@@ -343,7 +353,5 @@ export async function createBranchAndPR(
     title,
     body,
   });
-  // Open PR
-  console.info(`✅ Created PR`, res.data.html_url);
   return res.data.html_url;
 }

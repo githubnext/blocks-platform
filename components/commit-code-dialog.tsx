@@ -19,6 +19,7 @@ import { useCreateBranchAndPR, useUpdateFileContents } from "hooks";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Diff, Hunk, parseDiff } from "react-diff-view";
 import "react-diff-view/style/index.css";
+import { useQueryClient } from "react-query";
 import { diffAsText } from "unidiff";
 
 interface CommitCodeDialogProps {
@@ -27,7 +28,6 @@ interface CommitCodeDialogProps {
   newCode: string;
   currentCode?: string;
   path: string;
-  sha: string;
   repo: string;
   owner: string;
   token: string;
@@ -41,24 +41,18 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
   const [body, setBody] = useState("");
   const [commitType, setCommitType] = useState<CommitType>("main");
   const [branchName, setBranchName] = useState("");
-  const {
-    onClose,
-    isOpen,
-    currentCode,
-    newCode,
-    path,
-    owner,
-    repo,
-    sha,
-    token,
-  } = props;
+  const { onClose, isOpen, currentCode, newCode, path, owner, repo, token } =
+    props;
+  const queryClient = useQueryClient();
 
   const {
     mutate: updateContents,
     status: updateContentsStatus,
     error: updateContentsError,
   } = useUpdateFileContents({
-    onSuccess: () => {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries("file");
+      await queryClient.invalidateQueries("timeline");
       onClose();
     },
   });
@@ -84,7 +78,6 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
           owner,
           repo,
           ref: branchName,
-          sha,
           token,
           content: newCode,
           path,
@@ -120,7 +113,13 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
     createBranchStatus === "loading" || updateContentsStatus === "loading";
 
   return (
-    <Dialog isOpen={isOpen} title="Commit changes" wide onDismiss={onClose}>
+    <Dialog
+      className="overflow-auto"
+      isOpen={isOpen}
+      title="Commit changes"
+      wide
+      onDismiss={onClose}
+    >
       <Dialog.Header>Editing {path}</Dialog.Header>
 
       <div className="p-4">
@@ -138,7 +137,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
 
         <div
           style={{}}
-          className="border rounded max-h-[400px] overflow-auto text-sm"
+          className="border rounded max-h-[200px] overflow-auto text-sm"
         >
           {files.map(({ oldRevision, newRevision, type, hunks }) => (
             <Diff

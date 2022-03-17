@@ -5,15 +5,10 @@ import {
 } from "@githubnext/utils";
 import { SandboxedBlockWrapper } from "components/sandboxed-block-wrapper";
 import { getFileContent, getRepoInfo } from "ghapi";
-import {
-  useFileContent,
-  useFolderContent,
-  useMetadata,
-  useUpdateFileContents,
-} from "hooks";
+import { useFileContent, useFolderContent, useMetadata } from "hooks";
 import { useRouter } from "next/router";
 import React, { useMemo } from "react";
-import { useQueryClient } from "react-query";
+import { CommitCodeDialog } from "./commit-code-dialog";
 import { ErrorBoundary } from "./error-boundary";
 import { UpdateCodeModal } from "./UpdateCodeModal";
 
@@ -26,7 +21,6 @@ interface GeneralBlockProps {
 
 export function GeneralBlock(props: GeneralBlockProps) {
   const { context, theme, block, token } = props;
-  const queryClient = useQueryClient();
   const { repo, owner, path, sha } = context;
   const [requestedMetadata, setRequestedMetadata] = React.useState(null);
   const [requestedMetadataExisting, setRequestedMetadataExisting] =
@@ -49,24 +43,6 @@ export function GeneralBlock(props: GeneralBlockProps) {
     token: token,
   });
   const type = block.type;
-
-  const { mutateAsync } = useUpdateFileContents({
-    onSuccess: async () => {
-      await queryClient.invalidateQueries("file");
-      await queryClient.invalidateQueries("timeline");
-      console.info("✅ Refreshed timeline and file");
-    },
-  });
-  const onUpdateContent = async (newContent: string) => {
-    await mutateAsync({
-      content: newContent,
-      owner,
-      repo,
-      path,
-      sha: "latest",
-      token: token as string,
-    });
-  };
 
   const onRequestUpdateMetadata = async (
     newMetadata: any,
@@ -198,13 +174,15 @@ export function GeneralBlock(props: GeneralBlockProps) {
         />
       )}
       {!!requestedFileContent && (
-        <UpdateCodeModal
-          isLoggedIn={!!token}
+        <CommitCodeDialog
+          repo={repo}
+          owner={owner}
           path={path}
           newCode={requestedFileContent}
           currentCode={content}
-          onSubmit={() => onUpdateContent(requestedFileContent)}
           onClose={() => setRequestedFileContent(null)}
+          isOpen
+          token={token}
         />
       )}
     </div>

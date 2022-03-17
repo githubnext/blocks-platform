@@ -13,7 +13,7 @@ import {
   Text,
   TextInput,
 } from "@primer/react";
-import { useCreateBranch } from "hooks";
+import { useCreateBranchAndPR, useUpdateFileContents } from "hooks";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Diff, Hunk, parseDiff } from "react-diff-view";
 import "react-diff-view/style/index.css";
@@ -47,30 +47,42 @@ export function CommitCodeModal(props: CommitCodeModalProps) {
     token,
   } = props;
 
+  const { mutateAsync: updateContents, status: updateContentsStatus } =
+    useUpdateFileContents({
+      onSuccess: () => {
+        onClose();
+      },
+    });
   const { mutateAsync: createBranch, status: createBranchStatus } =
-    useCreateBranch({
+    useCreateBranchAndPR({
       onSuccess: (prUrl) => {
         window.open(prUrl, "_blank");
+        onClose();
       },
     });
 
-  const branchCommitAndPR = async () => {
-    const url = await createBranch({
-      owner,
-      repo,
-      ref: branchName,
-      sha,
-      token,
-      content: newCode,
-      path,
-    });
-    console.log(url);
-  };
-
   const handleCommit = async () => {
     if (commitType === "branch") {
-      branchCommitAndPR();
+      await createBranch({
+        owner,
+        repo,
+        ref: branchName,
+        sha,
+        token,
+        content: newCode,
+        path,
+      });
     } else {
+      await updateContents({
+        owner,
+        repo,
+        // By passing latest here, we are forcing the update function to fetch
+        // the latest blob sha.
+        sha: "latest",
+        token,
+        content: newCode,
+        path,
+      });
     }
   };
   const files = useMemo(

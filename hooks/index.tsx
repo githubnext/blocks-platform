@@ -373,7 +373,7 @@ const overrideDefaultBlocks = {
   ts: "code-block",
 };
 
-export function useCreateBranch(
+export function useCreateBranchAndPR(
   config?: UseMutationOptions<CreateBranchResponse, any, CreateBranchParams>
 ) {
   return useMutation(createBranchAndPR, config);

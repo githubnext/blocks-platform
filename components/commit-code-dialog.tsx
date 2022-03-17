@@ -31,9 +31,11 @@ interface CommitCodeDialogProps {
   token: string;
 }
 
+type CommitType = "main" | "branch";
+
 export function CommitCodeDialog(props: CommitCodeDialogProps) {
   const textInputRef = useRef(null);
-  const [commitType, setCommitType] = useState("main");
+  const [commitType, setCommitType] = useState<CommitType>("main");
   const [branchName, setBranchName] = useState("");
   const {
     onClose,
@@ -125,7 +127,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
             disabled={isLoading}
             name="choiceGroup"
             onChange={(value) => {
-              setCommitType(value);
+              setCommitType(value as CommitType);
             }}
           >
             <RadioGroup.Label>Commit changes</RadioGroup.Label>

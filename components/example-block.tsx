@@ -115,7 +115,6 @@ const BlockComponent = ({
     }/contents/${getMetadataPath(block, path)}`;
     const res = await onRequestGitHubData(apiUrl, {
       ref: "HEAD",
-      cache: new Date().toString(),
     });
     const encodedContent = res.content;
     const content = Buffer.from(encodedContent, "base64").toString("utf8");

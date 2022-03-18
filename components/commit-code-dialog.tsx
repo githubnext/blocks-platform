@@ -61,9 +61,9 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
     error: updateContentsError,
   } = useUpdateFileContents({
     onSuccess: async () => {
+      onClose();
       await queryClient.invalidateQueries("file");
       await queryClient.invalidateQueries("timeline");
-      onClose();
     },
   });
 

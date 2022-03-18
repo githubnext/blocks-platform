@@ -1,6 +1,10 @@
-import { FileContext, FolderContext } from "@githubnext/utils";
+import {
+  FileContext,
+  FolderContext,
+  onRequestGitHubData as onRequestGitHubDataFetch,
+} from "@githubnext/utils";
 import { SandboxedBlockWrapper } from "components/sandboxed-block-wrapper";
-import { getFileContent, getGenericData, getRepoInfo } from "ghapi";
+import { getFileContent, getRepoInfo } from "ghapi";
 import {
   useFileContent,
   useFolderContent,
@@ -8,7 +12,7 @@ import {
   useUpdateFileContents,
 } from "hooks";
 import { useRouter } from "next/router";
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import { useQueryClient } from "react-query";
 import { ErrorBoundary } from "./error-boundary";
 import { UpdateCodeModal } from "./UpdateCodeModal";
@@ -45,22 +49,6 @@ export function GeneralBlock(props: GeneralBlockProps) {
     token: token,
   });
   const type = block.type;
-
-  const getGitHubData = async (
-    path: string,
-    params: Record<string, any> = {}
-  ) => {
-    const data = await getGenericData(
-      path,
-      {
-        ...params,
-        // restrict to GET calls to prevent updating data
-        method: "GET",
-      },
-      token
-    );
-    return data;
-  };
 
   const { mutateAsync } = useUpdateFileContents({
     onSuccess: async () => {
@@ -113,7 +101,7 @@ export function GeneralBlock(props: GeneralBlockProps) {
     params: Record<string, any> = {},
     id = ""
   ) => {
-    const data = await getGitHubData(path, params);
+    const data = await onRequestGitHubDataFetch(path, params);
     window.postMessage(
       {
         type: "github-data--response",

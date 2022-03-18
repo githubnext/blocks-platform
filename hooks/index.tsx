@@ -6,7 +6,7 @@ import {
 } from "react-query";
 import { Octokit } from "@octokit/rest";
 import { Base64 } from "js-base64";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   UseFileContentParams,
   getFileContent,

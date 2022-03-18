@@ -218,11 +218,11 @@ export function RepoDetail(props: RepoDetailProps) {
             <motion.div
               initial={{ width: 0 }}
               animate={{
-                width: "auto",
+                width: "17rem",
                 transition: { type: "tween", duration: 0.1 },
               }}
               exit={{ width: 0, transition: { type: "tween", duration: 0.1 } }}
-              className="flex-none w-80 border-r border-gray-200"
+              className="flex-none w-[17rem] border-r border-gray-200"
             >
               {repoFilesStatus === "loading" ? (
                 <div className="flex flex-col items-center justify-center h-full w-full">

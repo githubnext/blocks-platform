@@ -5,7 +5,12 @@ import {
 } from "@githubnext/utils";
 import { SandboxedBlockWrapper } from "components/sandboxed-block-wrapper";
 import { getFileContent, getRepoInfo } from "ghapi";
-import { useFileContent, useFolderContent, useMetadata } from "hooks";
+import {
+  useFileContent,
+  useFolderContent,
+  useMetadata,
+  useRepoTimeline,
+} from "hooks";
 import { useRouter } from "next/router";
 import React, { useMemo } from "react";
 import { CommitCodeDialog } from "./commit-code-dialog";
@@ -128,6 +133,18 @@ export function GeneralBlock(props: GeneralBlockProps) {
     [context, name, type]
   );
 
+  const { data: timelineData } = useRepoTimeline({
+    repo,
+    owner,
+    token,
+    path,
+  });
+
+  let commits = timelineData?.commits || [];
+  let mostRecentCommit = commits.length > 0 ? commits[0].sha : null;
+
+  let isBranchable = sha === "HEAD" || sha === mostRecentCommit;
+
   return (
     <div
       className="flex flex-col"
@@ -184,8 +201,7 @@ export function GeneralBlock(props: GeneralBlockProps) {
           onClose={() => setRequestedFileContent(null)}
           isOpen
           token={token}
-          // todo(Matt) – use actual commit SHA instead of HEAD
-          branchingDisabled={sha !== "HEAD"}
+          branchingDisabled={!isBranchable}
         />
       )}
     </div>

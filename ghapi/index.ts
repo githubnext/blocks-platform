@@ -229,15 +229,14 @@ export async function getRepoTimeline(
 }
 
 export async function getRepoFiles(
-  params: RepoContextWithToken
+  params: RepoContextWithToken & { sha?: string }
 ): Promise<RepoFiles> {
-  const { owner, repo, token } = params;
+  const { owner, repo, sha, token } = params;
   if (!owner || !repo) {
     return [];
   }
 
-  const branch = "HEAD";
-  const url = `https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`;
+  const url = `https://api.github.com/repos/${owner}/${repo}/git/trees/${sha}?recursive=1`;
 
   const fileTreeRes = await fetch(url, {
     headers: {
@@ -316,11 +315,12 @@ export interface CreateBranchParams {
   body?: string;
 }
 
-export type CreateBranchResponse = string;
+type PullsResponse = Endpoints["POST /repos/{owner}/{repo}/pulls"]["response"];
+export type CreateBranchResponse = PullsResponse["data"];
 
 export async function createBranchAndPR(
   params: CreateBranchParams
-): Promise<string> {
+): Promise<CreateBranchResponse> {
   const {
     ref,
     token,
@@ -382,5 +382,5 @@ export async function createBranchAndPR(
     title,
     body,
   });
-  return res.data.html_url;
+  return res.data;
 }

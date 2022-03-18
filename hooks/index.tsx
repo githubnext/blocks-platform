@@ -210,7 +210,7 @@ export function useRepoTimeline(
   });
 }
 
-export function useRepoFiles(params: RepoContextWithToken) {
+export function useRepoFiles(params: RepoContextWithToken & { sha?: string }) {
   return useQuery(["files", params], () => getRepoFiles(params), {
     enabled: Boolean(params.repo) && Boolean(params.owner),
     refetchOnWindowFocus: false,

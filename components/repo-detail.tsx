@@ -104,6 +104,7 @@ export function RepoDetail(props: RepoDetailProps) {
   } = useRepoFiles({
     repo: repo as string,
     owner: owner as string,
+    sha: (fileRef as string) || branch?.commit?.sha || "HEAD",
     token,
   });
 

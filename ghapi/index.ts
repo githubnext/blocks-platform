@@ -195,13 +195,15 @@ export async function getRepoInfoWithContributors(
 }
 
 export async function getRepoTimeline(
-  params: RepoContextWithToken & { path: string }
+  params: RepoContextWithToken & { path: string; sha?: string }
 ): Promise<RepoTimeline> {
-  const { owner, repo, path, token } = params;
+  const { owner, repo, sha, path, token } = params;
 
   const randomQueryParamName = `${Math.random()}`;
 
-  const url = `https://api.github.com/repos/${owner}/${repo}/commits?path=${path}&${randomQueryParamName}=""`;
+  const url = `https://api.github.com/repos/${owner}/${repo}/commits?path=${path}&${randomQueryParamName}=""&sha=${
+    sha || "HEAD"
+  }`;
 
   const commitsRes = await fetch(url, {
     headers: {
@@ -250,6 +252,35 @@ export async function getRepoFiles(
   }
   const files = fileTree.tree;
   return files;
+}
+
+type BranchesResponse =
+  Endpoints["GET /repos/{owner}/{repo}/branches"]["response"];
+export type Branch = BranchesResponse["data"][0];
+
+export async function getBranches(
+  params: RepoContextWithToken
+): Promise<Branch[]> {
+  const { owner, repo, token } = params;
+  if (!owner || !repo) {
+    return [];
+  }
+
+  const url = `https://api.github.com/repos/${owner}/${repo}/branches`;
+
+  const res = await fetch(url, {
+    headers: {
+      Authorization: token && `Bearer ${token}`,
+    },
+  });
+
+  if (res.status !== 200) {
+    const error = await res.json();
+    throw new Error(error.message);
+  }
+
+  const data = await res.json();
+  return data;
 }
 
 export async function getRepoInfo(

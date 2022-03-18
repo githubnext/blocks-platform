@@ -14,6 +14,7 @@ import {
   getFolderContent,
   getRepoInfoWithContributors,
   getRepoFiles,
+  getBranches,
   RepoContext,
   RepoContextWithToken,
   getRepoTimeline,
@@ -197,7 +198,7 @@ export function useRepoInfo(params: RepoContextWithToken) {
 }
 
 export function useRepoTimeline(
-  params: RepoContextWithToken & { path: string },
+  params: RepoContextWithToken & { path: string; sha?: string },
   config?: UseQueryOptions<RepoTimeline, any, any>
 ) {
   return useQuery(["timeline", params], () => getRepoTimeline(params), {
@@ -211,6 +212,14 @@ export function useRepoTimeline(
 
 export function useRepoFiles(params: RepoContextWithToken) {
   return useQuery(["files", params], () => getRepoFiles(params), {
+    enabled: Boolean(params.repo) && Boolean(params.owner),
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
+}
+
+export function useGetBranches(params: RepoContextWithToken) {
+  return useQuery(["branches", params], () => getBranches(params), {
     enabled: Boolean(params.repo) && Boolean(params.owner),
     refetchOnWindowFocus: false,
     retry: false,

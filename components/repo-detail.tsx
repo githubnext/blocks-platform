@@ -2,6 +2,7 @@ import { Box, Button, Link, useTheme } from "@primer/react";
 import { default as NextLink } from "next/link";
 import {
   getBlockKey,
+  useGetBranches,
   useManageBlock,
   useMetadata,
   useRepoFiles,
@@ -20,6 +21,7 @@ import { UpdateCodeModal } from "./UpdateCodeModal";
 import { FileContext, FolderContext } from "@githubnext/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { ScreenFullIcon, ScreenNormalIcon } from "@primer/octicons-react";
+import BranchPicker from "./branch-picker";
 
 const BlockPicker = dynamic(() => import("./block-picker"), { ssr: false });
 
@@ -31,21 +33,55 @@ export function RepoDetail(props: RepoDetailProps) {
   const { token } = props;
   const router = useRouter();
   const { setColorMode } = useTheme();
-  const { repo, owner, path = "", theme, fileRef, mode } = router.query;
+  const {
+    repo,
+    owner,
+    path = "",
+    theme,
+    fileRef,
+    mode,
+    branch: branchName = "main",
+  } = router.query;
   const [isChoosingCustomBlock, setIsChoosingCustomBlock] = useState(false);
   const [requestedMetadata, setRequestedMetadata] = useState(null);
   const isFullscreen = mode === "fullscreen";
   // need this to only animate chrome in on fullscreen mode change, but not on load
+
+  const { data: branches } = useGetBranches({
+    owner: owner as string,
+    repo: repo as string,
+    token,
+  });
+  const branch = useMemo(
+    () => branches?.find((b) => b.name === branchName),
+    [branches, branchName]
+  );
 
   const context = useMemo(
     () => ({
       repo: repo as string,
       owner: owner as string,
       path: path as string,
-      sha: (fileRef as string) || "HEAD",
+      sha: (fileRef as string) || branch?.commit?.sha || "HEAD",
     }),
-    [repo, owner, path, fileRef]
+    [repo, owner, path, fileRef || branch?.commit?.sha]
   );
+
+  const setBranchName = (branchName: string) => {
+    router.push(
+      {
+        pathname: router.pathname,
+        query: {
+          ...router.query,
+          branch: branchName,
+          // clear cached sha and default to latest on branch
+          fileRef: undefined,
+        },
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
 
   useEffect(() => {
     setColorMode(theme === "dark" ? "night" : "day");
@@ -219,7 +255,7 @@ export function RepoDetail(props: RepoDetailProps) {
                 alignItems="center"
                 justifyContent="space-between"
               >
-                <Box display="flex" alignItems="center">
+                <Box display="flex" alignItems="center" className="space-x-2">
                   <BlockPicker
                     blocks={blockOptions}
                     defaultBlock={defaultBlock}
@@ -241,11 +277,15 @@ export function RepoDetail(props: RepoDetailProps) {
                         };
                         setRequestedMetadata(newMetadata);
                       }}
-                      sx={{ ml: 2 }}
                     >
                       Set as default for all users
                     </Button>
                   )}
+                  <BranchPicker
+                    value={branchName}
+                    branches={branches || []}
+                    onChange={setBranchName}
+                  />
                 </Box>
                 <AnimatePresence initial={false}>
                   {isFullscreen && (
@@ -336,7 +376,7 @@ export function RepoDetail(props: RepoDetailProps) {
               exit={{ width: 0, transition: { type: "tween", duration: 0.1 } }}
               className="flex-none hidden lg:block h-full border-l border-gray-200"
             >
-              <ActivityFeed context={context} token={token} />
+              <ActivityFeed context={context} token={token} branch={branch} />
             </motion.div>
           )}
         </AnimatePresence>

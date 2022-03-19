@@ -1,7 +1,6 @@
 import {
   SandpackProvider,
   SandpackPreview,
-  useSandpack,
 } from "@codesandbox/sandpack-react/dist/cjs/index.js";
 import {
   FileContext,
@@ -33,8 +32,7 @@ interface SandboxedBlockProps {
   onRequestUpdateContent: (newContent: string) => void;
   onRequestGitHubData: (
     path: string,
-    params?: Record<string, any>,
-    id?: string
+    params?: Record<string, any>
   ) => Promise<any>;
   onNavigateToPath: (path: string) => void;
 }
@@ -76,30 +74,14 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
   useEffect(() => {
     const onMessage = (event) => {
       if (event.data.id === id.current) {
-        const { data, origin } = event;
-
-        // handle messages from generic block wrapper
-        const currentDomain = window.location.origin;
-        if (origin === currentDomain) {
-          if (data.type === "github-data--response") {
-            const iframe = sandpackWrapper.current?.querySelector("iframe");
-            if (!iframe) return;
-            iframe.contentWindow.postMessage(
-              {
-                type: "github-data--response",
-                ...data,
-              },
-              "*"
-            );
-          }
-          return;
-        }
+        const { data, origin, source } = event;
 
         // handle messages from the sandboxed block
         const originRegex = new RegExp(
           /^https:\/\/\d{1,4}-\d{1,4}-\d{1,4}-sandpack\.codesandbox\.io$/
         );
-        if (!originRegex.test(origin)) return;
+        if (!source || !originRegex.test(origin)) return;
+        const window = source as Window;
         if (data.type === "update-metadata") {
           onUpdateMetadata(
             data.metadata,
@@ -112,7 +94,29 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
         } else if (data.type === "navigate-to-path") {
           onNavigateToPath(data.path);
         } else if (data.type === "github-data--request") {
-          onRequestGitHubData(data.path, data.params, data.id);
+          onRequestGitHubData(data.path, data.params)
+            .then((res) => {
+              window.postMessage(
+                {
+                  type: "github-data--response",
+                  id: id.current,
+                  data: res,
+                },
+                origin
+              );
+            })
+            .catch((e) => {
+              window.postMessage(
+                {
+                  type: "github-data--response",
+                  id: id.current,
+                  // Error is not always serializable
+                  // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm#things_that_dont_work_with_structured_clone
+                  error: e instanceof Error ? e.message : e,
+                },
+                origin
+              );
+            });
         }
       }
     };
@@ -136,11 +140,6 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
       metadata,
     });
 
-    const filesWithConfig = {
-      ...files,
-      "/sandbox.config.json": JSON.stringify({ infiniteLoopProtection: false }),
-    };
-
     return (
       <div ref={sandpackWrapper} className="w-full h-full">
         <SandpackProvider
@@ -148,7 +147,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
           template="react"
           customSetup={{
             dependencies: {},
-            files: filesWithConfig,
+            files,
           }}
           autorun
         >
@@ -204,14 +203,4 @@ const useFetchZip = (block: Block): UseFetchZipResponse => {
     fetchContentForBlock();
   }, [url]);
   return state;
-};
-
-const processBundle = (bundle: string) => {
-  // remove imports from React. This might need tweaking
-  bundle = bundle.replace(
-    /(import)([\w\s\}\{,]{3,30}?)(from\s["']react["'])/g,
-    ""
-  );
-
-  return bundle;
 };

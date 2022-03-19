@@ -1,7 +1,7 @@
 import {
   FileContext,
   FolderContext,
-  onRequestGitHubData as onRequestGitHubDataFetch,
+  onRequestGitHubData,
 } from "@githubnext/utils";
 import { SandboxedBlockWrapper } from "components/sandboxed-block-wrapper";
 import { getFileContent, getRepoInfo } from "ghapi";
@@ -76,23 +76,6 @@ export function GeneralBlock(props: GeneralBlockProps) {
 
   const onRequestUpdateContent = async (newContent: string) => {
     setRequestedFileContent(newContent);
-  };
-
-  const onRequestGitHubData = async (
-    path,
-    params: Record<string, any> = {},
-    id = ""
-  ) => {
-    const data = await onRequestGitHubDataFetch(path, params);
-    window.postMessage(
-      {
-        type: "github-data--response",
-        id,
-        data,
-      },
-      "*"
-    );
-    return data;
   };
 
   const { data: treeData } = useFolderContent(

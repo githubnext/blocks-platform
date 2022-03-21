@@ -1,4 +1,5 @@
 import {
+  QueryKey,
   useMutation,
   UseMutationOptions,
   useQuery,
@@ -15,7 +16,6 @@ import {
   getRepoFiles,
   RepoContext,
   RepoContextWithToken,
-  UseFolderContentParams,
   getRepoTimeline,
   CreateBranchResponse,
   CreateBranchParams,
@@ -23,6 +23,7 @@ import {
 } from "ghapi";
 import { defaultBlocksRepo as exampleBlocksInfo } from "blocks/index";
 import { useRouter } from "next/router";
+import { FolderKeyParams, GenericQueryKey, queryKeys } from "lib/query-keys";
 
 export function useFileContent(
   params: UseFileContentParams,
@@ -50,21 +51,17 @@ export function useFileContent(
 }
 
 export function useFolderContent(
-  params: UseFolderContentParams,
+  params: FolderKeyParams,
   config?: UseQueryOptions<FolderData>
 ) {
-  const { repo, owner, path, fileRef, token } = params;
-
-  return useQuery(
-    ["folder", params],
-    () =>
-      getFolderContent({
-        repo,
-        owner,
-        path,
-        fileRef,
-        token,
-      }),
+  return useQuery<
+    FolderData,
+    any,
+    FolderData,
+    GenericQueryKey<FolderKeyParams>
+  >(
+    queryKeys.folder(params),
+    getFolderContent,
     // @ts-ignore
     {
       ...config,

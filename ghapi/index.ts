@@ -1,4 +1,8 @@
 import { Octokit } from "@octokit/rest";
+import { Endpoints } from "@octokit/types";
+import { Base64 } from "js-base64";
+import { FolderKeyParams, GenericQueryKey } from "lib/query-keys";
+import { QueryFunction } from "react-query";
 export interface RepoContext {
   repo: string;
   owner: string;
@@ -12,11 +16,6 @@ export interface UseFileContentParams extends RepoContextWithToken {
   path: string;
   fileRef?: string;
   cache?: string;
-}
-
-export interface UseFolderContentParams extends RepoContextWithToken {
-  path: string;
-  fileRef?: string;
 }
 
 export interface SearchContext {
@@ -115,10 +114,12 @@ export async function getLatestSha(
   return resObject.commit.sha;
 }
 
-export async function getFolderContent(
-  params: UseFolderContentParams
-): Promise<FolderData> {
-  const { repo, owner, path, fileRef, token } = params;
+export const getFolderContent: QueryFunction<
+  FolderData,
+  GenericQueryKey<FolderKeyParams>
+> = async (ctx) => {
+  let { queryKey } = ctx;
+  const { repo, owner, path, token, fileRef } = queryKey[0].params;
   let branch = fileRef || "HEAD";
 
   const apiUrl = `https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`;
@@ -159,7 +160,7 @@ export async function getFolderContent(
     tree,
     context,
   };
-}
+};
 
 type listRepoFilesResponse =
   Endpoints["GET /repos/{owner}/{repo}/git/trees/{tree_sha}"]["response"];
@@ -250,9 +251,6 @@ export async function getRepoFiles(
   const files = fileTree.tree;
   return files;
 }
-
-import { Endpoints } from "@octokit/types";
-import { Base64 } from "js-base64";
 
 export async function getRepoInfo(
   params: RepoContextWithToken

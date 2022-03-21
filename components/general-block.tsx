@@ -79,14 +79,18 @@ export function GeneralBlock(props: GeneralBlockProps) {
   };
 
   const { data: treeData } = useFolderContent(
-    type === "folder" && {
+    {
       repo: repo,
       owner: owner,
       path: path,
       fileRef: sha,
       token: token as string,
+    },
+    {
+      enabled: type === "folder",
     }
   );
+
   const tree = useMemo(() => treeData?.tree || [], [treeData]);
 
   const { data: fileData } = useFileContent(

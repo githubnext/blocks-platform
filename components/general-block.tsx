@@ -83,7 +83,6 @@ export function GeneralBlock(props: GeneralBlockProps) {
       owner: owner,
       path: path,
       fileRef: sha,
-      token: token as string,
     },
     {
       enabled: type === "folder",

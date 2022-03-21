@@ -4,8 +4,7 @@ import {
   FolderContext,
   RepoFiles,
 } from "@githubnext/utils";
-import { useGetBlocksInfo, useRepoFiles } from "hooks";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import components from "./../blocks";
 
 export interface BundleCode {
@@ -28,8 +27,7 @@ interface ExampleBlockProps {
   onRequestUpdateContent: (newContent: string) => void;
   onRequestGitHubData: (
     path: string,
-    params?: Record<string, any>,
-    id?: string
+    params?: Record<string, any>
   ) => Promise<any>;
   onNavigateToPath: (path: string) => void;
 }

@@ -1,5 +1,6 @@
 import { Octokit } from "@octokit/rest";
 import { Endpoints } from "@octokit/types";
+import axios, { Axios, AxiosInstance } from "axios";
 import { Base64 } from "js-base64";
 import { FolderKeyParams, GenericQueryKey } from "lib/query-keys";
 import { QueryFunction } from "react-query";
@@ -24,6 +25,24 @@ export interface SearchContext {
 
 export interface SearchContextWithToken extends SearchContext {
   token: string;
+}
+
+export function makeGitHubAPIInstance(token) {
+  return axios.create({
+    baseURL: "https://api.github.com",
+    headers: {
+      Authorization: `token ${token}`,
+    },
+  });
+}
+
+export function makeOctokitInstance(token) {
+  return new Octokit({ auth: token });
+}
+
+interface BlocksQueryMeta {
+  ghapi: AxiosInstance;
+  octokit: Octokit;
 }
 
 export async function getFileContent(
@@ -121,15 +140,12 @@ export const getFolderContent: QueryFunction<
   let { queryKey } = ctx;
   const { repo, owner, path, token, fileRef } = queryKey[0].params;
   let branch = fileRef || "HEAD";
+  let meta = ctx.meta as unknown as BlocksQueryMeta;
+  const apiUrl = `repos/${owner}/${repo}/git/trees/${branch}?recursive=1`;
 
-  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`;
+  const res = await meta.ghapi.get<FolderData>(apiUrl);
 
-  const res = await fetch(apiUrl, {
-    headers: {
-      Authorization: token && `token ${token}`,
-    },
-  });
-  const { tree: rawTree } = await res.json();
+  const { tree: rawTree } = res.data;
 
   const files = (rawTree as TreeItem[]).filter((item) => {
     return item.path?.includes(path);

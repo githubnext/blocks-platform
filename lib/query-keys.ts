@@ -5,7 +5,6 @@ export interface FolderKeyParams {
   owner: string;
   path: string;
   fileRef?: string;
-  token: string;
 }
 
 interface InfoKeyParams {

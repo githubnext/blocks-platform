@@ -120,7 +120,6 @@ export const getFolderContent: QueryFunction<
 > = async (ctx) => {
   let { queryKey } = ctx;
   const { repo, owner, path, token, fileRef } = queryKey[0].params;
-  console.log(repo, owner, path, token, fileRef);
   let branch = fileRef || "HEAD";
 
   const apiUrl = `https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`;

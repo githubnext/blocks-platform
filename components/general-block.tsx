@@ -91,8 +91,6 @@ export function GeneralBlock(props: GeneralBlockProps) {
     }
   );
 
-  console.log(treeData);
-
   const tree = useMemo(() => treeData?.tree || [], [treeData]);
 
   const { data: fileData } = useFileContent(

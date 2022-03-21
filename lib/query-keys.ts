@@ -1,9 +1,11 @@
-interface FolderKeyParams {
+export type GenericQueryKey<T> = { scope: string; params: T }[];
+
+export interface FolderKeyParams {
   repo: string;
   owner: string;
   path: string;
   fileRef?: string;
-  sha: string;
+  token: string;
 }
 
 interface InfoKeyParams {
@@ -33,7 +35,7 @@ interface FileKeyParams {
 }
 
 export const queryKeys = {
-  folder: (params: FolderKeyParams) => [{ scope: "folder", params }] as const,
+  folder: (params: FolderKeyParams) => [{ scope: "folder", params }],
   info: (params: InfoKeyParams) => [{ scope: "info", params }] as const,
   timeline: (params: TimelineKeyParams) =>
     [{ scope: "timeline", params }] as const,

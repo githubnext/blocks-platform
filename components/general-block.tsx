@@ -4,7 +4,6 @@ import {
   onRequestGitHubData,
 } from "@githubnext/utils";
 import { SandboxedBlockWrapper } from "components/sandboxed-block-wrapper";
-import { getFileContent, getRepoInfo } from "ghapi";
 import {
   useFileContent,
   useFolderContent,
@@ -207,42 +206,3 @@ export const getMetadataPath = (block, path) =>
   `.github/blocks/${block?.type}/${getBlockKey(block)}/${encodeURIComponent(
     path
   )}.json`;
-
-const fetchGitHubData = async (type, config) => {
-  if (type === "file-content") {
-    const data = await getFileContent({
-      owner: config.owner,
-      repo: config.repo,
-      path: config.path,
-      fileRef: config.fileRef || "HEAD",
-      token: config.token,
-    });
-    return data;
-  } else if (type === "metadata") {
-    try {
-      const res = await getFileContent({
-        owner: config.owner,
-        repo: config.repo,
-        path: getMetadataPath(config.block, config.path),
-        fileRef: "HEAD",
-        cache: new Date().toString(),
-        token: config.token,
-      });
-      const fullMetadata = JSON.parse((res.content || "{}") as string);
-      return fullMetadata || {};
-    } catch (e) {
-      return {};
-    }
-  } else if (type === "repo-info") {
-    try {
-      const res = await getRepoInfo({
-        owner: config.owner,
-        repo: config.repo,
-        token: config.token,
-      });
-      return res;
-    } catch (e) {
-      return {};
-    }
-  }
-};

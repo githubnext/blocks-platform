@@ -5,6 +5,7 @@ import {
   SidebarExpandIcon,
 } from "@primer/octicons-react";
 import { Avatar, Box, IconButton, Label, Text, Timeline } from "@primer/react";
+import { Branch } from "ghapi";
 import { useRepoTimeline } from "hooks";
 import { getRelativeTime } from "lib/date-utils";
 import Link from "next/link";
@@ -13,9 +14,11 @@ import { useState } from "react";
 
 export const ActivityFeed = ({
   context,
+  branch,
   token,
 }: {
   context: Omit<FileContext, "file">;
+  branch?: Branch;
   token: string;
 }) => {
   const { owner, repo, path } = context;
@@ -26,6 +29,7 @@ export const ActivityFeed = ({
     repo: repo,
     owner: owner,
     token,
+    sha: branch?.commit?.sha,
     path: path,
   });
 

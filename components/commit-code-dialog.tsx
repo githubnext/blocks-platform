@@ -16,6 +16,7 @@ import {
   TextInput,
 } from "@primer/react";
 import { useCreateBranchAndPR, useUpdateFileContents } from "hooks";
+import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Diff, Hunk, parseDiff } from "react-diff-view";
 import "react-diff-view/style/index.css";
@@ -53,6 +54,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
     token,
     branchingDisabled,
   } = props;
+  const router = useRouter();
   const queryClient = useQueryClient();
 
   const {
@@ -72,12 +74,31 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
     status: createBranchStatus,
     error: createBranchError,
   } = useCreateBranchAndPR({
-    onSuccess: (prUrl) => {
-      window.open(prUrl, "_blank");
+    onSuccess: async (res) => {
+      window.open(res.html_url, "_blank");
       onClose();
       setTitle("");
       setBody("");
       setCommitType("main");
+      await queryClient.refetchQueries([
+        "branches",
+        {
+          owner,
+          repo,
+        },
+      ]);
+      router.push(
+        {
+          pathname: router.pathname,
+          query: {
+            ...router.query,
+            branch: branchName,
+            fileRef: res.head.sha,
+          },
+        },
+        null,
+        { shallow: true }
+      );
     },
   });
 

@@ -119,7 +119,6 @@ const Folder = ({
           pathname: router.pathname,
           query: {
             ...query,
-            fileRef: undefined,
             path,
           },
         }}
@@ -201,7 +200,6 @@ const File = ({
         pathname: router.pathname,
         query: {
           ...query,
-          fileRef: undefined,
           path,
         },
       }}

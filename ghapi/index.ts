@@ -1,6 +1,6 @@
 import { Octokit } from "@octokit/rest";
 import { Endpoints } from "@octokit/types";
-import axios, { Axios, AxiosInstance } from "axios";
+import axios, { AxiosInstance } from "axios";
 import { Base64 } from "js-base64";
 import { FolderKeyParams, GenericQueryKey } from "lib/query-keys";
 import { QueryFunction } from "react-query";

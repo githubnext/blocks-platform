@@ -207,6 +207,9 @@ export function RepoDetail(props: RepoDetailProps) {
                 description={repoInfo?.description}
                 // @ts-ignore
                 contributors={repoInfo?.contributors}
+                branchName={branchName as string}
+                branches={branches || []}
+                onChangeBranch={setBranchName}
               />
             </motion.div>
           </motion.div>
@@ -282,11 +285,6 @@ export function RepoDetail(props: RepoDetailProps) {
                       Set as default for all users
                     </Button>
                   )}
-                  <BranchPicker
-                    value={branchName}
-                    branches={branches || []}
-                    onChange={setBranchName}
-                  />
                 </Box>
                 <AnimatePresence initial={false}>
                   {isFullscreen && (

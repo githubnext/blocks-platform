@@ -25,6 +25,7 @@ import {
   ShieldIcon,
   StarIcon,
 } from "@primer/octicons-react";
+import BranchPicker from "./branch-picker";
 
 const repoHeaderLinks = [
   ["Code", CodeIcon],
@@ -49,11 +50,17 @@ export const RepoHeader = ({
   repo,
   description,
   contributors = [],
+  branchName = "",
+  branches = [],
+  onChangeBranch,
 }: {
   owner: string;
   repo: string;
   description: string;
   contributors: any[];
+  branchName?: string;
+  branches?: any[];
+  onChangeBranch: (branchName: string) => void;
 }) => {
   return (
     <Box
@@ -97,6 +104,13 @@ export const RepoHeader = ({
           >
             {repo}
           </Link>
+          <Box ml={2}>
+            <BranchPicker
+              value={branchName}
+              branches={branches}
+              onChange={onChangeBranch}
+            />
+          </Box>
           <Box ml={2}>
             <AvatarStack>
               {contributors?.map((contributor) => (

@@ -80,23 +80,25 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
       setTitle("");
       setBody("");
       setCommitType("main");
-      await queryClient.invalidateQueries("branches");
-      // wait one second to make sure endpoints are updated before we switch branches
-      // this isn't bulletproof, but works for now!
-      setTimeout(() => {
-        router.push(
-          {
-            pathname: router.pathname,
-            query: {
-              ...router.query,
-              branch: branchName,
-              fileRef: res.head.sha,
-            },
+      await queryClient.refetchQueries([
+        "branches",
+        {
+          owner,
+          repo,
+        },
+      ]);
+      router.push(
+        {
+          pathname: router.pathname,
+          query: {
+            ...router.query,
+            branch: branchName,
+            fileRef: res.head.sha,
           },
-          null,
-          { shallow: true }
-        );
-      }, 2000);
+        },
+        null,
+        { shallow: true }
+      );
     },
   });
 

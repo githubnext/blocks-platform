@@ -30,13 +30,19 @@ export interface FileKeyParams {
   fileRef?: string;
 }
 
+export interface BranchesKeyParams {
+  repo: string;
+  owner: string;
+}
+
 type keyNames =
   | "folder"
   | "info"
   | "timeline"
   | "files"
   | "file"
-  | "blocksInfo";
+  | "blocksInfo"
+  | "branches";
 export type GenericQueryKey<T> = [key: keyNames, params: T];
 
 export const queryKeys = {
@@ -55,4 +61,8 @@ export const queryKeys = {
   ],
   blocksInfo: () => ["blocksInfo"],
   file: (params: FileKeyParams): ["file", FileKeyParams] => ["file", params],
+  branches: (params: BranchesKeyParams): ["branches", BranchesKeyParams] => [
+    "branches",
+    params,
+  ],
 };

@@ -3,6 +3,7 @@ import { Endpoints } from "@octokit/types";
 import axios, { AxiosInstance } from "axios";
 import { Base64 } from "js-base64";
 import {
+  BranchesKeyParams,
   FileKeyParams,
   FilesKeyParams,
   FolderKeyParams,
@@ -249,30 +250,19 @@ type BranchesResponse =
   Endpoints["GET /repos/{owner}/{repo}/branches"]["response"];
 export type Branch = BranchesResponse["data"][0];
 
-export async function getBranches(
-  params: RepoContextWithToken
-): Promise<Branch[]> {
-  const { owner, repo, token } = params;
-  if (!owner || !repo) {
-    return [];
-  }
+export const getBranches: QueryFunction<
+  Branch[],
+  GenericQueryKey<BranchesKeyParams>
+> = async (ctx) => {
+  let params = ctx.queryKey[1];
+  const { owner, repo } = params;
+  let meta = ctx.meta as unknown as BlocksQueryMeta;
 
-  const url = `https://api.github.com/repos/${owner}/${repo}/branches`;
+  const url = `repos/${owner}/${repo}/branches`;
 
-  const res = await fetch(url, {
-    headers: {
-      Authorization: token && `Bearer ${token}`,
-    },
-  });
-
-  if (res.status !== 200) {
-    const error = await res.json();
-    throw new Error(error.message);
-  }
-
-  const data = await res.json();
-  return data;
-}
+  const res = await meta.ghapi(url);
+  return res.data;
+};
 
 export async function getRepoInfo(
   params: RepoContextWithToken

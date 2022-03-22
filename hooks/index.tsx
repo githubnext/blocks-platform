@@ -2,6 +2,7 @@ import { RepoFiles } from "@githubnext/utils";
 import { Octokit } from "@octokit/rest";
 import { defaultBlocksRepo as exampleBlocksInfo } from "blocks/index";
 import {
+  Branch,
   createBranchAndPR,
   CreateBranchParams,
   CreateBranchResponse,
@@ -16,6 +17,7 @@ import {
 } from "ghapi";
 import { Base64 } from "js-base64";
 import {
+  BranchesKeyParams,
   FileKeyParams,
   FilesKeyParams,
   FolderKeyParams,
@@ -229,12 +231,16 @@ export function useRepoFiles(params: FilesKeyParams) {
   );
 }
 
-export function useGetBranches(params: RepoContextWithToken) {
-  return useQuery(["branches", params], () => getBranches(params), {
-    enabled: Boolean(params.repo) && Boolean(params.owner),
-    refetchOnWindowFocus: false,
-    retry: false,
-  });
+export function useGetBranches(params: BranchesKeyParams) {
+  return useQuery<Branch[], any, Branch[], GenericQueryKey<BranchesKeyParams>>(
+    queryKeys.branches(params),
+    getBranches,
+    {
+      enabled: Boolean(params.repo) && Boolean(params.owner),
+      refetchOnWindowFocus: false,
+      retry: false,
+    }
+  );
 }
 
 interface BlocksInfo {

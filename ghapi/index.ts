@@ -2,7 +2,15 @@ import { Octokit } from "@octokit/rest";
 import { Endpoints } from "@octokit/types";
 import axios, { AxiosInstance } from "axios";
 import { Base64 } from "js-base64";
-import { FolderKeyParams, GenericQueryKey } from "lib/query-keys";
+import {
+  BranchesKeyParams,
+  FileKeyParams,
+  FilesKeyParams,
+  FolderKeyParams,
+  GenericQueryKey,
+  InfoKeyParams,
+  TimelineKeyParams,
+} from "lib/query-keys";
 import { QueryFunction } from "react-query";
 export interface RepoContext {
   repo: string;
@@ -45,13 +53,15 @@ interface BlocksQueryMeta {
   octokit: Octokit;
 }
 
-export async function getFileContent(
-  params: UseFileContentParams
-): Promise<FileData> {
-  const { repo, owner, path, fileRef, token } = params;
-
+export const getFileContent: QueryFunction<
+  FileData,
+  GenericQueryKey<FileKeyParams>
+> = async (ctx) => {
+  let meta = ctx.meta as unknown as BlocksQueryMeta;
+  let params = ctx.queryKey[1];
+  const { path, owner, repo, fileRef = "main" } = params;
   const query = fileRef && fileRef !== "HEAD" ? `?ref=${fileRef}` : "";
-  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}${query}`;
+  const apiUrl = `repos/${owner}/${repo}/contents/${path}${query}`;
 
   const file = path.split("/").pop() || "";
 
@@ -65,80 +75,29 @@ export async function getFileContent(
     username: "mona",
   };
 
-  const res = await fetch(apiUrl, {
-    headers: {
-      Authorization: token && `token ${token}`,
-    },
-  });
+  const res = await meta.ghapi(apiUrl);
   if (res.status !== 200) {
     if (res.status === 404) {
       throw new Error(`File not found: ${owner}/${repo}: ${path}`);
     } else {
-      throw new Error(
-        `Error fetching file: ${owner}/${repo}: ${path}\n${await res.text()}`
-      );
+      throw new Error(`Error fetching file: ${owner}/${repo}: ${path}`);
     }
   }
-
-  const resObject = await res.json();
-  const encodedContent = resObject.content;
+  const encodedContent = res.data.content;
   const content = Buffer.from(encodedContent, "base64").toString("utf8");
 
   return {
     content,
     context,
   };
-}
-
-export async function getMainBranch(
-  params: RepoContextWithToken
-): Promise<string> {
-  const { repo, owner, token } = params;
-
-  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/branches/main`;
-
-  const res = await fetch(apiUrl, {
-    headers: {
-      Authorization: token && `token ${token}`,
-    },
-  });
-  if (res.status !== 200) {
-    throw new Error(
-      `Error fetching main branch: ${owner}/${repo}\n${await res.text()}`
-    );
-  }
-
-  const resObject = await res.json();
-  return resObject.name;
-}
-export async function getLatestSha(
-  params: RepoContextWithToken
-): Promise<string> {
-  const { repo, owner, token } = params;
-
-  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/branches/main`;
-
-  const res = await fetch(apiUrl, {
-    headers: {
-      Authorization: token && `token ${token}`,
-    },
-  });
-  if (res.status !== 200) {
-    throw new Error(
-      `Error fetching main branch: ${owner}/${repo}\n${await res.text()}`
-    );
-  }
-
-  const resObject = await res.json();
-  return resObject.commit.sha;
-}
+};
 
 export const getFolderContent: QueryFunction<
   FolderData,
   GenericQueryKey<FolderKeyParams>
 > = async (ctx) => {
   let { queryKey } = ctx;
-  const { repo, owner, path, fileRef } = queryKey[0].params;
+  const { repo, owner, path, fileRef } = queryKey[1];
   let branch = fileRef || "HEAD";
   let meta = ctx.meta as unknown as BlocksQueryMeta;
   const apiUrl = `repos/${owner}/${repo}/git/trees/${branch}?recursive=1`;
@@ -182,58 +141,39 @@ type listRepoFilesResponse =
   Endpoints["GET /repos/{owner}/{repo}/git/trees/{tree_sha}"]["response"];
 export type RepoFiles = listRepoFilesResponse["data"]["tree"];
 
-export async function getRepoInfoWithContributors(
-  params: RepoContextWithToken
-): Promise<RepoInfo> {
-  const { owner, repo, token } = params;
-  const url = `https://api.github.com/repos/${owner}/${repo}`;
-  const res = await fetch(url, {
-    headers: {
-      Authorization: token && `token ${token}`,
-    },
-  });
-  if (res.status !== 200) {
-    const error = await res.json();
-    throw new Error(error.message);
-  }
-
-  const data = await res.json();
+export const getRepoInfoWithContributors: QueryFunction<
+  RepoInfo,
+  GenericQueryKey<InfoKeyParams>
+> = async (ctx) => {
+  let params = ctx.queryKey[1];
+  const { owner, repo } = params;
+  let meta = ctx.meta as unknown as BlocksQueryMeta;
+  const url = `repos/${owner}/${repo}`;
+  const repoInfoRes = await meta.ghapi.get(url);
 
   const contributorsUrl = `${url}/contributors`;
-  const contributorsRes = await fetch(contributorsUrl, {
-    headers: {
-      Authorization: token && `token ${token}`,
-    },
-  });
-  const contributors = await contributorsRes.json();
+  const contributorsRes = await meta.ghapi.get(contributorsUrl);
 
-  return { ...data, contributors };
-}
+  return { ...repoInfoRes.data, contributors: contributorsRes.data };
+};
 
-export async function getRepoTimeline(
-  params: RepoContextWithToken & { path: string; sha?: string }
-): Promise<RepoTimeline> {
-  const { owner, repo, sha, path, token } = params;
+export const getRepoTimeline: QueryFunction<
+  RepoTimeline,
+  GenericQueryKey<TimelineKeyParams>
+> = async (ctx) => {
+  let params = ctx.queryKey[1];
+  let meta = ctx.meta as unknown as BlocksQueryMeta;
+  const { owner, repo, sha, path } = params;
 
   const randomQueryParamName = `${Math.random()}`;
 
-  const url = `https://api.github.com/repos/${owner}/${repo}/commits?path=${path}&${randomQueryParamName}=""&sha=${
+  const url = `repos/${owner}/${repo}/commits?path=${path}&${randomQueryParamName}=""&sha=${
     sha || "HEAD"
   }`;
 
-  const commitsRes = await fetch(url, {
-    headers: {
-      Authorization: token && `token ${token}`,
-    },
-  });
-  const data = await commitsRes.json();
+  const commitsRes = await meta.ghapi(url);
 
-  if (commitsRes.status !== 200) {
-    const error = await commitsRes.json();
-    throw new Error(error.message);
-  }
-
-  const commits = data.map((commit) => ({
+  const commits = commitsRes.data.map((commit) => ({
     date: commit.commit.author.date,
     username: commit.author?.login,
     message: commit.commit.message,
@@ -242,83 +182,44 @@ export async function getRepoTimeline(
   }));
 
   return { commits };
-}
+};
 
-export async function getRepoFiles(
-  params: RepoContextWithToken & { sha?: string }
-): Promise<RepoFiles> {
-  const { owner, repo, sha, token } = params;
+export const getRepoFiles: QueryFunction<
+  RepoFiles,
+  GenericQueryKey<FilesKeyParams>
+> = async (ctx) => {
+  let params = ctx.queryKey[1];
+  let meta = ctx.meta as unknown as BlocksQueryMeta;
+  const { owner, repo, sha } = params;
   if (!owner || !repo) {
     return [];
   }
 
-  const url = `https://api.github.com/repos/${owner}/${repo}/git/trees/${sha}?recursive=1`;
+  const url = `repos/${owner}/${repo}/git/trees/${sha}?recursive=1`;
 
-  const fileTreeRes = await fetch(url, {
-    headers: {
-      Authorization: token && `Bearer ${token}`,
-    },
-  });
-  const fileTree = await fileTreeRes.json();
+  const fileTreeRes = await meta.ghapi(url);
 
-  if (fileTreeRes.status !== 200) {
-    const error = await fileTreeRes.json();
-    throw new Error(error.message);
-  }
-  const files = fileTree.tree;
+  const files = fileTreeRes.data.tree;
   return files;
-}
+};
 
 type BranchesResponse =
   Endpoints["GET /repos/{owner}/{repo}/branches"]["response"];
 export type Branch = BranchesResponse["data"][0];
 
-export async function getBranches(
-  params: RepoContextWithToken
-): Promise<Branch[]> {
-  const { owner, repo, token } = params;
-  if (!owner || !repo) {
-    return [];
-  }
+export const getBranches: QueryFunction<
+  Branch[],
+  GenericQueryKey<BranchesKeyParams>
+> = async (ctx) => {
+  let params = ctx.queryKey[1];
+  const { owner, repo } = params;
+  let meta = ctx.meta as unknown as BlocksQueryMeta;
 
-  const url = `https://api.github.com/repos/${owner}/${repo}/branches`;
+  const url = `repos/${owner}/${repo}/branches`;
 
-  const res = await fetch(url, {
-    headers: {
-      Authorization: token && `Bearer ${token}`,
-    },
-  });
-
-  if (res.status !== 200) {
-    const error = await res.json();
-    throw new Error(error.message);
-  }
-
-  const data = await res.json();
-  return data;
-}
-
-export async function getRepoInfo(
-  params: RepoContextWithToken
-): Promise<string> {
-  const { repo, owner, token } = params;
-
-  const apiUrl = `https://api.github.com/repos/${owner}/${repo}`;
-
-  const res = await fetch(apiUrl, {
-    headers: {
-      Authorization: token && `token ${token}`,
-    },
-  });
-  if (res.status !== 200) {
-    throw new Error(
-      `Error fetching repo info: ${owner}/${repo}\n${await res.text()}`
-    );
-  }
-
-  const resObject = await res.json();
-  return resObject;
-}
+  const res = await meta.ghapi(url);
+  return res.data;
+};
 
 export interface CreateBranchParams {
   ref: string;
@@ -400,3 +301,24 @@ export async function createBranchAndPR(
   });
   return res.data;
 }
+
+export interface RepoSearchResult {
+  id: string;
+  text: string;
+}
+
+export const searchRepos: QueryFunction<RepoSearchResult[]> = async (ctx) => {
+  let query = ctx.queryKey[1];
+  let meta = ctx.meta as unknown as BlocksQueryMeta;
+  const url = `search/repositories?q=${query}+in:name&sort=stars&order=desc&per_page=10`;
+
+  const res = await meta.ghapi(url);
+  const { items: searchItems } = res.data;
+  const data = (searchItems as RepoItem[]).map((item) => {
+    return {
+      text: item.full_name,
+      id: item.full_name,
+    };
+  });
+  return data;
+};

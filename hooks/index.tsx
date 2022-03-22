@@ -1,47 +1,50 @@
+import { RepoFiles } from "@githubnext/utils";
+import { Octokit } from "@octokit/rest";
+import { defaultBlocksRepo as exampleBlocksInfo } from "blocks/index";
 import {
-  QueryKey,
+  Branch,
+  createBranchAndPR,
+  CreateBranchParams,
+  CreateBranchResponse,
+  getBranches,
+  getFileContent,
+  getFolderContent,
+  getRepoFiles,
+  getRepoInfoWithContributors,
+  getRepoTimeline,
+  RepoContext,
+  RepoSearchResult,
+  searchRepos,
+} from "ghapi";
+import { Base64 } from "js-base64";
+import {
+  BranchesKeyParams,
+  FileKeyParams,
+  FilesKeyParams,
+  FolderKeyParams,
+  GenericQueryKey,
+  InfoKeyParams,
+  QueryKeyMap,
+  TimelineKeyParams,
+} from "lib/query-keys";
+import { useRouter } from "next/router";
+import { useCallback, useEffect, useState } from "react";
+import {
   useMutation,
   UseMutationOptions,
   useQuery,
   UseQueryOptions,
 } from "react-query";
-import { Octokit } from "@octokit/rest";
-import { Base64 } from "js-base64";
-import { useCallback, useEffect, useState } from "react";
-import {
-  UseFileContentParams,
-  getFileContent,
-  getFolderContent,
-  getRepoInfoWithContributors,
-  getRepoFiles,
-  getBranches,
-  RepoContext,
-  RepoContextWithToken,
-  getRepoTimeline,
-  CreateBranchResponse,
-  CreateBranchParams,
-  createBranchAndPR,
-} from "ghapi";
-import { defaultBlocksRepo as exampleBlocksInfo } from "blocks/index";
-import { useRouter } from "next/router";
-import { FolderKeyParams, GenericQueryKey, queryKeys } from "lib/query-keys";
 
 export function useFileContent(
-  params: UseFileContentParams,
-  config?: UseQueryOptions<any>
+  params: FileKeyParams,
+  config?: UseQueryOptions<FileData>
 ) {
-  const { repo, owner, path, fileRef = "main", token } = params;
+  const { repo, owner, path } = params;
 
-  return useQuery(
-    ["file", params],
-    () =>
-      getFileContent({
-        repo,
-        owner,
-        path,
-        fileRef,
-        token,
-      }),
+  return useQuery<FileData, any, FileData, GenericQueryKey<FileKeyParams>>(
+    QueryKeyMap.file.factory(params),
+    getFileContent,
     {
       enabled: Boolean(repo) && Boolean(owner) && Boolean(path),
       refetchOnWindowFocus: false,
@@ -60,16 +63,11 @@ export function useFolderContent(
     any,
     FolderData,
     GenericQueryKey<FolderKeyParams>
-  >(
-    queryKeys.folder(params),
-    getFolderContent,
-    // @ts-ignore
-    {
-      ...config,
-      retry: false,
-      refetchOnWindowFocus: false,
-    }
-  );
+  >(QueryKeyMap.folder.factory(params), getFolderContent, {
+    ...config,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
 }
 
 interface UseUpdateFileContentParams extends RepoContext {
@@ -105,7 +103,7 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
   }
 
   try {
-    await octokit.repos.createOrUpdateFileContents({
+    const res = await octokit.repos.createOrUpdateFileContents({
       owner: params.owner,
       repo: params.repo,
       path: params.path,
@@ -113,6 +111,7 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
       content: contentEncoded,
       sha: sha,
     });
+    return res.data.commit.sha;
   } catch (e) {}
 }
 
@@ -140,7 +139,6 @@ export function useMetadata({
       repo,
       owner,
       path: metadataPath,
-      token,
     },
     {
       refetchOnWindowFocus: false,
@@ -188,20 +186,28 @@ export function useMetadata({
   };
 }
 
-export function useRepoInfo(params: RepoContextWithToken) {
-  return useQuery(["info", params], () => getRepoInfoWithContributors(params), {
-    enabled:
-      Boolean(params.repo) && Boolean(params.owner) && Boolean(params.token),
-    refetchOnWindowFocus: false,
-    retry: false,
-  });
+export function useRepoInfo(params: InfoKeyParams) {
+  return useQuery<RepoInfo, any, RepoInfo, GenericQueryKey<InfoKeyParams>>(
+    QueryKeyMap.info.factory(params),
+    getRepoInfoWithContributors,
+    {
+      enabled: Boolean(params.repo) && Boolean(params.owner),
+      refetchOnWindowFocus: false,
+      retry: false,
+    }
+  );
 }
 
 export function useRepoTimeline(
-  params: RepoContextWithToken & { path: string; sha?: string },
-  config?: UseQueryOptions<RepoTimeline, any, any>
+  params: TimelineKeyParams,
+  config?: UseQueryOptions<RepoTimeline>
 ) {
-  return useQuery(["timeline", params], () => getRepoTimeline(params), {
+  return useQuery<
+    RepoTimeline,
+    any,
+    RepoTimeline,
+    GenericQueryKey<TimelineKeyParams>
+  >(QueryKeyMap.timeline.factory(params), getRepoTimeline, {
     cacheTime: 0,
     enabled: Boolean(params.repo) && Boolean(params.owner),
     refetchOnWindowFocus: false,
@@ -210,20 +216,28 @@ export function useRepoTimeline(
   });
 }
 
-export function useRepoFiles(params: RepoContextWithToken & { sha?: string }) {
-  return useQuery(["files", params], () => getRepoFiles(params), {
-    enabled: Boolean(params.repo) && Boolean(params.owner),
-    refetchOnWindowFocus: false,
-    retry: false,
-  });
+export function useRepoFiles(params: FilesKeyParams) {
+  return useQuery<RepoFiles, any, RepoFiles, GenericQueryKey<FilesKeyParams>>(
+    QueryKeyMap.files.factory(params),
+    getRepoFiles,
+    {
+      enabled: Boolean(params.repo) && Boolean(params.owner),
+      refetchOnWindowFocus: false,
+      retry: false,
+    }
+  );
 }
 
-export function useGetBranches(params: RepoContextWithToken) {
-  return useQuery(["branches", params], () => getBranches(params), {
-    enabled: Boolean(params.repo) && Boolean(params.owner),
-    refetchOnWindowFocus: false,
-    retry: false,
-  });
+export function useGetBranches(params: BranchesKeyParams) {
+  return useQuery<Branch[], any, Branch[], GenericQueryKey<BranchesKeyParams>>(
+    QueryKeyMap.branches.factory(params),
+    getBranches,
+    {
+      enabled: Boolean(params.repo) && Boolean(params.owner),
+      refetchOnWindowFocus: false,
+      retry: false,
+    }
+  );
 }
 
 interface BlocksInfo {
@@ -250,7 +264,7 @@ interface BlocksInfo {
 
 export function useGetBlocksInfo() {
   return useQuery<BlocksInfo[]>(
-    ["blocks-info"],
+    QueryKeyMap.blocksInfo.factory(),
     () => {
       const url = `${process.env.NEXT_PUBLIC_MARKETPLACE_URL}/api/blocks`;
       return fetch(url).then((res) => res.json());
@@ -385,4 +399,15 @@ export function useCreateBranchAndPR(
   config?: UseMutationOptions<CreateBranchResponse, any, CreateBranchParams>
 ) {
   return useMutation(createBranchAndPR, config);
+}
+
+export function useSearchRepos(
+  query: string,
+  config?: UseQueryOptions<RepoSearchResult[]>
+) {
+  return useQuery<RepoSearchResult[], any, RepoSearchResult[]>(
+    QueryKeyMap.searchRepos.factory(query),
+    searchRepos,
+    config
+  );
 }

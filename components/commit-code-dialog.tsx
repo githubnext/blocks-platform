@@ -16,6 +16,7 @@ import {
   TextInput,
 } from "@primer/react";
 import { useCreateBranchAndPR, useUpdateFileContents } from "hooks";
+import { QueryKeyMap } from "lib/query-keys";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Diff, Hunk, parseDiff } from "react-diff-view";
@@ -62,10 +63,22 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
     status: updateContentsStatus,
     error: updateContentsError,
   } = useUpdateFileContents({
-    onSuccess: async () => {
+    onSuccess: async (newSha) => {
       onClose();
-      await queryClient.invalidateQueries("file");
-      await queryClient.invalidateQueries("timeline");
+      await queryClient.invalidateQueries(QueryKeyMap.file.key);
+      await queryClient.invalidateQueries(QueryKeyMap.timeline.key);
+
+      router.push(
+        {
+          pathname: router.pathname,
+          query: {
+            ...router.query,
+            fileRef: newSha,
+          },
+        },
+        null,
+        { shallow: true }
+      );
     },
   });
 
@@ -81,11 +94,8 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
       setBody("");
       setCommitType("main");
       await queryClient.refetchQueries([
-        "branches",
-        {
-          owner,
-          repo,
-        },
+        QueryKeyMap.branches.key,
+        { owner, repo },
       ]);
       router.push(
         {

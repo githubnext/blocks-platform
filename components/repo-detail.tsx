@@ -21,7 +21,6 @@ import { UpdateCodeModal } from "./UpdateCodeModal";
 import { FileContext, FolderContext } from "@githubnext/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { ScreenFullIcon, ScreenNormalIcon } from "@primer/octicons-react";
-import BranchPicker from "./branch-picker";
 
 const BlockPicker = dynamic(() => import("./block-picker"), { ssr: false });
 
@@ -50,7 +49,6 @@ export function RepoDetail(props: RepoDetailProps) {
   const { data: branches } = useGetBranches({
     owner: owner as string,
     repo: repo as string,
-    token,
   });
   const branch = useMemo(
     () => branches?.find((b) => b.name === branchName),
@@ -62,9 +60,9 @@ export function RepoDetail(props: RepoDetailProps) {
       repo: repo as string,
       owner: owner as string,
       path: path as string,
-      sha: (fileRef as string) || branch?.commit?.sha || "HEAD",
+      sha: (fileRef as string) || "HEAD",
     }),
-    [repo, owner, path, fileRef || branch?.commit?.sha]
+    [repo, owner, path, fileRef]
   );
 
   const setBranchName = (branchName: string) => {
@@ -94,7 +92,6 @@ export function RepoDetail(props: RepoDetailProps) {
   } = useRepoInfo({
     repo: repo as string,
     owner: owner as string,
-    token,
   });
 
   const {
@@ -104,8 +101,7 @@ export function RepoDetail(props: RepoDetailProps) {
   } = useRepoFiles({
     repo: repo as string,
     owner: owner as string,
-    sha: (fileRef as string) || branch?.commit?.sha || "HEAD",
-    token,
+    sha: branch?.name || "HEAD",
   });
 
   const isFolder =
@@ -199,7 +195,7 @@ export function RepoDetail(props: RepoDetailProps) {
                 transition: { type: "tween", duration: 0, delay: 0.1 },
               }}
             >
-              <GitHubHeader token={token} />
+              <GitHubHeader />
               <RepoHeader
                 owner={owner as string}
                 repo={repo as string}
@@ -356,6 +352,7 @@ export function RepoDetail(props: RepoDetailProps) {
               theme,
               block,
               token,
+              branchName,
             }}
             // @ts-ignore
             context={context}
@@ -375,7 +372,7 @@ export function RepoDetail(props: RepoDetailProps) {
               exit={{ width: 0, transition: { type: "tween", duration: 0.1 } }}
               className="flex-none hidden lg:block h-full border-l border-gray-200"
             >
-              <ActivityFeed context={context} token={token} branch={branch} />
+              <ActivityFeed context={context} branch={branch} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -409,6 +406,7 @@ function BlockRender({
   theme,
   block,
   token,
+  branchName,
 }: {
   isChoosingCustomBlock: boolean;
   allBlocksInfo: Block[];
@@ -422,6 +420,7 @@ function BlockRender({
   theme: string;
   block: Block;
   token: string;
+  branchName: string;
 }) {
   if (isChoosingCustomBlock)
     return (
@@ -447,6 +446,7 @@ function BlockRender({
       theme={(theme as string) || "light"}
       block={block}
       token={token}
+      branchName={branchName}
     />
   );
 }

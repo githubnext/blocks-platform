@@ -36,37 +36,53 @@ export interface BranchesKeyParams {
 }
 
 export const QueryKeyMap = {
-  folder: "folder",
-  info: "info",
-  timeline: "timeline",
-  files: "files",
-  file: "file",
-  blocksInfo: "blocksInfo",
-  branches: "branches",
+  folder: {
+    key: "folder",
+    factory: (params: FolderKeyParams): ["folder", FolderKeyParams] => [
+      "folder",
+      params,
+    ],
+  },
+  info: {
+    key: "info",
+    factory: (params: InfoKeyParams): ["info", InfoKeyParams] => [
+      "info",
+      params,
+    ],
+  },
+  timeline: {
+    key: "timeline",
+    factory: (params: TimelineKeyParams): ["timeline", TimelineKeyParams] => [
+      "timeline",
+      params,
+    ],
+  },
+  files: {
+    key: "files",
+    factory: (params: FilesKeyParams): ["files", FilesKeyParams] => [
+      "files",
+      params,
+    ],
+  },
+  file: {
+    key: "file",
+    factory: (params: FileKeyParams): ["file", FileKeyParams] => [
+      "file",
+      params,
+    ],
+  },
+  blocksInfo: {
+    key: "blocksInfo",
+    factory: () => ["blocksInfo"],
+  },
+  branches: {
+    key: "branches",
+    factory: (params: BranchesKeyParams): ["branches", BranchesKeyParams] => [
+      "branches",
+      params,
+    ],
+  },
 } as const;
 
 type KeyName = keyof typeof QueryKeyMap;
-
 export type GenericQueryKey<T> = [key: KeyName, params: T];
-
-export const queryKeys = {
-  folder: (params: FolderKeyParams): ["folder", FolderKeyParams] => [
-    "folder",
-    params,
-  ],
-  info: (params: InfoKeyParams): ["info", InfoKeyParams] => ["info", params],
-  timeline: (params: TimelineKeyParams): ["timeline", TimelineKeyParams] => [
-    "timeline",
-    params,
-  ],
-  files: (params: FilesKeyParams): ["files", FilesKeyParams] => [
-    "files",
-    params,
-  ],
-  blocksInfo: () => ["blocksInfo"],
-  file: (params: FileKeyParams): ["file", FileKeyParams] => ["file", params],
-  branches: (params: BranchesKeyParams): ["branches", BranchesKeyParams] => [
-    "branches",
-    params,
-  ],
-};

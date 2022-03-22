@@ -13,7 +13,6 @@ import {
   getRepoInfoWithContributors,
   getRepoTimeline,
   RepoContext,
-  RepoContextWithToken,
 } from "ghapi";
 import { Base64 } from "js-base64";
 import {
@@ -23,7 +22,7 @@ import {
   FolderKeyParams,
   GenericQueryKey,
   InfoKeyParams,
-  queryKeys,
+  QueryKeyMap,
   TimelineKeyParams,
 } from "lib/query-keys";
 import { useRouter } from "next/router";
@@ -42,7 +41,7 @@ export function useFileContent(
   const { repo, owner, path } = params;
 
   return useQuery<FileData, any, FileData, GenericQueryKey<FileKeyParams>>(
-    queryKeys.file(params),
+    QueryKeyMap.file.factory(params),
     getFileContent,
     {
       enabled: Boolean(repo) && Boolean(owner) && Boolean(path),
@@ -63,7 +62,7 @@ export function useFolderContent(
     FolderData,
     GenericQueryKey<FolderKeyParams>
   >(
-    queryKeys.folder(params),
+    QueryKeyMap.folder.factory(params),
     getFolderContent,
     // @ts-ignore
     {
@@ -191,7 +190,7 @@ export function useMetadata({
 
 export function useRepoInfo(params: InfoKeyParams) {
   return useQuery<RepoInfo, any, RepoInfo, GenericQueryKey<InfoKeyParams>>(
-    queryKeys.info(params),
+    QueryKeyMap.info.factory(params),
     getRepoInfoWithContributors,
     {
       enabled: Boolean(params.repo) && Boolean(params.owner),
@@ -210,7 +209,7 @@ export function useRepoTimeline(
     any,
     RepoTimeline,
     GenericQueryKey<TimelineKeyParams>
-  >(queryKeys.timeline(params), getRepoTimeline, {
+  >(QueryKeyMap.timeline.factory(params), getRepoTimeline, {
     cacheTime: 0,
     enabled: Boolean(params.repo) && Boolean(params.owner),
     refetchOnWindowFocus: false,
@@ -221,7 +220,7 @@ export function useRepoTimeline(
 
 export function useRepoFiles(params: FilesKeyParams) {
   return useQuery<RepoFiles, any, RepoFiles, GenericQueryKey<FilesKeyParams>>(
-    queryKeys.files(params),
+    QueryKeyMap.files.factory(params),
     getRepoFiles,
     {
       enabled: Boolean(params.repo) && Boolean(params.owner),
@@ -233,7 +232,7 @@ export function useRepoFiles(params: FilesKeyParams) {
 
 export function useGetBranches(params: BranchesKeyParams) {
   return useQuery<Branch[], any, Branch[], GenericQueryKey<BranchesKeyParams>>(
-    queryKeys.branches(params),
+    QueryKeyMap.branches.factory(params),
     getBranches,
     {
       enabled: Boolean(params.repo) && Boolean(params.owner),
@@ -267,7 +266,7 @@ interface BlocksInfo {
 
 export function useGetBlocksInfo() {
   return useQuery<BlocksInfo[]>(
-    queryKeys.blocksInfo(),
+    QueryKeyMap.blocksInfo.factory(),
     () => {
       const url = `${process.env.NEXT_PUBLIC_MARKETPLACE_URL}/api/blocks`;
       return fetch(url).then((res) => res.json());

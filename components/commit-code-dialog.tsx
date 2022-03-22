@@ -65,8 +65,8 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
   } = useUpdateFileContents({
     onSuccess: async () => {
       onClose();
-      await queryClient.invalidateQueries(QueryKeyMap.file);
-      await queryClient.invalidateQueries(QueryKeyMap.timeline);
+      await queryClient.invalidateQueries(QueryKeyMap.file.key);
+      await queryClient.invalidateQueries(QueryKeyMap.timeline.key);
     },
   });
 

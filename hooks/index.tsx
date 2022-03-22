@@ -24,7 +24,12 @@ import {
 } from "ghapi";
 import { defaultBlocksRepo as exampleBlocksInfo } from "blocks/index";
 import { useRouter } from "next/router";
-import { FolderKeyParams, GenericQueryKey, queryKeys } from "lib/query-keys";
+import {
+  FolderKeyParams,
+  GenericQueryKey,
+  InfoKeyParams,
+  queryKeys,
+} from "lib/query-keys";
 
 export function useFileContent(
   params: UseFileContentParams,
@@ -188,13 +193,17 @@ export function useMetadata({
   };
 }
 
-export function useRepoInfo(params: RepoContextWithToken) {
-  return useQuery(["info", params], () => getRepoInfoWithContributors(params), {
-    enabled:
-      Boolean(params.repo) && Boolean(params.owner) && Boolean(params.token),
-    refetchOnWindowFocus: false,
-    retry: false,
-  });
+export function useRepoInfo(params: InfoKeyParams) {
+  return useQuery<RepoInfo, any, RepoInfo, GenericQueryKey<InfoKeyParams>>(
+    queryKeys.info(params),
+    getRepoInfoWithContributors,
+    {
+      enabled:
+        Boolean(params.repo) && Boolean(params.owner) && Boolean(params.token),
+      refetchOnWindowFocus: false,
+      retry: false,
+    }
+  );
 }
 
 export function useRepoTimeline(

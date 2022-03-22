@@ -2,7 +2,11 @@ import { Octokit } from "@octokit/rest";
 import { Endpoints } from "@octokit/types";
 import axios, { AxiosInstance } from "axios";
 import { Base64 } from "js-base64";
-import { FolderKeyParams, GenericQueryKey } from "lib/query-keys";
+import {
+  FolderKeyParams,
+  GenericQueryKey,
+  InfoKeyParams,
+} from "lib/query-keys";
 import { QueryFunction } from "react-query";
 export interface RepoContext {
   repo: string;
@@ -182,33 +186,21 @@ type listRepoFilesResponse =
   Endpoints["GET /repos/{owner}/{repo}/git/trees/{tree_sha}"]["response"];
 export type RepoFiles = listRepoFilesResponse["data"]["tree"];
 
-export async function getRepoInfoWithContributors(
-  params: RepoContextWithToken
-): Promise<RepoInfo> {
+export const getRepoInfoWithContributors: QueryFunction<
+  RepoInfo,
+  GenericQueryKey<InfoKeyParams>
+> = async (ctx) => {
+  let params = ctx.queryKey[1];
   const { owner, repo, token } = params;
-  const url = `https://api.github.com/repos/${owner}/${repo}`;
-  const res = await fetch(url, {
-    headers: {
-      Authorization: token && `token ${token}`,
-    },
-  });
-  if (res.status !== 200) {
-    const error = await res.json();
-    throw new Error(error.message);
-  }
-
-  const data = await res.json();
+  let meta = ctx.meta as unknown as BlocksQueryMeta;
+  const url = `repos/${owner}/${repo}`;
+  const repoInfoRes = await meta.ghapi.get(url);
 
   const contributorsUrl = `${url}/contributors`;
-  const contributorsRes = await fetch(contributorsUrl, {
-    headers: {
-      Authorization: token && `token ${token}`,
-    },
-  });
-  const contributors = await contributorsRes.json();
+  const contributorsRes = await meta.ghapi.get(contributorsUrl);
 
-  return { ...data, contributors };
-}
+  return { ...repoInfoRes.data, contributors: contributorsRes.data };
+};
 
 export async function getRepoTimeline(
   params: RepoContextWithToken & { path: string; sha?: string }

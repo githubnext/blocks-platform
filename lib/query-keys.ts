@@ -5,7 +5,7 @@ export interface FolderKeyParams {
   fileRef?: string;
 }
 
-interface InfoKeyParams {
+export interface InfoKeyParams {
   repo: string;
   owner: string;
   token: string;
@@ -39,7 +39,7 @@ export const queryKeys = {
     "folder",
     params,
   ],
-  info: (params: InfoKeyParams) => [{ scope: "info", params }] as const,
+  info: (params: InfoKeyParams): ["info", InfoKeyParams] => ["info", params],
   timeline: (params: TimelineKeyParams) =>
     [{ scope: "timeline", params }] as const,
   files: (params: FilesKeyParams) => [{ scope: "files", params }] as const,

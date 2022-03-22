@@ -50,7 +50,6 @@ export function RepoDetail(props: RepoDetailProps) {
   const { data: branches } = useGetBranches({
     owner: owner as string,
     repo: repo as string,
-    token,
   });
   const branch = useMemo(
     () => branches?.find((b) => b.name === branchName),

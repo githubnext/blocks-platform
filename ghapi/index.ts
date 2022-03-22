@@ -264,28 +264,6 @@ export const getBranches: QueryFunction<
   return res.data;
 };
 
-export async function getRepoInfo(
-  params: RepoContextWithToken
-): Promise<string> {
-  const { repo, owner, token } = params;
-
-  const apiUrl = `https://api.github.com/repos/${owner}/${repo}`;
-
-  const res = await fetch(apiUrl, {
-    headers: {
-      Authorization: token && `token ${token}`,
-    },
-  });
-  if (res.status !== 200) {
-    throw new Error(
-      `Error fetching repo info: ${owner}/${repo}\n${await res.text()}`
-    );
-  }
-
-  const resObject = await res.json();
-  return resObject;
-}
-
 export interface CreateBranchParams {
   ref: string;
   token: string;

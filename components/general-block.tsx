@@ -185,6 +185,7 @@ export function GeneralBlock(props: GeneralBlockProps) {
           onClose={() => setRequestedFileContent(null)}
           isOpen
           token={token}
+          branchName={branchName}
           branchingDisabled={!isBranchable}
         />
       )}

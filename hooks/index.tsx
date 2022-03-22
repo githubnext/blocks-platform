@@ -1,29 +1,20 @@
-import {
-  QueryKey,
-  useMutation,
-  UseMutationOptions,
-  useQuery,
-  UseQueryOptions,
-} from "react-query";
+import { RepoFiles } from "@githubnext/utils";
 import { Octokit } from "@octokit/rest";
-import { Base64 } from "js-base64";
-import { useCallback, useEffect, useState } from "react";
+import { defaultBlocksRepo as exampleBlocksInfo } from "blocks/index";
 import {
-  UseFileContentParams,
+  createBranchAndPR,
+  CreateBranchParams,
+  CreateBranchResponse,
+  getBranches,
   getFileContent,
   getFolderContent,
-  getRepoInfoWithContributors,
   getRepoFiles,
-  getBranches,
+  getRepoInfoWithContributors,
+  getRepoTimeline,
   RepoContext,
   RepoContextWithToken,
-  getRepoTimeline,
-  CreateBranchResponse,
-  CreateBranchParams,
-  createBranchAndPR,
 } from "ghapi";
-import { defaultBlocksRepo as exampleBlocksInfo } from "blocks/index";
-import { useRouter } from "next/router";
+import { Base64 } from "js-base64";
 import {
   FileKeyParams,
   FilesKeyParams,
@@ -33,13 +24,19 @@ import {
   queryKeys,
   TimelineKeyParams,
 } from "lib/query-keys";
-import { RepoFiles } from "@githubnext/utils";
+import { useRouter } from "next/router";
+import { useCallback, useEffect, useState } from "react";
+import {
+  useMutation,
+  UseMutationOptions,
+  useQuery,
+  UseQueryOptions,
+} from "react-query";
 
 export function useFileContent(
   params: FileKeyParams,
   config?: UseQueryOptions<FileData>
 ) {
-  // fileRef = "main"
   const { repo, owner, path } = params;
 
   return useQuery<FileData, any, FileData, GenericQueryKey<FileKeyParams>>(
@@ -143,7 +140,6 @@ export function useMetadata({
       repo,
       owner,
       path: metadataPath,
-      token,
     },
     {
       refetchOnWindowFocus: false,

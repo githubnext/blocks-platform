@@ -3,6 +3,7 @@ import { Endpoints } from "@octokit/types";
 import axios, { AxiosInstance } from "axios";
 import { Base64 } from "js-base64";
 import {
+  FileKeyParams,
   FilesKeyParams,
   FolderKeyParams,
   GenericQueryKey,
@@ -51,13 +52,15 @@ interface BlocksQueryMeta {
   octokit: Octokit;
 }
 
-export async function getFileContent(
-  params: UseFileContentParams
-): Promise<FileData> {
-  const { repo, owner, path, fileRef, token } = params;
-
+export const getFileContent: QueryFunction<
+  FileData,
+  GenericQueryKey<FileKeyParams>
+> = async (ctx) => {
+  let meta = ctx.meta as unknown as BlocksQueryMeta;
+  let params = ctx.queryKey[1];
+  const { path, owner, repo, fileRef = "main" } = params;
   const query = fileRef && fileRef !== "HEAD" ? `?ref=${fileRef}` : "";
-  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}${query}`;
+  const apiUrl = `repos/${owner}/${repo}/contents/${path}${query}`;
 
   const file = path.split("/").pop() || "";
 
@@ -71,30 +74,22 @@ export async function getFileContent(
     username: "mona",
   };
 
-  const res = await fetch(apiUrl, {
-    headers: {
-      Authorization: token && `token ${token}`,
-    },
-  });
+  const res = await meta.ghapi(apiUrl);
   if (res.status !== 200) {
     if (res.status === 404) {
       throw new Error(`File not found: ${owner}/${repo}: ${path}`);
     } else {
-      throw new Error(
-        `Error fetching file: ${owner}/${repo}: ${path}\n${await res.text()}`
-      );
+      throw new Error(`Error fetching file: ${owner}/${repo}: ${path}`);
     }
   }
-
-  const resObject = await res.json();
-  const encodedContent = resObject.content;
+  const encodedContent = res.data.content;
   const content = Buffer.from(encodedContent, "base64").toString("utf8");
 
   return {
     content,
     context,
   };
-}
+};
 
 export async function getMainBranch(
   params: RepoContextWithToken

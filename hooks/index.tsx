@@ -25,6 +25,7 @@ import {
 import { defaultBlocksRepo as exampleBlocksInfo } from "blocks/index";
 import { useRouter } from "next/router";
 import {
+  FileKeyParams,
   FilesKeyParams,
   FolderKeyParams,
   GenericQueryKey,
@@ -35,21 +36,15 @@ import {
 import { RepoFiles } from "@githubnext/utils";
 
 export function useFileContent(
-  params: UseFileContentParams,
-  config?: UseQueryOptions<any>
+  params: FileKeyParams,
+  config?: UseQueryOptions<FileData>
 ) {
-  const { repo, owner, path, fileRef = "main", token } = params;
+  // fileRef = "main"
+  const { repo, owner, path } = params;
 
-  return useQuery(
-    ["file", params],
-    () =>
-      getFileContent({
-        repo,
-        owner,
-        path,
-        fileRef,
-        token,
-      }),
+  return useQuery<FileData, any, FileData, GenericQueryKey<FileKeyParams>>(
+    queryKeys.file(params),
+    getFileContent,
     {
       enabled: Boolean(repo) && Boolean(owner) && Boolean(path),
       refetchOnWindowFocus: false,

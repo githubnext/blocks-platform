@@ -23,15 +23,20 @@ export interface FilesKeyParams {
   sha: string;
 }
 
-interface FileKeyParams {
+export interface FileKeyParams {
   repo: string;
   owner: string;
   path: string;
   fileRef?: string;
-  token: string;
 }
 
-type keyNames = "folder" | "info" | "timeline" | "files" | "file";
+type keyNames =
+  | "folder"
+  | "info"
+  | "timeline"
+  | "files"
+  | "file"
+  | "blocksInfo";
 export type GenericQueryKey<T> = [key: keyNames, params: T];
 
 export const queryKeys = {
@@ -49,5 +54,5 @@ export const queryKeys = {
     params,
   ],
   blocksInfo: () => ["blocksInfo"],
-  file: (params: FileKeyParams) => [{ scope: "file", params }] as const,
+  file: (params: FileKeyParams): ["file", FileKeyParams] => ["file", params],
 };

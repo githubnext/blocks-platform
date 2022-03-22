@@ -104,7 +104,6 @@ export function RepoDetail(props: RepoDetailProps) {
     repo: repo as string,
     owner: owner as string,
     sha: (fileRef as string) || branch?.commit?.sha || "HEAD",
-    token,
   });
 
   const isFolder =

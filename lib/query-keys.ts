@@ -17,10 +17,10 @@ export interface TimelineKeyParams {
   sha?: string;
 }
 
-interface FilesKeyParams {
+export interface FilesKeyParams {
   repo: string;
   owner: string;
-  token: string;
+  sha: string;
 }
 
 interface FileKeyParams {
@@ -44,7 +44,10 @@ export const queryKeys = {
     "timeline",
     params,
   ],
-  files: (params: FilesKeyParams) => [{ scope: "files", params }] as const,
+  files: (params: FilesKeyParams): ["files", FilesKeyParams] => [
+    "files",
+    params,
+  ],
   blocksInfo: () => [{ scope: "blocksInfo" }] as const,
   file: (params: FileKeyParams) => [{ scope: "file", params }] as const,
 };

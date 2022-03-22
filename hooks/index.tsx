@@ -25,12 +25,14 @@ import {
 import { defaultBlocksRepo as exampleBlocksInfo } from "blocks/index";
 import { useRouter } from "next/router";
 import {
+  FilesKeyParams,
   FolderKeyParams,
   GenericQueryKey,
   InfoKeyParams,
   queryKeys,
   TimelineKeyParams,
 } from "lib/query-keys";
+import { RepoFiles } from "@githubnext/utils";
 
 export function useFileContent(
   params: UseFileContentParams,
@@ -224,12 +226,16 @@ export function useRepoTimeline(
   });
 }
 
-export function useRepoFiles(params: RepoContextWithToken & { sha?: string }) {
-  return useQuery(["files", params], () => getRepoFiles(params), {
-    enabled: Boolean(params.repo) && Boolean(params.owner),
-    refetchOnWindowFocus: false,
-    retry: false,
-  });
+export function useRepoFiles(params: FilesKeyParams) {
+  return useQuery<RepoFiles, any, RepoFiles, GenericQueryKey<FilesKeyParams>>(
+    queryKeys.files(params),
+    getRepoFiles,
+    {
+      enabled: Boolean(params.repo) && Boolean(params.owner),
+      refetchOnWindowFocus: false,
+      retry: false,
+    }
+  );
 }
 
 export function useGetBranches(params: RepoContextWithToken) {

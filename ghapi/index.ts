@@ -3,6 +3,7 @@ import { Endpoints } from "@octokit/types";
 import axios, { AxiosInstance } from "axios";
 import { Base64 } from "js-base64";
 import {
+  FilesKeyParams,
   FolderKeyParams,
   GenericQueryKey,
   InfoKeyParams,
@@ -230,30 +231,24 @@ export const getRepoTimeline: QueryFunction<
   return { commits };
 };
 
-export async function getRepoFiles(
-  params: RepoContextWithToken & { sha?: string }
-): Promise<RepoFiles> {
-  const { owner, repo, sha, token } = params;
+export const getRepoFiles: QueryFunction<
+  RepoFiles,
+  GenericQueryKey<FilesKeyParams>
+> = async (ctx) => {
+  let params = ctx.queryKey[1];
+  let meta = ctx.meta as unknown as BlocksQueryMeta;
+  const { owner, repo, sha } = params;
   if (!owner || !repo) {
     return [];
   }
 
-  const url = `https://api.github.com/repos/${owner}/${repo}/git/trees/${sha}?recursive=1`;
+  const url = `repos/${owner}/${repo}/git/trees/${sha}?recursive=1`;
 
-  const fileTreeRes = await fetch(url, {
-    headers: {
-      Authorization: token && `Bearer ${token}`,
-    },
-  });
-  const fileTree = await fileTreeRes.json();
+  const fileTreeRes = await meta.ghapi(url);
 
-  if (fileTreeRes.status !== 200) {
-    const error = await fileTreeRes.json();
-    throw new Error(error.message);
-  }
-  const files = fileTree.tree;
+  const files = fileTreeRes.data.tree;
   return files;
-}
+};
 
 type BranchesResponse =
   Endpoints["GET /repos/{owner}/{repo}/branches"]["response"];

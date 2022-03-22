@@ -21,10 +21,11 @@ interface GeneralBlockProps {
   context: FileContext | FolderContext;
   block: Block;
   token: string;
+  branchName: string;
 }
 
 export function GeneralBlock(props: GeneralBlockProps) {
-  const { context, theme, block, token } = props;
+  const { context, theme, block, token, branchName } = props;
   const { repo, owner, path, sha } = context;
 
   const [requestedMetadata, setRequestedMetadata] = React.useState(null);
@@ -126,7 +127,7 @@ export function GeneralBlock(props: GeneralBlockProps) {
 
   let mostRecentCommit =
     timelineData?.commits?.length > 0 ? timelineData.commits[0].sha : null;
-  let isBranchable = sha === "HEAD" || sha === mostRecentCommit;
+  let isBranchable = sha === mostRecentCommit || sha === branchName;
 
   return (
     <div

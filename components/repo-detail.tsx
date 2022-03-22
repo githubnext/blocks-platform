@@ -21,7 +21,6 @@ import { UpdateCodeModal } from "./UpdateCodeModal";
 import { FileContext, FolderContext } from "@githubnext/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { ScreenFullIcon, ScreenNormalIcon } from "@primer/octicons-react";
-import BranchPicker from "./branch-picker";
 
 const BlockPicker = dynamic(() => import("./block-picker"), { ssr: false });
 
@@ -353,6 +352,7 @@ export function RepoDetail(props: RepoDetailProps) {
               theme,
               block,
               token,
+              branchName,
             }}
             // @ts-ignore
             context={context}
@@ -406,6 +406,7 @@ function BlockRender({
   theme,
   block,
   token,
+  branchName,
 }: {
   isChoosingCustomBlock: boolean;
   allBlocksInfo: Block[];
@@ -419,6 +420,7 @@ function BlockRender({
   theme: string;
   block: Block;
   token: string;
+  branchName: string;
 }) {
   if (isChoosingCustomBlock)
     return (
@@ -444,6 +446,7 @@ function BlockRender({
       theme={(theme as string) || "light"}
       block={block}
       token={token}
+      branchName={branchName}
     />
   );
 }

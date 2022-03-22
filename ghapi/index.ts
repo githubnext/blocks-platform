@@ -92,49 +92,6 @@ export const getFileContent: QueryFunction<
   };
 };
 
-export async function getMainBranch(
-  params: RepoContextWithToken
-): Promise<string> {
-  const { repo, owner, token } = params;
-
-  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/branches/main`;
-
-  const res = await fetch(apiUrl, {
-    headers: {
-      Authorization: token && `token ${token}`,
-    },
-  });
-  if (res.status !== 200) {
-    throw new Error(
-      `Error fetching main branch: ${owner}/${repo}\n${await res.text()}`
-    );
-  }
-
-  const resObject = await res.json();
-  return resObject.name;
-}
-export async function getLatestSha(
-  params: RepoContextWithToken
-): Promise<string> {
-  const { repo, owner, token } = params;
-
-  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/branches/main`;
-
-  const res = await fetch(apiUrl, {
-    headers: {
-      Authorization: token && `token ${token}`,
-    },
-  });
-  if (res.status !== 200) {
-    throw new Error(
-      `Error fetching main branch: ${owner}/${repo}\n${await res.text()}`
-    );
-  }
-
-  const resObject = await res.json();
-  return resObject.commit.sha;
-}
-
 export const getFolderContent: QueryFunction<
   FolderData,
   GenericQueryKey<FolderKeyParams>

@@ -270,7 +270,7 @@ interface BlocksInfo {
 
 export function useGetBlocksInfo() {
   return useQuery<BlocksInfo[]>(
-    ["blocks-info"],
+    queryKeys.blocksInfo(),
     () => {
       const url = `${process.env.NEXT_PUBLIC_MARKETPLACE_URL}/api/blocks`;
       return fetch(url).then((res) => res.json());

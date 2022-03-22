@@ -48,6 +48,6 @@ export const queryKeys = {
     "files",
     params,
   ],
-  blocksInfo: () => [{ scope: "blocksInfo" }] as const,
+  blocksInfo: () => ["blocksInfo"],
   file: (params: FileKeyParams) => [{ scope: "file", params }] as const,
 };

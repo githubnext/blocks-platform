@@ -200,7 +200,7 @@ export function useRepoInfo(params: InfoKeyParams) {
 
 export function useRepoTimeline(
   params: TimelineKeyParams,
-  config?: UseQueryOptions<RepoTimeline, any, any>
+  config?: UseQueryOptions<RepoTimeline>
 ) {
   return useQuery<
     RepoTimeline,

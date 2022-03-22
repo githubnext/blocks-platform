@@ -61,9 +61,9 @@ export function RepoDetail(props: RepoDetailProps) {
       repo: repo as string,
       owner: owner as string,
       path: path as string,
-      sha: (fileRef as string) || branch?.commit?.sha || "HEAD",
+      sha: (fileRef as string) || "HEAD",
     }),
-    [repo, owner, path, fileRef || branch?.commit?.sha]
+    [repo, owner, path, fileRef]
   );
 
   const setBranchName = (branchName: string) => {
@@ -102,7 +102,7 @@ export function RepoDetail(props: RepoDetailProps) {
   } = useRepoFiles({
     repo: repo as string,
     owner: owner as string,
-    sha: (fileRef as string) || branch?.commit?.sha || "HEAD",
+    sha: branch?.name || "HEAD",
   });
 
   const isFolder =

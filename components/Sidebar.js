@@ -120,6 +120,7 @@ const Folder = ({
           query: {
             ...query,
             path,
+            fileRef: null,
           },
         }}
       >
@@ -201,6 +202,7 @@ const File = ({
         query: {
           ...query,
           path,
+          fileRef: null,
         },
       }}
     >

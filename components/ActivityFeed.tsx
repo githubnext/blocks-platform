@@ -19,16 +19,37 @@ export const ActivityFeed = ({
   context: Omit<FileContext, "file">;
   branch?: Branch;
 }) => {
+  const router = useRouter();
   const { owner, repo, path } = context;
 
   const [open, setOpen] = useState(true);
 
-  const { data: timelineData } = useRepoTimeline({
-    repo: repo,
-    owner: owner,
-    sha: branch?.name,
-    path: path,
-  });
+  const { data: timelineData } = useRepoTimeline(
+    {
+      repo: repo,
+      owner: owner,
+      sha: branch?.name,
+      path: path,
+    },
+    {
+      onSuccess: () => {
+        const { fileRef } = router.query;
+        if (!fileRef) {
+          router.push(
+            {
+              pathname: router.pathname,
+              query: {
+                ...router.query,
+                fileRef: branch?.name,
+              },
+            },
+            null,
+            { shallow: true }
+          );
+        }
+      },
+    }
+  );
 
   const commits = timelineData?.commits || [];
 
@@ -65,13 +86,19 @@ export const ActivityFeed = ({
           </Box>
         </Box>
         <Timeline>
-          {commits.map((item) => (
-            <Commit
-              {...item}
-              isSelected={context.sha === item.sha}
-              key={item.sha}
-            />
-          ))}
+          {commits.map((item, index) => {
+            const sha = index ? item.sha : branch?.name;
+
+            return (
+              <Commit
+                {...item}
+                sha={sha}
+                defaultSha={branch?.name}
+                isSelected={context.sha === sha || context.sha === item.sha}
+                key={item.sha}
+              />
+            );
+          })}
         </Timeline>
       </div>
     </div>
@@ -84,12 +111,14 @@ const Commit = ({
   username,
   message,
   sha,
+  defaultSha,
 }: {
   isSelected: boolean;
   date: string;
   message: string;
   username: string;
   sha: string;
+  defaultSha: string;
 }) => {
   const router = useRouter();
   return (
@@ -98,7 +127,7 @@ const Commit = ({
       href={{
         query: {
           ...router.query,
-          fileRef: isSelected ? undefined : sha,
+          fileRef: isSelected ? defaultSha : sha,
         },
       }}
     >

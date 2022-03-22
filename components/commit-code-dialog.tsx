@@ -67,6 +67,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
       onClose();
       await queryClient.invalidateQueries(QueryKeyMap.file.key);
       await queryClient.invalidateQueries(QueryKeyMap.timeline.key);
+
       router.push(
         {
           pathname: router.pathname,

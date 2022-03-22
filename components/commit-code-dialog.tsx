@@ -16,6 +16,7 @@ import {
   TextInput,
 } from "@primer/react";
 import { useCreateBranchAndPR, useUpdateFileContents } from "hooks";
+import { QueryKeyMap } from "lib/query-keys";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Diff, Hunk, parseDiff } from "react-diff-view";
@@ -64,8 +65,8 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
   } = useUpdateFileContents({
     onSuccess: async () => {
       onClose();
-      await queryClient.invalidateQueries("file");
-      await queryClient.invalidateQueries("timeline");
+      await queryClient.invalidateQueries(QueryKeyMap.file);
+      await queryClient.invalidateQueries(QueryKeyMap.timeline);
     },
   });
 

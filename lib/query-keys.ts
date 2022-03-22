@@ -35,15 +35,19 @@ export interface BranchesKeyParams {
   owner: string;
 }
 
-type keyNames =
-  | "folder"
-  | "info"
-  | "timeline"
-  | "files"
-  | "file"
-  | "blocksInfo"
-  | "branches";
-export type GenericQueryKey<T> = [key: keyNames, params: T];
+export const QueryKeyMap = {
+  folder: "folder",
+  info: "info",
+  timeline: "timeline",
+  files: "files",
+  file: "file",
+  blocksInfo: "blocksInfo",
+  branches: "branches",
+} as const;
+
+type KeyName = keyof typeof QueryKeyMap;
+
+export type GenericQueryKey<T> = [key: KeyName, params: T];
 
 export const queryKeys = {
   folder: (params: FolderKeyParams): ["folder", FolderKeyParams] => [

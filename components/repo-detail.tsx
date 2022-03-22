@@ -94,7 +94,6 @@ export function RepoDetail(props: RepoDetailProps) {
   } = useRepoInfo({
     repo: repo as string,
     owner: owner as string,
-    token,
   });
 
   const {

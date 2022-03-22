@@ -6,6 +6,7 @@ import {
   FolderKeyParams,
   GenericQueryKey,
   InfoKeyParams,
+  TimelineKeyParams,
 } from "lib/query-keys";
 import { QueryFunction } from "react-query";
 export interface RepoContext {
@@ -191,7 +192,7 @@ export const getRepoInfoWithContributors: QueryFunction<
   GenericQueryKey<InfoKeyParams>
 > = async (ctx) => {
   let params = ctx.queryKey[1];
-  const { owner, repo, token } = params;
+  const { owner, repo } = params;
   let meta = ctx.meta as unknown as BlocksQueryMeta;
   const url = `repos/${owner}/${repo}`;
   const repoInfoRes = await meta.ghapi.get(url);
@@ -202,30 +203,23 @@ export const getRepoInfoWithContributors: QueryFunction<
   return { ...repoInfoRes.data, contributors: contributorsRes.data };
 };
 
-export async function getRepoTimeline(
-  params: RepoContextWithToken & { path: string; sha?: string }
-): Promise<RepoTimeline> {
-  const { owner, repo, sha, path, token } = params;
+export const getRepoTimeline: QueryFunction<
+  RepoTimeline,
+  GenericQueryKey<TimelineKeyParams>
+> = async (ctx) => {
+  let params = ctx.queryKey[1];
+  let meta = ctx.meta as unknown as BlocksQueryMeta;
+  const { owner, repo, sha, path } = params;
 
   const randomQueryParamName = `${Math.random()}`;
 
-  const url = `https://api.github.com/repos/${owner}/${repo}/commits?path=${path}&${randomQueryParamName}=""&sha=${
+  const url = `repos/${owner}/${repo}/commits?path=${path}&${randomQueryParamName}=""&sha=${
     sha || "HEAD"
   }`;
 
-  const commitsRes = await fetch(url, {
-    headers: {
-      Authorization: token && `token ${token}`,
-    },
-  });
-  const data = await commitsRes.json();
+  const commitsRes = await meta.ghapi(url);
 
-  if (commitsRes.status !== 200) {
-    const error = await commitsRes.json();
-    throw new Error(error.message);
-  }
-
-  const commits = data.map((commit) => ({
+  const commits = commitsRes.data.map((commit) => ({
     date: commit.commit.author.date,
     username: commit.author?.login,
     message: commit.commit.message,
@@ -234,7 +228,7 @@ export async function getRepoTimeline(
   }));
 
   return { commits };
-}
+};
 
 export async function getRepoFiles(
   params: RepoContextWithToken & { sha?: string }

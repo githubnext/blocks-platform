@@ -8,13 +8,13 @@ export interface FolderKeyParams {
 export interface InfoKeyParams {
   repo: string;
   owner: string;
-  token: string;
 }
 
-interface TimelineKeyParams {
+export interface TimelineKeyParams {
   repo: string;
   owner: string;
   path: string;
+  sha?: string;
 }
 
 interface FilesKeyParams {
@@ -40,8 +40,10 @@ export const queryKeys = {
     params,
   ],
   info: (params: InfoKeyParams): ["info", InfoKeyParams] => ["info", params],
-  timeline: (params: TimelineKeyParams) =>
-    [{ scope: "timeline", params }] as const,
+  timeline: (params: TimelineKeyParams): ["timeline", TimelineKeyParams] => [
+    "timeline",
+    params,
+  ],
   files: (params: FilesKeyParams) => [{ scope: "files", params }] as const,
   blocksInfo: () => [{ scope: "blocksInfo" }] as const,
   file: (params: FileKeyParams) => [{ scope: "file", params }] as const,

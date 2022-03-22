@@ -29,6 +29,7 @@ import {
   GenericQueryKey,
   InfoKeyParams,
   queryKeys,
+  TimelineKeyParams,
 } from "lib/query-keys";
 
 export function useFileContent(
@@ -198,8 +199,7 @@ export function useRepoInfo(params: InfoKeyParams) {
     queryKeys.info(params),
     getRepoInfoWithContributors,
     {
-      enabled:
-        Boolean(params.repo) && Boolean(params.owner) && Boolean(params.token),
+      enabled: Boolean(params.repo) && Boolean(params.owner),
       refetchOnWindowFocus: false,
       retry: false,
     }
@@ -207,10 +207,15 @@ export function useRepoInfo(params: InfoKeyParams) {
 }
 
 export function useRepoTimeline(
-  params: RepoContextWithToken & { path: string; sha?: string },
+  params: TimelineKeyParams,
   config?: UseQueryOptions<RepoTimeline, any, any>
 ) {
-  return useQuery(["timeline", params], () => getRepoTimeline(params), {
+  return useQuery<
+    RepoTimeline,
+    any,
+    RepoTimeline,
+    GenericQueryKey<TimelineKeyParams>
+  >(queryKeys.timeline(params), getRepoTimeline, {
     cacheTime: 0,
     enabled: Boolean(params.repo) && Boolean(params.owner),
     refetchOnWindowFocus: false,

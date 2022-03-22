@@ -63,10 +63,21 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
     status: updateContentsStatus,
     error: updateContentsError,
   } = useUpdateFileContents({
-    onSuccess: async () => {
+    onSuccess: async (newSha) => {
       onClose();
       await queryClient.invalidateQueries(QueryKeyMap.file.key);
       await queryClient.invalidateQueries(QueryKeyMap.timeline.key);
+      router.push(
+        {
+          pathname: router.pathname,
+          query: {
+            ...router.query,
+            fileRef: newSha,
+          },
+        },
+        null,
+        { shallow: true }
+      );
     },
   });
 
@@ -82,11 +93,8 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
       setBody("");
       setCommitType("main");
       await queryClient.refetchQueries([
-        "branches",
-        {
-          owner,
-          repo,
-        },
+        QueryKeyMap.branches.key,
+        { owner, repo },
       ]);
       router.push(
         {

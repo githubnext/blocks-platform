@@ -103,7 +103,7 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
   }
 
   try {
-    await octokit.repos.createOrUpdateFileContents({
+    const res = await octokit.repos.createOrUpdateFileContents({
       owner: params.owner,
       repo: params.repo,
       path: params.path,
@@ -111,6 +111,7 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
       content: contentEncoded,
       sha: sha,
     });
+    return res.data.commit.sha;
   } catch (e) {}
 }
 

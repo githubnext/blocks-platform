@@ -118,22 +118,14 @@ export function GeneralBlock(props: GeneralBlockProps) {
     [context, name, type]
   );
 
-  const { data: mostRecentCommit } = useRepoTimeline(
-    {
-      repo,
-      owner,
-      token,
-      path,
-    },
-    {
-      select: (timelineData) => {
-        return timelineData.commits.length > 0
-          ? timelineData.commits[0].sha
-          : null;
-      },
-    }
-  );
+  const { data: timelineData } = useRepoTimeline({
+    repo,
+    owner,
+    path,
+  });
 
+  let mostRecentCommit =
+    timelineData?.commits?.length > 0 ? timelineData.commits[0].sha : null;
   let isBranchable = sha === "HEAD" || sha === mostRecentCommit;
 
   return (

@@ -646,15 +646,15 @@
     unist-util-visit "^1.0.0"
     uuid "^3.3.2"
 
-"@githubnext/blocks-examples@https://github.com/githubnext/blocks-examples.git#0.9.3":
+"@githubnext/blocks-examples@https://github.com/githubnext/blocks-examples.git#0.9.4":
   version "0.0.0"
-  resolved "https://github.com/githubnext/blocks-examples.git#8bdebbf488b26976e8858cfdf7b91045c24ef740"
+  resolved "https://github.com/githubnext/blocks-examples.git#fed58c5410881e5c4264afd0345ade4a9e899c15"
   dependencies:
     "@codesandbox/sandpack-react" "^0.13.13"
     "@excalidraw/excalidraw" "^0.10.0"
     "@fullstackio/cq" "^6.0.9"
     "@fullstackio/remark-cq" "^6.1.2"
-    "@githubnext/utils" "^0.19.3"
+    "@githubnext/utils" "^0.19.6"
     "@githubocto/flat-ui" "^0.13.4"
     "@loadable/component" "^5.15.0"
     "@mdx-js/runtime" "2.0.0-next.9"
@@ -697,7 +697,7 @@
     styled-components "^5.3.3"
     three "^0.134.0"
 
-"@githubnext/utils@^0.19.3", "@githubnext/utils@^0.19.6":
+"@githubnext/utils@^0.19.6":
   version "0.19.6"
   resolved "https://registry.yarnpkg.com/@githubnext/utils/-/utils-0.19.6.tgz#d48ff8861deee3b6c2f826bc1dc7b1ad00819a6f"
   integrity sha512-Y+NSr9ykNxa0WEm7175fp3aekKJK4d52jqhv3vs0hr2BdQwftmq3rPrsE2Fe2LIpUu+/4XqwG9F+07icyTnvQw==

@@ -26,7 +26,7 @@ export const ActivityFeed = ({
   const { data: timelineData } = useRepoTimeline({
     repo: repo,
     owner: owner,
-    sha: branch?.commit?.sha,
+    sha: branch?.name,
     path: path,
   });
 

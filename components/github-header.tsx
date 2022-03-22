@@ -2,11 +2,7 @@ import Link from "next/link";
 import { NextOctocat } from "./next-octocat";
 import { RepoSearch } from "./repo-search";
 
-interface GitHubHeaderProps {
-  token: string;
-}
-
-export const GitHubHeader = (props: GitHubHeaderProps) => {
+export const GitHubHeader = () => {
   return (
     <header className="bg-gray-900 text-white px-[30px] py-4 lg:flex items-center">
       <div className="flex items-center space-x-4">
@@ -18,7 +14,7 @@ export const GitHubHeader = (props: GitHubHeaderProps) => {
           </Link>
         </div>
         <div className="flex-1 min-w-[240px]">
-          <RepoSearch token={props.token} />
+          <RepoSearch />
         </div>
       </div>
       <p className="text-sm opacity-50 mt-2 lg:mt-0 lg:ml-4">

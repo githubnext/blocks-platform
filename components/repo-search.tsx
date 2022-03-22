@@ -1,48 +1,18 @@
 import { FormControl, Autocomplete } from "@primer/react";
 import { useState } from "react";
-import { useQuery } from "react-query";
 import { useDebounce } from "use-debounce";
 import { useRouter } from "next/router";
+import { useSearchRepos } from "hooks";
 
-let searchRepos = async (filterText: string, token: string) => {
-  const url = `https://api.github.com/search/repositories?q=${filterText}+in:name&sort=stars&order=desc&per_page=10`;
-  const headers = token
-    ? {
-        Authorization: `token ${token}`,
-      }
-    : {};
-
-  const res = await fetch(url, {
-    headers,
-  });
-  const { items: searchItems } = await res.json();
-  const data = (searchItems as RepoItem[]).map((item) => {
-    return {
-      text: item.full_name,
-      id: item.full_name,
-    };
-  });
-  return data;
-};
-
-interface RepoSearchProps {
-  token: string;
-}
-
-export function RepoSearch(props: RepoSearchProps) {
-  const { token } = props;
+export function RepoSearch() {
   const router = useRouter();
   const [inputValue, setInputValue] = useState("");
   let [debouncedInputValue] = useDebounce(inputValue, 400);
   let emptyStateText = "Enter repo name to get started.";
 
-  const { data: items = [], status } = useQuery(
-    ["search", debouncedInputValue],
-    () => searchRepos(debouncedInputValue, token),
-    {
-      enabled: Boolean(debouncedInputValue),
-    }
-  );
+  const { data: items = [], status } = useSearchRepos(debouncedInputValue, {
+    enabled: Boolean(debouncedInputValue),
+  });
 
   return (
     <FormControl>

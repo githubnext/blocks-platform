@@ -197,7 +197,7 @@ export function RepoDetail(props: RepoDetailProps) {
                 transition: { type: "tween", duration: 0, delay: 0.1 },
               }}
             >
-              <GitHubHeader token={token} />
+              <GitHubHeader />
               <RepoHeader
                 owner={owner as string}
                 repo={repo as string}

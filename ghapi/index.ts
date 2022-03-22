@@ -301,3 +301,24 @@ export async function createBranchAndPR(
   });
   return res.data;
 }
+
+export interface RepoSearchResult {
+  id: string;
+  text: string;
+}
+
+export const searchRepos: QueryFunction<RepoSearchResult[]> = async (ctx) => {
+  let query = ctx.queryKey[1];
+  let meta = ctx.meta as unknown as BlocksQueryMeta;
+  const url = `search/repositories?q=${query}+in:name&sort=stars&order=desc&per_page=10`;
+
+  const res = await meta.ghapi(url);
+  const { items: searchItems } = res.data;
+  const data = (searchItems as RepoItem[]).map((item) => {
+    return {
+      text: item.full_name,
+      id: item.full_name,
+    };
+  });
+  return data;
+};

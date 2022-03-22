@@ -13,6 +13,8 @@ import {
   getRepoInfoWithContributors,
   getRepoTimeline,
   RepoContext,
+  RepoSearchResult,
+  searchRepos,
 } from "ghapi";
 import { Base64 } from "js-base64";
 import {
@@ -61,16 +63,11 @@ export function useFolderContent(
     any,
     FolderData,
     GenericQueryKey<FolderKeyParams>
-  >(
-    QueryKeyMap.folder.factory(params),
-    getFolderContent,
-    // @ts-ignore
-    {
-      ...config,
-      retry: false,
-      refetchOnWindowFocus: false,
-    }
-  );
+  >(QueryKeyMap.folder.factory(params), getFolderContent, {
+    ...config,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
 }
 
 interface UseUpdateFileContentParams extends RepoContext {
@@ -401,4 +398,15 @@ export function useCreateBranchAndPR(
   config?: UseMutationOptions<CreateBranchResponse, any, CreateBranchParams>
 ) {
   return useMutation(createBranchAndPR, config);
+}
+
+export function useSearchRepos(
+  query: string,
+  config?: UseQueryOptions<RepoSearchResult[]>
+) {
+  return useQuery<RepoSearchResult[], any, RepoSearchResult[]>(
+    QueryKeyMap.searchRepos.factory(query),
+    searchRepos,
+    config
+  );
 }

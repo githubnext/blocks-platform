@@ -82,6 +82,10 @@ export const QueryKeyMap = {
       params,
     ],
   },
+  searchRepos: {
+    key: "searchRepos",
+    factory: (query: string) => ["searchRepos", query],
+  },
 } as const;
 
 type KeyName = keyof typeof QueryKeyMap;

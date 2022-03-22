@@ -15,11 +15,9 @@ import { useState } from "react";
 export const ActivityFeed = ({
   context,
   branch,
-  token,
 }: {
   context: Omit<FileContext, "file">;
   branch?: Branch;
-  token: string;
 }) => {
   const { owner, repo, path } = context;
 
@@ -28,7 +26,6 @@ export const ActivityFeed = ({
   const { data: timelineData } = useRepoTimeline({
     repo: repo,
     owner: owner,
-    token,
     sha: branch?.commit?.sha,
     path: path,
   });

@@ -138,7 +138,7 @@ export const getFolderContent: QueryFunction<
   GenericQueryKey<FolderKeyParams>
 > = async (ctx) => {
   let { queryKey } = ctx;
-  const { repo, owner, path, fileRef } = queryKey[0].params;
+  const { repo, owner, path, fileRef } = queryKey[1];
   let branch = fileRef || "HEAD";
   let meta = ctx.meta as unknown as BlocksQueryMeta;
   const apiUrl = `repos/${owner}/${repo}/git/trees/${branch}?recursive=1`;

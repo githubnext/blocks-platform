@@ -47,6 +47,7 @@ export function GeneralBlock(props: GeneralBlockProps) {
     metadataPath: block.entry && getMetadataPath(block, path),
     filePath: path,
     token: token,
+    branchName,
   });
   const type = block.type;
 

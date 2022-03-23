@@ -115,6 +115,7 @@ export function RepoDetail(props: RepoDetailProps) {
     metadataPath: `.github/blocks/all.json`,
     filePath: path as string,
     token,
+    branchName: branch?.name,
   });
 
   const {

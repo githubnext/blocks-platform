@@ -80,7 +80,6 @@ interface UseUpdateFileContentParams extends RepoContext {
 }
 
 async function updateFileContents(params: UseUpdateFileContentParams) {
-  console.log("Updating", params.ref);
   const contentEncoded = Base64.encode(params.content);
   const octokit = new Octokit({
     auth: params.token,

@@ -123,7 +123,6 @@ export function RepoDetail(props: RepoDetailProps) {
     setBlock,
     blockOptions,
     defaultBlock,
-    allBlocksInfo,
   } = useManageBlock({
     path: path as string,
     storedDefaultBlock: metadata[path as string]?.default,
@@ -134,6 +133,7 @@ export function RepoDetail(props: RepoDetailProps) {
     () => rawBlock,
     [rawBlock.owner, rawBlock.repo, rawBlock.id]
   );
+  console.log(block, rawBlock);
   const setBlockLocal = (block: Block) => {
     setIsChoosingCustomBlock(false);
     setBlock(block);
@@ -261,6 +261,7 @@ export function RepoDetail(props: RepoDetailProps) {
                     blocks={blockOptions}
                     defaultBlock={defaultBlock}
                     path={path as string}
+                    type={isFolder ? "folder" : "file"}
                     onChange={setBlockLocal}
                     value={block}
                     isChoosingCustomBlock={isChoosingCustomBlock}
@@ -345,7 +346,6 @@ export function RepoDetail(props: RepoDetailProps) {
           <BlockRender
             {...{
               isChoosingCustomBlock,
-              allBlocksInfo,
               setBlockLocal,
               isFolder,
               size,
@@ -399,7 +399,6 @@ export function RepoDetail(props: RepoDetailProps) {
 
 function BlockRender({
   isChoosingCustomBlock,
-  allBlocksInfo,
   setBlockLocal,
   path,
   isFolder,
@@ -413,7 +412,6 @@ function BlockRender({
   branchName,
 }: {
   isChoosingCustomBlock: boolean;
-  allBlocksInfo: Block[];
   setBlockLocal: (block: Block) => void;
   path: string;
   isFolder: boolean;
@@ -429,7 +427,6 @@ function BlockRender({
   if (isChoosingCustomBlock)
     return (
       <CustomBlockPicker
-        allBlocks={allBlocksInfo}
         onChange={setBlockLocal}
         path={path as string}
         isFolder={isFolder}

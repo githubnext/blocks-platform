@@ -29,7 +29,7 @@ import {
 } from "lib/query-keys";
 import { isArray } from "lodash";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   useMutation,
   UseMutationOptions,
@@ -412,4 +412,39 @@ export function useSearchRepos(
     searchRepos,
     config
   );
+}
+
+export function useCustomBlocks(
+  path: string = "",
+  type: "file" | "folder" = "file"
+) {
+  const { data: allBlockRepos = [] } = useGetBlocksInfo();
+
+  const extension = path.split(".").pop();
+  const filteredBlocks = useMemo(
+    () =>
+      allBlockRepos
+        .map((repo) => {
+          if (repo.full_name === "githubnext/blocks-examples") return;
+          const filteredBlocks = repo.blocks.filter(
+            (block: Block) =>
+              // don't include example Blocks
+              !["Example File Block", "Example Folder Block"].includes(
+                block.title
+              ) &&
+              block.type === type &&
+              (!block.extensions ||
+                block.extensions?.includes("*") ||
+                block.extensions?.includes(extension))
+          );
+          return {
+            ...repo,
+            blocks: filteredBlocks,
+          };
+        })
+        .filter((repo) => repo?.blocks?.length),
+    [allBlockRepos, extension]
+  );
+
+  return filteredBlocks;
 }

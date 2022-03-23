@@ -27,6 +27,7 @@ import {
   QueryKeyMap,
   TimelineKeyParams,
 } from "lib/query-keys";
+import { isArray } from "lodash";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -73,33 +74,30 @@ export function useFolderContent(
 interface UseUpdateFileContentParams extends RepoContext {
   content: string;
   path: string;
-  sha: string;
+  ref: string; // The name of the commit/branch/tag.
+  branch: string; // Required in order to target createOrUpdateFileContents
   token?: string;
 }
 
 async function updateFileContents(params: UseUpdateFileContentParams) {
   const contentEncoded = Base64.encode(params.content);
-  let sha = params.sha;
   const octokit = new Octokit({
     auth: params.token,
   });
 
-  // todo(use client side SHA which we already have for this update)
-  if (sha === "latest") {
-    try {
-      const { data, status } = await octokit.repos.getContent({
-        owner: params.owner,
-        repo: params.repo,
-        path: params.path,
-      });
+  const { data } = await octokit.repos.getContent({
+    owner: params.owner,
+    repo: params.repo,
+    path: params.path,
+    ref: params.ref,
+  });
 
-      if (status !== 200) throw new Error("Something bad happened");
-
-      // @ts-ignore
-      sha = data.sha;
-    } catch (e) {
-      sha = "HEAD";
-    }
+  let fileSha;
+  // Octokit is silly here and potentially returns an array of contents.
+  if (isArray(data)) {
+    fileSha = data[0].sha;
+  } else {
+    fileSha = data.sha;
   }
 
   try {
@@ -109,7 +107,8 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
       path: params.path,
       message: `feat: updated ${params.path} programatically`,
       content: contentEncoded,
-      sha: sha,
+      branch: params.branch,
+      sha: fileSha,
     });
     return res.data.commit.sha;
   } catch (e) {}

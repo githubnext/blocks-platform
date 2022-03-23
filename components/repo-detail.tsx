@@ -101,7 +101,7 @@ export function RepoDetail(props: RepoDetailProps) {
   } = useRepoFiles({
     repo: repo as string,
     owner: owner as string,
-    sha: branch?.name || "HEAD",
+    sha: (branchName as string) || branch?.name,
   });
 
   const isFolder =

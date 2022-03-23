@@ -5,7 +5,6 @@ import {
   SidebarExpandIcon,
 } from "@primer/octicons-react";
 import { Avatar, Box, IconButton, Label, Text, Timeline } from "@primer/react";
-import { Branch } from "ghapi";
 import { useRepoTimeline } from "hooks";
 import { getRelativeTime } from "lib/date-utils";
 import Link from "next/link";
@@ -14,10 +13,10 @@ import { useState } from "react";
 
 export const ActivityFeed = ({
   context,
-  branch,
+  branchName,
 }: {
   context: Omit<FileContext, "file">;
-  branch?: Branch;
+  branchName?: string;
 }) => {
   const router = useRouter();
   const { owner, repo, path } = context;
@@ -28,7 +27,7 @@ export const ActivityFeed = ({
     {
       repo: repo,
       owner: owner,
-      sha: branch?.name,
+      sha: branchName,
       path: path,
     },
     {
@@ -40,7 +39,7 @@ export const ActivityFeed = ({
               pathname: router.pathname,
               query: {
                 ...router.query,
-                fileRef: branch?.name,
+                fileRef: branchName,
               },
             },
             null,
@@ -87,13 +86,13 @@ export const ActivityFeed = ({
         </Box>
         <Timeline>
           {commits.map((item, index) => {
-            const sha = index ? item.sha : branch?.name;
+            const sha = index ? item.sha : branchName;
 
             return (
               <Commit
                 {...item}
                 sha={sha}
-                defaultSha={branch?.name}
+                defaultSha={branchName}
                 isSelected={context.sha === sha || context.sha === item.sha}
                 key={item.sha}
               />

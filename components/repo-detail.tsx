@@ -373,7 +373,10 @@ export function RepoDetail(props: RepoDetailProps) {
               exit={{ width: 0, transition: { type: "tween", duration: 0.1 } }}
               className="flex-none hidden lg:block h-full border-l border-gray-200"
             >
-              <ActivityFeed context={context} branch={branch} />
+              <ActivityFeed
+                context={context}
+                branchName={(branchName as string) || branch.name}
+              />
             </motion.div>
           )}
         </AnimatePresence>

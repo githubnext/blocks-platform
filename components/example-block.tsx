@@ -6,6 +6,7 @@ import {
 } from "@githubnext/utils";
 import React, { useEffect, useState } from "react";
 import components from "./../blocks";
+import { SandboxedBlock } from "./sandboxed-block";
 
 export interface BundleCode {
   name: string;
@@ -146,15 +147,36 @@ const BlockComponent = ({
 
   const name = path.split("/").pop();
 
+  if (
+    "githubnext/blocks-examples" === `${block.owner}/${block.repo}` &&
+    block.sandbox === false
+  ) {
+    return (
+      <ErrorBoundary key={path}>
+        <ExampleBlock
+          block={block}
+          context={{ ...props.context, path, file: name, folder: name }}
+          contents={contents}
+          tree={tree}
+          metadata={metadata}
+          isEmbedded
+          onUpdateMetadata={onUpdateMetadata}
+          onNavigateToPath={onNavigateToPath}
+          onRequestUpdateContent={onRequestUpdateContent}
+          onRequestGitHubData={onRequestGitHubData}
+        />
+      </ErrorBoundary>
+    );
+  }
+
   return (
     <ErrorBoundary key={path}>
-      <ExampleBlock
+      <SandboxedBlock
         block={block}
         context={{ ...props.context, path, file: name, folder: name }}
         contents={contents}
         tree={tree}
         metadata={metadata}
-        isEmbedded
         onUpdateMetadata={onUpdateMetadata}
         onNavigateToPath={onNavigateToPath}
         onRequestUpdateContent={onRequestUpdateContent}

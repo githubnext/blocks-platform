@@ -134,10 +134,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
           owner,
           repo,
           branch: branchName,
-          ref:
-            branchName === router.query?.fileRef
-              ? branchName
-              : (router.query?.fileRef as string),
+          ref: router?.query?.fileRef as string,
           token,
           content: newCode,
           path,

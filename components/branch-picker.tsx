@@ -1,6 +1,7 @@
-import { GitBranchIcon } from "@primer/octicons-react";
-import { ActionList, ActionMenu } from "@primer/react";
+import { GitBranchIcon, SearchIcon } from "@primer/octicons-react";
+import { ActionList, ActionMenu, TextInput } from "@primer/react";
 import { Branch } from "ghapi";
+import { useMemo, useState } from "react";
 
 interface BranchPickerProps {
   value: string;
@@ -11,32 +12,63 @@ interface BranchPickerProps {
 export default function BranchPicker(props: BranchPickerProps) {
   const { value, branches, onChange } = props;
 
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredBranches = useMemo(
+    () =>
+      searchTerm
+        ? branches.filter((branch) =>
+            branch.name.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+        : branches,
+    [searchTerm, branches]
+  );
+
   return (
-    <ActionMenu>
-      <ActionMenu.Button>
+    <ActionMenu
+      onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          setSearchTerm("");
+        }
+      }}
+    >
+      <ActionMenu.Button title={value}>
         <span className="mr-1">
           <GitBranchIcon />
         </span>
-        {value}
+        <div className="inline-block align-middle truncate max-w-[20em]">
+          {value}
+        </div>
       </ActionMenu.Button>
 
       <ActionMenu.Overlay width="medium">
-        <ActionList>
-          <ActionList.Group title="Branches" selectionVariant="single">
-            {branches.map((branch) => {
-              return (
-                <ActionList.Item
-                  key={branch.name}
-                  selected={branch.name === value}
-                  onSelect={() => {
-                    onChange(branch.name);
-                  }}
-                >
-                  {branch.name}
-                </ActionList.Item>
-              );
-            })}
-          </ActionList.Group>
+        <div className="px-3 pt-3 w-full">
+          <TextInput
+            value={searchTerm}
+            icon={SearchIcon}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search branches"
+            className="!pl-2 w-full"
+          />
+        </div>
+        <ActionList
+          className="max-h-[calc(95vh-10em)] overflow-auto"
+          selectionVariant="single"
+        >
+          {filteredBranches.map((branch) => {
+            return (
+              <ActionList.Item
+                key={branch.name}
+                selected={branch.name === value}
+                onSelect={() => {
+                  onChange(branch.name);
+                }}
+                title={branch.name}
+              >
+                <div className="truncate">{branch.name}</div>
+              </ActionList.Item>
+            );
+          })}
         </ActionList>
       </ActionMenu.Overlay>
     </ActionMenu>

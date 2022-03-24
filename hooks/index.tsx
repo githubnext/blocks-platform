@@ -328,11 +328,6 @@ export function useManageBlock({
     let [blockOwner, blockRepo, blockId] = key.split("__");
     if (!blockOwner) blockOwner = defaultFileBlock.owner;
     if (!blockRepo) blockRepo = defaultFileBlock.repo;
-    const isDefaultBlocksRepo =
-      `${blockOwner}/${blockRepo}` ===
-      `${defaultFileBlock.owner}/${defaultFileBlock.repo}`;
-    if (isDefaultBlocksRepo)
-      return relevantExampleBlocksInfo.find((b) => b.id === blockId);
     const customBlocksInfo = allBlocksInfo.find(
       (b) => b.owner === blockOwner && b.repo === blockRepo
     );
@@ -367,12 +362,6 @@ export function useManageBlock({
   const defaultBlock = blockFromMetadata || fallbackDefaultBlock;
   const block = blockInUrl || defaultBlock;
 
-  let blockOptions = relevantExampleBlocksInfo;
-  if (block && !blockOptions.some((b) => b.id === block.id)) {
-    // If using a custom block, add it to the list
-    blockOptions.push({ ...block, title: `Custom: ${block.title}` });
-  }
-
   const setBlock = (block: Block) => {
     if (!block) return;
     router.push({
@@ -387,9 +376,7 @@ export function useManageBlock({
   return {
     block,
     setBlock,
-    blockOptions: relevantExampleBlocksInfo,
     defaultBlock,
-    allBlocksInfo,
   };
 }
 const overrideDefaultBlocks = {
@@ -414,10 +401,13 @@ export function useSearchRepos(
   );
 }
 
-export function useBlocks(path: string = "", type: "file" | "folder" = "file") {
+export function useBlocks(
+  path: string | undefined = undefined,
+  type: "file" | "folder" = "file"
+) {
   const { data: allBlockRepos = [] } = useGetBlocksInfo();
 
-  const extension = path.split(".").pop();
+  const extension = path?.split(".")?.pop();
   const filteredBlocks = useMemo(
     () =>
       allBlockRepos
@@ -429,7 +419,8 @@ export function useBlocks(path: string = "", type: "file" | "folder" = "file") {
                 block.title
               ) &&
               block.type === type &&
-              (!block.extensions ||
+              (extension === undefined ||
+                !block.extensions ||
                 block.extensions?.includes("*") ||
                 block.extensions?.includes(extension))
           );

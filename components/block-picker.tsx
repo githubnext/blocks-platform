@@ -4,7 +4,7 @@ import {
   SearchIcon,
   StarFillIcon,
 } from "@primer/octicons-react";
-import { ActionList, ActionMenu, Text, TextInput } from "@primer/react";
+import { Link, ActionList, ActionMenu, Text, TextInput } from "@primer/react";
 import { BlocksInfo, useBlocks } from "hooks";
 import { useEffect, useState } from "react";
 
@@ -119,14 +119,22 @@ const BlockItem = ({
       )}
       <div className="font-semibold">{block.title}</div>
       <ActionList.Description variant="block">
-        <div className="flex items-center mt-1">
-          <div className="mr-1">
+        <Link
+          href={`https://github.com/${repo.full_name}`}
+          className="flex items-center mt-1"
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          <Text className="mr-1" color="fg.muted">
             <RepoIcon />
-          </div>
-          <Text color="fg.muted">
+          </Text>
+          <Text color="fg.muted" className="underline">
             {repo.owner}/{repo.repo}
           </Text>
-        </div>
+        </Link>
         <div className="flex items-start mt-1">
           <div className="mr-1">
             <InfoIcon />

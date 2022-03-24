@@ -3,6 +3,7 @@ import {
   RepoIcon,
   SearchIcon,
   StarFillIcon,
+  VerifiedIcon,
 } from "@primer/octicons-react";
 import { Link, ActionList, ActionMenu, Text, TextInput } from "@primer/react";
 import { BlocksInfo, useBlocks } from "hooks";
@@ -112,12 +113,15 @@ const BlockItem = ({
         setIsOpen(false);
       }}
     >
-      {isExampleBlock && !isSelected && (
-        <ActionList.LeadingVisual className="absolute left-[1.1rem]">
-          <StarFillIcon />
-        </ActionList.LeadingVisual>
-      )}
-      <div className="font-semibold">{block.title}</div>
+      <div className="font-semibold">
+        {block.title}
+
+        {isExampleBlock && (
+          <Text ml={1} color="ansi.blue">
+            <VerifiedIcon />
+          </Text>
+        )}
+      </div>
       <ActionList.Description variant="block">
         <Link
           href={`https://github.com/${repo.full_name}`}

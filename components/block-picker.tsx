@@ -1,6 +1,11 @@
-import { InfoIcon, RepoIcon, SearchIcon } from "@primer/octicons-react";
-import { ActionList, ActionMenu, Button, Text, TextInput } from "@primer/react";
-import { useCustomBlocks } from "hooks";
+import {
+  InfoIcon,
+  RepoIcon,
+  SearchIcon,
+  StarFillIcon,
+} from "@primer/octicons-react";
+import { ActionList, ActionMenu, Text, TextInput } from "@primer/react";
+import { BlocksInfo, useBlocks } from "hooks";
 import { useEffect, useState } from "react";
 
 interface BlockPickerProps {
@@ -9,22 +14,11 @@ interface BlockPickerProps {
   defaultBlock?: Block;
   path: string;
   type: "file" | "folder";
-  isChoosingCustomBlock: boolean;
-  setIsChoosingCustomBlock: (isChoosingCustomBlock: boolean) => void;
   onChange: (newType: Block) => void;
 }
 
 export default function BlockPicker(props: BlockPickerProps) {
-  const {
-    blocks,
-    value,
-    defaultBlock,
-    path,
-    type,
-    isChoosingCustomBlock,
-    setIsChoosingCustomBlock,
-    onChange,
-  } = props;
+  const { value, defaultBlock, path, type, onChange } = props;
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const lowerSearchTerm = searchTerm.toLowerCase();
@@ -41,12 +35,12 @@ export default function BlockPicker(props: BlockPickerProps) {
     }
   }, [path]);
 
-  const customBlockRepos = useCustomBlocks(path, type);
+  const blockRepos = useBlocks(path, type);
 
   return (
     <ActionMenu open={isOpen} onOpenChange={setIsOpen}>
       <ActionMenu.Button aria-expanded={isOpen}>
-        {isChoosingCustomBlock ? "Custom Block" : `Block: ${value?.title}`}
+        {`Block: ${value?.title}`}
       </ActionMenu.Button>
 
       <ActionMenu.Overlay width="medium">
@@ -61,37 +55,8 @@ export default function BlockPicker(props: BlockPickerProps) {
         </div>
         <ActionList>
           <ActionList.Group title="Blocks" selectionVariant="single">
-            {blocks.map((block) => {
-              if (
-                searchTerm &&
-                !block.title.toLowerCase().includes(lowerSearchTerm)
-              )
-                return null;
-              if (
-                block.owner !== "githubnext" ||
-                block.repo !== "blocks-examples"
-              )
-                return null;
-              return (
-                <ActionList.Item
-                  key={block.entry}
-                  selected={!isChoosingCustomBlock && block.id === value?.id}
-                  onSelect={(e) => {
-                    setIsChoosingCustomBlock(false);
-                    onChange(block);
-                    setIsOpen(false);
-                  }}
-                  className="font-semibold"
-                >
-                  {block.title}
-                </ActionList.Item>
-              );
-            })}
-          </ActionList.Group>
-          <ActionList.Divider />
-          <ActionList.Group title="Custom Blocks" selectionVariant="single">
-            <div className="max-h-[calc(100vh-30.5em)] overflow-auto">
-              {customBlockRepos.map((repo, index) => {
+            <div className="max-h-[calc(100vh-20em)] overflow-auto">
+              {blockRepos.map((repo, index) => {
                 if (index > 15) return null;
                 return repo.blocks.map((block) => {
                   if (
@@ -100,57 +65,75 @@ export default function BlockPicker(props: BlockPickerProps) {
                   )
                     return null;
                   return (
-                    <ActionList.Item
+                    <BlockItem
                       key={block.entry}
-                      selected={
-                        !isChoosingCustomBlock && block.id === value?.id
-                      }
-                      onSelect={() => {
-                        const enhancedBlock = {
-                          ...block,
-                          owner: repo.owner,
-                          repo: repo.repo,
-                        };
-                        setIsChoosingCustomBlock(false);
-                        onChange(enhancedBlock);
-                        setIsOpen(false);
-                      }}
-                    >
-                      <div className="font-semibold">{block.title}</div>
-                      <ActionList.Description variant="block">
-                        <div className="flex items-center mt-1">
-                          <div className="mr-1">
-                            <RepoIcon />
-                          </div>
-                          <Text color="fg.muted">
-                            {repo.owner}/{repo.repo}
-                          </Text>
-                        </div>
-                        <div className="flex items-start mt-1">
-                          <div className="mr-1">
-                            <InfoIcon />
-                          </div>
-                          {block.description}
-                        </div>
-                      </ActionList.Description>
-                    </ActionList.Item>
+                      block={block}
+                      value={value}
+                      repo={repo}
+                      onChange={onChange}
+                      setIsOpen={setIsOpen}
+                    />
                   );
                 });
               })}
             </div>
-            <Button
-              className="w-[calc(100%-1rem)] mx-2 mt-2 justify-center"
-              leadingIcon={SearchIcon}
-              onClick={() => {
-                setIsChoosingCustomBlock(true);
-                setIsOpen(false);
-              }}
-            >
-              Look for a custom Block
-            </Button>
           </ActionList.Group>
         </ActionList>
       </ActionMenu.Overlay>
     </ActionMenu>
   );
 }
+
+const BlockItem = ({
+  block,
+  value,
+  repo,
+  setIsOpen,
+  onChange,
+}: {
+  block: Block;
+  value: Block;
+  repo: BlocksInfo;
+  setIsOpen: (isOpen: boolean) => void;
+  onChange: (newType: Block) => void;
+}) => {
+  const isExampleBlock = repo.full_name === `githubnext/blocks-examples`;
+  const isSelected = block.id === value?.id;
+  return (
+    <ActionList.Item
+      selected={isSelected}
+      onSelect={() => {
+        const enhancedBlock = {
+          ...block,
+          owner: repo.owner,
+          repo: repo.repo,
+        };
+        onChange(enhancedBlock);
+        setIsOpen(false);
+      }}
+    >
+      {isExampleBlock && !isSelected && (
+        <ActionList.LeadingVisual className="absolute left-[1.1rem]">
+          <StarFillIcon />
+        </ActionList.LeadingVisual>
+      )}
+      <div className="font-semibold">{block.title}</div>
+      <ActionList.Description variant="block">
+        <div className="flex items-center mt-1">
+          <div className="mr-1">
+            <RepoIcon />
+          </div>
+          <Text color="fg.muted">
+            {repo.owner}/{repo.repo}
+          </Text>
+        </div>
+        <div className="flex items-start mt-1">
+          <div className="mr-1">
+            <InfoIcon />
+          </div>
+          {block.description}
+        </div>
+      </ActionList.Description>
+    </ActionList.Item>
+  );
+};

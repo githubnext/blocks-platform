@@ -1,7 +1,7 @@
 import {
   FileContext,
   FolderContext,
-  onRequestGitHubData,
+  onRequestGitHubData as utilsOnRequestGitHubData,
 } from "@githubnext/utils";
 import { SandboxedBlockWrapper } from "components/sandboxed-block-wrapper";
 import {
@@ -78,6 +78,9 @@ export function GeneralBlock(props: GeneralBlockProps) {
   const onRequestUpdateContent = async (newContent: string) => {
     setRequestedFileContent(newContent);
   };
+
+  const onRequestGitHubData = (path: string, params?: Record<string, any>) =>
+    utilsOnRequestGitHubData(path, params, token);
 
   const { data: treeData } = useFolderContent(
     {

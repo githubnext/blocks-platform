@@ -113,15 +113,7 @@ const BlockItem = ({
         setIsOpen(false);
       }}
     >
-      <div className="font-semibold">
-        {block.title}
-
-        {isExampleBlock && (
-          <Text ml={1} color="ansi.blue">
-            <VerifiedIcon />
-          </Text>
-        )}
-      </div>
+      <div className="font-semibold">{block.title}</div>
       <ActionList.Description variant="block">
         <Link
           href={`https://github.com/${repo.full_name}`}
@@ -137,6 +129,11 @@ const BlockItem = ({
           </Text>
           <Text color="fg.muted" className="underline">
             {repo.owner}/{repo.repo}
+            {isExampleBlock && (
+              <Text ml={1} color="ansi.blue">
+                <VerifiedIcon />
+              </Text>
+            )}
           </Text>
         </Link>
         <div className="flex items-start mt-1">

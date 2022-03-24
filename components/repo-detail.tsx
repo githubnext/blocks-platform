@@ -16,7 +16,6 @@ import { GitHubHeader } from "./github-header";
 import { RepoHeader } from "./repo-header";
 import { Sidebar } from "./Sidebar";
 import { GeneralBlock } from "./general-block";
-import { CustomBlockPicker } from "./custom-block-picker";
 import { UpdateCodeModal } from "./UpdateCodeModal";
 import { FileContext, FolderContext } from "@githubnext/utils";
 import { AnimatePresence, motion } from "framer-motion";
@@ -41,7 +40,6 @@ export function RepoDetail(props: RepoDetailProps) {
     mode,
     branch: branchName = "main",
   } = router.query;
-  const [isChoosingCustomBlock, setIsChoosingCustomBlock] = useState(false);
   const [requestedMetadata, setRequestedMetadata] = useState(null);
   const isFullscreen = mode === "fullscreen";
   // need this to only animate chrome in on fullscreen mode change, but not on load
@@ -123,7 +121,6 @@ export function RepoDetail(props: RepoDetailProps) {
     setBlock,
     blockOptions,
     defaultBlock,
-    allBlocksInfo,
   } = useManageBlock({
     path: path as string,
     storedDefaultBlock: metadata[path as string]?.default,
@@ -134,10 +131,6 @@ export function RepoDetail(props: RepoDetailProps) {
     () => rawBlock,
     [rawBlock.owner, rawBlock.repo, rawBlock.id]
   );
-  const setBlockLocal = (block: Block) => {
-    setIsChoosingCustomBlock(false);
-    setBlock(block);
-  };
   const blockKey = getBlockKey(block);
   const defaultBlockKey = getBlockKey(defaultBlock);
   const isDefaultBlock = defaultBlockKey === blockKey;
@@ -261,10 +254,9 @@ export function RepoDetail(props: RepoDetailProps) {
                     blocks={blockOptions}
                     defaultBlock={defaultBlock}
                     path={path as string}
-                    onChange={setBlockLocal}
+                    type={isFolder ? "folder" : "file"}
+                    onChange={setBlock}
                     value={block}
-                    isChoosingCustomBlock={isChoosingCustomBlock}
-                    setIsChoosingCustomBlock={setIsChoosingCustomBlock}
                   />
                   {!isDefaultBlock && token && (
                     <Button
@@ -344,9 +336,7 @@ export function RepoDetail(props: RepoDetailProps) {
           </div>
           <BlockRender
             {...{
-              isChoosingCustomBlock,
-              allBlocksInfo,
-              setBlockLocal,
+              setBlock,
               isFolder,
               size,
               isTooLarge,
@@ -398,11 +388,6 @@ export function RepoDetail(props: RepoDetailProps) {
 }
 
 function BlockRender({
-  isChoosingCustomBlock,
-  allBlocksInfo,
-  setBlockLocal,
-  path,
-  isFolder,
   isLoaded,
   size,
   isTooLarge,
@@ -412,11 +397,6 @@ function BlockRender({
   token,
   branchName,
 }: {
-  isChoosingCustomBlock: boolean;
-  allBlocksInfo: Block[];
-  setBlockLocal: (block: Block) => void;
-  path: string;
-  isFolder: boolean;
   isLoaded: boolean;
   size: number;
   isTooLarge: boolean;
@@ -426,15 +406,6 @@ function BlockRender({
   token: string;
   branchName: string;
 }) {
-  if (isChoosingCustomBlock)
-    return (
-      <CustomBlockPicker
-        allBlocks={allBlocksInfo}
-        onChange={setBlockLocal}
-        path={path as string}
-        isFolder={isFolder}
-      />
-    );
   if (!isLoaded) return null;
   if (isTooLarge)
     return (

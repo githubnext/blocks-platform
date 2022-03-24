@@ -1,43 +1,39 @@
 import { Link } from "@primer/react";
 import { EyeIcon, StarFillIcon } from "@primer/octicons-react";
 import { getRelativeTime } from "lib/date-utils";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useCustomBlocks } from "hooks";
 
 interface CustomBlockPickerProps {
-  allBlocks: any[];
   path: string;
   isFolder: boolean;
   onChange: (block: Block) => void;
 }
 export const CustomBlockPicker = ({
-  allBlocks,
   path,
   isFolder,
   onChange,
 }: CustomBlockPickerProps) => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const extension = path.split(".").pop();
+  const customBlockRepos = useCustomBlocks(path, isFolder ? "folder" : "file");
+
   const filteredRepos = useMemo(
     () =>
-      allBlocks
+      customBlockRepos
         .map((repo) => ({
           ...repo,
           blocks: repo.blocks.filter(
             (block) =>
-              (!searchTerm ||
-                `${block.name} ${block.description}`
-                  .toLowerCase()
-                  .includes(searchTerm.toLowerCase())) &&
-              block.type === (isFolder ? "folder" : "file") &&
-              (!block.extensions ||
-                block.extensions?.includes("*") ||
-                block.extensions?.includes(extension))
+              !searchTerm ||
+              `${repo.owner}/${repo.repo} ${block.title} ${block.description}`
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase())
           ),
         }))
         .filter((repo) => repo.blocks.length > 0)
         .sort((a, b) => b.stars - a.stars),
-    [allBlocks, searchTerm]
+    [customBlockRepos, searchTerm]
   );
 
   return (

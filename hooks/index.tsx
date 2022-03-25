@@ -1,5 +1,6 @@
 import { RepoFiles } from "@githubnext/utils";
 import { Octokit } from "@octokit/rest";
+import pm from "picomatch";
 import { defaultBlocksRepo as exampleBlocksRepo } from "blocks/index";
 import {
   Branch,
@@ -402,18 +403,23 @@ export function useFilteredBlocksRepos(
     () =>
       allBlockRepos
         .map((repo) => {
-          const filteredBlocks = repo.blocks.filter(
-            (block: Block) =>
-              // don't include example Blocks
-              !["Example File Block", "Example Folder Block"].includes(
-                block.title
-              ) &&
-              block.type === type &&
-              (extension === undefined ||
-                !block.extensions ||
-                block.extensions?.includes("*") ||
-                block.extensions?.includes(extension))
-          );
+          const filteredBlocks = repo.blocks.filter((block: Block) => {
+            // don't include example Blocks
+            const isExampleBlock = [
+              "Example File Block",
+              "Example Folder Block",
+            ].includes(block.title);
+
+            const extensionOrPathMatch = Boolean(block.matches)
+              ? pm(block.matches)(path)
+              : block.type === type &&
+                (extension === undefined ||
+                  !block.extensions ||
+                  block.extensions?.includes("*") ||
+                  block.extensions?.includes(extension));
+
+            return !isExampleBlock && extensionOrPathMatch;
+          });
           return {
             ...repo,
             blocks: filteredBlocks.map((b) => ({

@@ -42,7 +42,7 @@ export function RepoDetail(props: RepoDetailProps) {
     theme,
     fileRef,
     mode,
-    branch: branchName = "main",
+    branch: branchName,
   } = router.query as Record<string, string>;
   const [requestedMetadata, setRequestedMetadata] = useState(null);
   const isFullscreen = mode === "fullscreen";
@@ -366,7 +366,7 @@ export function RepoDetail(props: RepoDetailProps) {
             >
               <ActivityFeed
                 context={context}
-                branchName={branchName || branch.name}
+                branchName={branchName || branch?.name}
               />
             </motion.div>
           )}

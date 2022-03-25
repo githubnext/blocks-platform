@@ -59,7 +59,7 @@ export const getFileContent: QueryFunction<
 > = async (ctx) => {
   let meta = ctx.meta as unknown as BlocksQueryMeta;
   let params = ctx.queryKey[1];
-  const { path, owner, repo, fileRef = "main" } = params;
+  const { path, owner, repo, fileRef = "HEAD" } = params;
   const query = fileRef && fileRef !== "HEAD" ? `?ref=${fileRef}` : "";
   const apiUrl = `repos/${owner}/${repo}/contents/${path}${query}`;
 
@@ -190,7 +190,7 @@ export const getRepoFiles: QueryFunction<
 > = async (ctx) => {
   let params = ctx.queryKey[1];
   let meta = ctx.meta as unknown as BlocksQueryMeta;
-  const { owner, repo, sha } = params;
+  const { owner, repo, sha = "HEAD" } = params;
   if (!owner || !repo) {
     return [];
   }

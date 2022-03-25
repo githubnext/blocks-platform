@@ -1,5 +1,6 @@
 import { RepoFiles } from "@githubnext/utils";
 import { Octokit } from "@octokit/rest";
+import pm from "picomatch";
 import { defaultBlocksRepo as exampleBlocksInfo } from "blocks/index";
 import {
   Branch,
@@ -315,9 +316,11 @@ export function useManageBlock({
       } as Block)
   );
   const extension = (path as string).split(".").slice(-1)[0];
+  // console.log({ path, extension, exampleBlocks });
   const relevantExampleBlocksInfo = exampleBlocks.filter(
     (d) =>
       d.type === (isFolder ? "folder" : "file") &&
+      // pm.isMatch(path, d.extensions)
       (!d.extensions ||
         d.extensions?.includes("*") ||
         d.extensions?.includes(extension))

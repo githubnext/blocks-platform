@@ -52,6 +52,7 @@ interface Block {
   sandbox?: boolean;
   entry: string;
   extensions?: string[];
+  matches?: string[];
   owner?: string;
   repo?: string;
 }

@@ -316,15 +316,20 @@ export function useManageBlock({
       } as Block)
   );
   const extension = (path as string).split(".").slice(-1)[0];
-  // console.log({ path, extension, exampleBlocks });
-  const relevantExampleBlocksInfo = exampleBlocks.filter(
-    (d) =>
-      d.type === (isFolder ? "folder" : "file") &&
-      // pm.isMatch(path, d.extensions)
-      (!d.extensions ||
-        d.extensions?.includes("*") ||
-        d.extensions?.includes(extension))
-  );
+
+  const relevantExampleBlocksInfo = exampleBlocks
+    .filter((b) => b.type === (isFolder ? "folder" : "file"))
+    .filter((b) => {
+      if (b.matches) {
+        return pm(b.matches)(path);
+      } else {
+        return (
+          !b.extensions ||
+          b.extensions?.includes("*") ||
+          b.extensions?.includes(extension)
+        );
+      }
+    });
 
   // find default block
   const tryToGetBlockFromKey = (key = ""): Block | null => {
@@ -425,17 +430,22 @@ export function useBlocks(path: string = "", type: "file" | "folder" = "file") {
     () =>
       allBlockRepos
         .map((repo) => {
-          const filteredBlocks = repo.blocks.filter(
-            (block: Block) =>
-              // don't include example Blocks
-              !["Example File Block", "Example Folder Block"].includes(
-                block.title
-              ) &&
-              block.type === type &&
-              (!block.extensions ||
-                block.extensions?.includes("*") ||
-                block.extensions?.includes(extension))
-          );
+          const filteredBlocks = repo.blocks.filter((block: Block) => {
+            // don't include example Blocks
+            const isExampleBlock = [
+              "Example File Block",
+              "Example Folder Block",
+            ].includes(block.title);
+
+            const extensionOrPathMatch = Boolean(block.matches)
+              ? pm(block.matches)(path)
+              : block.type === type &&
+                (!block.extensions ||
+                  block.extensions?.includes("*") ||
+                  block.extensions?.includes(extension));
+
+            return !isExampleBlock && extensionOrPathMatch;
+          });
           return {
             ...repo,
             blocks: filteredBlocks,

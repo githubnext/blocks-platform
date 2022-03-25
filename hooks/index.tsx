@@ -1,6 +1,6 @@
 import { RepoFiles } from "@githubnext/utils";
 import { Octokit } from "@octokit/rest";
-import { defaultBlocksRepo as exampleBlocksInfo } from "blocks/index";
+import { defaultBlocksRepo as exampleBlocksRepo } from "blocks/index";
 import {
   Branch,
   createBranchAndPR,
@@ -242,7 +242,7 @@ export function useGetBranches(params: BranchesKeyParams) {
   );
 }
 
-export interface BlocksInfo {
+export interface BlocksRepo {
   owner: string;
   repo: string;
   full_name: string;
@@ -264,9 +264,9 @@ export interface BlocksInfo {
   };
 }
 
-export function useGetBlocksInfo() {
-  return useQuery<BlocksInfo[]>(
-    QueryKeyMap.blocksInfo.factory(),
+export function useAllBlocksRepos() {
+  return useQuery<BlocksRepo[]>(
+    QueryKeyMap.blocksRepos.factory(),
     () => {
       const url = `${process.env.NEXT_PUBLIC_MARKETPLACE_URL}/api/blocks`;
       return fetch(url).then((res) => res.json());
@@ -304,11 +304,14 @@ export function useManageBlock({
   const router = useRouter();
   const { blockKey = "" } = router.query;
 
-  const allBlocksInfo = useBlocks(path, isFolder ? "folder" : "file");
+  const blocksRepos = useFilteredBlocksRepos(
+    path,
+    isFolder ? "folder" : "file"
+  );
   const exampleBlocks =
-    allBlocksInfo.find(
+    blocksRepos.find(
       (b) =>
-        b.owner === exampleBlocksInfo.owner && b.repo === exampleBlocksInfo.repo
+        b.owner === exampleBlocksRepo.owner && b.repo === exampleBlocksRepo.repo
     )?.blocks ?? [];
   const extension = (path as string).split(".").slice(-1)[0];
 
@@ -317,16 +320,16 @@ export function useManageBlock({
     let [blockOwner, blockRepo, blockId] = key.split("__");
     if (!blockOwner) blockOwner = defaultFileBlock.owner;
     if (!blockRepo) blockRepo = defaultFileBlock.repo;
-    const customBlocksInfo = allBlocksInfo.find(
+    const blocksRepo = blocksRepos.find(
       (b) => b.owner === blockOwner && b.repo === blockRepo
     );
-    const block = customBlocksInfo?.blocks.find((b) => b.id === blockId);
+    const block = blocksRepo?.blocks.find((b) => b.id === blockId);
     if (!block) return null;
     if (isFolder !== (block.type === "folder")) return null;
     return {
       ...block,
-      owner: customBlocksInfo.owner,
-      repo: customBlocksInfo.repo,
+      owner: blocksRepo.owner,
+      repo: blocksRepo.repo,
     };
   };
 
@@ -388,11 +391,11 @@ export function useSearchRepos(
   );
 }
 
-export function useBlocks(
+export function useFilteredBlocksRepos(
   path: string | undefined = undefined,
   type: "file" | "folder" = "file"
 ) {
-  const { data: allBlockRepos = [] } = useGetBlocksInfo();
+  const { data: allBlockRepos = [] } = useAllBlocksRepos();
 
   const extension = path?.split(".")?.pop();
   const filteredBlocks = useMemo(

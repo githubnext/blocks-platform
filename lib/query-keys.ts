@@ -71,9 +71,9 @@ export const QueryKeyMap = {
       params,
     ],
   },
-  blocksInfo: {
-    key: "blocksInfo",
-    factory: () => ["blocksInfo"],
+  blocksRepos: {
+    key: "blocksRepos",
+    factory: () => ["blocksRepos"],
   },
   branches: {
     key: "branches",

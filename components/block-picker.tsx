@@ -5,7 +5,7 @@ import {
   VerifiedIcon,
 } from "@primer/octicons-react";
 import { Link, ActionList, ActionMenu, Text, TextInput } from "@primer/react";
-import { BlocksInfo, useBlocks } from "hooks";
+import { BlocksRepo, useFilteredBlocksRepos } from "hooks";
 import { useState } from "react";
 
 interface BlockPickerProps {
@@ -22,7 +22,7 @@ export default function BlockPicker(props: BlockPickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const lowerSearchTerm = searchTerm.toLowerCase();
 
-  const blockRepos = useBlocks(path, type);
+  const blockRepos = useFilteredBlocksRepos(path, type);
 
   return (
     <ActionMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -80,7 +80,7 @@ const BlockItem = ({
 }: {
   block: Block;
   value: Block;
-  repo: BlocksInfo;
+  repo: BlocksRepo;
   setIsOpen: (isOpen: boolean) => void;
   onChange: (newType: Block) => void;
 }) => {

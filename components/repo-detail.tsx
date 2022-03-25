@@ -229,14 +229,12 @@ export function RepoDetail(props: RepoDetailProps) {
                   </div>
                 </div>
               ) : (
-                <div>
-                  <Sidebar
-                    owner={owner}
-                    repo={repo}
-                    files={files}
-                    activeFilePath={path}
-                  />
-                </div>
+                <Sidebar
+                  owner={owner}
+                  repo={repo}
+                  files={files}
+                  activeFilePath={path}
+                />
               )}
             </motion.div>
           )}

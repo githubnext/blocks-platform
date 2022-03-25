@@ -304,24 +304,13 @@ export function useManageBlock({
   const router = useRouter();
   const { blockKey = "" } = router.query;
 
-  // load list of example blocks
-  const { data: allBlocksInfo = [] } = useGetBlocksInfo();
-  const exampleBlocks = (exampleBlocksInfo?.blocks || []).map(
-    (block) =>
-      ({
-        ...block,
-        owner: exampleBlocksInfo.owner,
-        repo: exampleBlocksInfo.repo,
-      } as Block)
-  );
+  const allBlocksInfo = useBlocks(path, isFolder ? "folder" : "file");
+  const exampleBlocks =
+    allBlocksInfo.find(
+      (b) =>
+        b.owner === exampleBlocksInfo.owner && b.repo === exampleBlocksInfo.repo
+    )?.blocks ?? [];
   const extension = (path as string).split(".").slice(-1)[0];
-  const relevantExampleBlocksInfo = exampleBlocks.filter(
-    (d) =>
-      d.type === (isFolder ? "folder" : "file") &&
-      (!d.extensions ||
-        d.extensions?.includes("*") ||
-        d.extensions?.includes(extension))
-  );
 
   // find default block
   const tryToGetBlockFromKey = (key = ""): Block | null => {
@@ -344,13 +333,11 @@ export function useManageBlock({
   // first, default to block from url param
   const blockInUrl = tryToGetBlockFromKey(blockKey as string);
   const blockFromMetadata = tryToGetBlockFromKey(storedDefaultBlock);
-  let fallbackDefaultBlock = overrideDefaultBlocks[extension]
-    ? relevantExampleBlocksInfo.find(
-        (b) => b.id === overrideDefaultBlocks[extension]
-      )
+  let fallbackDefaultBlock: Block = overrideDefaultBlocks[extension]
+    ? exampleBlocks.find((b) => b.id === overrideDefaultBlocks[extension])
     : // the first example block is always the code block,
       // so let's default to the second one, when available
-      relevantExampleBlocksInfo[1] || relevantExampleBlocksInfo[0];
+      exampleBlocks[1] || exampleBlocks[0];
 
   if (
     !fallbackDefaultBlock ||
@@ -426,7 +413,11 @@ export function useBlocks(
           );
           return {
             ...repo,
-            blocks: filteredBlocks,
+            blocks: filteredBlocks.map((b) => ({
+              ...b,
+              owner: repo.owner,
+              repo: repo.repo,
+            })),
           };
         })
         .filter((repo) => repo?.blocks?.length),

@@ -2,46 +2,32 @@ import {
   InfoIcon,
   RepoIcon,
   SearchIcon,
-  StarFillIcon,
   VerifiedIcon,
 } from "@primer/octicons-react";
 import { Link, ActionList, ActionMenu, Text, TextInput } from "@primer/react";
-import { BlocksInfo, useBlocks } from "hooks";
-import { useEffect, useState } from "react";
+import { BlocksRepo, useFilteredBlocksRepos } from "hooks";
+import { useState } from "react";
 
 interface BlockPickerProps {
-  blocks: Block[];
-  value: Block;
-  defaultBlock?: Block;
-  path: string;
+  button?: React.ReactNode;
+  value?: Block;
+  path?: string;
   type: "file" | "folder";
   onChange: (newType: Block) => void;
 }
 
 export default function BlockPicker(props: BlockPickerProps) {
-  const { value, defaultBlock, path, type, onChange } = props;
+  const { button, value, path, type, onChange } = props;
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const lowerSearchTerm = searchTerm.toLowerCase();
 
-  const [hasLoaded, setHasLoaded] = useState(false);
-  useEffect(() => {
-    if (defaultBlock) {
-      // ignore on initial load
-      if (!hasLoaded) {
-        setHasLoaded(true);
-      } else {
-        onChange(defaultBlock);
-      }
-    }
-  }, [path]);
-
-  const blockRepos = useBlocks(path, type);
+  const blockRepos = useFilteredBlocksRepos(path, type);
 
   return (
     <ActionMenu open={isOpen} onOpenChange={setIsOpen}>
       <ActionMenu.Button aria-expanded={isOpen}>
-        {`Block: ${value?.title}`}
+        {button ?? `Block: ${value?.title}`}
       </ActionMenu.Button>
 
       <ActionMenu.Overlay width="medium">
@@ -94,7 +80,7 @@ const BlockItem = ({
 }: {
   block: Block;
   value: Block;
-  repo: BlocksInfo;
+  repo: BlocksRepo;
   setIsOpen: (isOpen: boolean) => void;
   onChange: (newType: Block) => void;
 }) => {

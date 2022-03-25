@@ -53,6 +53,9 @@ export const defaultBlocksRepo = {
       "extensions": [
         "*"
       ],
+      "matches": [
+        "*"
+      ],
       "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/Aside.jsx"
     },
     {
@@ -64,6 +67,9 @@ export const defaultBlocksRepo = {
       "entry": "/src/blocks/file-blocks/excalidraw/index.tsx",
       "extensions": [
         "excalidraw"
+      ],
+      "matches": [
+        "*.excalidraw"
       ],
       "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/drawing.excalidraw"
     },
@@ -78,6 +84,10 @@ export const defaultBlocksRepo = {
         "html",
         "svelte"
       ],
+      "matches": [
+        "*.html",
+        "*.svelte"
+      ],
       "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/photos.html"
     },
     {
@@ -89,6 +99,9 @@ export const defaultBlocksRepo = {
       "entry": "/src/blocks/file-blocks/css.tsx",
       "extensions": [
         "css"
+      ],
+      "matches": [
+        "*.css"
       ],
       "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/global.css"
     },
@@ -106,6 +119,13 @@ export const defaultBlocksRepo = {
         "gif",
         "svg"
       ],
+      "matches": [
+        "*.png",
+        "*.jpg",
+        "*.jpeg",
+        "*.gif",
+        "*.svg"
+      ],
       "example_path": "https://github.com/pmndrs/react-spring/blob/HEAD/assets/projects/aragon.png?raw=true"
     },
     {
@@ -122,6 +142,15 @@ export const defaultBlocksRepo = {
         "yaml",
         "yml"
       ],
+      "matches": [
+        "*.json",
+        "*.webmanifest",
+        "webmanifest",
+        "prettierrc",
+        "*.prettierrc",
+        "*.yaml",
+        "*.yml"
+      ],
       "example_path": "https://github.com/d3/d3-geo/blob/main/package.json"
     },
     {
@@ -135,6 +164,10 @@ export const defaultBlocksRepo = {
         "gltf",
         "glb"
       ],
+      "matches": [
+        "*.gltf",
+        "*.glb"
+      ],
       "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/avocado.glb"
     },
     {
@@ -146,6 +179,9 @@ export const defaultBlocksRepo = {
       "entry": "/src/blocks/file-blocks/flat.tsx",
       "extensions": [
         "csv"
+      ],
+      "matches": [
+        "*.csv"
       ],
       "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/data.csv"
     },
@@ -159,6 +195,9 @@ export const defaultBlocksRepo = {
       "extensions": [
         "json"
       ],
+      "matches": [
+        "*.json"
+      ],
       "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/poll.json"
     },
     {
@@ -170,6 +209,9 @@ export const defaultBlocksRepo = {
       "entry": "/src/blocks/file-blocks/charts/index.tsx",
       "extensions": [
         "csv"
+      ],
+      "matches": [
+        "*.csv"
       ],
       "example_path": "https://github.com/the-pudding/data/blob/master/pockets/measurements.csv"
     },
@@ -184,6 +226,10 @@ export const defaultBlocksRepo = {
         "md",
         "mdx"
       ],
+      "matches": [
+        "*.md",
+        "*.mdx"
+      ],
       "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/README.md"
     },
     {
@@ -197,6 +243,10 @@ export const defaultBlocksRepo = {
         "jsx",
         "tsx"
       ],
+      "matches": [
+        "*.jsx",
+        "*.tsx"
+      ],
       "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/Aside.jsx"
     },
     {
@@ -209,6 +259,9 @@ export const defaultBlocksRepo = {
       "extensions": [
         "json"
       ],
+      "matches": [
+        "*.json"
+      ],
       "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/queries.json"
     },
     {
@@ -220,6 +273,9 @@ export const defaultBlocksRepo = {
       "entry": "/src/blocks/file-blocks/processing.tsx",
       "extensions": [
         "js"
+      ],
+      "matches": [
+        "*.js"
       ],
       "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/processing-sketch.js"
     },

@@ -19,7 +19,11 @@ import { GeneralBlock } from "./general-block";
 import { UpdateCodeModal } from "./UpdateCodeModal";
 import { FileContext, FolderContext } from "@githubnext/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { ScreenFullIcon, ScreenNormalIcon } from "@primer/octicons-react";
+import {
+  PlusIcon,
+  ScreenFullIcon,
+  ScreenNormalIcon,
+} from "@primer/octicons-react";
 
 const BlockPicker = dynamic(() => import("./block-picker"), { ssr: false });
 
@@ -39,15 +43,12 @@ export function RepoDetail(props: RepoDetailProps) {
     fileRef,
     mode,
     branch: branchName,
-  } = router.query;
+  } = router.query as Record<string, string>;
   const [requestedMetadata, setRequestedMetadata] = useState(null);
   const isFullscreen = mode === "fullscreen";
   // need this to only animate chrome in on fullscreen mode change, but not on load
 
-  const { data: branches } = useGetBranches({
-    owner: owner as string,
-    repo: repo as string,
-  });
+  const { data: branches } = useGetBranches({ owner, repo });
   const branch = useMemo(
     () => branches?.find((b) => b.name === branchName),
     [branches, branchName]
@@ -55,10 +56,10 @@ export function RepoDetail(props: RepoDetailProps) {
 
   const context = useMemo(
     () => ({
-      repo: repo as string,
-      owner: owner as string,
-      path: path as string,
-      sha: (fileRef as string) || "HEAD",
+      repo,
+      owner,
+      path,
+      sha: fileRef || "HEAD",
     }),
     [repo, owner, path, fileRef]
   );
@@ -87,31 +88,28 @@ export function RepoDetail(props: RepoDetailProps) {
     data: repoInfo,
     status: repoInfoStatus,
     error: repoInfoError,
-  } = useRepoInfo({
-    repo: repo as string,
-    owner: owner as string,
-  });
+  } = useRepoInfo({ repo, owner });
 
   const {
     data: files,
     status: repoFilesStatus,
     error: repoFilesError,
   } = useRepoFiles({
-    repo: repo as string,
-    owner: owner as string,
-    sha: (branchName as string) || branch?.name,
+    repo,
+    owner,
+    sha: branchName || branch?.name,
   });
 
   const isFolder =
     repoFilesStatus === "success"
       ? files?.find((d) => d.path === path)?.type !== "blob"
-      : !(path as string).includes("."); // if there's an extension it's a file
+      : !path.includes("."); // if there's an extension it's a file
 
   const { metadata, onUpdateMetadata } = useMetadata({
-    owner: owner as string,
-    repo: repo as string,
+    owner,
+    repo,
     metadataPath: `.github/blocks/all.json`,
-    filePath: path as string,
+    filePath: path,
     token,
     branchName: branch?.name,
   });
@@ -119,13 +117,18 @@ export function RepoDetail(props: RepoDetailProps) {
   const {
     block: rawBlock,
     setBlock,
-    blockOptions,
     defaultBlock,
   } = useManageBlock({
-    path: path as string,
-    storedDefaultBlock: metadata[path as string]?.default,
+    path,
+    storedDefaultBlock: metadata[path]?.default,
     isFolder,
   });
+
+  useEffect(() => {
+    if (defaultBlock) {
+      setBlock(defaultBlock);
+    }
+  }, [path]);
 
   const block = useMemo(
     () => rawBlock,
@@ -191,13 +194,13 @@ export function RepoDetail(props: RepoDetailProps) {
             >
               <GitHubHeader />
               <RepoHeader
-                owner={owner as string}
-                repo={repo as string}
+                owner={owner}
+                repo={repo}
                 // @ts-ignore
                 description={repoInfo?.description}
                 // @ts-ignore
                 contributors={repoInfo?.contributors}
-                branchName={branchName as string}
+                branchName={branchName}
                 branches={branches || []}
                 onChangeBranch={setBranchName}
               />
@@ -227,10 +230,10 @@ export function RepoDetail(props: RepoDetailProps) {
                 </div>
               ) : (
                 <Sidebar
-                  owner={owner as string}
-                  repo={repo as string}
+                  owner={owner}
+                  repo={repo}
                   files={files}
-                  activeFilePath={path as string}
+                  activeFilePath={path}
                 />
               )}
             </motion.div>
@@ -251,9 +254,7 @@ export function RepoDetail(props: RepoDetailProps) {
               >
                 <Box display="flex" alignItems="center" className="space-x-2">
                   <BlockPicker
-                    blocks={blockOptions}
-                    defaultBlock={defaultBlock}
-                    path={path as string}
+                    path={path}
                     type={isFolder ? "folder" : "file"}
                     onChange={setBlock}
                     value={block}
@@ -263,8 +264,8 @@ export function RepoDetail(props: RepoDetailProps) {
                       onClick={() => {
                         const newMetadata = {
                           ...metadata,
-                          [path as string]: {
-                            ...metadata[path as string],
+                          [path]: {
+                            ...metadata[path],
                             default: blockKey,
                           },
                         };
@@ -347,7 +348,7 @@ export function RepoDetail(props: RepoDetailProps) {
             }}
             // @ts-ignore
             context={context}
-            path={path as string}
+            path={path}
             isLoaded={!!block.id && repoFilesStatus !== "loading"}
           />
         </div>
@@ -365,7 +366,7 @@ export function RepoDetail(props: RepoDetailProps) {
             >
               <ActivityFeed
                 context={context}
-                branchName={(branchName as string) || branch?.name}
+                branchName={branchName || branch?.name}
               />
             </motion.div>
           )}
@@ -418,7 +419,7 @@ function BlockRender({
       key={block.id}
       // @ts-ignore
       context={context}
-      theme={(theme as string) || "light"}
+      theme={theme || "light"}
       block={block}
       token={token}
       branchName={branchName}

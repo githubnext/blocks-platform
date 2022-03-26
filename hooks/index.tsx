@@ -314,6 +314,7 @@ export function useManageBlock({
       (b) =>
         b.owner === exampleBlocksRepo.owner && b.repo === exampleBlocksRepo.repo
     )?.blocks ?? [];
+  console.log({ blocksRepos, exampleBlocks });
   const extension = (path as string).split(".").slice(-1)[0];
 
   // find default block
@@ -396,29 +397,37 @@ export function useFilteredBlocksRepos(
   path: string | undefined = undefined,
   type: "file" | "folder" = "file"
 ) {
-  const { data: allBlockRepos = [] } = useAllBlocksRepos();
-
-  const extension = path?.split(".")?.pop();
+  const { data: allBlockRepos = [exampleBlocksRepo] } = useAllBlocksRepos();
   const filteredBlocks = useMemo(
     () =>
       allBlockRepos
         .map((repo) => {
           const filteredBlocks = repo.blocks.filter((block: Block) => {
             // don't include example Blocks
-            const isExampleBlock = [
-              "Example File Block",
-              "Example Folder Block",
-            ].includes(block.title);
+            if (
+              block.title === "Example File Block" ||
+              block.title === "Example Folder Block"
+            ) {
+              return false;
+            }
 
-            const extensionOrPathMatch = Boolean(block.matches)
-              ? pm(block.matches)(path)
-              : block.type === type &&
-                (extension === undefined ||
-                  !block.extensions ||
-                  block.extensions?.includes("*") ||
-                  block.extensions?.includes(extension));
+            if (block.type !== type) return false;
 
-            return !isExampleBlock && extensionOrPathMatch;
+            if (path === undefined) return true;
+
+            if (Boolean(block.matches)) {
+              return pm(block.matches, { bash: true, dot: true })(path);
+            }
+
+            if (block.extensions) {
+              const extension = path.split(".").pop();
+              return (
+                block.extensions.includes("*") ||
+                block.extensions.includes(extension)
+              );
+            }
+
+            return true;
           });
           return {
             ...repo,
@@ -430,7 +439,7 @@ export function useFilteredBlocksRepos(
           };
         })
         .filter((repo) => repo?.blocks?.length),
-    [allBlockRepos, extension]
+    [allBlockRepos, path]
   );
 
   return filteredBlocks;

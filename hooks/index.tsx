@@ -314,7 +314,6 @@ export function useManageBlock({
       (b) =>
         b.owner === exampleBlocksRepo.owner && b.repo === exampleBlocksRepo.repo
     )?.blocks ?? [];
-  console.log({ blocksRepos, exampleBlocks });
   const extension = (path as string).split(".").slice(-1)[0];
 
   // find default block

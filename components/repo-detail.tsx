@@ -128,7 +128,7 @@ export function RepoDetail(props: RepoDetailProps) {
     if (defaultBlock) {
       setBlock(defaultBlock);
     }
-  }, [path]);
+  }, [getBlockKey(defaultBlock), path]);
 
   const block = useMemo(
     () => rawBlock,

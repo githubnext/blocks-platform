@@ -1,13 +1,46 @@
 import { Box } from "@primer/react";
 import { extent, scaleLinear, timeFormat } from "d3";
+import type { ScaleLinear } from "d3";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 import { IoFolderOpenOutline, IoFolderOutline } from "react-icons/io5";
 import { VscSymbolFile } from "react-icons/vsc";
 import { getNestedFileTree } from "@githubnext/utils";
-import languageColors from "./../language-colors.json";
+import type { RepoFiles } from "@githubnext/utils";
+import languageColors from "../language-colors.json";
 import { Tooltip } from "./Tooltip";
+
+// defined in @githubnext/utils but not exported
+interface NestedFileTree {
+  children: NestedFileTree[];
+  name: string;
+  path: string;
+  parent: string;
+  size: number;
+  type: string;
+}
+
+type User = {
+  id: string;
+  path: string;
+};
+
+type FileChange = {
+  date: number;
+};
+
+type FileChanges = Record<string, FileChange>;
+
+type FileChangesScale = ScaleLinear<number, number, never>;
+
+type SidebarProps = {
+  owner: string;
+  repo: string;
+  files: RepoFiles;
+  fileChanges?: FileChanges;
+  activeFilePath: string;
+};
 
 const doShowPills = false;
 export const Sidebar = ({
@@ -16,7 +49,7 @@ export const Sidebar = ({
   fileChanges = {},
   files = [],
   activeFilePath = "",
-}) => {
+}: SidebarProps) => {
   if (!files.map) return null;
 
   const nestedFiles = useMemo(() => {
@@ -30,9 +63,11 @@ export const Sidebar = ({
   const fileChangesScale = useMemo(() => {
     const datesExtent = extent(
       Object.values(fileChanges),
-      (d) => new Date(d.date)
+      (d: FileChange) => new Date(d.date)
     );
-    return scaleLinear().domain(datesExtent).range(["#aaa", "#F9FAFB"]);
+    return scaleLinear()
+      .domain(datesExtent)
+      .range(["#aaa", "#F9FAFB"] as Iterable<number>);
   }, [fileChanges]);
 
   return (
@@ -55,7 +90,18 @@ export const Sidebar = ({
   );
 };
 
-const Item = (props) => {
+type ItemProps = {
+  name: string;
+  path: string;
+  children: NestedFileTree[];
+  activeFilePath: string;
+  allUsers: User[];
+  fileChangesScale: FileChangesScale;
+  fileChanges: FileChanges;
+  canCollapse?: boolean;
+};
+
+const Item = (props: ItemProps) => {
   if (props.children.length) {
     return (
       <Folder
@@ -78,6 +124,17 @@ const Item = (props) => {
   );
 };
 
+type FolderProps = {
+  name: string;
+  path: string;
+  children: NestedFileTree[];
+  activeFilePath: string;
+  allUsers: User[];
+  fileChangesScale: FileChangesScale;
+  fileChanges: FileChanges;
+  canCollapse?: boolean;
+};
+
 const Folder = ({
   name,
   path,
@@ -87,7 +144,7 @@ const Folder = ({
   fileChangesScale,
   fileChanges,
   canCollapse = true,
-}) => {
+}: FolderProps) => {
   const [isExpanded, setIsExpanded] = useState(!canCollapse);
   const router = useRouter();
   const query = router.query;
@@ -104,7 +161,9 @@ const Folder = ({
     );
 
     const mostRecentChange = relatedChangePaths.sort(
-      (a, b) => new Date(fileChanges[a].date) - new Date(fileChanges[b].date)
+      (a, b) =>
+        Number(new Date(fileChanges[a].date)) -
+        Number(new Date(fileChanges[b].date))
     )[0];
     return mostRecentChange && fileChanges[mostRecentChange].date;
   }, [path, fileChangesScale]);

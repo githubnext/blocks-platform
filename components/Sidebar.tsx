@@ -32,7 +32,7 @@ type FileChange = {
 
 type FileChanges = Record<string, FileChange>;
 
-type FileChangesScale = ScaleLinear<number, number, never>;
+type FileChangesScale = ScaleLinear<string, string>;
 
 type SidebarProps = {
   owner: string;
@@ -40,6 +40,7 @@ type SidebarProps = {
   files: RepoFiles;
   fileChanges?: FileChanges;
   activeFilePath: string;
+  componentAtPath?: { component: React.ReactNode; path: string };
 };
 
 const doShowPills = false;
@@ -49,6 +50,7 @@ export const Sidebar = ({
   fileChanges = {},
   files = [],
   activeFilePath = "",
+  componentAtPath,
 }: SidebarProps) => {
   if (!files.map) return null;
 
@@ -65,9 +67,9 @@ export const Sidebar = ({
       Object.values(fileChanges),
       (d: FileChange) => new Date(d.date)
     );
-    return scaleLinear()
+    return scaleLinear<string, string>()
       .domain(datesExtent)
-      .range(["#aaa", "#F9FAFB"] as Iterable<number>);
+      .range(["#aaa", "#F9FAFB"]);
   }, [fileChanges]);
 
   return (
@@ -83,6 +85,7 @@ export const Sidebar = ({
             fileChangesScale={fileChangesScale}
             fileChanges={fileChanges}
             canCollapse={false}
+            componentAtPath={componentAtPath}
           />
         </div>
       </Box>
@@ -99,26 +102,18 @@ type ItemProps = {
   fileChangesScale: FileChangesScale;
   fileChanges: FileChanges;
   canCollapse?: boolean;
+  componentAtPath?: { component: React.ReactNode; path: string };
 };
 
 const Item = (props: ItemProps) => {
   if (props.children.length) {
-    return (
-      <Folder
-        {...props}
-        activeFilePath={props.activeFilePath}
-        allUsers={props.allUsers}
-        fileChangesScale={props.fileChangesScale}
-        fileChanges={props.fileChanges}
-      />
-    );
+    return <Folder {...props} />;
   }
   return (
     <File
       {...props}
       isActive={props.activeFilePath === props.path}
       activeUsers={props.allUsers.filter((user) => user.path === props.path)}
-      fileChangesScale={props.fileChangesScale}
       date={props.fileChanges[props.path]?.date}
     />
   );
@@ -133,6 +128,7 @@ type FolderProps = {
   fileChangesScale: FileChangesScale;
   fileChanges: FileChanges;
   canCollapse?: boolean;
+  componentAtPath?: { component: React.ReactNode; path: string };
 };
 
 const Folder = ({
@@ -144,10 +140,17 @@ const Folder = ({
   fileChangesScale,
   fileChanges,
   canCollapse = true,
+  componentAtPath,
 }: FolderProps) => {
   const [isExpanded, setIsExpanded] = useState(!canCollapse);
+
   const router = useRouter();
   const query = router.query;
+
+  useEffect(() => {
+    if (!isExpanded && componentAtPath && componentAtPath.path.startsWith(path))
+      setIsExpanded(true);
+  });
 
   useEffect(() => {
     if (!isExpanded && activeFilePath?.includes(name)) {
@@ -235,13 +238,32 @@ const Folder = ({
                 allUsers={allUsers}
                 fileChangesScale={fileChangesScale}
                 fileChanges={fileChanges}
+                componentAtPath={componentAtPath}
               />
             ))}
+          {Boolean(componentAtPath) && path === componentAtPath.path && (
+            <div className="flex items-center flex-1 max-w-full py-1">
+              <div className="mr-2">
+                <VscSymbolFile className="text-gray-400" />
+              </div>
+              <div className="flex-1 mr-2">{componentAtPath.component}</div>
+            </div>
+          )}
         </div>
       )}
     </Box>
   );
 };
+
+type FileProps = {
+  name: string;
+  path: string;
+  activeUsers: User[];
+  fileChangesScale: FileChangesScale;
+  date?: number;
+  isActive: boolean;
+};
+
 const File = ({
   name,
   path,
@@ -249,7 +271,7 @@ const File = ({
   fileChangesScale,
   date,
   isActive,
-}) => {
+}: FileProps) => {
   const router = useRouter();
   const query = router.query;
 
@@ -329,12 +351,21 @@ const formatDate = (d) =>
     getOrdinal(+timeFormat("%d")(d)),
     timeFormat(", %Y")(d),
   ].join("");
-const DateChangedIndicator = ({ date, fileChangesScale }) => {
+
+type DateChangedIndicatorProps = {
+  date?: number;
+  fileChangesScale: FileChangesScale;
+};
+
+const DateChangedIndicator = ({
+  date,
+  fileChangesScale,
+}: DateChangedIndicatorProps) => {
   if (!date) return null;
   if (!fileChangesScale) return null;
 
   const backgroundColor = useMemo(() => {
-    return date && fileChangesScale(new Date(date));
+    return fileChangesScale(new Date(date));
   }, [fileChangesScale, date]);
 
   return (

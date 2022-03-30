@@ -1,4 +1,4 @@
-import { Box, Button, Link, useTheme } from "@primer/react";
+import { Box, Button, Link, TextInput, useTheme } from "@primer/react";
 import { default as NextLink } from "next/link";
 import {
   getBlockKey,
@@ -12,7 +12,7 @@ import type { Branch } from "ghapi";
 import type { QueryStatus } from "react-query";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { ActivityFeed } from "./ActivityFeed";
 import { GitHubHeader } from "./github-header";
 import { RepoHeader } from "./repo-header";
@@ -120,6 +120,16 @@ function FileTreePane({
   files,
   path,
 }: FileTreePaneProps) {
+  const newFileInputRef = useRef<HTMLInputElement>(null);
+  const [isAddingNewFile, setIsAddingNewFile] = useState<
+    undefined | { block: Block; path: string; name: string }
+  >(undefined);
+  useEffect(() => {
+    if (isAddingNewFile && newFileInputRef.current) {
+      newFileInputRef.current.focus();
+    }
+  }, [isAddingNewFile]);
+
   return (
     <AnimatePresence initial={false}>
       {!isFullscreen && (
@@ -141,12 +151,66 @@ function FileTreePane({
               </div>
             </div>
           ) : (
-            <Sidebar
-              owner={owner}
-              repo={repo}
-              files={files}
-              activeFilePath={path}
-            />
+            <Box>
+              <Box
+                bg="canvas.subtle"
+                p={2}
+                borderBottom="1px solid"
+                borderColor="border.muted"
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                <BlockPicker
+                  button={
+                    <>
+                      <PlusIcon /> New File
+                    </>
+                  }
+                  type={"file"}
+                  onChange={(block) =>
+                    // TODO(jaked) if selected path is a file, `path` should be the parent folder
+                    setIsAddingNewFile({ block, path, name: "" })
+                  }
+                />
+              </Box>
+              <Sidebar
+                owner={owner}
+                repo={repo}
+                files={files}
+                activeFilePath={path}
+                componentAtPath={
+                  isAddingNewFile
+                    ? {
+                        component: (
+                          <TextInput
+                            ref={newFileInputRef}
+                            block={true}
+                            value={isAddingNewFile.name}
+                            onChange={(e) =>
+                              setIsAddingNewFile({
+                                ...isAddingNewFile,
+                                name: e.target.value,
+                              })
+                            }
+                            onBlur={() => {
+                              setIsAddingNewFile(undefined);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                setIsAddingNewFile(undefined);
+                              } else if (e.key === "Escape") {
+                                setIsAddingNewFile(undefined);
+                              }
+                            }}
+                          />
+                        ),
+                        path: isAddingNewFile.path,
+                      }
+                    : undefined
+                }
+              />
+            </Box>
           )}
         </motion.div>
       )}

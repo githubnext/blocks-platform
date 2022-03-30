@@ -178,6 +178,7 @@ const Folder = ({
           pathname: router.pathname,
           query: {
             ...query,
+            blockKey: isActive ? query.blockKey : undefined,
             path,
             fileRef: null,
           },
@@ -260,6 +261,7 @@ const File = ({
         pathname: router.pathname,
         query: {
           ...query,
+          blockKey: isActive ? query.blockKey : undefined,
           path,
           fileRef: null,
         },

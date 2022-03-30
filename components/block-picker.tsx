@@ -22,7 +22,15 @@ export default function BlockPicker(props: BlockPickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const lowerSearchTerm = searchTerm.toLowerCase();
 
-  const blockRepos = useFilteredBlocksRepos(path, type);
+  const { data: blockRepos } = useFilteredBlocksRepos(path, type);
+
+  if (!blockRepos) {
+    return (
+      <ActionMenu open={false}>
+        <ActionMenu.Button>{button ?? `Block`}</ActionMenu.Button>
+      </ActionMenu>
+    );
+  }
 
   return (
     <ActionMenu open={isOpen} onOpenChange={setIsOpen}>

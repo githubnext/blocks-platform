@@ -157,12 +157,8 @@ function FileTreePane({
 type BlockPaneProps = {
   path: string;
   isFolder: boolean;
-  setBlock: (block: Block) => void;
-  block: Block;
-  isDefaultBlock: boolean;
   token: string;
   metadata: any;
-  blockKey: string;
   setRequestedMetadata: (metadata: any) => void;
   isFullscreen: boolean;
   context: Context;
@@ -176,12 +172,8 @@ type BlockPaneProps = {
 function BlockPane({
   path,
   isFolder,
-  setBlock,
-  block,
-  isDefaultBlock,
   token,
   metadata,
-  blockKey,
   setRequestedMetadata,
   isFullscreen,
   context,
@@ -192,6 +184,35 @@ function BlockPane({
   branchName,
 }: BlockPaneProps) {
   const router = useRouter();
+
+  const manageBlockResult = useManageBlock({
+    path,
+    storedDefaultBlock: metadata[path]?.default,
+    isFolder,
+  });
+
+  useEffect(() => {
+    if (manageBlockResult.data) {
+      const defaultBlock = manageBlockResult.data.defaultBlock;
+      if (defaultBlock) {
+        setBlock(defaultBlock);
+      }
+    }
+  }, [
+    manageBlockResult.data && getBlockKey(manageBlockResult.data.defaultBlock),
+    path,
+  ]);
+
+  if (!manageBlockResult.data) {
+    return <div className="flex-1" />;
+  }
+
+  const { block, setBlock, defaultBlock } = manageBlockResult.data;
+
+  const blockKey = getBlockKey(block);
+  const defaultBlockKey = getBlockKey(defaultBlock);
+  const isDefaultBlock = defaultBlockKey === blockKey;
+
   return (
     <div className="flex-1 overflow-hidden">
       <div className="flex-none top-0 z-10">
@@ -427,30 +448,6 @@ export function RepoDetail(props: RepoDetailProps) {
     branchName: branch?.name,
   });
 
-  const {
-    block: rawBlock,
-    setBlock,
-    defaultBlock,
-  } = useManageBlock({
-    path,
-    storedDefaultBlock: metadata[path]?.default,
-    isFolder,
-  });
-
-  useEffect(() => {
-    if (defaultBlock) {
-      setBlock(defaultBlock);
-    }
-  }, [getBlockKey(defaultBlock), path]);
-
-  const block = useMemo(
-    () => rawBlock,
-    [rawBlock.owner, rawBlock.repo, rawBlock.id]
-  );
-  const blockKey = getBlockKey(block);
-  const defaultBlockKey = getBlockKey(defaultBlock);
-  const isDefaultBlock = defaultBlockKey === blockKey;
-
   const fileInfo = files?.find((d) => d.path === path);
   const size = fileInfo?.size || 0;
   const fileSizeLimit = 1500000; // 1.5Mb
@@ -500,12 +497,8 @@ export function RepoDetail(props: RepoDetailProps) {
           {...{
             path,
             isFolder,
-            setBlock,
-            block,
-            isDefaultBlock,
             token,
             metadata,
-            blockKey,
             setRequestedMetadata,
             isFullscreen,
             context,

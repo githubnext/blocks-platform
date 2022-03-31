@@ -422,7 +422,7 @@ export function useFilteredBlocksRepos(
       ...allBlocksReposResult,
       data: allBlocksReposResult.data
         .map((repo) => {
-          const filteredBlocks: Block[] = repo.blocks.filter((block: Block) => {
+          const filteredBlocks = repo.blocks.filter((block: Block) => {
             // don't include example Blocks
             if (
               block.title === "Example File Block" ||
@@ -449,12 +449,14 @@ export function useFilteredBlocksRepos(
 
             return true;
           });
-          const blocks: Block[] = filteredBlocks.map((b) => ({
-            ...b,
-            owner: repo.owner,
-            repo: repo.repo,
-          }));
-          return { ...repo, blocks };
+          return {
+            ...repo,
+            blocks: filteredBlocks.map((b) => ({
+              ...b,
+              owner: repo.owner,
+              repo: repo.repo,
+            })),
+          };
         })
         .filter((repo) => repo?.blocks?.length),
     };

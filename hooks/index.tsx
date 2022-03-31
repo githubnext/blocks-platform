@@ -300,7 +300,7 @@ interface UseManageBlockParams {
   isFolder: boolean;
 }
 
-type UseManageBlockResult = UseQueryResult<{
+export type UseManageBlockResult = UseQueryResult<{
   block: Block;
   setBlock: (block: Block) => void;
   defaultBlock: Block;
@@ -318,74 +318,82 @@ export function useManageBlock({
     path,
     isFolder ? "folder" : "file"
   );
-  if (!filteredBlocksReposResult.data)
-    return filteredBlocksReposResult as UseManageBlockResult;
-  const blocksRepos = filteredBlocksReposResult.data;
 
-  const exampleBlocks =
-    blocksRepos.find(
-      (b) =>
-        b.owner === exampleBlocksRepo.owner && b.repo === exampleBlocksRepo.repo
-    )?.blocks ?? [];
-  const extension = (path as string).split(".").slice(-1)[0];
+  switch (filteredBlocksReposResult.status) {
+    case "success": {
+      const blocksRepos = filteredBlocksReposResult.data;
 
-  // find default block
-  const tryToGetBlockFromKey = (key = ""): Block | null => {
-    let [blockOwner, blockRepo, blockId] = key.split("__");
-    if (!blockOwner) blockOwner = defaultFileBlock.owner;
-    if (!blockRepo) blockRepo = defaultFileBlock.repo;
-    const blocksRepo = blocksRepos.find(
-      (b) => b.owner === blockOwner && b.repo === blockRepo
-    );
-    const block = blocksRepo?.blocks.find((b) => b.id === blockId);
-    if (!block) return null;
-    if (isFolder !== (block.type === "folder")) return null;
-    return {
-      ...block,
-      owner: blocksRepo.owner,
-      repo: blocksRepo.repo,
-    };
-  };
+      const exampleBlocks =
+        blocksRepos.find(
+          (b) =>
+            b.owner === exampleBlocksRepo.owner &&
+            b.repo === exampleBlocksRepo.repo
+        )?.blocks ?? [];
+      const extension = (path as string).split(".").slice(-1)[0];
 
-  // first, default to block from url param
-  const blockInUrl = tryToGetBlockFromKey(blockKey as string);
-  const blockFromMetadata = tryToGetBlockFromKey(storedDefaultBlock);
-  let fallbackDefaultBlock: Block = overrideDefaultBlocks[extension]
-    ? exampleBlocks.find((b) => b.id === overrideDefaultBlocks[extension])
-    : // the first example block is always the code block,
-      // so let's default to the second one, when available
-      exampleBlocks[1] || exampleBlocks[0];
+      // find default block
+      const tryToGetBlockFromKey = (key = ""): Block | null => {
+        let [blockOwner, blockRepo, blockId] = key.split("__");
+        if (!blockOwner) blockOwner = defaultFileBlock.owner;
+        if (!blockRepo) blockRepo = defaultFileBlock.repo;
+        const blocksRepo = blocksRepos.find(
+          (b) => b.owner === blockOwner && b.repo === blockRepo
+        );
+        const block = blocksRepo?.blocks.find((b) => b.id === blockId);
+        if (!block) return null;
+        if (isFolder !== (block.type === "folder")) return null;
+        return {
+          ...block,
+          owner: blocksRepo.owner,
+          repo: blocksRepo.repo,
+        };
+      };
 
-  if (
-    !fallbackDefaultBlock ||
-    isFolder !== (fallbackDefaultBlock.type === "folder")
-  ) {
-    fallbackDefaultBlock = isFolder ? defaultFolderBlock : defaultFileBlock;
+      // first, default to block from url param
+      const blockInUrl = tryToGetBlockFromKey(blockKey as string);
+      const blockFromMetadata = tryToGetBlockFromKey(storedDefaultBlock);
+      let fallbackDefaultBlock: Block = overrideDefaultBlocks[extension]
+        ? exampleBlocks.find((b) => b.id === overrideDefaultBlocks[extension])
+        : // the first example block is always the code block,
+          // so let's default to the second one, when available
+          exampleBlocks[1] || exampleBlocks[0];
+
+      if (
+        !fallbackDefaultBlock ||
+        isFolder !== (fallbackDefaultBlock.type === "folder")
+      ) {
+        fallbackDefaultBlock = isFolder ? defaultFolderBlock : defaultFileBlock;
+      }
+
+      const defaultBlock = blockFromMetadata || fallbackDefaultBlock;
+      const block = blockInUrl || defaultBlock;
+
+      const setBlock = (block: Block) => {
+        if (!block) return;
+        router.push({
+          pathname: router.pathname,
+          query: {
+            ...router.query,
+            blockKey: getBlockKey(block),
+          },
+        });
+      };
+
+      return {
+        ...filteredBlocksReposResult,
+        data: {
+          block,
+          setBlock,
+          defaultBlock,
+        },
+      } as UseManageBlockResult;
+    }
+
+    default:
+      return filteredBlocksReposResult as UseManageBlockResult;
   }
-
-  const defaultBlock = blockFromMetadata || fallbackDefaultBlock;
-  const block = blockInUrl || defaultBlock;
-
-  const setBlock = (block: Block) => {
-    if (!block) return;
-    router.push({
-      pathname: router.pathname,
-      query: {
-        ...router.query,
-        blockKey: getBlockKey(block),
-      },
-    });
-  };
-
-  return {
-    ...filteredBlocksReposResult,
-    data: {
-      block,
-      setBlock,
-      defaultBlock,
-    },
-  } as UseManageBlockResult;
 }
+
 const overrideDefaultBlocks = {
   js: "code-block",
   ts: "code-block",
@@ -411,51 +419,56 @@ export function useSearchRepos(
 export function useFilteredBlocksRepos(
   path: string | undefined = undefined,
   type: "file" | "folder" = "file"
-) {
+): UseQueryResult<BlocksRepo[]> {
   const allBlocksReposResult = useAllBlocksRepos();
   return useMemo(() => {
-    if (!allBlocksReposResult.data) return allBlocksReposResult;
-    return {
-      ...allBlocksReposResult,
-      data: allBlocksReposResult.data
-        .map((repo) => {
-          const filteredBlocks = repo.blocks.filter((block: Block) => {
-            // don't include example Blocks
-            if (
-              block.title === "Example File Block" ||
-              block.title === "Example Folder Block"
-            ) {
-              return false;
-            }
+    switch (allBlocksReposResult.status) {
+      case "success":
+        return {
+          ...allBlocksReposResult,
+          data: allBlocksReposResult.data
+            .map((repo) => {
+              const filteredBlocks: Block[] = repo.blocks.filter(
+                (block: Block) => {
+                  // don't include example Blocks
+                  if (
+                    block.title === "Example File Block" ||
+                    block.title === "Example Folder Block"
+                  ) {
+                    return false;
+                  }
 
-            if (block.type !== type) return false;
+                  if (block.type !== type) return false;
 
-            if (path === undefined) return true;
+                  if (path === undefined) return true;
 
-            if (Boolean(block.matches)) {
-              return pm(block.matches, { bash: true, dot: true })(path);
-            }
+                  if (Boolean(block.matches)) {
+                    return pm(block.matches, { bash: true, dot: true })(path);
+                  }
 
-            if (block.extensions) {
-              const extension = path.split(".").pop();
-              return (
-                block.extensions.includes("*") ||
-                block.extensions.includes(extension)
+                  if (block.extensions) {
+                    const extension = path.split(".").pop();
+                    return (
+                      block.extensions.includes("*") ||
+                      block.extensions.includes(extension)
+                    );
+                  }
+
+                  return true;
+                }
               );
-            }
+              const blocks: Block[] = filteredBlocks.map((b) => ({
+                ...b,
+                owner: repo.owner,
+                repo: repo.repo,
+              }));
+              return { ...repo, blocks };
+            })
+            .filter((repo) => repo?.blocks?.length),
+        };
 
-            return true;
-          });
-          return {
-            ...repo,
-            blocks: filteredBlocks.map((b) => ({
-              ...b,
-              owner: repo.owner,
-              repo: repo.repo,
-            })),
-          };
-        })
-        .filter((repo) => repo?.blocks?.length),
-    };
+      default:
+        return allBlocksReposResult;
+    }
   }, [allBlocksReposResult.data, path]);
 }

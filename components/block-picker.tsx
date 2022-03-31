@@ -24,17 +24,9 @@ export default function BlockPicker(props: BlockPickerProps) {
 
   const { data: blockRepos } = useFilteredBlocksRepos(path, type);
 
-  if (!blockRepos) {
-    return (
-      <ActionMenu open={false}>
-        <ActionMenu.Button>{button ?? `Block`}</ActionMenu.Button>
-      </ActionMenu>
-    );
-  }
-
   return (
     <ActionMenu open={isOpen} onOpenChange={setIsOpen}>
-      <ActionMenu.Button aria-expanded={isOpen}>
+      <ActionMenu.Button aria-expanded={isOpen} disabled={!blockRepos}>
         {button ?? `Block: ${value?.title}`}
       </ActionMenu.Button>
 
@@ -51,26 +43,27 @@ export default function BlockPicker(props: BlockPickerProps) {
         <ActionList>
           <ActionList.Group title="Blocks" selectionVariant="single">
             <div className="max-h-[calc(100vh-20em)] overflow-auto">
-              {blockRepos.map((repo, index) => {
-                if (index > 15) return null;
-                return repo.blocks.map((block) => {
-                  if (
-                    searchTerm &&
-                    !block.title.toLowerCase().includes(lowerSearchTerm)
-                  )
-                    return null;
-                  return (
-                    <BlockItem
-                      key={block.entry}
-                      block={block}
-                      value={value}
-                      repo={repo}
-                      onChange={onChange}
-                      setIsOpen={setIsOpen}
-                    />
-                  );
-                });
-              })}
+              {blockRepos &&
+                blockRepos.map((repo, index) => {
+                  if (index > 15) return null;
+                  return repo.blocks.map((block) => {
+                    if (
+                      searchTerm &&
+                      !block.title.toLowerCase().includes(lowerSearchTerm)
+                    )
+                      return null;
+                    return (
+                      <BlockItem
+                        key={block.entry}
+                        block={block}
+                        value={value}
+                        repo={repo}
+                        onChange={onChange}
+                        setIsOpen={setIsOpen}
+                      />
+                    );
+                  });
+                })}
             </div>
           </ActionList.Group>
         </ActionList>

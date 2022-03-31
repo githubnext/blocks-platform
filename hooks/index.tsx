@@ -319,79 +319,74 @@ export function useManageBlock({
     isFolder ? "folder" : "file"
   );
 
-  switch (filteredBlocksReposResult.status) {
-    case "success": {
-      const blocksRepos = filteredBlocksReposResult.data;
+  if (filteredBlocksReposResult.status !== "success")
+    return filteredBlocksReposResult as UseManageBlockResult;
 
-      const exampleBlocks =
-        blocksRepos.find(
-          (b) =>
-            b.owner === exampleBlocksRepo.owner &&
-            b.repo === exampleBlocksRepo.repo
-        )?.blocks ?? [];
-      const extension = (path as string).split(".").slice(-1)[0];
+  const blocksRepos = filteredBlocksReposResult.data;
 
-      // find default block
-      const tryToGetBlockFromKey = (key = ""): Block | null => {
-        let [blockOwner, blockRepo, blockId] = key.split("__");
-        if (!blockOwner) blockOwner = defaultFileBlock.owner;
-        if (!blockRepo) blockRepo = defaultFileBlock.repo;
-        const blocksRepo = blocksRepos.find(
-          (b) => b.owner === blockOwner && b.repo === blockRepo
-        );
-        const block = blocksRepo?.blocks.find((b) => b.id === blockId);
-        if (!block) return null;
-        if (isFolder !== (block.type === "folder")) return null;
-        return {
-          ...block,
-          owner: blocksRepo.owner,
-          repo: blocksRepo.repo,
-        };
-      };
+  const exampleBlocks =
+    blocksRepos.find(
+      (b) =>
+        b.owner === exampleBlocksRepo.owner && b.repo === exampleBlocksRepo.repo
+    )?.blocks ?? [];
+  const extension = (path as string).split(".").slice(-1)[0];
 
-      // first, default to block from url param
-      const blockInUrl = tryToGetBlockFromKey(blockKey as string);
-      const blockFromMetadata = tryToGetBlockFromKey(storedDefaultBlock);
-      let fallbackDefaultBlock: Block = overrideDefaultBlocks[extension]
-        ? exampleBlocks.find((b) => b.id === overrideDefaultBlocks[extension])
-        : // the first example block is always the code block,
-          // so let's default to the second one, when available
-          exampleBlocks[1] || exampleBlocks[0];
+  // find default block
+  const tryToGetBlockFromKey = (key = ""): Block | null => {
+    let [blockOwner, blockRepo, blockId] = key.split("__");
+    if (!blockOwner) blockOwner = defaultFileBlock.owner;
+    if (!blockRepo) blockRepo = defaultFileBlock.repo;
+    const blocksRepo = blocksRepos.find(
+      (b) => b.owner === blockOwner && b.repo === blockRepo
+    );
+    const block = blocksRepo?.blocks.find((b) => b.id === blockId);
+    if (!block) return null;
+    if (isFolder !== (block.type === "folder")) return null;
+    return {
+      ...block,
+      owner: blocksRepo.owner,
+      repo: blocksRepo.repo,
+    };
+  };
 
-      if (
-        !fallbackDefaultBlock ||
-        isFolder !== (fallbackDefaultBlock.type === "folder")
-      ) {
-        fallbackDefaultBlock = isFolder ? defaultFolderBlock : defaultFileBlock;
-      }
+  // first, default to block from url param
+  const blockInUrl = tryToGetBlockFromKey(blockKey as string);
+  const blockFromMetadata = tryToGetBlockFromKey(storedDefaultBlock);
+  let fallbackDefaultBlock: Block = overrideDefaultBlocks[extension]
+    ? exampleBlocks.find((b) => b.id === overrideDefaultBlocks[extension])
+    : // the first example block is always the code block,
+      // so let's default to the second one, when available
+      exampleBlocks[1] || exampleBlocks[0];
 
-      const defaultBlock = blockFromMetadata || fallbackDefaultBlock;
-      const block = blockInUrl || defaultBlock;
-
-      const setBlock = (block: Block) => {
-        if (!block) return;
-        router.push({
-          pathname: router.pathname,
-          query: {
-            ...router.query,
-            blockKey: getBlockKey(block),
-          },
-        });
-      };
-
-      return {
-        ...filteredBlocksReposResult,
-        data: {
-          block,
-          setBlock,
-          defaultBlock,
-        },
-      } as UseManageBlockResult;
-    }
-
-    default:
-      return filteredBlocksReposResult as UseManageBlockResult;
+  if (
+    !fallbackDefaultBlock ||
+    isFolder !== (fallbackDefaultBlock.type === "folder")
+  ) {
+    fallbackDefaultBlock = isFolder ? defaultFolderBlock : defaultFileBlock;
   }
+
+  const defaultBlock = blockFromMetadata || fallbackDefaultBlock;
+  const block = blockInUrl || defaultBlock;
+
+  const setBlock = (block: Block) => {
+    if (!block) return;
+    router.push({
+      pathname: router.pathname,
+      query: {
+        ...router.query,
+        blockKey: getBlockKey(block),
+      },
+    });
+  };
+
+  return {
+    ...filteredBlocksReposResult,
+    data: {
+      block,
+      setBlock,
+      defaultBlock,
+    },
+  } as UseManageBlockResult;
 }
 
 const overrideDefaultBlocks = {
@@ -422,53 +417,46 @@ export function useFilteredBlocksRepos(
 ): UseQueryResult<BlocksRepo[]> {
   const allBlocksReposResult = useAllBlocksRepos();
   return useMemo(() => {
-    switch (allBlocksReposResult.status) {
-      case "success":
-        return {
-          ...allBlocksReposResult,
-          data: allBlocksReposResult.data
-            .map((repo) => {
-              const filteredBlocks: Block[] = repo.blocks.filter(
-                (block: Block) => {
-                  // don't include example Blocks
-                  if (
-                    block.title === "Example File Block" ||
-                    block.title === "Example Folder Block"
-                  ) {
-                    return false;
-                  }
+    if (allBlocksReposResult.status !== "success") return allBlocksReposResult;
+    return {
+      ...allBlocksReposResult,
+      data: allBlocksReposResult.data
+        .map((repo) => {
+          const filteredBlocks: Block[] = repo.blocks.filter((block: Block) => {
+            // don't include example Blocks
+            if (
+              block.title === "Example File Block" ||
+              block.title === "Example Folder Block"
+            ) {
+              return false;
+            }
 
-                  if (block.type !== type) return false;
+            if (block.type !== type) return false;
 
-                  if (path === undefined) return true;
+            if (path === undefined) return true;
 
-                  if (Boolean(block.matches)) {
-                    return pm(block.matches, { bash: true, dot: true })(path);
-                  }
+            if (Boolean(block.matches)) {
+              return pm(block.matches, { bash: true, dot: true })(path);
+            }
 
-                  if (block.extensions) {
-                    const extension = path.split(".").pop();
-                    return (
-                      block.extensions.includes("*") ||
-                      block.extensions.includes(extension)
-                    );
-                  }
-
-                  return true;
-                }
+            if (block.extensions) {
+              const extension = path.split(".").pop();
+              return (
+                block.extensions.includes("*") ||
+                block.extensions.includes(extension)
               );
-              const blocks: Block[] = filteredBlocks.map((b) => ({
-                ...b,
-                owner: repo.owner,
-                repo: repo.repo,
-              }));
-              return { ...repo, blocks };
-            })
-            .filter((repo) => repo?.blocks?.length),
-        };
+            }
 
-      default:
-        return allBlocksReposResult;
-    }
+            return true;
+          });
+          const blocks: Block[] = filteredBlocks.map((b) => ({
+            ...b,
+            owner: repo.owner,
+            repo: repo.repo,
+          }));
+          return { ...repo, blocks };
+        })
+        .filter((repo) => repo?.blocks?.length),
+    };
   }, [allBlocksReposResult.data, path]);
 }

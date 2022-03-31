@@ -8,6 +8,7 @@ import {
   useRepoFiles,
   useRepoInfo,
 } from "hooks";
+import type { UseManageBlockResult } from "hooks";
 import type { Branch } from "ghapi";
 import type { QueryStatus } from "react-query";
 import dynamic from "next/dynamic";
@@ -154,142 +155,196 @@ function FileTreePane({
   );
 }
 
-type BlockPaneProps = {
+type BlockPaneHeaderProps = {
+  manageBlockResult: UseManageBlockResult;
+  isFullscreen: boolean;
   path: string;
   isFolder: boolean;
-  setBlock: (block: Block) => void;
-  block: Block;
-  isDefaultBlock: boolean;
   token: string;
   metadata: any;
-  blockKey: string;
+  setRequestedMetadata: (metadata: any) => void;
+  context: Context;
+};
+
+function BlockPaneHeader({
+  manageBlockResult,
+  isFullscreen,
+  path,
+  isFolder,
+  token,
+  metadata,
+  setRequestedMetadata,
+  context,
+}: BlockPaneHeaderProps) {
+  const router = useRouter();
+
+  const { block, setBlock, defaultBlock } = manageBlockResult.data ?? {};
+  const isDefaultBlock = getBlockKey(block) === getBlockKey(defaultBlock);
+
+  return (
+    <div className="flex-none top-0 z-10">
+      <div>
+        <Box
+          bg="canvas.subtle"
+          p={2}
+          borderBottom="1px solid"
+          borderColor="border.muted"
+          display="flex"
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          <Box display="flex" alignItems="center" className="space-x-2">
+            <BlockPicker
+              path={path}
+              type={isFolder ? "folder" : "file"}
+              onChange={setBlock}
+              value={block}
+            />
+            {!isDefaultBlock && token && (
+              <Button
+                onClick={() => {
+                  const newMetadata = {
+                    ...metadata,
+                    [path]: {
+                      ...metadata[path],
+                      default: getBlockKey(block),
+                    },
+                  };
+                  setRequestedMetadata(newMetadata);
+                }}
+              >
+                Set as default for all users
+              </Button>
+            )}
+          </Box>
+          <AnimatePresence initial={false}>
+            {isFullscreen && (
+              <motion.div
+                initial={{ opacity: 0, y: 5 }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  transition: {
+                    type: "tween",
+                    duration: 0.1,
+                    delay: 0.2,
+                  },
+                }}
+                exit={{
+                  opacity: 0,
+                  y: 5,
+                  transition: {
+                    type: "tween",
+                    duration: 0.1,
+                    delay: 0.2,
+                  },
+                }}
+              >
+                <Box className="text-sm text-gray-500 ml-2">
+                  {context.owner}/{context.repo}: {path}
+                </Box>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <Link
+            href={`https://github.com/${context.owner}/${context.repo}/${
+              path ? `blob/${context.sha}/${path}` : ""
+            }`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="!text-gray-500 mr-3 ml-auto text-xs"
+          >
+            View on GitHub
+          </Link>
+          <NextLink
+            shallow
+            href={{
+              pathname: router.pathname,
+              query: {
+                ...router.query,
+                mode: isFullscreen ? undefined : "fullscreen",
+              },
+            }}
+          >
+            <span
+              className="text-gray-500 text-xs ml-2 mr-3 cursor-pointer"
+              title={isFullscreen ? "Exit fullscreen" : "Make fullscreen"}
+            >
+              {isFullscreen ? <ScreenNormalIcon /> : <ScreenFullIcon />}
+            </span>
+          </NextLink>
+        </Box>
+      </div>
+    </div>
+  );
+}
+
+type BlockPaneProps = {
+  files: RepoFiles;
+  path: string;
+  token: string;
+  metadata: any;
   setRequestedMetadata: (metadata: any) => void;
   isFullscreen: boolean;
   context: Context;
-  size: number;
-  isTooLarge: boolean;
   theme: string;
-  repoFilesStatus: QueryStatus;
   branchName: string;
 };
 
 function BlockPane({
+  files,
   path,
-  isFolder,
-  setBlock,
-  block,
-  isDefaultBlock,
   token,
   metadata,
-  blockKey,
   setRequestedMetadata,
   isFullscreen,
   context,
-  size,
-  isTooLarge,
   theme,
-  repoFilesStatus,
   branchName,
 }: BlockPaneProps) {
-  const router = useRouter();
+  const isFolder = files
+    ? files?.find((d) => d.path === path)?.type !== "blob"
+    : !path.includes("."); // if there's an extension it's a file
+
+  const fileInfo = files?.find((d) => d.path === path);
+  const size = fileInfo?.size || 0;
+  const fileSizeLimit = 1500000; // 1.5Mb
+  const isTooLarge = size > fileSizeLimit;
+
+  const manageBlockResult = useManageBlock({
+    path,
+    storedDefaultBlock: metadata[path]?.default,
+    isFolder,
+  });
+
+  useEffect(() => {
+    if (manageBlockResult.data) {
+      const { defaultBlock, setBlock } = manageBlockResult.data;
+      if (defaultBlock) {
+        setBlock(defaultBlock);
+      }
+    }
+  }, [
+    manageBlockResult.data && getBlockKey(manageBlockResult.data.defaultBlock),
+    path,
+  ]);
   return (
     <div className="flex-1 overflow-hidden">
-      <div className="flex-none top-0 z-10">
-        <div>
-          <Box
-            bg="canvas.subtle"
-            p={2}
-            borderBottom="1px solid"
-            borderColor="border.muted"
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Box display="flex" alignItems="center" className="space-x-2">
-              <BlockPicker
-                path={path}
-                type={isFolder ? "folder" : "file"}
-                onChange={setBlock}
-                value={block}
-              />
-              {!isDefaultBlock && token && (
-                <Button
-                  onClick={() => {
-                    const newMetadata = {
-                      ...metadata,
-                      [path]: {
-                        ...metadata[path],
-                        default: blockKey,
-                      },
-                    };
-                    setRequestedMetadata(newMetadata);
-                  }}
-                >
-                  Set as default for all users
-                </Button>
-              )}
-            </Box>
-            <AnimatePresence initial={false}>
-              {isFullscreen && (
-                <motion.div
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{
-                    opacity: 1,
-                    y: 0,
-                    transition: {
-                      type: "tween",
-                      duration: 0.1,
-                      delay: 0.2,
-                    },
-                  }}
-                  exit={{
-                    opacity: 0,
-                    y: 5,
-                    transition: {
-                      type: "tween",
-                      duration: 0.1,
-                      delay: 0.2,
-                    },
-                  }}
-                >
-                  <Box className="text-sm text-gray-500 ml-2">
-                    {context.owner}/{context.repo}: {path}
-                  </Box>
-                </motion.div>
-              )}
-            </AnimatePresence>
-            <Link
-              href={`https://github.com/${context.owner}/${context.repo}/${
-                path ? `blob/${context.sha}/${path}` : ""
-              }`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="!text-gray-500 mr-3 ml-auto text-xs"
-            >
-              View on GitHub
-            </Link>
-            <NextLink
-              shallow
-              href={{
-                pathname: router.pathname,
-                query: {
-                  ...router.query,
-                  mode: isFullscreen ? undefined : "fullscreen",
-                },
-              }}
-            >
-              <span
-                className="text-gray-500 text-xs ml-2 mr-3 cursor-pointer"
-                title={isFullscreen ? "Exit fullscreen" : "Make fullscreen"}
-              >
-                {isFullscreen ? <ScreenNormalIcon /> : <ScreenFullIcon />}
-              </span>
-            </NextLink>
-          </Box>
-        </div>
-      </div>
+      <BlockPaneHeader
+        {...{
+          manageBlockResult,
+          isFullscreen,
+          path,
+          isFolder,
+          token,
+          metadata,
+          setRequestedMetadata,
+          context,
+        }}
+      />
       {(() => {
-        if (!(block.id && repoFilesStatus !== "loading")) return null;
+        if (!manageBlockResult.data || !files) return null;
+        const block = manageBlockResult.data.block;
 
         if (isTooLarge)
           return (
@@ -413,11 +468,6 @@ export function RepoDetail(props: RepoDetailProps) {
     sha: branchName || branch?.name,
   });
 
-  const isFolder =
-    repoFilesStatus === "success"
-      ? files?.find((d) => d.path === path)?.type !== "blob"
-      : !path.includes("."); // if there's an extension it's a file
-
   const { metadata, onUpdateMetadata } = useMetadata({
     owner,
     repo,
@@ -426,35 +476,6 @@ export function RepoDetail(props: RepoDetailProps) {
     token,
     branchName: branch?.name,
   });
-
-  const {
-    block: rawBlock,
-    setBlock,
-    defaultBlock,
-  } = useManageBlock({
-    path,
-    storedDefaultBlock: metadata[path]?.default,
-    isFolder,
-  });
-
-  useEffect(() => {
-    if (defaultBlock) {
-      setBlock(defaultBlock);
-    }
-  }, [getBlockKey(defaultBlock), path]);
-
-  const block = useMemo(
-    () => rawBlock,
-    [rawBlock.owner, rawBlock.repo, rawBlock.id]
-  );
-  const blockKey = getBlockKey(block);
-  const defaultBlockKey = getBlockKey(defaultBlock);
-  const isDefaultBlock = defaultBlockKey === blockKey;
-
-  const fileInfo = files?.find((d) => d.path === path);
-  const size = fileInfo?.size || 0;
-  const fileSizeLimit = 1500000; // 1.5Mb
-  const isTooLarge = size > fileSizeLimit;
 
   if (repoFilesStatus === "error" || repoInfoStatus === "error") {
     const error = repoInfoError || repoFilesError;
@@ -498,21 +519,14 @@ export function RepoDetail(props: RepoDetailProps) {
 
         <BlockPane
           {...{
+            files,
             path,
-            isFolder,
-            setBlock,
-            block,
-            isDefaultBlock,
             token,
             metadata,
-            blockKey,
             setRequestedMetadata,
             isFullscreen,
             context,
-            size,
-            isTooLarge,
             theme,
-            repoFilesStatus,
             branchName,
           }}
         />

@@ -37,6 +37,7 @@ import {
   useQuery,
   UseQueryOptions,
 } from "react-query";
+import type { UseQueryResult } from "react-query";
 
 export function useFileContent(
   params: FileKeyParams,
@@ -292,23 +293,37 @@ const defaultFolderBlock = {
 } as Block;
 export const getBlockKey = (block: Block) =>
   [block?.owner, block?.repo, block?.id || ""].join("__");
+
 interface UseManageBlockParams {
   path: string;
   storedDefaultBlock: string;
   isFolder: boolean;
 }
+
+export type UseManageBlockResult = UseQueryResult<{
+  block: Block;
+  setBlock: (block: Block) => void;
+  defaultBlock: Block;
+}>;
+
 export function useManageBlock({
   path,
   storedDefaultBlock,
   isFolder,
-}: UseManageBlockParams) {
+}: UseManageBlockParams): UseManageBlockResult {
   const router = useRouter();
   const { blockKey = "" } = router.query;
 
-  const blocksRepos = useFilteredBlocksRepos(
+  const filteredBlocksReposResult = useFilteredBlocksRepos(
     path,
     isFolder ? "folder" : "file"
   );
+
+  if (filteredBlocksReposResult.status !== "success")
+    return filteredBlocksReposResult as UseManageBlockResult;
+
+  const blocksRepos = filteredBlocksReposResult.data;
+
   const exampleBlocks =
     blocksRepos.find(
       (b) =>
@@ -365,11 +380,15 @@ export function useManageBlock({
   };
 
   return {
-    block,
-    setBlock,
-    defaultBlock,
-  };
+    ...filteredBlocksReposResult,
+    data: {
+      block,
+      setBlock,
+      defaultBlock,
+    },
+  } as UseManageBlockResult;
 }
+
 const overrideDefaultBlocks = {
   js: "code-block",
   ts: "code-block",
@@ -395,11 +414,13 @@ export function useSearchRepos(
 export function useFilteredBlocksRepos(
   path: string | undefined = undefined,
   type: "file" | "folder" = "file"
-) {
-  const { data: allBlockRepos = [exampleBlocksRepo] } = useAllBlocksRepos();
-  const filteredBlocks = useMemo(
-    () =>
-      allBlockRepos
+): UseQueryResult<BlocksRepo[]> {
+  const allBlocksReposResult = useAllBlocksRepos();
+  return useMemo(() => {
+    if (allBlocksReposResult.status !== "success") return allBlocksReposResult;
+    return {
+      ...allBlocksReposResult,
+      data: allBlocksReposResult.data
         .map((repo) => {
           const filteredBlocks = repo.blocks.filter((block: Block) => {
             // don't include example Blocks
@@ -438,8 +459,6 @@ export function useFilteredBlocksRepos(
           };
         })
         .filter((repo) => repo?.blocks?.length),
-    [allBlockRepos, path]
-  );
-
-  return filteredBlocks;
+    };
+  }, [allBlocksReposResult.data, path]);
 }

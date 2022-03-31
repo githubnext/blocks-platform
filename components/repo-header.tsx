@@ -140,7 +140,7 @@ export const RepoHeader = ({
       </Box>
 
       <Box fontSize={1} ml={4} mb={1} color="fg.muted">
-        {description}
+        {description ?? "\u00a0"}
       </Box>
 
       <UnderlineNav sx={{ mb: "-1px" }}>

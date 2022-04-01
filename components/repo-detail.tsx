@@ -302,6 +302,8 @@ function BlockPane({
   theme,
   branchName,
 }: BlockPaneProps) {
+  const router = useRouter();
+
   const isFolder = files
     ? files?.find((d) => d.path === path)?.type !== "blob"
     : !path.includes("."); // if there's an extension it's a file
@@ -319,15 +321,23 @@ function BlockPane({
 
   useEffect(() => {
     if (manageBlockResult.data) {
-      const { defaultBlock, setBlock } = manageBlockResult.data;
-      if (defaultBlock) {
-        setBlock(defaultBlock);
+      const blockKey = getBlockKey(manageBlockResult.data.block);
+      if (router.query.blockKey !== blockKey) {
+        router.replace(
+          {
+            pathname: router.pathname,
+            query: {
+              ...router.query,
+              blockKey: blockKey,
+            },
+          },
+          undefined,
+          { shallow: true }
+        );
       }
     }
-  }, [
-    manageBlockResult.data && getBlockKey(manageBlockResult.data.defaultBlock),
-    path,
-  ]);
+  });
+
   return (
     <div className="flex-1 overflow-hidden">
       <BlockPaneHeader

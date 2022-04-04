@@ -466,7 +466,25 @@ export function RepoDetail(props: RepoDetailProps) {
     data: repoInfo,
     status: repoInfoStatus,
     error: repoInfoError,
-  } = useRepoInfo({ repo, owner });
+  } = useRepoInfo(
+    { repo, owner },
+    {
+      onSuccess: (repo) => {
+        if (branchName) return;
+        router.push(
+          {
+            pathname: router.pathname,
+            query: {
+              ...router.query,
+              branch: repo.default_branch,
+            },
+          },
+          undefined,
+          { shallow: true }
+        );
+      },
+    }
+  );
 
   const {
     data: files,

@@ -190,7 +190,10 @@ export function useMetadata({
   };
 }
 
-export function useRepoInfo(params: InfoKeyParams) {
+export function useRepoInfo(
+  params: InfoKeyParams,
+  config?: UseQueryOptions<RepoInfo>
+) {
   return useQuery<RepoInfo, any, RepoInfo, GenericQueryKey<InfoKeyParams>>(
     QueryKeyMap.info.factory(params),
     getRepoInfoWithContributors,
@@ -198,6 +201,7 @@ export function useRepoInfo(params: InfoKeyParams) {
       enabled: Boolean(params.repo) && Boolean(params.owner),
       refetchOnWindowFocus: false,
       retry: false,
+      ...config,
     }
   );
 }

@@ -1,5 +1,8 @@
 {
   "private": true,
+  "engines": {
+    "node": ">=16.14.0"
+  },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
   },
@@ -8,7 +11,7 @@
     "build": "next build",
     "static": "next build && next export",
     "start": "next start",
-    "preinstall": "node sync-with-example-blocks.mjs",
+    "preinstall": "node --experimental-json-modules sync-with-example-blocks.mjs",
     "postinstall": "node process-example-blocks.mjs",
     "prepare": "husky install"
   },

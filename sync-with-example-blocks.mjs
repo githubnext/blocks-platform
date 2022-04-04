@@ -2,7 +2,12 @@ import https from "https";
 import fs from "fs";
 
 const fullRepo = "githubnext/blocks-examples";
-const packageJson = `https://raw.githubusercontent.com/${fullRepo}/main/package.json`;
+import blocksPackageJson from "./package.json" assert { type: "json" };
+const version =
+  blocksPackageJson["dependencies"]["@githubnext/blocks-examples"].split(
+    "#"
+  )[1];
+const packageJson = `https://raw.githubusercontent.com/${fullRepo}/${version}/package.json`;
 
 async function init() {
   const packageJsonRawContent = await fetch(packageJson);

@@ -32,7 +32,7 @@ type FileChange = {
 
 type FileChanges = Record<string, FileChange>;
 
-type FileChangesScale = ScaleLinear<number, number, never>;
+type FileChangesScale = ScaleLinear<string, string>;
 
 type SidebarProps = {
   owner: string;
@@ -65,9 +65,7 @@ export const Sidebar = ({
       Object.values(fileChanges),
       (d: FileChange) => new Date(d.date)
     );
-    return scaleLinear()
-      .domain(datesExtent)
-      .range(["#aaa", "#F9FAFB"] as Iterable<number>);
+    return scaleLinear<string>().domain(datesExtent).range(["#aaa", "#F9FAFB"]);
   }, [fileChanges]);
 
   return (
@@ -243,6 +241,16 @@ const Folder = ({
     </Box>
   );
 };
+
+type FileProps = {
+  name: string;
+  path: string;
+  activeUsers: User[];
+  fileChangesScale: FileChangesScale;
+  date?: number;
+  isActive: boolean;
+};
+
 const File = ({
   name,
   path,
@@ -250,7 +258,7 @@ const File = ({
   fileChangesScale,
   date,
   isActive,
-}) => {
+}: FileProps) => {
   const router = useRouter();
   const query = router.query;
 
@@ -301,7 +309,12 @@ const File = ({
   );
 };
 
-const FileDot = ({ name, type = "file" }) => {
+type FileDotProps = {
+  name: string;
+  type?: "file" | "folder";
+};
+
+const FileDot = ({ name, type = "file" }: FileDotProps) => {
   if (!doShowPills) return null;
 
   const extension = name.split(".").pop();
@@ -320,18 +333,27 @@ const FileDot = ({ name, type = "file" }) => {
   );
 };
 
-const getOrdinal = (n) => {
+const getOrdinal = (n: number) => {
   const s = ["th", "st", "nd", "rd"];
   const v = n % 100;
   return s[(v - 20) % 10] || s[v] || s[0];
 };
-const formatDate = (d) =>
+const formatDate = (d: Date) =>
   [
     timeFormat("%B %-d")(d),
     getOrdinal(+timeFormat("%d")(d)),
     timeFormat(", %Y")(d),
   ].join("");
-const DateChangedIndicator = ({ date, fileChangesScale }) => {
+
+type DateChangedIndicatorProps = {
+  date?: number;
+  fileChangesScale?: FileChangesScale;
+};
+
+const DateChangedIndicator = ({
+  date,
+  fileChangesScale,
+}: DateChangedIndicatorProps) => {
   if (!date) return null;
   if (!fileChangesScale) return null;
 

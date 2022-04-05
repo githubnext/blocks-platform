@@ -431,7 +431,8 @@ export function RepoDetail(props: RepoDetailProps) {
     error: repoInfoError,
   } = useRepoInfo({ repo, owner });
 
-  let branchName = (router.query.branch as string) || repoInfo.default_branch;
+  let branchName =
+    (router.query.branch as string) || repoInfo?.default_branch || "";
 
   const { data: branches } = useGetBranches({ owner, repo });
   const branch = useMemo(

@@ -57,6 +57,15 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const queryClient = new QueryClient();
   const session = await getSession({ req: context.req });
 
+  if (!session) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
   await queryClient.prefetchQuery(
     QueryKeyMap.info.factory({ owner, repo }),
     () =>

@@ -3,10 +3,9 @@ import fs from "fs";
 
 const fullRepo = "githubnext/blocks-examples";
 import blocksPackageJson from "./package.json" assert { type: "json" };
-const version =
-  blocksPackageJson["dependencies"]["@githubnext/blocks-examples"].split(
-    "#"
-  )[1];
+const version = blocksPackageJson["dependencies"]["@githubnext/blocks-examples"]
+  .split("/")
+  .pop();
 const packageJson = `https://raw.githubusercontent.com/${fullRepo}/${version}/package.json`;
 
 async function init() {

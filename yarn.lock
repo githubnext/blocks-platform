@@ -855,9 +855,9 @@
     unist-util-visit "^1.0.0"
     uuid "^3.3.2"
 
-"@githubnext/blocks-examples@https://api.github.com/repos/githubnext/blocks-examples/tarball/0.9.7":
+"@githubnext/blocks-examples@https://api.github.com/repos/githubnext/blocks-examples/tarball/0.9.8":
   version "0.0.0"
-  resolved "https://api.github.com/repos/githubnext/blocks-examples/tarball/0.9.7#3b683c48c5e1017226dee370a62dd4ece4f2d2c4"
+  resolved "https://api.github.com/repos/githubnext/blocks-examples/tarball/0.9.8#c13878954d7f22204294a3ffadb309e16e040abc"
   dependencies:
     "@codemirror/autocomplete" "^0.19.15"
     "@codemirror/closebrackets" "^0.19.1"
@@ -887,6 +887,7 @@
     "@primer/components" "^31.1.0"
     "@react-three/drei" "^7.20.5"
     "@react-three/fiber" "^7.0.19"
+    "@replit/codemirror-interact" "^0.19.2"
     "@tensorflow-models/universal-sentence-encoder" "^1.3.3"
     "@tensorflow/tfjs" "^3.14.0"
     "@types/d3" "^7.1.0"
@@ -2015,6 +2016,11 @@
     use-asset "^1.0.4"
     utility-types "^3.10.0"
     zustand "^3.5.1"
+
+"@replit/codemirror-interact@^0.19.2":
+  version "0.19.2"
+  resolved "https://registry.yarnpkg.com/@replit/codemirror-interact/-/codemirror-interact-0.19.2.tgz#4ce3075e749e070e1bf9c42bd91e8f8b0263e3e6"
+  integrity sha512-pDNZHkA0uhXB89ctPZ4wMubuP/nYc1oF2ebEtvM8yfkVns1iq1Y/MMIMWrESdL2OfWhhFtZksZVhkoNHuNbJWw==
 
 "@rollup/pluginutils@^4.2.0":
   version "4.2.0"

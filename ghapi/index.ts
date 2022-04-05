@@ -157,6 +157,24 @@ export const getRepoInfoWithContributors: QueryFunction<
   return { ...repoInfoRes.data, contributors: contributorsRes.data };
 };
 
+interface GetRepoInfoSSRParams {
+  repo: string;
+  owner: string;
+  token: string;
+}
+export async function getRepoInfoWithContributorsSSR(
+  params: GetRepoInfoSSRParams
+) {
+  const { repo, owner, token } = params;
+  const ghapi = makeGitHubAPIInstance(token);
+  const url = `repos/${owner}/${repo}`;
+  const repoInfoRes = await ghapi.get(url);
+
+  const contributorsUrl = `${url}/contributors`;
+  const contributorsRes = await ghapi.get(contributorsUrl);
+  return { ...repoInfoRes.data, contributors: contributorsRes.data };
+}
+
 export const getRepoTimeline: QueryFunction<
   RepoTimeline,
   GenericQueryKey<TimelineKeyParams>

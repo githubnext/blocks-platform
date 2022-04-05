@@ -1,9 +1,15 @@
 import { FullPageLoader } from "components/full-page-loader";
 import { RepoDetail } from "components/repo-detail";
-import { makeGitHubAPIInstance, makeOctokitInstance } from "ghapi";
-import { useSession } from "next-auth/react";
+import {
+  getRepoInfoWithContributorsSSR,
+  makeGitHubAPIInstance,
+  makeOctokitInstance,
+} from "ghapi";
+import { QueryKeyMap } from "lib/query-keys";
+import { GetServerSidePropsContext } from "next";
+import { getSession, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { useQueryClient } from "react-query";
+import { dehydrate, QueryClient, useQueryClient } from "react-query";
 
 function RepoDetailContainer() {
   const [loaded, setLoaded] = useState(false);
@@ -44,3 +50,26 @@ function RepoDetailContainer() {
 }
 
 export default RepoDetailContainer;
+
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const query = context.query;
+  const { repo, owner } = query as Record<string, string>;
+  const queryClient = new QueryClient();
+  const session = await getSession({ req: context.req });
+
+  await queryClient.prefetchQuery(
+    QueryKeyMap.info.factory({ owner, repo }),
+    () =>
+      getRepoInfoWithContributorsSSR({
+        owner,
+        repo,
+        token: session?.token as string,
+      })
+  );
+
+  return {
+    props: {
+      dehydratedState: dehydrate(queryClient),
+    },
+  };
+}

@@ -420,11 +420,19 @@ export function RepoDetail(props: RepoDetailProps) {
     theme,
     fileRef,
     mode,
-    branch: branchName,
   } = router.query as Record<string, string>;
   const [requestedMetadata, setRequestedMetadata] = useState(null);
   const isFullscreen = mode === "fullscreen";
   // need this to only animate chrome in on fullscreen mode change, but not on load
+
+  const {
+    data: repoInfo,
+    status: repoInfoStatus,
+    error: repoInfoError,
+  } = useRepoInfo({ repo, owner });
+
+  let branchName =
+    (router.query.branch as string) || repoInfo?.default_branch || "";
 
   const { data: branches } = useGetBranches({ owner, repo });
   const branch = useMemo(
@@ -461,12 +469,6 @@ export function RepoDetail(props: RepoDetailProps) {
   useEffect(() => {
     setColorMode(theme === "dark" ? "night" : "day");
   }, [theme]);
-
-  const {
-    data: repoInfo,
-    status: repoInfoStatus,
-    error: repoInfoError,
-  } = useRepoInfo({ repo, owner });
 
   const {
     data: files,

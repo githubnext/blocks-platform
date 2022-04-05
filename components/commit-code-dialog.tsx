@@ -250,7 +250,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
                   <TextInput
                     ref={textInputRef}
                     className="font-mono"
-                    leadingVisual={<GitBranchIcon />}
+                    leadingVisual={GitBranchIcon}
                     placeholder="New branch name"
                     value={newBranchName}
                     onChange={(e) => {

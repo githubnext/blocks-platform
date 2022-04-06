@@ -18,6 +18,7 @@ const reactFeedbackBlock = dynamic(() => import("./file-blocks/annotate-react/in
 const sentenceEncoderBlock = dynamic(() => import("./file-blocks/sentence-encoder.tsx"), {ssr:false});
 const processingBlock = dynamic(() => import("./file-blocks/processing.tsx"), {ssr:false});
 const minimapBlock = dynamic(() => import("./folder-blocks/minimap/index.tsx"), {ssr:false});
+const overviewBlock = dynamic(() => import("./folder-blocks/overview/index.tsx"), {ssr:false});
 const dashboardBlock = dynamic(() => import("./folder-blocks/dashboard/index.tsx"), {ssr:false});
 const codeTourBlock = dynamic(() => import("./folder-blocks/code-tour/index.tsx"), {ssr:false});
 
@@ -37,6 +38,7 @@ export default {
   'sentence-encoder-block': sentenceEncoderBlock,
   'processing-block': processingBlock,
   'minimap-block': minimapBlock,
+  'overview-block': overviewBlock,
   'dashboard-block': dashboardBlock,
   'code-tour-block': codeTourBlock
 }
@@ -286,6 +288,15 @@ export const defaultBlocksRepo = {
       "description": "A visualization of your folders and files",
       "sandbox": false,
       "entry": "/src/blocks/folder-blocks/minimap/index.tsx",
+      "example_path": "https://github.com/githubnext/blocks-tutorial"
+    },
+    {
+      "type": "folder",
+      "id": "overview-block",
+      "title": "Overview",
+      "description": "An overview of a folder: including README, license, and recent activity",
+      "sandbox": false,
+      "entry": "/src/blocks/folder-blocks/overview/index.tsx",
       "example_path": "https://github.com/githubnext/blocks-tutorial"
     },
     {

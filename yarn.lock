@@ -855,9 +855,9 @@
     unist-util-visit "^1.0.0"
     uuid "^3.3.2"
 
-"@githubnext/blocks-examples@https://api.github.com/repos/githubnext/blocks-examples/tarball/0.9.8":
+"@githubnext/blocks-examples@https://api.github.com/repos/githubnext/blocks-examples/tarball/0.9.9":
   version "0.0.0"
-  resolved "https://api.github.com/repos/githubnext/blocks-examples/tarball/0.9.8#c13878954d7f22204294a3ffadb309e16e040abc"
+  resolved "https://api.github.com/repos/githubnext/blocks-examples/tarball/0.9.9#7f259716e302b264fb24bd8e4224d47be775e67d"
   dependencies:
     "@codemirror/autocomplete" "^0.19.15"
     "@codemirror/closebrackets" "^0.19.1"
@@ -884,6 +884,7 @@
     "@loadable/component" "^5.15.0"
     "@mdx-js/runtime" "2.0.0-next.9"
     "@octokit/rest" "^18.12.0"
+    "@octokit/types" "^6.34.0"
     "@primer/components" "^31.1.0"
     "@react-three/drei" "^7.20.5"
     "@react-three/fiber" "^7.0.19"

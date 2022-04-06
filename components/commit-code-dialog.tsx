@@ -4,6 +4,7 @@ import {
   GitPullRequestIcon,
 } from "@primer/octicons-react";
 import {
+  Box,
   BranchName,
   Button,
   Dialog,
@@ -15,7 +16,7 @@ import {
   Textarea,
   TextInput,
 } from "@primer/react";
-import { useCreateBranchAndPR, useUpdateFileContents } from "hooks";
+import { useCreateBranchAndPR, useUpdateFilesContents } from "hooks";
 import { QueryKeyMap } from "lib/query-keys";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -27,9 +28,10 @@ import { diffAsText } from "unidiff";
 interface CommitCodeDialogProps {
   onClose: () => void;
   isOpen: boolean;
-  newCode: string;
-  currentCode?: string;
-  path: string;
+  updatedContents: Record<
+    string,
+    { sha: string; original: string; content: string }
+  >;
   repo: string;
   owner: string;
   token: string;
@@ -48,9 +50,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
   const {
     onClose,
     isOpen,
-    currentCode,
-    newCode,
-    path,
+    updatedContents,
     owner,
     repo,
     token,
@@ -64,9 +64,10 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
     mutate: updateContents,
     status: updateContentsStatus,
     error: updateContentsError,
-  } = useUpdateFileContents({
+  } = useUpdateFilesContents({
     onSuccess: async (newSha) => {
       onClose();
+      // TODO(jaked) invalidate just the updated ones
       await queryClient.invalidateQueries(QueryKeyMap.file.key);
       await queryClient.invalidateQueries(QueryKeyMap.timeline.key);
 
@@ -75,7 +76,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
           pathname: router.pathname,
           query: {
             ...router.query,
-            fileRef: newSha,
+            fileRef: newSha, // TODO(jaked) correct redirect
           },
         },
         null,
@@ -117,16 +118,16 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
   const handleCommit = () => {
     if (commitType === "newBranch") {
       try {
+        /*
         createBranch({
           owner,
           repo,
           ref: newBranchName,
           token,
-          content: newCode,
-          path,
           title,
           body,
         });
+*/
       } catch (e) {}
     } else {
       try {
@@ -134,17 +135,18 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
           owner,
           repo,
           branch: branchName,
-          ref: router?.query?.fileRef as string,
           token,
-          content: newCode,
-          path,
+          updatedContents,
         });
       } catch (e) {}
     }
   };
-  const files = useMemo(
-    () => parseDiff(diffAsText(currentCode, newCode)),
-    [currentCode, newCode]
+
+  const diffs = Object.entries(updatedContents).map(
+    ([path, { original, content }]) => [
+      path,
+      parseDiff(diffAsText(original, content, { context: 3 }))[0],
+    ]
   );
 
   useEffect(() => {
@@ -164,7 +166,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
       wide
       onDismiss={onClose}
     >
-      <Dialog.Header>Editing {path}</Dialog.Header>
+      <Dialog.Header>Editing</Dialog.Header>
 
       <div className="p-4">
         {(createBranchError || updateContentsError) && (
@@ -183,17 +185,20 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
           style={{}}
           className="border rounded max-h-[200px] overflow-auto text-sm"
         >
-          {files.map(({ oldRevision, newRevision, type, hunks }) => (
-            <Diff
-              key={oldRevision + "-" + newRevision}
-              viewType="split"
-              diffType={type}
-              hunks={hunks}
-            >
-              {(hunks) =>
-                hunks.map((hunk) => <Hunk key={hunk.content} hunk={hunk} />)
-              }
-            </Diff>
+          {diffs.map(([path, { oldRevision, newRevision, type, hunks }]) => (
+            <Box>
+              {path}
+              <Diff
+                key={oldRevision + "-" + newRevision}
+                viewType="split"
+                diffType={type}
+                hunks={hunks}
+              >
+                {(hunks) =>
+                  hunks.map((hunk) => <Hunk key={hunk.content} hunk={hunk} />)
+                }
+              </Diff>
+            </Box>
           ))}
         </div>
         <div className="mt-4">

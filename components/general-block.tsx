@@ -4,15 +4,9 @@ import {
   onRequestGitHubData as utilsOnRequestGitHubData,
 } from "@githubnext/utils";
 import { SandboxedBlockWrapper } from "components/sandboxed-block-wrapper";
-import {
-  useFileContent,
-  useFolderContent,
-  useMetadata,
-  useRepoTimeline,
-} from "hooks";
+import { useFolderContent, useMetadata } from "hooks";
 import { useRouter } from "next/router";
 import React, { useMemo } from "react";
-import { CommitCodeDialog } from "./commit-code-dialog";
 import { ErrorBoundary } from "./error-boundary";
 import { UpdateCodeModal } from "./UpdateCodeModal";
 
@@ -22,10 +16,20 @@ interface GeneralBlockProps {
   block: Block;
   token: string;
   branchName: string;
+  content: string;
+  onRequestUpdateContent: (newContent: string) => void;
 }
 
 export function GeneralBlock(props: GeneralBlockProps) {
-  const { context, theme, block, token, branchName } = props;
+  const {
+    context,
+    theme,
+    block,
+    token,
+    branchName,
+    content,
+    onRequestUpdateContent,
+  } = props;
   const { repo, owner, path, sha } = context;
 
   const [requestedMetadata, setRequestedMetadata] = React.useState(null);
@@ -35,7 +39,6 @@ export function GeneralBlock(props: GeneralBlockProps) {
     React.useState(null);
   const [requestedMetadataPathFull, setRequestedMetadataPathFull] =
     React.useState(null);
-  const [requestedFileContent, setRequestedFileContent] = React.useState(null);
 
   const router = useRouter();
   const query = router.query;
@@ -75,10 +78,6 @@ export function GeneralBlock(props: GeneralBlockProps) {
     );
   };
 
-  const onRequestUpdateContent = async (newContent: string) => {
-    setRequestedFileContent(newContent);
-  };
-
   const onRequestGitHubData = (path: string, params?: Record<string, any>) =>
     utilsOnRequestGitHubData(path, params, token);
 
@@ -96,22 +95,6 @@ export function GeneralBlock(props: GeneralBlockProps) {
 
   const tree = useMemo(() => treeData?.tree || [], [treeData]);
 
-  const { data: fileData } = useFileContent(
-    {
-      repo: repo,
-      owner: owner,
-      path: path,
-      fileRef: sha,
-    },
-    {
-      enabled: type === "file",
-      cacheTime: 0,
-    }
-  );
-  const { content = "" } = fileData || {};
-
-  const code = content;
-
   const name = path.split("/").pop();
 
   const updatedContext = useMemo(
@@ -122,16 +105,6 @@ export function GeneralBlock(props: GeneralBlockProps) {
       } as FileContext | FolderContext),
     [context, name, type]
   );
-
-  const { data: timelineData } = useRepoTimeline({
-    repo,
-    owner,
-    path,
-  });
-
-  let mostRecentCommit =
-    timelineData?.commits?.length > 0 ? timelineData.commits[0].sha : null;
-  let isBranchable = sha === mostRecentCommit || sha === branchName;
 
   return (
     <div
@@ -147,7 +120,7 @@ export function GeneralBlock(props: GeneralBlockProps) {
             theme={theme}
             context={updatedContext}
             tree={tree}
-            contents={code}
+            contents={content}
             metadata={metadata}
             onUpdateMetadata={onRequestUpdateMetadata}
             onRequestUpdateContent={onRequestUpdateContent}
@@ -177,20 +150,6 @@ export function GeneralBlock(props: GeneralBlockProps) {
             }, 1000);
           }}
           onClose={() => setRequestedMetadata(null)}
-        />
-      )}
-      {!!requestedFileContent && (
-        <CommitCodeDialog
-          repo={repo}
-          owner={owner}
-          path={path}
-          newCode={requestedFileContent}
-          currentCode={content}
-          onClose={() => setRequestedFileContent(null)}
-          isOpen
-          token={token}
-          branchName={branchName}
-          branchingDisabled={!isBranchable}
         />
       )}
     </div>

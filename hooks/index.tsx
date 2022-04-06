@@ -122,6 +122,22 @@ export function useUpdateFileContents(
   return useMutation(updateFileContents, config);
 }
 
+interface UseUpdateFilesContentParams extends RepoContext {
+  updatedContents: Record<string, { sha: string; content: string }>;
+  branch: string;
+  token?: string;
+}
+
+async function updateFilesContents(params: UseUpdateFilesContentParams) {
+  return Promise.resolve();
+}
+
+export function useUpdateFilesContents(
+  config?: UseMutationOptions<any, any, UseUpdateFilesContentParams>
+) {
+  return useMutation(updateFilesContents, config);
+}
+
 export function useMetadata({
   owner,
   repo,

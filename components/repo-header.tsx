@@ -8,7 +8,6 @@ import {
   Button,
 } from "@primer/react";
 import React from "react";
-import { BiCaretDown } from "react-icons/bi";
 
 import {
   BookIcon,
@@ -22,6 +21,7 @@ import {
   ProjectIcon,
   RepoForkedIcon,
   RepoIcon,
+  RepoPushIcon,
   ShieldIcon,
   StarIcon,
 } from "@primer/octicons-react";
@@ -45,6 +45,17 @@ const repoActions = [
   ["Star", StarIcon],
 ] as const;
 
+type RepoHeaderProps = {
+  owner: string;
+  repo: string;
+  description: string;
+  contributors: any[];
+  branchName?: string;
+  branches?: any[];
+  onChangeBranch: (branchName: string) => void;
+  onSaveChanges?: () => void;
+};
+
 export const RepoHeader = ({
   owner,
   repo,
@@ -53,15 +64,8 @@ export const RepoHeader = ({
   branchName = "",
   branches = [],
   onChangeBranch,
-}: {
-  owner: string;
-  repo: string;
-  description: string;
-  contributors: any[];
-  branchName?: string;
-  branches?: any[];
-  onChangeBranch: (branchName: string) => void;
-}) => {
+  onSaveChanges,
+}: RepoHeaderProps) => {
   return (
     <Box
       bg="canvas.subtle"
@@ -125,6 +129,16 @@ export const RepoHeader = ({
         </Box>
 
         <Box display="flex" alignItems="center">
+          <Button
+            key={"Save Changes"}
+            leadingIcon={RepoPushIcon}
+            size="small"
+            disabled={!onSaveChanges}
+            onClick={onSaveChanges}
+            sx={{ ml: 2 }}
+          >
+            Save Changes
+          </Button>
           {repoActions.map(([label, Icon], i) => (
             <Button
               key={label}

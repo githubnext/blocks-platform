@@ -291,7 +291,7 @@ const defaultFileBlock = {
 } as Block;
 
 const defaultFolderBlock = {
-  id: "minimap-block",
+  id: "overview-block",
   owner: "githubnext",
   repo: "blocks-examples",
 } as Block;

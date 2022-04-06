@@ -152,9 +152,12 @@ export const getRepoInfoWithContributors: QueryFunction<
   const repoInfoRes = await meta.ghapi.get(url);
 
   const contributorsUrl = `${url}/contributors`;
-  const contributorsRes = await meta.ghapi.get(contributorsUrl);
-
-  return { ...repoInfoRes.data, contributors: contributorsRes.data };
+  try {
+    const contributorsRes = await meta.ghapi.get(contributorsUrl);
+    return { ...repoInfoRes.data, contributors: contributorsRes.data };
+  } catch (e) {
+    return { ...repoInfoRes.data, contributors: [] };
+  }
 };
 
 interface GetRepoInfoSSRParams {
@@ -171,8 +174,12 @@ export async function getRepoInfoWithContributorsSSR(
   const repoInfoRes = await ghapi.get(url);
 
   const contributorsUrl = `${url}/contributors`;
-  const contributorsRes = await ghapi.get(contributorsUrl);
-  return { ...repoInfoRes.data, contributors: contributorsRes.data };
+  try {
+    const contributorsRes = await ghapi.get(contributorsUrl);
+    return { ...repoInfoRes.data, contributors: contributorsRes.data };
+  } catch (e) {
+    return { ...repoInfoRes.data, contributors: [] };
+  }
 }
 
 export const getRepoTimeline: QueryFunction<

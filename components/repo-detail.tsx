@@ -1,7 +1,9 @@
+import * as Immer from "immer";
 import { Box, Button, Link, useTheme } from "@primer/react";
 import { default as NextLink } from "next/link";
 import {
   getBlockKey,
+  useFileContent,
   useGetBranches,
   useManageBlock,
   useMetadata,
@@ -20,6 +22,7 @@ import { RepoHeader } from "./repo-header";
 import { Sidebar } from "./Sidebar";
 import { GeneralBlock } from "./general-block";
 import { UpdateCodeModal } from "./UpdateCodeModal";
+import { CommitCodeDialog } from "./commit-code-dialog";
 import type { RepoFiles } from "@githubnext/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -32,6 +35,11 @@ const BlockPicker = dynamic(() => import("./block-picker"), { ssr: false });
 
 type Context = { repo: string; owner: string; path: string; sha: string };
 
+type UpdatedContents = Record<
+  string,
+  { sha: string; original: string; content: string }
+>;
+
 type HeaderProps = {
   isFullscreen: boolean;
   owner: string;
@@ -41,6 +49,7 @@ type HeaderProps = {
   branchName: string;
   branches: Branch[];
   onChangeBranch: (branchName: string) => void;
+  onSaveChanges?: () => void;
 };
 
 function Header({
@@ -52,6 +61,7 @@ function Header({
   branchName,
   branches,
   onChangeBranch,
+  onSaveChanges,
 }: HeaderProps) {
   return (
     <AnimatePresence initial={false}>
@@ -96,6 +106,7 @@ function Header({
               branchName={branchName}
               branches={branches}
               onChangeBranch={onChangeBranch}
+              onSaveChanges={onSaveChanges}
             />
           </motion.div>
         </motion.div>
@@ -110,6 +121,7 @@ type FileTreePaneProps = {
   repo: string;
   files: undefined | RepoFiles;
   path: string;
+  updatedContents: UpdatedContents;
 };
 
 function FileTreePane({
@@ -118,6 +130,7 @@ function FileTreePane({
   repo,
   files,
   path,
+  updatedContents,
 }: FileTreePaneProps) {
   return (
     <AnimatePresence initial={false}>
@@ -144,6 +157,7 @@ function FileTreePane({
               owner={owner}
               repo={repo}
               files={files}
+              updatedContents={updatedContents}
               activeFilePath={path}
             />
           )}
@@ -288,6 +302,8 @@ type BlockPaneProps = {
   context: Context;
   theme: string;
   branchName: string;
+  updatedContents: UpdatedContents;
+  setUpdatedContents: (_: UpdatedContents) => void;
 };
 
 function BlockPane({
@@ -301,6 +317,8 @@ function BlockPane({
   context,
   theme,
   branchName,
+  updatedContents,
+  setUpdatedContents,
 }: BlockPaneProps) {
   const router = useRouter();
 
@@ -315,6 +333,19 @@ function BlockPane({
     storedDefaultBlock: metadata[path]?.default,
     isFolder,
   });
+
+  const { data: fileData } = useFileContent(
+    {
+      repo: context.repo,
+      owner: context.owner,
+      path: path,
+      fileRef: context.sha,
+    },
+    {
+      enabled: !isFolder && !updatedContents[path],
+      cacheTime: 0,
+    }
+  );
 
   const block = manageBlockResult.data?.block;
 
@@ -336,6 +367,38 @@ function BlockPane({
       }
     }
   });
+
+  let content: undefined | string;
+  let onRequestUpdateContent: undefined | ((_: string) => void);
+  if (updatedContents[path]) {
+    content = updatedContents[path].content;
+    onRequestUpdateContent = (newContent: string) => {
+      setUpdatedContents(
+        Immer.produce(updatedContents, (updatedContents) => {
+          if (newContent === updatedContents[path].original) {
+            delete updatedContents[path];
+          } else {
+            updatedContents[path].content = newContent;
+          }
+        })
+      );
+    };
+  } else if (fileData) {
+    content = fileData.content;
+    onRequestUpdateContent = (newContent: string) => {
+      setUpdatedContents(
+        Immer.produce(updatedContents, (updatedContents) => {
+          if (newContent !== content) {
+            updatedContents[path] = {
+              sha: fileData.context.sha,
+              original: content,
+              content: newContent,
+            };
+          }
+        })
+      );
+    };
+  }
 
   return (
     <>
@@ -366,6 +429,8 @@ function BlockPane({
           block={block}
           token={token}
           branchName={branchName}
+          content={content}
+          onRequestUpdateContent={onRequestUpdateContent}
         />
       )}
     </>
@@ -476,6 +541,18 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
     branchName,
   });
 
+  let isBranchable =
+    context.sha === branchName ||
+    (timeline && timeline.length > 0 && timeline[0].sha === branchName);
+
+  const [updatedContents, setUpdatedContents] = useState<UpdatedContents>({});
+  const [showCommitCodeDialog, setShowCommitCodeDialog] = useState(false);
+
+  useEffect(() => {
+    // allow only the current file to have updated content (temporary)
+    setUpdatedContents({});
+  }, [path]);
+
   return (
     <div className="flex flex-col w-full h-screen overflow-hidden">
       <Header
@@ -487,6 +564,13 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
         branchName={branchName}
         branches={branches}
         onChangeBranch={setBranchName}
+        onSaveChanges={
+          Object.keys(updatedContents).length > 0
+            ? () => {
+                setShowCommitCodeDialog(true);
+              }
+            : undefined
+        }
       />
 
       <div className="flex flex-1 overflow-hidden">
@@ -497,6 +581,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
             repo,
             files,
             path,
+            updatedContents,
           }}
         />
         <div className="flex-1 overflow-hidden">
@@ -513,6 +598,8 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
                 context,
                 theme,
                 branchName,
+                updatedContents,
+                setUpdatedContents,
               }}
             />
           )}
@@ -535,6 +622,23 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
             onUpdateMetadata(requestedMetadata, `.github/blocks/all.json`);
           }}
           onClose={() => setRequestedMetadata(null)}
+        />
+      )}
+      {!!showCommitCodeDialog && updatedContents[path] && (
+        <CommitCodeDialog
+          repo={repo}
+          owner={owner}
+          path={path}
+          newCode={updatedContents[path].content}
+          currentCode={updatedContents[path].original}
+          onClose={() => {
+            setShowCommitCodeDialog(false);
+            setUpdatedContents({}); // TODO(jaked) drops changes on cancel
+          }}
+          isOpen
+          token={token}
+          branchName={branchName}
+          branchingDisabled={!isBranchable}
         />
       )}
     </div>

@@ -27,6 +27,7 @@ import type { RepoFiles } from "@githubnext/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   PlusIcon,
+  RepoPushIcon,
   ScreenFullIcon,
   ScreenNormalIcon,
 } from "@primer/octicons-react";
@@ -49,7 +50,6 @@ type HeaderProps = {
   branchName: string;
   branches: Branch[];
   onChangeBranch: (branchName: string) => void;
-  onSaveChanges?: () => void;
 };
 
 function Header({
@@ -61,7 +61,6 @@ function Header({
   branchName,
   branches,
   onChangeBranch,
-  onSaveChanges,
 }: HeaderProps) {
   return (
     <AnimatePresence initial={false}>
@@ -106,7 +105,6 @@ function Header({
               branchName={branchName}
               branches={branches}
               onChangeBranch={onChangeBranch}
-              onSaveChanges={onSaveChanges}
             />
           </motion.div>
         </motion.div>
@@ -122,6 +120,7 @@ type FileTreePaneProps = {
   files: undefined | RepoFiles;
   path: string;
   updatedContents: UpdatedContents;
+  onSaveChanges: () => void;
 };
 
 function FileTreePane({
@@ -131,6 +130,7 @@ function FileTreePane({
   files,
   path,
   updatedContents,
+  onSaveChanges,
 }: FileTreePaneProps) {
   return (
     <AnimatePresence initial={false}>
@@ -153,13 +153,33 @@ function FileTreePane({
               </div>
             </div>
           ) : (
-            <Sidebar
-              owner={owner}
-              repo={repo}
-              files={files}
-              updatedContents={updatedContents}
-              activeFilePath={path}
-            />
+            <Box className="h-full">
+              <Box
+                bg="canvas.subtle"
+                p={2}
+                borderBottom="1px solid"
+                borderColor="border.muted"
+                display="flex"
+                alignItems="center"
+              >
+                <Button
+                  key={"Save"}
+                  variant={"primary"}
+                  leadingIcon={RepoPushIcon}
+                  disabled={false}
+                  onClick={onSaveChanges}
+                >
+                  Save
+                </Button>
+              </Box>
+              <Sidebar
+                owner={owner}
+                repo={repo}
+                files={files}
+                updatedContents={updatedContents}
+                activeFilePath={path}
+              />
+            </Box>
           )}
         </motion.div>
       )}
@@ -564,13 +584,6 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
         branchName={branchName}
         branches={branches}
         onChangeBranch={setBranchName}
-        onSaveChanges={
-          Object.keys(updatedContents).length > 0
-            ? () => {
-                setShowCommitCodeDialog(true);
-              }
-            : undefined
-        }
       />
 
       <div className="flex flex-1 overflow-hidden">
@@ -582,6 +595,12 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
             files,
             path,
             updatedContents,
+            onSaveChanges:
+              Object.keys(updatedContents).length > 0
+                ? () => {
+                    setShowCommitCodeDialog(true);
+                  }
+                : undefined,
           }}
         />
         <div className="flex-1 overflow-hidden">

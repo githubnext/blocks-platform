@@ -21,7 +21,6 @@ import {
   ProjectIcon,
   RepoForkedIcon,
   RepoIcon,
-  RepoPushIcon,
   ShieldIcon,
   StarIcon,
 } from "@primer/octicons-react";
@@ -53,7 +52,6 @@ type RepoHeaderProps = {
   branchName: string;
   branches: Branch[];
   onChangeBranch: (branchName: string) => void;
-  onSaveChanges?: () => void;
 };
 
 export const RepoHeader = ({
@@ -64,7 +62,6 @@ export const RepoHeader = ({
   branchName,
   branches,
   onChangeBranch,
-  onSaveChanges,
 }: RepoHeaderProps) => {
   return (
     <Box
@@ -129,16 +126,6 @@ export const RepoHeader = ({
         </Box>
 
         <Box display="flex" alignItems="center">
-          <Button
-            key={"Save Changes"}
-            leadingIcon={RepoPushIcon}
-            size="small"
-            disabled={!onSaveChanges}
-            onClick={onSaveChanges}
-            sx={{ ml: 2 }}
-          >
-            Save Changes
-          </Button>
           {repoActions.map(([label, Icon], i) => (
             <Button
               key={label}

@@ -933,6 +933,15 @@
     lodash.uniqueid "^4.0.1"
     zod "^3.11.6"
 
+"@githubnext/utils@^0.19.7":
+  version "0.19.7"
+  resolved "https://registry.yarnpkg.com/@githubnext/utils/-/utils-0.19.7.tgz#c2a29cce364c8de3df4b6c224f566cec59b33454"
+  integrity sha512-gl4a7YfcYmCJuSaZRi4BMTq9Lmfvx4U4k5OzMoISh1auAUPwEwR2F8XNlIsaqVtf9wkWGR6iUkz1UR22BzgCtw==
+  dependencies:
+    "@types/lodash.uniqueid" "^4.0.6"
+    lodash.uniqueid "^4.0.1"
+    zod "^3.11.6"
+
 "@githubocto/flat-ui@^0.13.4":
   version "0.13.5"
   resolved "https://registry.yarnpkg.com/@githubocto/flat-ui/-/flat-ui-0.13.5.tgz#65a03c07ab070c105b804917288ecbf5b9c3e894"

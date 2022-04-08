@@ -120,7 +120,6 @@ type FileTreePaneProps = {
   files: undefined | RepoFiles;
   path: string;
   updatedContents: UpdatedContents;
-  onSaveChanges: () => void;
 };
 
 function FileTreePane({
@@ -130,7 +129,6 @@ function FileTreePane({
   files,
   path,
   updatedContents,
-  onSaveChanges,
 }: FileTreePaneProps) {
   return (
     <AnimatePresence initial={false}>
@@ -153,33 +151,13 @@ function FileTreePane({
               </div>
             </div>
           ) : (
-            <Box className="h-full">
-              <Box
-                bg="canvas.subtle"
-                p={2}
-                borderBottom="1px solid"
-                borderColor="border.muted"
-                display="flex"
-                alignItems="center"
-              >
-                <Button
-                  key={"Save"}
-                  variant={"primary"}
-                  leadingIcon={RepoPushIcon}
-                  disabled={false}
-                  onClick={onSaveChanges}
-                >
-                  Save
-                </Button>
-              </Box>
-              <Sidebar
-                owner={owner}
-                repo={repo}
-                files={files}
-                updatedContents={updatedContents}
-                activeFilePath={path}
-              />
-            </Box>
+            <Sidebar
+              owner={owner}
+              repo={repo}
+              files={files}
+              updatedContents={updatedContents}
+              activeFilePath={path}
+            />
           )}
         </motion.div>
       )}
@@ -196,6 +174,7 @@ type BlockPaneHeaderProps = {
   metadata: any;
   setRequestedMetadata: (metadata: any) => void;
   context: Context;
+  onSaveChanges: () => void;
 };
 
 function BlockPaneHeader({
@@ -207,6 +186,7 @@ function BlockPaneHeader({
   metadata,
   setRequestedMetadata,
   context,
+  onSaveChanges,
 }: BlockPaneHeaderProps) {
   const router = useRouter();
 
@@ -226,6 +206,15 @@ function BlockPaneHeader({
           justifyContent="space-between"
         >
           <Box display="flex" alignItems="center" className="space-x-2">
+            <Button
+              key={"Save"}
+              variant={"primary"}
+              leadingIcon={RepoPushIcon}
+              disabled={!onSaveChanges}
+              onClick={onSaveChanges}
+            >
+              Save
+            </Button>
             <BlockPicker
               path={path}
               type={isFolder ? "folder" : "file"}
@@ -245,7 +234,7 @@ function BlockPaneHeader({
                   setRequestedMetadata(newMetadata);
                 }}
               >
-                Set as default for all users
+                Make default
               </Button>
             )}
           </Box>
@@ -314,7 +303,6 @@ function BlockPaneHeader({
 type BlockPaneProps = {
   fileInfo: RepoFiles[0];
   path: string;
-  timeline: undefined | RepoTimeline;
   token: string;
   metadata: any;
   setRequestedMetadata: (metadata: any) => void;
@@ -324,12 +312,12 @@ type BlockPaneProps = {
   branchName: string;
   updatedContents: UpdatedContents;
   setUpdatedContents: (_: UpdatedContents) => void;
+  onSaveChanges: () => void;
 };
 
 function BlockPane({
   fileInfo,
   path,
-  timeline,
   token,
   metadata,
   setRequestedMetadata,
@@ -339,6 +327,7 @@ function BlockPane({
   branchName,
   updatedContents,
   setUpdatedContents,
+  onSaveChanges,
 }: BlockPaneProps) {
   const router = useRouter();
 
@@ -432,6 +421,7 @@ function BlockPane({
           metadata,
           setRequestedMetadata,
           context,
+          onSaveChanges,
         }}
       />
       {isTooLarge && (
@@ -445,7 +435,6 @@ function BlockPane({
           // @ts-ignore
           context={context}
           theme={theme || "light"}
-          timeline={timeline}
           block={block}
           token={token}
           branchName={branchName}
@@ -567,11 +556,11 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
 
   const [updatedContents, setUpdatedContents] = useState<UpdatedContents>({});
   const [showCommitCodeDialog, setShowCommitCodeDialog] = useState(false);
-
-  useEffect(() => {
-    // allow only the current file to have updated content (temporary)
-    setUpdatedContents({});
-  }, [path]);
+  const onSaveChanges = updatedContents[path]
+    ? () => {
+        setShowCommitCodeDialog(true);
+      }
+    : undefined;
 
   return (
     <div className="flex flex-col w-full h-screen overflow-hidden">
@@ -595,12 +584,6 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
             files,
             path,
             updatedContents,
-            onSaveChanges:
-              Object.keys(updatedContents).length > 0
-                ? () => {
-                    setShowCommitCodeDialog(true);
-                  }
-                : undefined,
           }}
         />
         <div className="flex-1 overflow-hidden">
@@ -609,7 +592,6 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
               {...{
                 fileInfo,
                 path,
-                timeline,
                 token,
                 metadata,
                 setRequestedMetadata,
@@ -619,6 +601,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
                 branchName,
                 updatedContents,
                 setUpdatedContents,
+                onSaveChanges,
               }}
             />
           )}

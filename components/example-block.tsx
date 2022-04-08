@@ -93,7 +93,7 @@ const BlockComponent = ({
   ...props
 }: BlockComponentProps) => {
   const [contents, setContents] = useState<string | undefined>(undefined);
-  const [metadata, setMetadata] = useState<any | undefined>(undefined);
+  const [metadata, setMetadata] = useState<any>({});
 
   const getData = async () => {
     if (block.type !== "file") return;
@@ -112,13 +112,15 @@ const BlockComponent = ({
     const apiUrl = `/repos/${props.context.owner}/${
       props.context.repo
     }/contents/${getMetadataPath(block, path)}`;
-    const res = await onRequestGitHubData(apiUrl, {
-      ref: "HEAD",
-    });
-    const encodedContent = res.content;
-    const content = Buffer.from(encodedContent, "base64").toString("utf8");
-    const fullMetadata = JSON.parse((content || "{}") as string) || {};
-    setMetadata(fullMetadata);
+    try {
+      const res = await onRequestGitHubData(apiUrl, {
+        ref: "HEAD",
+      });
+      const encodedContent = res.content;
+      const content = Buffer.from(encodedContent, "base64").toString("utf8");
+      const fullMetadata = JSON.parse((content || "{}") as string) || {};
+      setMetadata(fullMetadata);
+    } catch (e) {}
   };
   useEffect(() => {
     getData();

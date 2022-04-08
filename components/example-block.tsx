@@ -93,7 +93,7 @@ const BlockComponent = ({
   ...props
 }: BlockComponentProps) => {
   const [contents, setContents] = useState<string | undefined>(undefined);
-  const [metadata, setMetadata] = useState<any | undefined>(undefined);
+  const [metadata, setMetadata] = useState<any>({});
 
   const getData = async () => {
     if (block.type !== "file") return;
@@ -120,9 +120,7 @@ const BlockComponent = ({
       const content = Buffer.from(encodedContent, "base64").toString("utf8");
       const fullMetadata = JSON.parse((content || "{}") as string) || {};
       setMetadata(fullMetadata);
-    } catch (e) {
-      setMetadata({});
-    }
+    } catch (e) {}
   };
   useEffect(() => {
     getData();

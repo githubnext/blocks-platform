@@ -112,13 +112,17 @@ const BlockComponent = ({
     const apiUrl = `/repos/${props.context.owner}/${
       props.context.repo
     }/contents/${getMetadataPath(block, path)}`;
-    const res = await onRequestGitHubData(apiUrl, {
-      ref: "HEAD",
-    });
-    const encodedContent = res.content;
-    const content = Buffer.from(encodedContent, "base64").toString("utf8");
-    const fullMetadata = JSON.parse((content || "{}") as string) || {};
-    setMetadata(fullMetadata);
+    try {
+      const res = await onRequestGitHubData(apiUrl, {
+        ref: "HEAD",
+      });
+      const encodedContent = res.content;
+      const content = Buffer.from(encodedContent, "base64").toString("utf8");
+      const fullMetadata = JSON.parse((content || "{}") as string) || {};
+      setMetadata(fullMetadata);
+    } catch (e) {
+      setMetadata({});
+    }
   };
   useEffect(() => {
     getData();

@@ -24,23 +24,27 @@ export default async function handler(
     return;
   }
 
+  const {
+    code,
+    language,
+    prompt = `/* Here is the explanation for the code above:\n1.`,
+    stop = `*/`, // this marker changes based on the language
+  } = req.body;
+
   try {
-    const response = await openai.createCompletion("cushman-codex-msft", {
-      prompt:
-        req.body.code +
-        `\n\n\"\"\"\nHere's a plain english explanation of the code above:\n\n1.`,
-      temperature: 0,
-      max_tokens: 64,
+    const completion = await openai.createCompletion("code-davinci-001", {
+      prompt: `// Language: ${language}\n${code}\n\n${prompt}`,
+      stop,
+      max_tokens: 2000, // prompt + max_tokens (tokens in completion) <= 2048 (2048 is the max the openAI model accepts)
+      temperature: 0.5,
       top_p: 1,
-      frequency_penalty: 0,
-      presence_penalty: 0,
-      // Should we make this configurable?
-      stop: ['"""'],
+      n: 1,
     });
-    res.status(200).json(response.data);
+
+    res.status(200).json(completion.data.choices[0].text);
     return;
-  } catch (e) {
-    res.status(500).send(e);
+  } catch {
+    res.status(500).send("Unable to get explanation.");
     return;
   }
 }

@@ -5,19 +5,19 @@ import { useQuery } from "react-query";
 const functionToExplain = `function slugify(text)
 {
   return text.toString().toLowerCase()
-    .replace(/\s+/g, '-')           // Replace spaces with -
-    .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
-    .replace(/\-\-+/g, '-')         // Replace multiple - with single -
-    .replace(/^-+/, '')             // Trim - from start of text
-    .replace(/-+$/, '');            // Trim - from end of text
+    .replace(/\s+/g, '-')           
+    .replace(/[^\w\-]+/g, '')       
+    .replace(/\-\-+/g, '-')         
+    .replace(/^-+/, '')             
+    .replace(/-+$/, '');            
 }
 `;
 
 async function getExplanation(code: string) {
   const res = await axios.post(`/api/explain`, {
     code,
+    language: "javascript",
   });
-  console.log(res.data);
   return res.data;
 }
 
@@ -35,7 +35,7 @@ function SandboxInner() {
       {status === "loading" && (
         <p className="text-sm text-gray-600">Loading...</p>
       )}
-      {status === "success" && data && <div>{data.choices?.[0]?.text}</div>}
+      {status === "success" && data && <div>{data}</div>}
     </div>
   );
 }

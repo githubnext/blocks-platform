@@ -1,6 +1,7 @@
 import { FileContext, FolderContext } from "@githubnext/utils";
 import { RepoFiles } from "ghapi";
 import { memo, useMemo } from "react";
+import IFramedBlock from "components/iframed-block";
 import { SandboxedBlock } from "components/sandboxed-block";
 import { ExampleBlock } from "components/example-block";
 
@@ -81,7 +82,7 @@ export const SandboxedBlockWrapper = memo(function SandboxedBlockWrapper(
 
   return (
     <div className="sandbox-wrapper h-full w-full">
-      <SandboxedBlock
+      <IFramedBlock
         block={block}
         contents={contents}
         tree={tree}

@@ -1,6 +1,7 @@
 import Parser from "tree-sitter";
 import JavaScript from "tree-sitter-javascript";
 import TypeScript from "tree-sitter-typescript";
+import flatten from "lodash/flatten";
 
 // break code into meaningful "chunks"
 export default async function getChunks(req, res) {
@@ -83,14 +84,4 @@ const breakIntoChunks = (node) => {
   return flatten([...functionsStructure, ...maybeFunctionsStructure]).filter(
     Boolean
   );
-};
-
-const flatten = (arr) => {
-  return arr.reduce((acc, val) => {
-    if (Array.isArray(val)) {
-      return acc.concat(flatten(val));
-    } else {
-      return acc.concat(val);
-    }
-  }, []);
 };

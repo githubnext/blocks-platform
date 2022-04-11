@@ -29,40 +29,26 @@ export function GeneralBlock(props: GeneralBlockProps) {
   const { repo, owner, path, sha } = context;
 
   const [requestedMetadata, setRequestedMetadata] = React.useState(null);
-  const [requestedMetadataExisting, setRequestedMetadataExisting] =
-    React.useState(null);
-  const [requestedMetadataPath, setRequestedMetadataPath] =
-    React.useState(null);
-  const [requestedMetadataPathFull, setRequestedMetadataPathFull] =
-    React.useState(null);
   const [requestedFileContent, setRequestedFileContent] = React.useState(null);
 
   const router = useRouter();
   const query = router.query;
 
+  const metadataPath = getMetadataPath(block, path);
+
   const blockKey = getBlockKey(block);
   const { metadata, onUpdateMetadata } = useMetadata({
-    owner: owner as string,
-    repo: repo as string,
-    metadataPath: block.entry && getMetadataPath(block, path),
+    owner,
+    repo,
+    metadataPath,
     filePath: path,
     token: token,
     branchName,
   });
   const type = block.type;
 
-  const onRequestUpdateMetadata = async (
-    newMetadata: any,
-    pathToUpdate = path,
-    blockToUpdate = block,
-    currentMetadata = metadata
-  ) => {
+  const onRequestUpdateMetadata = async (newMetadata: any) => {
     setRequestedMetadata(newMetadata);
-    setRequestedMetadataExisting(
-      JSON.stringify(currentMetadata || "{}", null, 2)
-    );
-    setRequestedMetadataPath(pathToUpdate);
-    setRequestedMetadataPathFull(getMetadataPath(blockToUpdate, pathToUpdate));
   };
   const onNavigateToPath = (path: string) => {
     router.push(
@@ -161,20 +147,9 @@ export function GeneralBlock(props: GeneralBlockProps) {
           isLoggedIn={!!token}
           path={`.github/blocks/${type}/${blockKey}.json`}
           newCode={JSON.stringify(requestedMetadata, null, 2)}
-          currentCode={
-            requestedMetadataExisting || JSON.stringify(metadata, null, 2)
-          }
+          currentCode={JSON.stringify(metadata, null, 2)}
           onSubmit={() => {
-            onUpdateMetadata(
-              requestedMetadata,
-              requestedMetadataPathFull || ""
-            );
-            setTimeout(() => {
-              window.postMessage({
-                type: "updated-metadata",
-                path: requestedMetadataPath,
-              });
-            }, 1000);
+            onUpdateMetadata(requestedMetadata);
           }}
           onClose={() => setRequestedMetadata(null)}
         />

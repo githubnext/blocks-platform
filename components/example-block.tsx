@@ -19,12 +19,7 @@ interface ExampleBlockProps {
   metadata?: any;
   context: FileContext | FolderContext;
   isEmbedded?: boolean;
-  onUpdateMetadata: (
-    newMetadata: any,
-    path: string,
-    block: Block,
-    currentMetadata: any
-  ) => void;
+  onUpdateMetadata: (newMetadata: any) => void;
   onRequestUpdateContent: (newContent: string) => void;
   onRequestGitHubData: (
     path: string,
@@ -128,20 +123,6 @@ const BlockComponent = ({
   useEffect(() => {
     getMetadata();
   }, [path, block.id]);
-
-  useEffect(() => {
-    // listen for updated metadata
-    const onMessageEvent = async (event: MessageEvent) => {
-      if (event.origin !== window.location.origin) return;
-      if (event.data.type === "updated-metadata") {
-        getMetadata();
-      }
-    };
-    window.addEventListener("message", onMessageEvent as EventListener);
-    return () => {
-      window.removeEventListener("message", onMessageEvent as EventListener);
-    };
-  }, []);
 
   if (block.type === "file" && !contents)
     return <div className="p-10">Loading...</div>;

@@ -556,7 +556,7 @@ export function RepoDetail(props: RepoDetailProps) {
           newCode={JSON.stringify(requestedMetadata, null, 2)}
           currentCode={JSON.stringify(metadata, null, 2)}
           onSubmit={() => {
-            onUpdateMetadata(requestedMetadata, `.github/blocks/all.json`);
+            onUpdateMetadata(requestedMetadata);
           }}
           onClose={() => setRequestedMetadata(null)}
         />

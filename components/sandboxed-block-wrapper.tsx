@@ -12,12 +12,7 @@ interface SandboxedBlockWrapperProps {
   context: FileContext | FolderContext;
   metadata: any;
   isEmbedded?: boolean;
-  onUpdateMetadata: (
-    newMetadata: any,
-    path: string,
-    block: Block,
-    currentMetadata: any
-  ) => void;
+  onUpdateMetadata: (newMetadata: any) => void;
   onRequestUpdateContent: (newContent: string) => void;
   onRequestGitHubData: (
     path: string,

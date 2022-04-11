@@ -2,14 +2,10 @@ import {
   SandpackProvider,
   SandpackPreview,
 } from "@codesandbox/sandpack-react/dist/cjs/index.js";
-import {
-  FileContext,
-  FolderContext,
-  RepoFiles,
-  bundleCodesandboxFiles,
-} from "@githubnext/utils";
+import { FileContext, FolderContext, RepoFiles } from "@githubnext/utils";
+import { bundleCodesandboxFiles } from "../utils/bundle-codesandbox-files";
 import uniqueId from "lodash/uniqueId";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 
 export interface BundleCode {
   name: string;
@@ -23,12 +19,7 @@ interface SandboxedBlockProps {
   context: FileContext | FolderContext;
   renderLoading?: React.ReactNode;
   renderError?: React.ReactNode;
-  onUpdateMetadata: (
-    newMetadata: any,
-    path: string,
-    block: Block,
-    currentMetadata: any
-  ) => void;
+  onUpdateMetadata: (newMetadata: any) => void;
   onRequestUpdateContent: (newContent: string) => void;
   onRequestGitHubData: (
     path: string,
@@ -65,7 +56,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
     onNavigateToPath,
   } = props;
   const state = useFetchZip(block);
-  const id = useRef(uniqueId("sandboxed-block-"));
+  const id = useMemo(() => uniqueId("sandboxed-block-"), []);
   const sandpackWrapper = useRef<HTMLDivElement>(null);
 
   const status = state.status;
@@ -73,7 +64,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
 
   useEffect(() => {
     const onMessage = (event) => {
-      if (event.data.id === id.current) {
+      if (event.data.id === id) {
         const { data, origin, source } = event;
 
         // handle messages from the sandboxed block
@@ -83,12 +74,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
         if (!source || !originRegex.test(origin)) return;
         const window = source as Window;
         if (data.type === "update-metadata") {
-          onUpdateMetadata(
-            data.metadata,
-            data.path,
-            data.block,
-            data.currentMetadata
-          );
+          onUpdateMetadata(data.metadata);
         } else if (data.type === "update-file") {
           onRequestUpdateContent(data.content);
         } else if (data.type === "navigate-to-path") {
@@ -99,7 +85,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
               window.postMessage(
                 {
                   type: "github-data--response",
-                  id: id.current,
+                  id,
                   data: res,
                 },
                 origin
@@ -109,7 +95,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
               window.postMessage(
                 {
                   type: "github-data--response",
-                  id: id.current,
+                  id,
                   // Error is not always serializable
                   // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm#things_that_dont_work_with_structured_clone
                   error: e instanceof Error ? e.message : e,
@@ -134,7 +120,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
       block,
       bundleCode: blockContent,
       context,
-      id: id.current,
+      id,
       contents,
       tree,
       metadata,

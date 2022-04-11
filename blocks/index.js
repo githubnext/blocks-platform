@@ -17,6 +17,7 @@ const markdownBlock = dynamic(() => import("./file-blocks/live-markdown/index.ts
 const reactFeedbackBlock = dynamic(() => import("./file-blocks/annotate-react/index.tsx"), {ssr:false});
 const sentenceEncoderBlock = dynamic(() => import("./file-blocks/sentence-encoder.tsx"), {ssr:false});
 const processingBlock = dynamic(() => import("./file-blocks/processing.tsx"), {ssr:false});
+const summarizeBlock = dynamic(() => import("./file-blocks/summarize/index.tsx"), {ssr:false});
 const minimapBlock = dynamic(() => import("./folder-blocks/minimap/index.tsx"), {ssr:false});
 const overviewBlock = dynamic(() => import("./folder-blocks/overview/index.tsx"), {ssr:false});
 const dashboardBlock = dynamic(() => import("./folder-blocks/dashboard/index.tsx"), {ssr:false});
@@ -37,6 +38,7 @@ export default {
   'react-feedback-block': reactFeedbackBlock,
   'sentence-encoder-block': sentenceEncoderBlock,
   'processing-block': processingBlock,
+  'summarize-block': summarizeBlock,
   'minimap-block': minimapBlock,
   'overview-block': overviewBlock,
   'dashboard-block': dashboardBlock,
@@ -280,6 +282,27 @@ export const defaultBlocksRepo = {
         "*.js"
       ],
       "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/processing-sketch.js"
+    },
+    {
+      "type": "file",
+      "id": "summarize-block",
+      "title": "Summarize block",
+      "description": "Summarize parts of a file using ML",
+      "sandbox": false,
+      "entry": "/src/blocks/file-blocks/summarize/index.tsx",
+      "extensions": [
+        "js",
+        "ts",
+        "tsx",
+        "jsx"
+      ],
+      "matches": [
+        "*.js",
+        "*.ts",
+        "*.tsx",
+        "*.jsx"
+      ],
+      "example_path": "https://github.com/mattdesl/canvas-sketch/blob/master/lib/save.js"
     },
     {
       "type": "folder",

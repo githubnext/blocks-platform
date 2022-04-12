@@ -1,6 +1,6 @@
 import uniqueId from "lodash.uniqueid";
 
-import { FileContext, FolderContext, FolderData } from "../types";
+import { FileContext, FolderContext, FolderData } from "@githubnext/utils";
 
 type Block = {
   id: string;

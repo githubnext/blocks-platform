@@ -18,6 +18,8 @@ export default async function handler(
     return;
   }
 
+  // we don't want to hit this every time, of course
+  // here for now for easier testing
   const token = await getCopilotToken(session);
   if (!token) {
     res.status(401).send("Unauthorized.");

@@ -128,31 +128,32 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
   }, []);
 
   const files = useMemo(() => {
-    if (status === "success" && blockContent) {
-      return bundleCodesandboxFiles({
-        block,
-        bundleCode: blockContent,
-        id,
-      });
-    } else {
-      return null;
-    }
-  }, [status, blockContent, JSON.stringify(block)]);
+    if (status !== "success") return null;
+    if (!blockContent) return null;
+    return bundleCodesandboxFiles({
+      block,
+      bundleCode: blockContent,
+      id,
+    });
+  }, [status, blockContent, block, id]);
+
+  useEffect(() => {
+    if (!sandbox) return;
+
+    // the file / folder contents may still be loading
+    if (
+      (block.type === "file" && !contents) ||
+      (block.type === "folder" && !tree)
+    )
+      return;
+
+    const props = { block, content: contents, tree, metadata, context };
+    sandbox.postMessage({ type: "set-props", id, props }, "*");
+  }, [sandbox, block, contents, tree, metadata, context, id]);
 
   if (!blockContent) return renderLoading as JSX.Element;
   if (status === "loading") return renderLoading as JSX.Element;
   if (status === "error") return renderError as JSX.Element;
-
-  if (files && sandbox) {
-    // the file / folder contents may still be loading
-    if (
-      (block.type === "file" && contents) ||
-      (block.type === "folder" && tree)
-    ) {
-      const props = { block, content: contents, tree, metadata, context };
-      sandbox.postMessage({ type: "set-props", id, props }, "*");
-    }
-  }
 
   return (
     files && (

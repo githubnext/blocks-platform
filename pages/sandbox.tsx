@@ -5,11 +5,11 @@ import { useQuery } from "react-query";
 const functionToExplain = `function slugify(text)
 {
   return text.toString().toLowerCase()
-    .replace(/\s+/g, '-')           
-    .replace(/[^\w\-]+/g, '')       
-    .replace(/\-\-+/g, '-')         
-    .replace(/^-+/, '')             
-    .replace(/-+$/, '');            
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-]+/g, '')
+    .replace(/\-\-+/g, '-')
+    .replace(/^-+/, '')
+    .replace(/-+$/, '');
 }
 `;
 
@@ -35,7 +35,9 @@ function SandboxInner() {
       {status === "loading" && (
         <p className="text-sm text-gray-600">Loading...</p>
       )}
-      {status === "success" && data && <div>{data}</div>}
+      {status === "success" && data && (
+        <div className="whitespace-pre-wrap">{data}</div>
+      )}
     </div>
   );
 }

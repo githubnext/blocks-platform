@@ -6,6 +6,7 @@ import { FileContext, FolderContext, RepoFiles } from "@githubnext/utils";
 import { bundleCodesandboxFiles } from "../utils/bundle-codesandbox-files";
 import uniqueId from "lodash/uniqueId";
 import React, { useEffect, useMemo, useRef } from "react";
+import { useBlockContent } from "../hooks";
 
 export interface BundleCode {
   name: string;
@@ -51,12 +52,19 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
     onRequestGitHubData,
     onNavigateToPath,
   } = props;
-  const state = useFetchZip(block);
+  const { status, data: blockContent } = useBlockContent(
+    block.owner,
+    block.repo,
+    block.id,
+    {
+      retry: false,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    }
+  );
   const id = useMemo(() => uniqueId("sandboxed-block-"), []);
   const sandpackWrapper = useRef<HTMLDivElement>(null);
-
-  const status = state.status;
-  const blockContent = state.value;
 
   const [sandbox, setSandbox] = React.useState<Window>(null);
 
@@ -172,46 +180,3 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
     )
   );
 }
-
-type UseFetchZipResponse = {
-  value: BundleCode[] | null;
-  status: "loading" | "error" | "success";
-};
-const useFetchZip = (block: Block): UseFetchZipResponse => {
-  if (!block.owner || !block.repo || !block.id) {
-    return { value: null, status: "success" };
-  }
-  const url = `${process.env.NEXT_PUBLIC_MARKETPLACE_URL}/api/get-block-content?owner=${block.owner}&repo=${block.repo}&id=${block.id}`;
-  const [state, setState] = React.useState<UseFetchZipResponse>({
-    value: null,
-    status: "loading",
-  });
-  const fetchContentForBlock = async () => {
-    if (!url) {
-      setState({
-        status: "error",
-        value: null,
-      });
-      return;
-    }
-    try {
-      const res = await fetch(url);
-
-      const allContent = await res.json();
-
-      setState({
-        status: "success",
-        value: allContent?.content,
-      });
-    } catch (error) {
-      setState({
-        status: "error",
-        value: null,
-      });
-    }
-  };
-  React.useEffect(() => {
-    fetchContentForBlock();
-  }, [url]);
-  return state;
-};

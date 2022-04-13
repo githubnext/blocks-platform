@@ -21,9 +21,9 @@ interface ExampleBlockProps {
   isEmbedded?: boolean;
   onUpdateMetadata: (
     newMetadata: any,
-    path: string,
-    block: Block,
-    currentMetadata: any
+    path?: string,
+    block?: Block,
+    currentMetadata?: any
   ) => void;
   onRequestUpdateContent: (newContent: string) => void;
   onRequestGitHubData: (
@@ -59,6 +59,8 @@ export function ExampleBlock(props: ExampleBlockProps) {
       id={`example-block-${block.id}`}
     >
       <Component
+        // recreate the block if we change file or version
+        key={context.sha}
         block={block}
         content={contents || ""}
         tree={tree || []}
@@ -86,7 +88,7 @@ const BlockComponent = ({
   block,
   path,
   tree,
-  onUpdateMetadata,
+  onUpdateMetadata: originalOnUpdateMetadata,
   onRequestUpdateContent,
   onRequestGitHubData,
   onNavigateToPath,
@@ -148,6 +150,9 @@ const BlockComponent = ({
   if (!block.id) return null;
 
   const name = path.split("/").pop();
+
+  const onUpdateMetadata = (newMetadata: any) =>
+    originalOnUpdateMetadata(newMetadata, path, block, metadata);
 
   if (
     "githubnext/blocks-examples" === `${block.owner}/${block.repo}` &&

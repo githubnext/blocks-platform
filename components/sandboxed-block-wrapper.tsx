@@ -14,9 +14,9 @@ interface SandboxedBlockWrapperProps {
   isEmbedded?: boolean;
   onUpdateMetadata: (
     newMetadata: any,
-    path: string,
-    block: Block,
-    currentMetadata: any
+    path?: string,
+    block?: Block,
+    currentMetadata?: any
   ) => void;
   onRequestUpdateContent: (newContent: string) => void;
   onRequestGitHubData: (
@@ -53,16 +53,16 @@ export const SandboxedBlockWrapper = memo(function SandboxedBlockWrapper(
   );
 
   if (
-    (!contents && block.type === "file") ||
-    (!tree && block.type === "tree")
-  ) {
-    return null;
-  }
-
-  if (
     exampleBlocksRepo === `${block.owner}/${block.repo}` &&
     block.sandbox === false
   ) {
+    if (
+      (!contents && block.type === "file") ||
+      (!tree && block.type === "tree")
+    ) {
+      return null;
+    }
+
     return (
       <ExampleBlock
         block={block}

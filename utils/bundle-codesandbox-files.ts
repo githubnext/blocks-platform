@@ -1,7 +1,5 @@
 import uniqueId from "lodash.uniqueid";
 
-import { FileContext, FolderContext, FolderData } from "@githubnext/utils";
-
 type Block = {
   id: string;
   type: string;
@@ -18,19 +16,11 @@ interface BundleCode {
 export const bundleCodesandboxFiles = ({
   block,
   bundleCode,
-  context,
   id,
-  contents,
-  tree,
-  metadata,
 }: {
   block: Block;
   bundleCode: BundleCode[];
-  context: FileContext | FolderContext;
   id: string;
-  contents?: string;
-  tree?: FolderData["tree"];
-  metadata?: any;
 }) => {
   const fileName = (block.entry.split("/").pop() || "index.js")
     .replace(".ts", ".js")
@@ -90,11 +80,7 @@ ${cssFilesString}
     window.parent.postMessage({
       type: "update-metadata",
       id: "${id}",
-      context: ${JSON.stringify(context)},
       metadata: newMetadata,
-      path: ${JSON.stringify(context.path)},
-      block: ${JSON.stringify(block)},
-      currentMetadata: ${JSON.stringify(metadata)},
     }, "*")
   }
 
@@ -102,75 +88,94 @@ ${cssFilesString}
     window.parent.postMessage({
       type: "navigate-to-path",
       id: "${id}",
-      context: ${JSON.stringify(context)},
       path,
     }, "*")
   }
 
+  const onRequestUpdateContent = (content) => {
+    window.parent.postMessage({
+      type: "update-file",
+      id: "${id}",
+      content: content
+    }, "*")
+  }
+
+  const pendingRequests = {};
+
+  let uniqueId = 0
+  const getUniqueId = () => {
+    uniqueId++
+    return uniqueId
+  }
+
+  const onRequestGitHubData = (path, params) => {
+    // for responses to this specific request
+    const requestId = "${uniqueId("github-data--request--")}--" + getUniqueId()
+
+    window.parent.postMessage({
+      type: "github-data--request",
+      id: "${id}",
+      requestId,
+      path,
+      params,
+    }, "*");
+
+    return new Promise((resolve, reject) => {
+      pendingRequests[requestId] = { resolve, reject };
+      const maxDelay = 1000 * 5;
+      window.setTimeout(() => {
+        delete pendingRequests[requestId];
+        reject(new Error("Timeout"));
+      }, maxDelay);
+    });
+  };
+
   export default function WrappedBlock() {
+    const [props, setProps] = React.useState(null);
 
-    const onRequestUpdateContent = (content) => {
-      window.parent.postMessage({
-        type: "update-file",
-        id: "${id}",
-        context: ${JSON.stringify(context)},
-        content: content
-      }, "*")
-    }
+    React.useEffect(() => {
+      const onMessage = (event: MessageEvent) => {
+        if (event.origin !== "${window.location.origin}") return;
+        if (event.data.id !== "${id}") return;
 
-    let uniqueId = 0
-    const getUniqueId = () => {
-      uniqueId++
-      return uniqueId
-    }
+        switch (event.data.type) {
+          case "set-props":
+            setProps(event.data.props);
+            break;
 
-    const onRequestGitHubData = React.useCallback((path, params) => {
-      // for responses to this specific request
-      const requestId = "${uniqueId(
-        "github-data--request--"
-      )}--" + getUniqueId()
-      window.parent.postMessage({
-        type: "github-data--request",
-        id: "${id}",
-        context: ${JSON.stringify(context)},
-        requestId,
-        path,
-        params,
-      }, "*")
+          case "github-data--response":
+            const request = pendingRequests[event.data.requestId];
+            if (!request) return;
+            delete pendingRequests[event.data.requestId];
 
-      return new Promise((resolve, reject) => {
-        const onMessage = (event: MessageEvent) => {
-          if (event.origin !== "${window.location.origin}") return;
-          if (event.data.type !== "github-data--response") return
-          if (event.data.id !== "${id}") return
-          window.removeEventListener("message", onMessage)
-          if ('error' in event.data) {
-            reject(event.data.error);
-          } else {
-            resolve(event.data.data);
-          }
+            if ('error' in event.data) {
+              request.reject(event.data.error);
+            } else {
+              request.resolve(event.data.data);
+            }
+            break;
         }
-        window.addEventListener("message", onMessage)
-        const maxDelay = 1000 * 5
-        window.setTimeout(() => {
-          window.removeEventListener("message", onMessage)
-          reject(new Error("Timeout"))
-        }, maxDelay)
-      })
-    }, [])
+      };
 
-    return <Block
-      context={${JSON.stringify(context)}}
-      content={${JSON.stringify(contents)}}
-      tree={${JSON.stringify(tree)}}
-      metadata={${JSON.stringify(metadata)}}
+      window.addEventListener("message", onMessage);
+      window.parent.postMessage(
+        { type: "sandbox-ready", id: "${id}" },
+        "*"
+      )
+      return () => { window.removeEventListener("message", onMessage); }
+    }, []);
+
+    return props && <Block
+      // recreate the block if we change file or version
+      key={props.context.sha}
+      {...props}
       onUpdateMetadata={onUpdateMetadata}
       onNavigateToPath={onNavigateToPath}
       onRequestUpdateContent={onRequestUpdateContent}
       onRequestGitHubData={onRequestGitHubData}
     />
   }
-`;
+  `;
 
   return {
     ...otherFiles,

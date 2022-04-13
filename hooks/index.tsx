@@ -3,6 +3,7 @@ import { Octokit } from "@octokit/rest";
 import pm from "picomatch";
 import { defaultBlocksRepo as exampleBlocksRepo } from "blocks/index";
 import {
+  BlocksQueryMeta,
   Branch,
   createBranchAndPR,
   CreateBranchParams,
@@ -19,6 +20,7 @@ import {
 } from "ghapi";
 import { Base64 } from "js-base64";
 import {
+  BlockContentKeyParams,
   BranchesKeyParams,
   FileKeyParams,
   FilesKeyParams,
@@ -37,7 +39,7 @@ import {
   useQuery,
   UseQueryOptions,
 } from "react-query";
-import type { UseQueryResult } from "react-query";
+import type { QueryFunction, UseQueryResult } from "react-query";
 
 export function useFileContent(
   params: FileKeyParams,
@@ -272,7 +274,7 @@ export interface BlocksRepo {
 
 export function useAllBlocksRepos() {
   return useQuery<BlocksRepo[]>(
-    QueryKeyMap.blocksRepos.factory(),
+    QueryKeyMap.blocksRepos.factory({}),
     () => {
       const url = `${process.env.NEXT_PUBLIC_MARKETPLACE_URL}/api/blocks`;
       return fetch(url).then((res) => res.json());
@@ -465,4 +467,36 @@ export function useFilteredBlocksRepos(
         .filter((repo) => repo?.blocks?.length),
     };
   }, [allBlocksReposResult.data, path]);
+}
+
+export interface BlockContent {
+  name: string;
+  content: string;
+}
+
+export const getBlockContent: QueryFunction<
+  BlockContent[],
+  GenericQueryKey<BlockContentKeyParams>
+> = async (ctx) => {
+  let params = ctx.queryKey[1];
+  const { owner, repo, id } = params;
+  let meta = ctx.meta as unknown as BlocksQueryMeta;
+
+  const url = `${process.env.NEXT_PUBLIC_MARKETPLACE_URL}/api/get-block-content?owner=${owner}&repo=${repo}&id=${id}`;
+
+  const res = await meta.ghapi(url);
+  return res.data.content;
+};
+
+export function useBlockContent(
+  params: BlockContentKeyParams,
+  config?: UseQueryOptions<BlockContent[]>
+): UseQueryResult<BlockContent[]> {
+  return useQuery(QueryKeyMap.blockContent.factory(params), getBlockContent, {
+    retry: false,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    ...config,
+  });
 }

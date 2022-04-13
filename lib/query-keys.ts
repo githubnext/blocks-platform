@@ -35,58 +35,34 @@ export interface BranchesKeyParams {
   owner: string;
 }
 
+export interface BlockContentKeyParams {
+  owner: string;
+  repo: string;
+  id: string;
+}
+
+function makeFactory<Key, Params>(
+  key: Key
+): { key: Key; factory: (params: Params) => [Key, Params] } {
+  return {
+    key,
+    factory: (params: Params) => [key, params],
+  };
+}
+
 export const QueryKeyMap = {
-  folder: {
-    key: "folder",
-    factory: (params: FolderKeyParams): ["folder", FolderKeyParams] => [
-      "folder",
-      params,
-    ],
-  },
-  info: {
-    key: "info",
-    factory: (params: InfoKeyParams): ["info", InfoKeyParams] => [
-      "info",
-      params,
-    ],
-  },
-  timeline: {
-    key: "timeline",
-    factory: (params: TimelineKeyParams): ["timeline", TimelineKeyParams] => [
-      "timeline",
-      params,
-    ],
-  },
-  files: {
-    key: "files",
-    factory: (params: FilesKeyParams): ["files", FilesKeyParams] => [
-      "files",
-      params,
-    ],
-  },
-  file: {
-    key: "file",
-    factory: (params: FileKeyParams): ["file", FileKeyParams] => [
-      "file",
-      params,
-    ],
-  },
-  blocksRepos: {
-    key: "blocksRepos",
-    factory: () => ["blocksRepos"],
-  },
-  branches: {
-    key: "branches",
-    factory: (params: BranchesKeyParams): ["branches", BranchesKeyParams] => [
-      "branches",
-      params,
-    ],
-  },
-  searchRepos: {
-    key: "searchRepos",
-    factory: (query: string) => ["searchRepos", query],
-  },
-} as const;
+  folder: makeFactory<"folder", FolderKeyParams>("folder"),
+  info: makeFactory<"info", InfoKeyParams>("info"),
+  timeline: makeFactory<"timeline", TimelineKeyParams>("timeline"),
+  files: makeFactory<"files", FilesKeyParams>("files"),
+  file: makeFactory<"file", FileKeyParams>("file"),
+  blocksRepos: makeFactory<"blocksRepos", {}>("blocksRepos"),
+  branches: makeFactory<"branches", BranchesKeyParams>("branches"),
+  searchRepos: makeFactory<"searchRepos", string>("searchRepos"),
+  blockContent: makeFactory<"blockContent", BlockContentKeyParams>(
+    "blockContent"
+  ),
+};
 
 type KeyName = keyof typeof QueryKeyMap;
 export type GenericQueryKey<T> = [key: KeyName, params: T];

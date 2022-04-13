@@ -60,7 +60,7 @@ export function ExampleBlock(props: ExampleBlockProps) {
     >
       <Component
         // recreate the block if we change file or version
-        key={JSON.stringify(context)}
+        key={context.sha}
         block={block}
         content={contents || ""}
         tree={tree || []}

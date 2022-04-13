@@ -167,7 +167,7 @@ ${cssFilesString}
 
     return props && <Block
       // recreate the block if we change file or version
-      key={JSON.stringify(props.context)}
+      key={props.context.sha}
       {...props}
       onUpdateMetadata={onUpdateMetadata}
       onNavigateToPath={onNavigateToPath}

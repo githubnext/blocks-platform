@@ -17,8 +17,6 @@ interface SandboxedBlockProps {
   tree?: RepoFiles;
   metadata?: any;
   context: FileContext | FolderContext;
-  renderLoading?: React.ReactNode;
-  renderError?: React.ReactNode;
   onUpdateMetadata: (newMetadata: any) => void;
   onRequestUpdateContent: (newContent: string) => void;
   onRequestGitHubData: (
@@ -48,8 +46,6 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
     tree,
     metadata = {},
     context,
-    renderLoading = DefaultLoadingState,
-    renderError = DefaultErrorState,
     onUpdateMetadata,
     onRequestUpdateContent,
     onRequestGitHubData,
@@ -151,9 +147,9 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
     sandbox.postMessage({ type: "set-props", id, props }, "*");
   }, [sandbox, block, contents, tree, metadata, context, id]);
 
-  if (!blockContent) return renderLoading as JSX.Element;
-  if (status === "loading") return renderLoading as JSX.Element;
-  if (status === "error") return renderError as JSX.Element;
+  if (!blockContent) return DefaultLoadingState;
+  if (status === "loading") return DefaultLoadingState;
+  if (status === "error") return DefaultErrorState;
 
   return (
     files && (

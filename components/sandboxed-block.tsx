@@ -52,17 +52,11 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
     onRequestGitHubData,
     onNavigateToPath,
   } = props;
-  const { status, data: blockContent } = useBlockContent(
-    block.owner,
-    block.repo,
-    block.id,
-    {
-      retry: false,
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: false,
-    }
-  );
+  const { status, data: blockContent } = useBlockContent({
+    owner: block.owner,
+    repo: block.repo,
+    id: block.id,
+  });
   const id = useMemo(() => uniqueId("sandboxed-block-"), []);
   const sandpackWrapper = useRef<HTMLDivElement>(null);
 

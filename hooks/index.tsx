@@ -489,14 +489,14 @@ export const getBlockContent: QueryFunction<
 };
 
 export function useBlockContent(
-  owner: string,
-  repo: string,
-  id: string,
+  params: BlockContentKeyParams,
   config?: UseQueryOptions<BlockContent[]>
 ): UseQueryResult<BlockContent[]> {
-  return useQuery(
-    QueryKeyMap.blockContent.factory({ owner, repo, id }),
-    getBlockContent,
-    config
-  );
+  return useQuery(QueryKeyMap.blockContent.factory(params), getBlockContent, {
+    retry: false,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    ...config,
+  });
 }

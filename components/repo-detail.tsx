@@ -300,6 +300,105 @@ function BlockPaneHeader({
   );
 }
 
+type BlockPaneBlockProps = {
+  token: string;
+  block: Block;
+  fileInfo: RepoFiles[0];
+  path: string;
+  context: Context;
+  isFolder: boolean;
+  theme: string;
+  branchName: string;
+  updatedContents: UpdatedContents;
+  setUpdatedContents: (_: UpdatedContents) => void;
+};
+
+function BlockPaneBlock({
+  token,
+  block,
+  fileInfo,
+  path,
+  context,
+  isFolder,
+  theme,
+  branchName,
+  updatedContents,
+  setUpdatedContents,
+}: BlockPaneBlockProps) {
+  const size = fileInfo.size || 0;
+  const fileSizeLimit = 1500000; // 1.5Mb
+  const isTooLarge = size > fileSizeLimit;
+
+  const { data: fileData } = useFileContent(
+    {
+      repo: context.repo,
+      owner: context.owner,
+      path: path,
+      fileRef: context.sha,
+    },
+    {
+      enabled: !isFolder && !updatedContents[path] && !isTooLarge,
+      cacheTime: 0,
+    }
+  );
+
+  let content: string;
+  let onRequestUpdateContent: (_: string) => void;
+  if (updatedContents[path]) {
+    content = updatedContents[path].content;
+    onRequestUpdateContent = (newContent: string) => {
+      setUpdatedContents(
+        Immer.produce(updatedContents, (updatedContents) => {
+          if (newContent === updatedContents[path].original) {
+            delete updatedContents[path];
+          } else {
+            updatedContents[path].content = newContent;
+          }
+        })
+      );
+    };
+  } else if (fileData) {
+    content = fileData.content;
+    onRequestUpdateContent = (newContent: string) => {
+      setUpdatedContents(
+        Immer.produce(updatedContents, (updatedContents) => {
+          if (newContent !== content) {
+            updatedContents[path] = {
+              sha: fileData.context.sha,
+              original: content,
+              content: newContent,
+            };
+          }
+        })
+      );
+    };
+  } else {
+    content = "";
+    onRequestUpdateContent = (newContent: string) => {};
+  }
+
+  if (isTooLarge)
+    return (
+      <div className="italic p-4 pt-40 text-center mx-auto text-gray-600">
+        Oh boy, that's a honkin file! It's {size / 1000} KBs.
+      </div>
+    );
+
+  return (
+    <GeneralBlock
+      key={block.id}
+      // @ts-ignore
+      context={context}
+      theme={theme || "light"}
+      block={block}
+      token={token}
+      branchName={branchName}
+      content={content}
+      onRequestUpdateContent={onRequestUpdateContent}
+    />
+  );
+}
+
 type BlockPaneProps = {
   fileInfo: RepoFiles[0];
   path: string;
@@ -333,28 +432,11 @@ function BlockPane({
 
   const isFolder = fileInfo.type !== "blob";
 
-  const size = fileInfo.size || 0;
-  const fileSizeLimit = 1500000; // 1.5Mb
-  const isTooLarge = size > fileSizeLimit;
-
   const manageBlockResult = useManageBlock({
     path,
     storedDefaultBlock: metadata[path]?.default,
     isFolder,
   });
-
-  const { data: fileData } = useFileContent(
-    {
-      repo: context.repo,
-      owner: context.owner,
-      path: path,
-      fileRef: context.sha,
-    },
-    {
-      enabled: !isFolder && !updatedContents[path],
-      cacheTime: 0,
-    }
-  );
 
   const block = manageBlockResult.data?.block;
 
@@ -377,38 +459,6 @@ function BlockPane({
     }
   });
 
-  let content: undefined | string;
-  let onRequestUpdateContent: undefined | ((_: string) => void);
-  if (updatedContents[path]) {
-    content = updatedContents[path].content;
-    onRequestUpdateContent = (newContent: string) => {
-      setUpdatedContents(
-        Immer.produce(updatedContents, (updatedContents) => {
-          if (newContent === updatedContents[path].original) {
-            delete updatedContents[path];
-          } else {
-            updatedContents[path].content = newContent;
-          }
-        })
-      );
-    };
-  } else if (fileData) {
-    content = fileData.content;
-    onRequestUpdateContent = (newContent: string) => {
-      setUpdatedContents(
-        Immer.produce(updatedContents, (updatedContents) => {
-          if (newContent !== content) {
-            updatedContents[path] = {
-              sha: fileData.context.sha,
-              original: content,
-              content: newContent,
-            };
-          }
-        })
-      );
-    };
-  }
-
   return (
     <>
       <BlockPaneHeader
@@ -424,22 +474,20 @@ function BlockPane({
           onSaveChanges,
         }}
       />
-      {isTooLarge && (
-        <div className="italic p-4 pt-40 text-center mx-auto text-gray-600">
-          Oh boy, that's a honkin file! It's {size / 1000} KBs.
-        </div>
-      )}
-      {!isTooLarge && block && (
-        <GeneralBlock
-          key={block.id}
-          // @ts-ignore
-          context={context}
-          theme={theme || "light"}
-          block={block}
-          token={token}
-          branchName={branchName}
-          content={content}
-          onRequestUpdateContent={onRequestUpdateContent}
+      {block && (
+        <BlockPaneBlock
+          {...{
+            token,
+            block,
+            fileInfo,
+            path,
+            context,
+            isFolder,
+            theme,
+            branchName,
+            updatedContents,
+            setUpdatedContents,
+          }}
         />
       )}
     </>

@@ -1,3 +1,5 @@
+type schemas = import("@octokit/openapi-types").components["schemas"];
+
 interface CommonBlockProps {
   metadata: any;
   onUpdateMetadata: () => any;
@@ -27,22 +29,27 @@ interface FolderData {
 }
 type FolderBlockProps = FolderData & CommonBlockProps;
 
-type DirectoryItem =
-  import("@octokit/openapi-types").components["schemas"]["content-directory"][number];
-type TreeItem =
-  import("@octokit/openapi-types").components["schemas"]["git-tree"]["tree"][number];
+type DirectoryItem = schemas["content-directory"][number];
+type TreeItem = schemas["git-tree"]["tree"][number];
 
-type RepoItem =
-  import("@octokit/openapi-types").components["schemas"]["repo-search-result-item"];
+type RepoItem = schemas["repo-search-result-item"];
 
-type RepoInfo =
-  import("@octokit/openapi-types").components["schemas"]["repository"];
+type Contributor = schemas["contributor"];
+type Branch = schemas["short-branch"];
+type RepoInfo = schemas["repository"] & {
+  contributors: Contributor[];
+};
 
-interface RepoTimeline {
-  activity?: any;
-  commits: any;
-  fileChanges?: any;
-}
+type Commit = schemas["commit"];
+type CommitBrief = {
+  date: Commit["commit"]["author"]["date"];
+  username: Commit["author"]["login"];
+  message: Commit["commit"]["message"];
+  url: Commit["html_url"];
+  sha: Commit["sha"];
+};
+
+type RepoTimeline = CommitBrief[];
 
 interface Block {
   id: string;

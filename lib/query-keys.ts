@@ -14,7 +14,7 @@ export interface TimelineKeyParams {
   repo: string;
   owner: string;
   path: string;
-  sha?: string;
+  sha: string;
 }
 
 export interface FilesKeyParams {

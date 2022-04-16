@@ -45,23 +45,25 @@ const repoActions = [
   ["Star", StarIcon],
 ] as const;
 
+type RepoHeaderProps = {
+  owner: string;
+  repo: string;
+  description: string;
+  contributors: Contributor[];
+  branch: string;
+  branches: Branch[];
+  onChangeBranch: (branchName: string) => void;
+};
+
 export const RepoHeader = ({
   owner,
   repo,
   description,
-  contributors = [],
-  branchName = "",
-  branches = [],
+  contributors,
+  branch,
+  branches,
   onChangeBranch,
-}: {
-  owner: string;
-  repo: string;
-  description: string;
-  contributors: any[];
-  branchName?: string;
-  branches?: any[];
-  onChangeBranch: (branchName: string) => void;
-}) => {
+}: RepoHeaderProps) => {
   return (
     <Box
       bg="canvas.subtle"
@@ -106,7 +108,7 @@ export const RepoHeader = ({
           </Link>
           <Box ml={2}>
             <BranchPicker
-              value={branchName}
+              value={branch}
               branches={branches}
               onChange={onChangeBranch}
             />

@@ -1,6 +1,5 @@
 import { GitBranchIcon, SearchIcon } from "@primer/octicons-react";
 import { ActionList, ActionMenu, TextInput } from "@primer/react";
-import { Branch } from "ghapi";
 import { useMemo, useState } from "react";
 
 interface BranchPickerProps {

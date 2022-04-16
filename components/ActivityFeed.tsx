@@ -5,52 +5,20 @@ import {
   SidebarExpandIcon,
 } from "@primer/octicons-react";
 import { Avatar, Box, IconButton, Label, Text, Timeline } from "@primer/react";
-import { useRepoTimeline } from "hooks";
 import { getRelativeTime } from "lib/date-utils";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
-export const ActivityFeed = ({
-  context,
-  branchName,
-}: {
+type ActivityFeedProps = {
   context: Omit<FileContext, "file">;
-  branchName?: string;
-}) => {
-  const router = useRouter();
-  const { owner, repo, path } = context;
+  timeline: RepoTimeline;
+};
+
+export const ActivityFeed = ({ context, timeline }: ActivityFeedProps) => {
+  const { path } = context;
 
   const [open, setOpen] = useState(true);
-
-  const { data: timelineData } = useRepoTimeline(
-    {
-      repo: repo,
-      owner: owner,
-      sha: branchName,
-      path: path,
-    },
-    {
-      onSuccess: () => {
-        const { fileRef } = router.query;
-        if (!fileRef) {
-          router.push(
-            {
-              pathname: router.pathname,
-              query: {
-                ...router.query,
-                fileRef: branchName,
-              },
-            },
-            null,
-            { shallow: true }
-          );
-        }
-      },
-    }
-  );
-
-  const commits = timelineData?.commits || [];
 
   return (
     <div
@@ -85,15 +53,11 @@ export const ActivityFeed = ({
           </Box>
         </Box>
         <Timeline>
-          {commits.map((item, index) => {
-            const sha = index ? item.sha : branchName;
-
+          {timeline.map((item) => {
             return (
               <Commit
                 {...item}
-                sha={sha}
-                defaultSha={branchName}
-                isSelected={context.sha === sha || context.sha === item.sha}
+                isSelected={context.sha === item.sha}
                 key={item.sha}
               />
             );
@@ -110,14 +74,12 @@ const Commit = ({
   username,
   message,
   sha,
-  defaultSha,
 }: {
   isSelected: boolean;
   date: string;
   message: string;
   username: string;
   sha: string;
-  defaultSha: string;
 }) => {
   const router = useRouter();
   return (
@@ -126,7 +88,7 @@ const Commit = ({
       href={{
         query: {
           ...router.query,
-          fileRef: isSelected ? defaultSha : sha,
+          fileRef: sha,
         },
       }}
     >

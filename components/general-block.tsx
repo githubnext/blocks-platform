@@ -4,12 +4,7 @@ import {
   onRequestGitHubData as utilsOnRequestGitHubData,
 } from "@githubnext/utils";
 import { SandboxedBlockWrapper } from "components/sandboxed-block-wrapper";
-import {
-  useFileContent,
-  useFolderContent,
-  useMetadata,
-  useRepoTimeline,
-} from "hooks";
+import { useFileContent, useFolderContent, useMetadata } from "hooks";
 import { useRouter } from "next/router";
 import React, { useMemo } from "react";
 import { CommitCodeDialog } from "./commit-code-dialog";
@@ -19,13 +14,14 @@ import { UpdateCodeModal } from "./UpdateCodeModal";
 interface GeneralBlockProps {
   theme: string;
   context: FileContext | FolderContext;
+  timeline: RepoTimeline;
   block: Block;
   token: string;
-  branchName: string;
+  branch: string;
 }
 
 export function GeneralBlock(props: GeneralBlockProps) {
-  const { context, theme, block, token, branchName } = props;
+  const { context, timeline, theme, block, token, branch } = props;
   const { repo, owner, path, sha } = context;
 
   const [requestedMetadata, setRequestedMetadata] = React.useState(null);
@@ -47,7 +43,7 @@ export function GeneralBlock(props: GeneralBlockProps) {
     metadataPath: block.entry && getMetadataPath(block, path),
     filePath: path,
     token: token,
-    branchName,
+    branch,
   });
   const type = block.type;
 
@@ -123,15 +119,8 @@ export function GeneralBlock(props: GeneralBlockProps) {
     [context, name, type]
   );
 
-  const { data: timelineData } = useRepoTimeline({
-    repo,
-    owner,
-    path,
-  });
-
-  let mostRecentCommit =
-    timelineData?.commits?.length > 0 ? timelineData.commits[0].sha : null;
-  let isBranchable = sha === mostRecentCommit || sha === branchName;
+  let mostRecentCommit = timeline.length > 0 ? timeline[0].sha : null;
+  let isBranchable = sha === mostRecentCommit || sha === branch;
 
   return (
     <div
@@ -189,7 +178,7 @@ export function GeneralBlock(props: GeneralBlockProps) {
           onClose={() => setRequestedFileContent(null)}
           isOpen
           token={token}
-          branchName={branchName}
+          branch={branch}
           branchingDisabled={!isBranchable}
         />
       )}

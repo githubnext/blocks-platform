@@ -4,7 +4,6 @@ import pm from "picomatch";
 import { defaultBlocksRepo as exampleBlocksRepo } from "blocks/index";
 import {
   BlocksQueryMeta,
-  Branch,
   createBranchAndPR,
   CreateBranchParams,
   CreateBranchResponse,
@@ -130,21 +129,21 @@ export function useMetadata({
   metadataPath,
   filePath,
   token,
-  branchName,
+  branch,
 }: {
   owner: string;
   repo: string;
   metadataPath: string;
   filePath: string;
   token: string;
-  branchName: string;
+  branch: string;
 }) {
   const { data: metadataData } = useFileContent(
     {
       repo,
       owner,
       path: metadataPath,
-      fileRef: branchName,
+      fileRef: branch,
     },
     {
       refetchOnWindowFocus: false,
@@ -166,7 +165,7 @@ export function useMetadata({
     } catch (e) {
       setMetadata({});
     }
-  }, [metadataData, branchName]);
+  }, [metadataData, branch]);
 
   const { mutateAsync } = useUpdateFileContents({});
   const onUpdateMetadata = useCallback(
@@ -177,13 +176,13 @@ export function useMetadata({
         owner,
         repo,
         path: overridePath || metadataPath,
-        ref: branchName,
-        branch: branchName,
+        ref: branch,
+        branch,
         token,
       });
       setMetadata(contents);
     },
-    [mutateAsync, owner, repo, metadataPath, filePath, token, branchName]
+    [mutateAsync, owner, repo, metadataPath, filePath, token, branch]
   );
 
   return {
@@ -219,33 +218,38 @@ export function useRepoTimeline(
     GenericQueryKey<TimelineKeyParams>
   >(QueryKeyMap.timeline.factory(params), getRepoTimeline, {
     cacheTime: 0,
-    enabled: Boolean(params.repo) && Boolean(params.owner),
     refetchOnWindowFocus: false,
     retry: false,
     ...config,
   });
 }
 
-export function useRepoFiles(params: FilesKeyParams) {
+export function useRepoFiles(
+  params: FilesKeyParams,
+  config?: UseQueryOptions<RepoFiles>
+) {
   return useQuery<RepoFiles, any, RepoFiles, GenericQueryKey<FilesKeyParams>>(
     QueryKeyMap.files.factory(params),
     getRepoFiles,
     {
-      enabled: Boolean(params.repo) && Boolean(params.owner),
       refetchOnWindowFocus: false,
       retry: false,
+      ...config,
     }
   );
 }
 
-export function useGetBranches(params: BranchesKeyParams) {
+export function useGetBranches(
+  params: BranchesKeyParams,
+  config?: UseQueryOptions<Branch[]>
+) {
   return useQuery<Branch[], any, Branch[], GenericQueryKey<BranchesKeyParams>>(
     QueryKeyMap.branches.factory(params),
     getBranches,
     {
-      enabled: Boolean(params.repo) && Boolean(params.owner),
       refetchOnWindowFocus: false,
       retry: false,
+      ...config,
     }
   );
 }

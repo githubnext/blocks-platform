@@ -50,7 +50,7 @@ function App({ Component, pageProps: { session, ...pageProps } }) {
       <Hydrate state={pageProps.dehydratedState}>
         <ThemeProvider>
           <BaseStyles>
-            <SessionProvider session={session}>
+            <SessionProvider refetchOnWindowFocus={false} session={session}>
               <Component {...pageProps} />
             </SessionProvider>
           </BaseStyles>

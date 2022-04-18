@@ -8,7 +8,6 @@ import {
   Button,
 } from "@primer/react";
 import React from "react";
-import { BiCaretDown } from "react-icons/bi";
 
 import {
   BookIcon,
@@ -50,7 +49,7 @@ type RepoHeaderProps = {
   repo: string;
   description: string;
   contributors: Contributor[];
-  branch: string;
+  branchName: string;
   branches: Branch[];
   onChangeBranch: (branchName: string) => void;
 };
@@ -60,7 +59,7 @@ export const RepoHeader = ({
   repo,
   description,
   contributors,
-  branch,
+  branchName,
   branches,
   onChangeBranch,
 }: RepoHeaderProps) => {
@@ -108,7 +107,7 @@ export const RepoHeader = ({
           </Link>
           <Box ml={2}>
             <BranchPicker
-              value={branch}
+              value={branchName}
               branches={branches}
               onChange={onChangeBranch}
             />

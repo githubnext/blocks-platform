@@ -34,7 +34,7 @@ interface CommitCodeDialogProps {
   owner: string;
   token: string;
   branchingDisabled: boolean;
-  branch: string;
+  branchName: string;
 }
 
 type CommitType = "currentBranch" | "newBranch";
@@ -44,7 +44,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [commitType, setCommitType] = useState<CommitType>("currentBranch");
-  const [newBranch, setNewBranch] = useState("");
+  const [newBranchName, setNewBranchName] = useState("");
   const {
     onClose,
     isOpen,
@@ -55,7 +55,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
     repo,
     token,
     branchingDisabled,
-    branch,
+    branchName,
   } = props;
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -104,7 +104,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
           pathname: router.pathname,
           query: {
             ...router.query,
-            branch: newBranch,
+            branch: newBranchName,
             fileRef: res.head.sha,
           },
         },
@@ -120,7 +120,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
         createBranch({
           owner,
           repo,
-          ref: newBranch,
+          ref: newBranchName,
           token,
           content: newCode,
           path,
@@ -133,7 +133,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
         updateContents({
           owner,
           repo,
-          branch,
+          branch: branchName,
           ref: router?.query?.fileRef as string,
           token,
           content: newCode,
@@ -219,7 +219,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
                 <GitCommitIcon />
                 <span className="ml-1">
                   Commit directly to the{" "}
-                  <BranchName className="font-normal">{branch}</BranchName>{" "}
+                  <BranchName className="font-normal">{branchName}</BranchName>{" "}
                   branch.
                 </span>
               </FormControl.Label>
@@ -252,9 +252,9 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
                     className="font-mono"
                     leadingVisual={GitBranchIcon}
                     placeholder="New branch name"
-                    value={newBranch}
+                    value={newBranchName}
                     onChange={(e) => {
-                      setNewBranch(e.target.value);
+                      setNewBranchName(e.target.value);
                     }}
                   />
                 </FormControl>
@@ -289,7 +289,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
           Cancel
         </Button>
         <Button
-          disabled={isLoading || (!newBranch && commitType === "newBranch")}
+          disabled={isLoading || (!newBranchName && commitType === "newBranch")}
           async
           type="button"
           variant="primary"

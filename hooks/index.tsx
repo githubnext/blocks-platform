@@ -129,21 +129,21 @@ export function useMetadata({
   metadataPath,
   filePath,
   token,
-  branch,
+  branchName,
 }: {
   owner: string;
   repo: string;
   metadataPath: string;
   filePath: string;
   token: string;
-  branch: string;
+  branchName: string;
 }) {
   const { data: metadataData } = useFileContent(
     {
       repo,
       owner,
       path: metadataPath,
-      fileRef: branch,
+      fileRef: branchName,
     },
     {
       refetchOnWindowFocus: false,
@@ -165,7 +165,7 @@ export function useMetadata({
     } catch (e) {
       setMetadata({});
     }
-  }, [metadataData, branch]);
+  }, [metadataData, branchName]);
 
   const { mutateAsync } = useUpdateFileContents({});
   const onUpdateMetadata = useCallback(
@@ -176,13 +176,13 @@ export function useMetadata({
         owner,
         repo,
         path: overridePath || metadataPath,
-        ref: branch,
-        branch,
+        ref: branchName,
+        branch: branchName,
         token,
       });
       setMetadata(contents);
     },
-    [mutateAsync, owner, repo, metadataPath, filePath, token, branch]
+    [mutateAsync, owner, repo, metadataPath, filePath, token, branchName]
   );
 
   return {

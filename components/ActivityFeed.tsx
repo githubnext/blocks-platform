@@ -12,10 +12,15 @@ import { useState } from "react";
 
 type ActivityFeedProps = {
   context: Omit<FileContext, "file">;
+  branchName: string;
   timeline: undefined | RepoTimeline;
 };
 
-export const ActivityFeed = ({ context, timeline }: ActivityFeedProps) => {
+export const ActivityFeed = ({
+  context,
+  branchName,
+  timeline,
+}: ActivityFeedProps) => {
   const { path } = context;
 
   const [open, setOpen] = useState(true);
@@ -54,11 +59,15 @@ export const ActivityFeed = ({ context, timeline }: ActivityFeedProps) => {
         </Box>
         {timeline && (
           <Timeline>
-            {timeline.map((item) => {
+            {timeline.map((item, index) => {
+              const sha = index ? item.sha : branchName;
+
               return (
                 <Commit
                   {...item}
-                  isSelected={context.sha === item.sha}
+                  sha={sha}
+                  defaultSha={branchName}
+                  isSelected={context.sha === sha || context.sha === item.sha}
                   key={item.sha}
                 />
               );
@@ -70,19 +79,23 @@ export const ActivityFeed = ({ context, timeline }: ActivityFeedProps) => {
   );
 };
 
+type CommitProps = {
+  isSelected: boolean;
+  date: string;
+  message: string;
+  username: string;
+  sha: string;
+  defaultSha: string;
+};
+
 const Commit = ({
   isSelected,
   date,
   username,
   message,
   sha,
-}: {
-  isSelected: boolean;
-  date: string;
-  message: string;
-  username: string;
-  sha: string;
-}) => {
+  defaultSha,
+}: CommitProps) => {
   const router = useRouter();
   return (
     <Link
@@ -90,7 +103,7 @@ const Commit = ({
       href={{
         query: {
           ...router.query,
-          fileRef: sha,
+          fileRef: isSelected ? defaultSha : sha,
         },
       }}
     >

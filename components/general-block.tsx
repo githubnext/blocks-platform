@@ -17,11 +17,11 @@ interface GeneralBlockProps {
   timeline: undefined | RepoTimeline;
   block: Block;
   token: string;
-  branch: string;
+  branchName: string;
 }
 
 export function GeneralBlock(props: GeneralBlockProps) {
-  const { context, timeline, theme, block, token, branch } = props;
+  const { context, timeline, theme, block, token, branchName } = props;
   const { repo, owner, path, sha } = context;
 
   const [requestedMetadata, setRequestedMetadata] = React.useState(null);
@@ -43,7 +43,7 @@ export function GeneralBlock(props: GeneralBlockProps) {
     metadataPath: block.entry && getMetadataPath(block, path),
     filePath: path,
     token: token,
-    branch,
+    branchName,
   });
   const type = block.type;
 
@@ -120,7 +120,7 @@ export function GeneralBlock(props: GeneralBlockProps) {
   );
 
   let isBranchable =
-    sha === branch ||
+    sha === branchName ||
     (timeline && timeline.length > 0 && sha === timeline[0].sha);
 
   return (
@@ -179,7 +179,7 @@ export function GeneralBlock(props: GeneralBlockProps) {
           onClose={() => setRequestedFileContent(null)}
           isOpen
           token={token}
-          branch={branch}
+          branchName={branchName}
           branchingDisabled={!isBranchable}
         />
       )}

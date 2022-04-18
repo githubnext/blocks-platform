@@ -38,9 +38,9 @@ type HeaderProps = {
   repo: string;
   description?: string;
   contributors: Contributor[];
-  branch: string;
+  branchName: string;
   branches: Branch[];
-  onChangeBranch: (branch: string) => void;
+  onChangeBranch: (branchName: string) => void;
 };
 
 function Header({
@@ -49,7 +49,7 @@ function Header({
   repo,
   description,
   contributors,
-  branch,
+  branchName,
   branches,
   onChangeBranch,
 }: HeaderProps) {
@@ -93,7 +93,7 @@ function Header({
               repo={repo}
               description={description}
               contributors={contributors}
-              branch={branch}
+              branchName={branchName}
               branches={branches}
               onChangeBranch={onChangeBranch}
             />
@@ -287,7 +287,7 @@ type BlockPaneProps = {
   isFullscreen: boolean;
   context: Context;
   theme: string;
-  branch: string;
+  branchName: string;
 };
 
 function BlockPane({
@@ -300,7 +300,7 @@ function BlockPane({
   isFullscreen,
   context,
   theme,
-  branch,
+  branchName,
 }: BlockPaneProps) {
   const router = useRouter();
 
@@ -365,7 +365,7 @@ function BlockPane({
           timeline={timeline}
           block={block}
           token={token}
-          branch={branch}
+          branchName={branchName}
         />
       )}
     </>
@@ -375,10 +375,16 @@ function BlockPane({
 type CommitsPaneProps = {
   isFullscreen: boolean;
   context: Context;
+  branchName: string;
   timeline: undefined | RepoTimeline;
 };
 
-function CommitsPane({ isFullscreen, context, timeline }: CommitsPaneProps) {
+function CommitsPane({
+  isFullscreen,
+  context,
+  branchName,
+  timeline,
+}: CommitsPaneProps) {
   return (
     <AnimatePresence initial={false}>
       {!isFullscreen && (
@@ -391,7 +397,11 @@ function CommitsPane({ isFullscreen, context, timeline }: CommitsPaneProps) {
           exit={{ width: 0, transition: { type: "tween", duration: 0.1 } }}
           className="flex-none hidden lg:block h-full border-l border-gray-200"
         >
-          <ActivityFeed context={context} timeline={timeline} />
+          <ActivityFeed
+            context={context}
+            branchName={branchName}
+            timeline={timeline}
+          />
         </motion.div>
       )}
     </AnimatePresence>
@@ -402,13 +412,13 @@ interface RepoDetailInnerProps {
   token: string;
   repoInfo: RepoInfo;
   branches: Branch[];
-  branch: string;
+  branchName: string;
   files: undefined | RepoFiles;
   timeline: undefined | RepoTimeline;
 }
 
 export function RepoDetailInner(props: RepoDetailInnerProps) {
-  const { token, repoInfo, branches, branch, files, timeline } = props;
+  const { token, repoInfo, branches, branchName, files, timeline } = props;
   const router = useRouter();
   const { setColorMode } = useTheme();
   const {
@@ -427,7 +437,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
       repo,
       owner,
       path,
-      sha: fileRef || branch,
+      sha: fileRef || branchName,
     }),
     [repo, owner, path, fileRef]
   );
@@ -437,8 +447,8 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
       ? { type: "tree" } // the root path is not included in `files`
       : files && files.find((d) => d.path === path);
 
-  const setBranch = (branch: string) => {
-    const query = { ...router.query, branch };
+  const setBranchName = (branchName: string) => {
+    const query = { ...router.query, branch: branchName };
     // clear cached sha and default to latest on branch
     delete query["fileRef"];
     router.push(
@@ -463,7 +473,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
     metadataPath: `.github/blocks/all.json`,
     filePath: path,
     token,
-    branch,
+    branchName,
   });
 
   return (
@@ -474,9 +484,9 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
         repo={repo}
         description={repoInfo.description}
         contributors={repoInfo.contributors}
-        branch={branch}
+        branchName={branchName}
         branches={branches}
-        onChangeBranch={setBranch}
+        onChangeBranch={setBranchName}
       />
 
       <div className="flex flex-1 overflow-hidden">
@@ -502,7 +512,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
                 isFullscreen,
                 context,
                 theme,
-                branch,
+                branchName,
               }}
             />
           )}
@@ -511,6 +521,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
         <CommitsPane
           isFullscreen={isFullscreen}
           context={context}
+          branchName={branchName}
           timeline={timeline}
         />
       </div>
@@ -546,19 +557,19 @@ export function RepoDetail({ token }: RepoDetailProps) {
   const repoInfo = useRepoInfo({ repo, owner });
   const branches = useGetBranches({ repo, owner });
 
-  let branch: string | undefined = undefined;
-  if (repoInfo.data && branches.data) {
+  let branchName: string | undefined = undefined;
+  if (branches.data) {
     if (branchParam && branches.data.some((b) => b.name === branchParam)) {
-      branch = branchParam;
+      branchName = branchParam;
     } else {
-      branch = repoInfo.data.default_branch;
+      branchName = repoInfo.data.default_branch;
     }
   }
 
   useEffect(() => {
-    if (branch) {
-      if (branchParam !== branch) {
-        const query = { ...router.query, branch };
+    if (branchName) {
+      if (branchParam !== branchName) {
+        const query = { ...router.query, branch: branchName };
         // clear cached sha and default to latest on branch
         delete query["fileRef"];
         router.push(
@@ -571,15 +582,15 @@ export function RepoDetail({ token }: RepoDetailProps) {
         );
       }
     }
-  }, [branch]);
+  }, [branchName]);
 
   const repoFiles = useRepoFiles(
     {
       repo,
       owner,
-      sha: branch,
+      sha: branchName,
     },
-    { enabled: Boolean(branch) }
+    { enabled: Boolean(branchName) }
   );
 
   const repoTimeline = useRepoTimeline(
@@ -587,9 +598,9 @@ export function RepoDetail({ token }: RepoDetailProps) {
       repo,
       owner,
       path,
-      sha: branch,
+      sha: branchName,
     },
-    { enabled: Boolean(branch) }
+    { enabled: Boolean(branchName) }
   );
 
   const queries = [repoInfo, branches, repoFiles, repoTimeline];
@@ -610,7 +621,7 @@ export function RepoDetail({ token }: RepoDetailProps) {
         token={token}
         repoInfo={repoInfo.data}
         branches={branches.data}
-        branch={branch}
+        branchName={branchName}
         files={repoFiles.data}
         timeline={repoTimeline.data}
       />

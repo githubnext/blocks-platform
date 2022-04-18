@@ -131,7 +131,15 @@ function FileTreePane({
           exit={{ width: 0, transition: { type: "tween", duration: 0.1 } }}
           className="flex-none w-[17rem] border-r border-gray-200"
         >
-          {files && (
+          {!files ? (
+            <div className="flex flex-col items-center justify-center h-full w-full">
+              <div className="animate-pulse flex space-y-4">
+                <div className="rounded-full bg-gray-200 h-12 w-full"></div>
+                <div className="rounded-full bg-gray-200 h-12 w-full"></div>
+                <div className="rounded-full bg-gray-200 h-12 w-full"></div>
+              </div>
+            </div>
+          ) : (
             <Sidebar
               owner={owner}
               repo={repo}
@@ -298,15 +306,21 @@ function BlockPane({
 
   const isFolder = fileInfo.type !== "blob";
 
+  const size = fileInfo.size || 0;
+  const fileSizeLimit = 1500000; // 1.5Mb
+  const isTooLarge = size > fileSizeLimit;
+
   const manageBlockResult = useManageBlock({
     path,
     storedDefaultBlock: metadata[path]?.default,
     isFolder,
   });
 
+  const block = manageBlockResult.data?.block;
+
   useEffect(() => {
-    if (manageBlockResult.data) {
-      const blockKey = getBlockKey(manageBlockResult.data.block);
+    if (block) {
+      const blockKey = getBlockKey(block);
       if (router.query.blockKey !== blockKey) {
         router.replace(
           {
@@ -324,7 +338,7 @@ function BlockPane({
   });
 
   return (
-    <div className="flex-1 overflow-hidden">
+    <>
       <BlockPaneHeader
         {...{
           manageBlockResult,
@@ -337,35 +351,24 @@ function BlockPane({
           context,
         }}
       />
-      {(() => {
-        if (!manageBlockResult.data) return null;
-        const block = manageBlockResult.data.block;
-
-        const size = fileInfo.size || 0;
-        const fileSizeLimit = 1500000; // 1.5Mb
-        const isTooLarge = size > fileSizeLimit;
-
-        if (isTooLarge)
-          return (
-            <div className="italic p-4 pt-40 text-center mx-auto text-gray-600">
-              Oh boy, that's a honkin file! It's {size / 1000} KBs.
-            </div>
-          );
-
-        return (
-          <GeneralBlock
-            key={block.id}
-            // @ts-ignore
-            context={context}
-            theme={theme || "light"}
-            timeline={timeline}
-            block={block}
-            token={token}
-            branch={branch}
-          />
-        );
-      })()}
-    </div>
+      {isTooLarge && (
+        <div className="italic p-4 pt-40 text-center mx-auto text-gray-600">
+          Oh boy, that's a honkin file! It's {size / 1000} KBs.
+        </div>
+      )}
+      {!isTooLarge && block && (
+        <GeneralBlock
+          key={block.id}
+          // @ts-ignore
+          context={context}
+          theme={theme || "light"}
+          timeline={timeline}
+          block={block}
+          token={token}
+          branch={branch}
+        />
+      )}
+    </>
   );
 }
 
@@ -418,7 +421,6 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
   } = router.query as Record<string, string>;
   const [requestedMetadata, setRequestedMetadata] = useState(null);
   const isFullscreen = mode === "fullscreen";
-  // need this to only animate chrome in on fullscreen mode change, but not on load
 
   const context = useMemo(
     () => ({
@@ -484,25 +486,24 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
             path,
           }}
         />
-
-        {fileInfo ? (
-          <BlockPane
-            {...{
-              fileInfo,
-              path,
-              timeline,
-              token,
-              metadata,
-              setRequestedMetadata,
-              isFullscreen,
-              context,
-              theme,
-              branch,
-            }}
-          />
-        ) : (
-          <div className="flex-1" />
-        )}
+        <div className="flex-1 overflow-hidden">
+          {fileInfo && (
+            <BlockPane
+              {...{
+                fileInfo,
+                path,
+                timeline,
+                token,
+                metadata,
+                setRequestedMetadata,
+                isFullscreen,
+                context,
+                theme,
+                branch,
+              }}
+            />
+          )}
+        </div>
 
         <CommitsPane
           isFullscreen={isFullscreen}
@@ -610,16 +611,6 @@ export function RepoDetail({ token }: RepoDetailProps) {
         files={repoFiles.data}
         timeline={repoTimeline.data}
       />
-    );
-  } else if (queries.some((res) => res.status === "error")) {
-    const error = queries.find((res) => res.error)?.error;
-    return (
-      <div className="p-4 pt-40 text-center mx-auto text-red-600">
-        Uh oh, something went wrong!
-        <p className="max-w-[50em] mx-auto text-sm mt-4 text-gray-600">
-          {error?.message}
-        </p>
-      </div>
     );
   } else {
     return <FullPageLoader />;

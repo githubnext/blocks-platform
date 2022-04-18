@@ -432,7 +432,10 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
     [repo, owner, path, fileRef]
   );
 
-  const fileInfo = files && files.find((d) => d.path === path);
+  const fileInfo =
+    path === ""
+      ? { type: "tree" } // the root path is not included in `files`
+      : files && files.find((d) => d.path === path);
 
   const setBranch = (branch: string) => {
     const query = { ...router.query, branch };

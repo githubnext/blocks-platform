@@ -108,7 +108,7 @@ type FileTreePaneProps = {
   isFullscreen: boolean;
   owner: string;
   repo: string;
-  files: RepoFiles;
+  files: undefined | RepoFiles;
   path: string;
 };
 
@@ -131,12 +131,14 @@ function FileTreePane({
           exit={{ width: 0, transition: { type: "tween", duration: 0.1 } }}
           className="flex-none w-[17rem] border-r border-gray-200"
         >
-          <Sidebar
-            owner={owner}
-            repo={repo}
-            files={files}
-            activeFilePath={path}
-          />
+          {files && (
+            <Sidebar
+              owner={owner}
+              repo={repo}
+              files={files}
+              activeFilePath={path}
+            />
+          )}
         </motion.div>
       )}
     </AnimatePresence>
@@ -268,9 +270,9 @@ function BlockPaneHeader({
 }
 
 type BlockPaneProps = {
-  files: RepoFiles;
+  fileInfo: RepoFiles[0];
   path: string;
-  timeline: RepoTimeline;
+  timeline: undefined | RepoTimeline;
   token: string;
   metadata: any;
   setRequestedMetadata: (metadata: any) => void;
@@ -281,7 +283,7 @@ type BlockPaneProps = {
 };
 
 function BlockPane({
-  files,
+  fileInfo,
   path,
   timeline,
   token,
@@ -294,14 +296,7 @@ function BlockPane({
 }: BlockPaneProps) {
   const router = useRouter();
 
-  const isFolder = files
-    ? files?.find((d) => d.path === path)?.type !== "blob"
-    : !path.includes("."); // if there's an extension it's a file
-
-  const fileInfo = files?.find((d) => d.path === path);
-  const size = fileInfo?.size || 0;
-  const fileSizeLimit = 1500000; // 1.5Mb
-  const isTooLarge = size > fileSizeLimit;
+  const isFolder = fileInfo.type !== "blob";
 
   const manageBlockResult = useManageBlock({
     path,
@@ -343,8 +338,12 @@ function BlockPane({
         }}
       />
       {(() => {
-        if (!manageBlockResult.data || !files) return null;
+        if (!manageBlockResult.data) return null;
         const block = manageBlockResult.data.block;
+
+        const size = fileInfo.size || 0;
+        const fileSizeLimit = 1500000; // 1.5Mb
+        const isTooLarge = size > fileSizeLimit;
 
         if (isTooLarge)
           return (
@@ -373,16 +372,10 @@ function BlockPane({
 type CommitsPaneProps = {
   isFullscreen: boolean;
   context: Context;
-  timeline: RepoTimeline;
-  branch: string;
+  timeline: undefined | RepoTimeline;
 };
 
-function CommitsPane({
-  isFullscreen,
-  context,
-  timeline,
-  branch,
-}: CommitsPaneProps) {
+function CommitsPane({ isFullscreen, context, timeline }: CommitsPaneProps) {
   return (
     <AnimatePresence initial={false}>
       {!isFullscreen && (
@@ -407,8 +400,8 @@ interface RepoDetailInnerProps {
   repoInfo: RepoInfo;
   branches: Branch[];
   branch: string;
-  files: RepoFiles;
-  timeline: RepoTimeline;
+  files: undefined | RepoFiles;
+  timeline: undefined | RepoTimeline;
 }
 
 export function RepoDetailInner(props: RepoDetailInnerProps) {
@@ -436,6 +429,8 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
     }),
     [repo, owner, path, fileRef]
   );
+
+  const fileInfo = files && files.find((d) => d.path === path);
 
   const setBranch = (branch: string) => {
     const query = { ...router.query, branch };
@@ -490,26 +485,29 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
           }}
         />
 
-        <BlockPane
-          {...{
-            files,
-            path,
-            timeline,
-            token,
-            metadata,
-            setRequestedMetadata,
-            isFullscreen,
-            context,
-            theme,
-            branch,
-          }}
-        />
+        {undefined ? (
+          <BlockPane
+            {...{
+              fileInfo,
+              path,
+              timeline,
+              token,
+              metadata,
+              setRequestedMetadata,
+              isFullscreen,
+              context,
+              theme,
+              branch,
+            }}
+          />
+        ) : (
+          <div className="flex-1" />
+        )}
 
         <CommitsPane
           isFullscreen={isFullscreen}
           context={context}
           timeline={timeline}
-          branch={branch}
         />
       </div>
       {!!requestedMetadata && (
@@ -592,7 +590,17 @@ export function RepoDetail({ token }: RepoDetailProps) {
 
   const queries = [repoInfo, branches, repoFiles, repoTimeline];
 
-  if (queries.every((res) => res.status === "success")) {
+  if (queries.some((res) => res.status === "error")) {
+    const error = queries.find((res) => res.error)?.error;
+    return (
+      <div className="p-4 pt-40 text-center mx-auto text-red-600">
+        Uh oh, something went wrong!
+        <p className="max-w-[50em] mx-auto text-sm mt-4 text-gray-600">
+          {error?.message}
+        </p>
+      </div>
+    );
+  } else if (repoInfo.status === "success" && branches.status === "success") {
     return (
       <RepoDetailInner
         token={token}

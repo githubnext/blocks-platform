@@ -14,7 +14,7 @@ import { UpdateCodeModal } from "./UpdateCodeModal";
 interface GeneralBlockProps {
   theme: string;
   context: FileContext | FolderContext;
-  timeline: RepoTimeline;
+  timeline: undefined | RepoTimeline;
   block: Block;
   token: string;
   branch: string;
@@ -119,8 +119,9 @@ export function GeneralBlock(props: GeneralBlockProps) {
     [context, name, type]
   );
 
-  let mostRecentCommit = timeline.length > 0 ? timeline[0].sha : null;
-  let isBranchable = sha === mostRecentCommit || sha === branch;
+  let isBranchable =
+    sha === branch ||
+    (timeline && timeline.length > 0 && sha === timeline[0].sha);
 
   return (
     <div
@@ -168,7 +169,7 @@ export function GeneralBlock(props: GeneralBlockProps) {
           onClose={() => setRequestedMetadata(null)}
         />
       )}
-      {!!requestedFileContent && (
+      {!!requestedFileContent && timeline && (
         <CommitCodeDialog
           repo={repo}
           owner={owner}

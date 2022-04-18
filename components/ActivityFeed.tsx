@@ -12,7 +12,7 @@ import { useState } from "react";
 
 type ActivityFeedProps = {
   context: Omit<FileContext, "file">;
-  timeline: RepoTimeline;
+  timeline: undefined | RepoTimeline;
 };
 
 export const ActivityFeed = ({ context, timeline }: ActivityFeedProps) => {
@@ -52,17 +52,19 @@ export const ActivityFeed = ({ context, timeline }: ActivityFeedProps) => {
             )}
           </Box>
         </Box>
-        <Timeline>
-          {timeline.map((item) => {
-            return (
-              <Commit
-                {...item}
-                isSelected={context.sha === item.sha}
-                key={item.sha}
-              />
-            );
-          })}
-        </Timeline>
+        {timeline && (
+          <Timeline>
+            {timeline.map((item) => {
+              return (
+                <Commit
+                  {...item}
+                  isSelected={context.sha === item.sha}
+                  key={item.sha}
+                />
+              );
+            })}
+          </Timeline>
+        )}
       </div>
     </div>
   );

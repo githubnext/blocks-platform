@@ -485,7 +485,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
           }}
         />
 
-        {undefined ? (
+        {fileInfo ? (
           <BlockPane
             {...{
               fileInfo,

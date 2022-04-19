@@ -192,21 +192,19 @@ export const getRepoTimeline: QueryFunction<
 
   const randomQueryParamName = `${Math.random()}`;
 
-  const url = `repos/${owner}/${repo}/commits?path=${path}&${randomQueryParamName}=""&sha=${
-    sha || "HEAD"
-  }`;
+  const url = `repos/${owner}/${repo}/commits?path=${path}&${randomQueryParamName}=""&sha=${sha}`;
 
   const commitsRes = await meta.ghapi(url);
 
-  const commits = commitsRes.data.map((commit) => ({
+  const commits: RepoTimeline = commitsRes.data.map((commit: Commit) => ({
     date: commit.commit.author.date,
-    username: commit.author?.login,
+    username: commit.author.login,
     message: commit.commit.message,
     url: commit.html_url,
     sha: commit.sha,
   }));
 
-  return { commits };
+  return commits;
 };
 
 export const getRepoFiles: QueryFunction<
@@ -227,10 +225,6 @@ export const getRepoFiles: QueryFunction<
   const files = fileTreeRes.data.tree;
   return files;
 };
-
-type BranchesResponse =
-  Endpoints["GET /repos/{owner}/{repo}/branches"]["response"];
-export type Branch = BranchesResponse["data"][0];
 
 export const getBranches: QueryFunction<
   Branch[],

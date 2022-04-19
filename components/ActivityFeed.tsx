@@ -5,52 +5,25 @@ import {
   SidebarExpandIcon,
 } from "@primer/octicons-react";
 import { Avatar, Box, IconButton, Label, Text, Timeline } from "@primer/react";
-import { useRepoTimeline } from "hooks";
 import { getRelativeTime } from "lib/date-utils";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
+type ActivityFeedProps = {
+  context: Omit<FileContext, "file">;
+  branchName: string;
+  timeline: undefined | RepoTimeline;
+};
+
 export const ActivityFeed = ({
   context,
   branchName,
-}: {
-  context: Omit<FileContext, "file">;
-  branchName?: string;
-}) => {
-  const router = useRouter();
-  const { owner, repo, path } = context;
+  timeline,
+}: ActivityFeedProps) => {
+  const { path } = context;
 
   const [open, setOpen] = useState(true);
-
-  const { data: timelineData } = useRepoTimeline(
-    {
-      repo: repo,
-      owner: owner,
-      sha: branchName,
-      path: path,
-    },
-    {
-      onSuccess: () => {
-        const { fileRef } = router.query;
-        if (!fileRef) {
-          router.push(
-            {
-              pathname: router.pathname,
-              query: {
-                ...router.query,
-                fileRef: branchName,
-              },
-            },
-            null,
-            { shallow: true }
-          );
-        }
-      },
-    }
-  );
-
-  const commits = timelineData?.commits || [];
 
   return (
     <div
@@ -84,24 +57,35 @@ export const ActivityFeed = ({
             )}
           </Box>
         </Box>
-        <Timeline>
-          {commits.map((item, index) => {
-            const sha = index ? item.sha : branchName;
+        {timeline && (
+          <Timeline>
+            {timeline.map((item, index) => {
+              const sha = index ? item.sha : branchName;
 
-            return (
-              <Commit
-                {...item}
-                sha={sha}
-                defaultSha={branchName}
-                isSelected={context.sha === sha || context.sha === item.sha}
-                key={item.sha}
-              />
-            );
-          })}
-        </Timeline>
+              return (
+                <Commit
+                  {...item}
+                  sha={sha}
+                  defaultSha={branchName}
+                  isSelected={context.sha === sha || context.sha === item.sha}
+                  key={item.sha}
+                />
+              );
+            })}
+          </Timeline>
+        )}
       </div>
     </div>
   );
+};
+
+type CommitProps = {
+  isSelected: boolean;
+  date: string;
+  message: string;
+  username: string;
+  sha: string;
+  defaultSha: string;
 };
 
 const Commit = ({
@@ -111,14 +95,7 @@ const Commit = ({
   message,
   sha,
   defaultSha,
-}: {
-  isSelected: boolean;
-  date: string;
-  message: string;
-  username: string;
-  sha: string;
-  defaultSha: string;
-}) => {
+}: CommitProps) => {
   const router = useRouter();
   return (
     <Link

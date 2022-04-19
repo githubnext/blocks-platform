@@ -33,7 +33,7 @@ interface CommitCodeDialogProps {
   repo: string;
   owner: string;
   token: string;
-  branchingDisabled?: boolean;
+  branchingDisabled: boolean;
   branchName: string;
 }
 

@@ -8,7 +8,6 @@ import {
   Button,
 } from "@primer/react";
 import React from "react";
-import { BiCaretDown } from "react-icons/bi";
 
 import {
   BookIcon,
@@ -45,23 +44,25 @@ const repoActions = [
   ["Star", StarIcon],
 ] as const;
 
+type RepoHeaderProps = {
+  owner: string;
+  repo: string;
+  description: string;
+  contributors: Contributor[];
+  branchName: string;
+  branches: Branch[];
+  onChangeBranch: (branchName: string) => void;
+};
+
 export const RepoHeader = ({
   owner,
   repo,
   description,
-  contributors = [],
-  branchName = "",
-  branches = [],
+  contributors,
+  branchName,
+  branches,
   onChangeBranch,
-}: {
-  owner: string;
-  repo: string;
-  description: string;
-  contributors: any[];
-  branchName?: string;
-  branches?: any[];
-  onChangeBranch: (branchName: string) => void;
-}) => {
+}: RepoHeaderProps) => {
   return (
     <Box
       bg="canvas.subtle"

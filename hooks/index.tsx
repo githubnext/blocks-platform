@@ -4,7 +4,6 @@ import pm from "picomatch";
 import { defaultBlocksRepo as exampleBlocksRepo } from "blocks/index";
 import {
   BlocksQueryMeta,
-  Branch,
   createBranchAndPR,
   CreateBranchParams,
   CreateBranchResponse,
@@ -219,33 +218,38 @@ export function useRepoTimeline(
     GenericQueryKey<TimelineKeyParams>
   >(QueryKeyMap.timeline.factory(params), getRepoTimeline, {
     cacheTime: 0,
-    enabled: Boolean(params.repo) && Boolean(params.owner),
     refetchOnWindowFocus: false,
     retry: false,
     ...config,
   });
 }
 
-export function useRepoFiles(params: FilesKeyParams) {
+export function useRepoFiles(
+  params: FilesKeyParams,
+  config?: UseQueryOptions<RepoFiles>
+) {
   return useQuery<RepoFiles, any, RepoFiles, GenericQueryKey<FilesKeyParams>>(
     QueryKeyMap.files.factory(params),
     getRepoFiles,
     {
-      enabled: Boolean(params.repo) && Boolean(params.owner),
       refetchOnWindowFocus: false,
       retry: false,
+      ...config,
     }
   );
 }
 
-export function useGetBranches(params: BranchesKeyParams) {
+export function useGetBranches(
+  params: BranchesKeyParams,
+  config?: UseQueryOptions<Branch[]>
+) {
   return useQuery<Branch[], any, Branch[], GenericQueryKey<BranchesKeyParams>>(
     QueryKeyMap.branches.factory(params),
     getBranches,
     {
-      enabled: Boolean(params.repo) && Boolean(params.owner),
       refetchOnWindowFocus: false,
       retry: false,
+      ...config,
     }
   );
 }

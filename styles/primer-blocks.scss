@@ -3,6 +3,6 @@
 @import "@primer/css/color-modes/index.scss";
 
 // scope Primer styles to our example Blocks
-.example-block {
+.example-block:not(#example-block-explain-block) {
   @import "@primer/css";
 }

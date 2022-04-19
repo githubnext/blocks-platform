@@ -3,9 +3,17 @@ import fs from "fs";
 
 const fullRepo = "githubnext/blocks-examples";
 import blocksPackageJson from "./package.json" assert { type: "json" };
-const version = blocksPackageJson["dependencies"]["@githubnext/blocks-examples"]
-  .split("/")
-  .pop();
+
+const blocksExamples =
+  blocksPackageJson["dependencies"]["@githubnext/blocks-examples"];
+const commitish = /#(.*)$/.exec(blocksExamples);
+const tarball = /tarball\/(.*)$/.exec(blocksExamples);
+const version =
+  commitish?.[1] ||
+  tarball?.[1] ||
+  (() => {
+    throw "couldn't find version of blocks-examples";
+  })();
 const packageJson = `https://raw.githubusercontent.com/${fullRepo}/${version}/package.json`;
 
 async function init() {
@@ -36,7 +44,7 @@ async function init() {
   };
   fs.writeFileSync(
     "./package.json",
-    JSON.stringify(newLocalPackageJsonContent, null, 2)
+    JSON.stringify(newLocalPackageJsonContent, null, 2) + "\n"
   );
 }
 

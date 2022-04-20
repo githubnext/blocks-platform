@@ -20,10 +20,12 @@ const sentenceEncoderBlock = dynamic(() => import("./file-blocks/sentence-encode
 const processingBlock = dynamic(() => import("./file-blocks/processing.tsx"), {ssr:false});
 const summarizeBlock = dynamic(() => import("./file-blocks/summarize/index.tsx"), {ssr:false});
 const explainBlock = dynamic(() => import("./file-blocks/explain/index.tsx"), {ssr:false});
+const editBlock = dynamic(() => import("./file-blocks/edit/index.tsx"), {ssr:false});
 const minimapBlock = dynamic(() => import("./folder-blocks/minimap/index.tsx"), {ssr:false});
 const overviewBlock = dynamic(() => import("./folder-blocks/overview/index.tsx"), {ssr:false});
 const dashboardBlock = dynamic(() => import("./folder-blocks/dashboard/index.tsx"), {ssr:false});
 const codeTourBlock = dynamic(() => import("./folder-blocks/code-tour/index.tsx"), {ssr:false});
+const infiniteCanvasBlock = dynamic(() => import("./folder-blocks/infinite-canvas/index.tsx"), {ssr:false});
 
 export default {
   'code-block': codeBlock,
@@ -43,10 +45,12 @@ export default {
   'processing-block': processingBlock,
   'summarize-block': summarizeBlock,
   'explain-block': explainBlock,
+  'edit-block': editBlock,
   'minimap-block': minimapBlock,
   'overview-block': overviewBlock,
   'dashboard-block': dashboardBlock,
-  'code-tour-block': codeTourBlock
+  'code-tour-block': codeTourBlock,
+  'infinite-canvas-block': infiniteCanvasBlock
 }
 
 export const defaultBlocksRepo = {
@@ -351,6 +355,21 @@ export const defaultBlocksRepo = {
       "example_path": "https://github.com/mattdesl/canvas-sketch/blob/master/lib/save.js"
     },
     {
+      "type": "file",
+      "id": "edit-block",
+      "title": "Edit code",
+      "description": "Edit code by prompting a Machine Learning model",
+      "sandbox": false,
+      "entry": "/src/blocks/file-blocks/edit/index.tsx",
+      "extensions": [
+        "*"
+      ],
+      "matches": [
+        "*"
+      ],
+      "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/processing-sketch.js"
+    },
+    {
       "type": "folder",
       "id": "minimap-block",
       "title": "Minimap",
@@ -384,6 +403,15 @@ export const defaultBlocksRepo = {
       "description": "Create documented tours of your code",
       "sandbox": false,
       "entry": "/src/blocks/folder-blocks/code-tour/index.tsx",
+      "example_path": "https://github.com/githubnext/blocks-tutorial"
+    },
+    {
+      "type": "folder",
+      "id": "infinite-canvas-block",
+      "title": "Infinite Canvas",
+      "description": "View and annotate your files in an infinite canvas",
+      "sandbox": false,
+      "entry": "/src/blocks/folder-blocks/infinite-canvas/index.tsx",
       "example_path": "https://github.com/githubnext/blocks-tutorial"
     }
   ],

@@ -8,7 +8,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
   if (!session) {
     res.status(401).send("Unauthorized.");
-    return;
   }
 
   const appOctokit = makeAppOctokit();
@@ -16,7 +15,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     await appOctokit.apps.getRepoInstallation({ owner, repo });
     res.status(200).send(true);
-    return;
   } catch (e) {
     res.status(200).send(false);
   }

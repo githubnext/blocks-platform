@@ -1,6 +1,3 @@
-import { Octokit } from "@octokit/rest";
-import { createAppAuth } from "@octokit/auth-app";
-
 import { FullPageLoader } from "components/full-page-loader";
 import { RepoDetail } from "components/repo-detail";
 import {
@@ -13,21 +10,8 @@ import { GetServerSidePropsContext } from "next";
 import { getSession, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { dehydrate, QueryClient, useQueryClient } from "react-query";
-import { RequestAccess } from "components/request-access";
-import { makeAppOctokit } from "lib/auth";
-import { useRouter } from "next/router";
 
-type Installation = { id: number };
-
-function RepoDetailContainer({
-  repoHasAccess,
-  installation,
-}: {
-  repoHasAccess: boolean;
-  installation: Installation | null;
-}) {
-  const router = useRouter();
-  const { owner, repo } = router.query;
+function RepoDetailContainer() {
   const [loaded, setLoaded] = useState(false);
 
   const queryClient = useQueryClient();
@@ -57,24 +41,9 @@ function RepoDetailContainer({
     return <FullPageLoader />;
   }
 
-  if (status === "authenticated" && session && loaded && repoHasAccess) {
+  if (status === "authenticated" && session && loaded) {
     // @ts-ignore
     return <RepoDetail token={session?.token} />;
-  }
-
-  if (!repoHasAccess && installation) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full">
-        <p>You do not have access to this repository.</p>
-        <div className="mt-4">
-          <RequestAccess
-            installationId={installation.id}
-            owner={owner as string}
-            repo={repo as string}
-          />
-        </div>
-      </div>
-    );
   }
 
   // TODO: Handle errors here
@@ -82,6 +51,19 @@ function RepoDetailContainer({
 }
 
 export default RepoDetailContainer;
+
+const NO_ACCESS_REDIRECT = ({
+  owner,
+  repo,
+}: {
+  owner: string;
+  repo: string;
+}) => ({
+  redirect: {
+    destination: `/no-access?owner=${owner}&repo=${repo}`,
+    permanent: false,
+  },
+});
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const query = context.query;
@@ -99,55 +81,15 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     };
   }
 
-  // Next, check if the user has a valid installation of the Blocks GitHub App.
-  // If not, redirect to the installation page.
-  // Note that we need to user the user's token here, not the GitHub App JWT.
   const octokit = makeOctokitInstance(session.token);
-  const appOctokit = makeAppOctokit();
-  let installations = [];
 
-  // Check if public or private repo
-  // Gate access if private AND no installation
-
-  // How do we handle multiple installations?
-  // How do we handle githubnext/blocks + github/github
-
+  // Next, check whether the user (and by extension, the GitHub App) has access to the repo.
   try {
-    const { data: installationsRes } =
-      await octokit.rest.apps.listInstallationsForAuthenticatedUser();
-
-    if (installationsRes.total_count === 0) {
-      return {
-        redirect: {
-          destination: `https://github.com/apps/${process.env.NEXT_PUBLIC_GITHUB_APP_SLUG}/installations/new`,
-          permanent: false,
-        },
-      };
-    }
-
-    installations = installationsRes.installations;
+    // Is this a reliable way to determine if the app is authenticated for the given repo?
+    // Do we need to use "octokit.rest.apps.getRepoInstallation" instead?
+    await octokit.repos.get({ owner, repo });
   } catch (e) {
-    return {
-      redirect: {
-        destination: `https://github.com/apps/${process.env.NEXT_PUBLIC_GITHUB_APP_SLUG}/installations/new`,
-        permanent: false,
-      },
-    };
-    // TODO: Handle errors here
-  }
-
-  let repoHasAccess: boolean;
-
-  // const { data: app } = await octokit.request("GET /app/installations");
-  // console.log(app);
-
-  try {
-    const { data } = await appOctokit.apps.getRepoInstallation({ owner, repo });
-    // console.log("You have access to this repository", data);
-    // repoHasAccess = true;
-  } catch (e) {
-    // console.log("You DO NOT have access to this repository", e);
-    // repoHasAccess = false;
+    return NO_ACCESS_REDIRECT({ repo, owner });
   }
 
   await queryClient.prefetchQuery(
@@ -163,8 +105,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   return {
     props: {
       dehydratedState: dehydrate(queryClient),
-      repoHasAccess: true,
-      installation: installations.length > 0 ? installations[0] : null,
     },
   };
 }

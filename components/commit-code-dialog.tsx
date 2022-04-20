@@ -1,3 +1,4 @@
+import { FileContext, FolderContext } from "@githubnext/utils";
 import {
   GitBranchIcon,
   GitCommitIcon,
@@ -32,6 +33,7 @@ interface CommitCodeDialogProps {
   path: string;
   repo: string;
   owner: string;
+  sha: string;
   token: string;
   branchingDisabled: boolean;
   branchName: string;
@@ -53,6 +55,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
     path,
     owner,
     repo,
+    sha,
     token,
     branchingDisabled,
     branchName,
@@ -134,7 +137,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
           owner,
           repo,
           branch: branchName,
-          ref: router?.query?.fileRef as string,
+          ref: sha,
           token,
           content: newCode,
           path,

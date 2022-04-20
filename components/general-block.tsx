@@ -174,6 +174,7 @@ export function GeneralBlock(props: GeneralBlockProps) {
           repo={repo}
           owner={owner}
           path={path}
+          sha={context.sha}
           newCode={requestedFileContent}
           currentCode={content}
           onClose={() => setRequestedFileContent(null)}

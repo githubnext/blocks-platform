@@ -37,7 +37,6 @@ export default async function handler(
     res.status(200).json(openAIRes.data.choices[0].text);
     return;
   } catch (e) {
-    console.log(e.response.data);
     res.status(500).send("Unable to get explanation.");
     return;
   }

@@ -24,6 +24,7 @@ export default function NoAccess() {
 
   useQuery(["checkAccess", owner, repo], () => checkAccess({ owner, repo }), {
     refetchInterval: 5000,
+    enabled: router.isReady,
     onSuccess: (hasAccess) => {
       if (hasAccess) {
         router.push(`/${owner}/${repo}`);

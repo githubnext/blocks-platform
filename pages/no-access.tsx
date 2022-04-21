@@ -1,7 +1,6 @@
+import axios from "axios";
 import { useRouter } from "next/router";
 import { useQuery } from "react-query";
-import axios from "axios";
-import { Button } from "@primer/react";
 
 const checkAccess = async ({
   owner,

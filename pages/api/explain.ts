@@ -33,7 +33,7 @@ export default async function handler(
   } = req.body;
 
   try {
-    const completion = await openai.createCompletion("code-davinci-001", {
+    const completion = await openai.createCompletion("davinci-codex-002-msft", {
       prompt: `// Language: ${language}\n${code}\n\n${prompt}`,
       stop,
       max_tokens: 2000, // prompt + max_tokens (tokens in completion) <= 2048 (2048 is the max the openAI model accepts)

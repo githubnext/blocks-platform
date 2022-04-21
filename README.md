@@ -29,13 +29,13 @@ After creating the app:
 Now fill in `.env.local` as follows:
 
 ```
-GITHUB_ID="Iv1.c1d9c6aa2e0bcc63" # your app's "App ID"
+GITHUB_ID="..." # your app's "App ID"
 GITHUB_PRIVATE_KEY="""
 -----BEGIN RSA PRIVATE KEY-----
 ...
 -----END RSA PRIVATE KEY-----
 """ # the contents of the private key file
-GITHUB_SECRET="f6f20567c6a094bc5cb4cedaf67ad3556ee7d408" # your app's "Client secret"
+GITHUB_SECRET="..." # your app's "Client secret"
 NEXT_PUBLIC_GITHUB_APP_SLUG="..." # the last path segment of the "Public link"
 NEXT_PUBLIC_MARKETPLACE_URL="https://blocks-marketplace.githubnext.com" # you can override this to develop `blocks-marketplace` locally
 NEXTAUTH_SECRET="secret"

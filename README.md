@@ -6,14 +6,40 @@ This repo contains the source code for a [prototype app](https://blocks.githubne
 
 ## Developing locally
 
-You'll need some environment variables to get started.
+This app uses a GitHub App to authenticate users and access resources on GitHub, with help from the [NextAuth](https://next-auth.js.org/) package. You'll need to create a GitHub App app and provide the required environment variables in the `.env.local` file.
 
-This app uses GitHub OAuth to authenticate users, with help from the [NextAuth](https://next-auth.js.org/) package. You'll need to create an OAuth app and provide the required environment variables (app secret and app ID) to the `.env.local` file.
+Visit [Register new GitHub App](https://github.com/settings/apps/new) to set up a new app and provide the following information in the form fields:
+
+- "GitHub App name": a name to uniquely identify your app
+- "Homepage URL": http://localhost:3000/
+- "Callback URL": http://localhost/api/auth/callback/github
+- "Request user authorization (OAuth) during installation": checked
+- "Webhook" / "Active": unchecked
+- "Repository permissions":
+  - "Administration": Read-only
+  - "Contents": Read and write
+  - "Pull requests": Read and write
+- "Where can this GitHub App be installed?": Any account
+
+After creating the app:
+
+- "Generate a new client secret" and copy it to `.env.local` (see below)
+- "Generate a private key" and copy it to `.env.local` (see below)
+
+Now fill in `.env.local` as follows:
 
 ```
-GITHUB_SECRET=X
-GITHUB_ID=X
-NEXT_PUBLIC_MARKETPLACE_URL="https://blocks-marketplace.githubnext.com"
+GITHUB_ID="Iv1.c1d9c6aa2e0bcc63" # your app's "App ID"
+GITHUB_PRIVATE_KEY="""
+-----BEGIN RSA PRIVATE KEY-----
+...
+-----END RSA PRIVATE KEY-----
+""" # the contents of the private key file
+GITHUB_SECRET="f6f20567c6a094bc5cb4cedaf67ad3556ee7d408" # your app's "Client secret"
+NEXT_PUBLIC_GITHUB_APP_SLUG="..." # the last path segment of the "Public link"
+NEXT_PUBLIC_MARKETPLACE_URL="https://blocks-marketplace.githubnext.com" # you can override this to develop `blocks-marketplace` locally
+NEXTAUTH_SECRET="secret"
+NEXTAUTH_URL="http://localhost:3000"
 ```
 
 To start working:

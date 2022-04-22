@@ -7,7 +7,7 @@ import {
 } from "@primer/octicons-react";
 import { Avatar, Box, IconButton, Label, Text, Timeline } from "@primer/react";
 import { useSession } from "next-auth/react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { getRelativeTime } from "lib/date-utils";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -66,61 +66,55 @@ export const ActivityFeed = ({
           </Box>
         </Box>
         {timeline && (
-          <Timeline>
-            <AnimatePresence initial={false}>
-              {updatedContent && (
-                <motion.div
-                  initial={{ height: 0 }}
-                  animate={{
-                    height: "auto",
-                    transition: { type: "tween", duration: 0.1, delay: 0 },
-                  }}
-                  exit={{
-                    height: 0,
-                    transition: { type: "tween", duration: 0.1, delay: 0 },
-                  }}
-                >
-                  <Commit
-                    username={session.data.user?.name}
-                    message={"Working changes"}
-                    isSelected={context.sha === branchName}
-                    onClickRef={branchName}
-                    onRemove={clearUpdatedContent}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
-            {timeline.map((item, index) => {
-              // When `context.sha === branchName` (i.e. `fileRef` is empty or
-              // set to `branchName`) we show the current version of the file.
-              // If there is updated content for the file, the current version
-              // is the ghost commit; otherwise it is the tip of the selected
-              // branch.
-              //
-              // To make it easier to compare an older version of a file against
-              // the current version, clicking the selected version takes you to
-              // the current version (so you can swap between them with repeated
-              // clicks).
+          <LayoutGroup>
+            <Timeline>
+              <AnimatePresence initial={false}>
+                {updatedContent && (
+                  <motion.div layout layoutId="ghost-commit">
+                    <Commit
+                      username={session.data.user?.name}
+                      message={"Working changes"}
+                      isSelected={context.sha === branchName}
+                      onClickRef={branchName}
+                      onRemove={clearUpdatedContent}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              {timeline.map((item, index) => {
+                // When `context.sha === branchName` (i.e. `fileRef` is empty or
+                // set to `branchName`) we show the current version of the file.
+                // If there is updated content for the file, the current version
+                // is the ghost commit; otherwise it is the tip of the selected
+                // branch.
+                //
+                // To make it easier to compare an older version of a file against
+                // the current version, clicking the selected version takes you to
+                // the current version (so you can swap between them with repeated
+                // clicks).
 
-              const isCurrent = index === 0 && !updatedContent;
+                const isCurrent = index === 0 && !updatedContent;
 
-              const isSelected =
-                item.sha === context.sha ||
-                (isCurrent && context.sha === branchName);
+                const isSelected =
+                  item.sha === context.sha ||
+                  (isCurrent && context.sha === branchName);
 
-              const onClickRef =
-                isSelected || isCurrent ? branchName : item.sha;
+                const onClickRef =
+                  isSelected || isCurrent ? branchName : item.sha;
 
-              return (
-                <Commit
-                  {...item}
-                  onClickRef={onClickRef}
-                  isSelected={isSelected}
-                  key={item.sha}
-                />
-              );
-            })}
-          </Timeline>
+                return (
+                  <motion.div layout layoutId={item.sha}>
+                    <Commit
+                      {...item}
+                      onClickRef={onClickRef}
+                      isSelected={isSelected}
+                      key={item.sha}
+                    />
+                  </motion.div>
+                );
+              })}
+            </Timeline>
+          </LayoutGroup>
         )}
       </div>
     </div>

@@ -207,22 +207,6 @@ function BlockPaneHeader({
 
   return (
     <div className="flex-none top-0 z-10">
-      {!appContext.hasRepoInstallation && (
-        <Flash className="text-sm" full variant="warning">
-          <StyledOcticon icon={AlertIcon} />
-          The Blocks GitHub app is not installed on this repository. You won't
-          be able to save changes to files or open pull-requests.{" "}
-          <Link
-            underline
-            muted
-            target="_blank"
-            rel="noopener"
-            href={`https://github.com/apps/${process.env.NEXT_PUBLIC_GITHUB_APP_SLUG}/installations/new`}
-          >
-            Grant access
-          </Link>
-        </Flash>
-      )}
       <div>
         <Box
           bg="canvas.subtle"
@@ -609,6 +593,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
   } = router.query as Record<string, string>;
   const [requestedMetadata, setRequestedMetadata] = useState(null);
   const isFullscreen = mode === "fullscreen";
+  const appContext = useContext(AppContext);
 
   const context = useMemo(
     () => ({
@@ -685,6 +670,23 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
         branches={branches}
         onChangeBranch={setBranchName}
       />
+
+      {!appContext.hasRepoInstallation && (
+        <Flash className="text-sm" full variant="warning">
+          <StyledOcticon icon={AlertIcon} />
+          The Blocks GitHub app is not installed on this repository. You won't
+          be able to save changes to files or open pull-requests.{" "}
+          <Link
+            underline
+            muted
+            target="_blank"
+            rel="noopener"
+            href={`https://github.com/apps/${process.env.NEXT_PUBLIC_GITHUB_APP_SLUG}/installations/new`}
+          >
+            Grant access
+          </Link>
+        </Flash>
+      )}
 
       <div className="flex flex-1 overflow-hidden">
         <FileTreePane

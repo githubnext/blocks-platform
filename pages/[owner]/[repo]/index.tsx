@@ -6,21 +6,39 @@ import {
   makeGitHubAPIInstance,
   makeOctokitInstance,
 } from "ghapi";
+import { useCheckRepoAccess } from "hooks";
 import { makeAppOctokit } from "lib/auth";
 import { QueryKeyMap } from "lib/query-keys";
 import { GetServerSidePropsContext } from "next";
 import { getSession, useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { dehydrate, QueryClient, useQueryClient } from "react-query";
 
 function RepoDetailContainer(props: { hasRepoInstallation: boolean }) {
   const { hasRepoInstallation } = props;
+  const router = useRouter();
+  const [localHasRepoInstallation, setLocalHasRepoInstallation] =
+    useState(hasRepoInstallation);
+  const { repo, owner } = router.query as Record<string, string>;
   const [loaded, setLoaded] = useState(false);
 
   const queryClient = useQueryClient();
   const { data: session, status } = useSession({
     required: true,
   });
+
+  useCheckRepoAccess(
+    { repo, owner },
+    {
+      enabled: !localHasRepoInstallation,
+      onSuccess: (hasAccess) => {
+        if (hasAccess) {
+          setLocalHasRepoInstallation(true);
+        }
+      },
+    }
+  );
 
   useEffect(() => {
     if (status !== "authenticated" || loaded) return;
@@ -46,7 +64,9 @@ function RepoDetailContainer(props: { hasRepoInstallation: boolean }) {
 
   if (status === "authenticated" && session && loaded) {
     return (
-      <AppContext.Provider value={{ hasRepoInstallation }}>
+      <AppContext.Provider
+        value={{ hasRepoInstallation: localHasRepoInstallation }}
+      >
         {/* @ts-ignore */}
         <RepoDetail token={session?.token} />
       </AppContext.Provider>

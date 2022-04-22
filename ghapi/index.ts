@@ -351,13 +351,14 @@ export const checkAccess: QueryFunction<
   let params = ctx.queryKey[1];
   const { owner, repo } = params;
 
-  // We don't have access to the meta object in this code path, so we have to use the global Axios instance.
-  const res = await axios.get(`/api/check-access`, {
-    params: {
-      owner,
-      repo,
-    },
+  let getParams = {
+    owner,
+    repo,
+  };
+
+  let response = await axios.get(`/api/check-access`, {
+    params: getParams,
   });
 
-  return res.data;
+  return response.data;
 };

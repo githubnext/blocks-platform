@@ -855,9 +855,9 @@
     unist-util-visit "^1.0.0"
     uuid "^3.3.2"
 
-"@githubnext/blocks-examples@https://api.github.com/repos/githubnext/blocks-examples/tarball/0.11.14":
+"@githubnext/blocks-examples@https://api.github.com/repos/githubnext/blocks-examples/tarball/0.12.0":
   version "0.0.0"
-  resolved "https://api.github.com/repos/githubnext/blocks-examples/tarball/0.11.14#43e411c7affac846cd373e6a7cf6a112cca6579b"
+  resolved "https://api.github.com/repos/githubnext/blocks-examples/tarball/0.12.0#dbccfa04532d79873cfd65ba0bfdd9e8ce45a168"
   dependencies:
     "@codemirror/autocomplete" "^0.19.15"
     "@codemirror/closebrackets" "^0.19.1"
@@ -895,6 +895,8 @@
     "@tensorflow/tfjs" "^3.14.0"
     "@types/d3" "^7.1.0"
     "@types/js-yaml" "^4.0.5"
+    "@types/lodash.flatten" "^4.4.7"
+    "@types/lodash.isempty" "^4.4.7"
     "@types/lodash.uniqueid" "^4.0.6"
     "@types/papaparse" "^5.3.1"
     assert "^2.0.0"
@@ -907,6 +909,7 @@
     git-url-parse "^11.6.0"
     js-base64 "^3.7.2"
     js-yaml "^4.1.0"
+    lodash.flatten "^4.4.0"
     lodash.isempty "^4.4.0"
     lodash.isobject "^3.0.2"
     lodash.uniqueid "^4.0.1"
@@ -914,6 +917,7 @@
     ol "^6.14.1"
     p5 "^1.4.1"
     papaparse "^5.3.1"
+    picomatch "^2.3.1"
     react "^17.0.0"
     react-diff-view "^2.4.8"
     react-dom "^17.0.0"
@@ -2613,6 +2617,20 @@
   version "4.0.5"
   resolved "https://registry.yarnpkg.com/@types/js-yaml/-/js-yaml-4.0.5.tgz#738dd390a6ecc5442f35e7f03fa1431353f7e138"
   integrity sha512-FhpRzf927MNQdRZP0J5DLIdTXhjLYzeUTmLAu69mnVksLH9CJY3IuSeEgbKUki7GQZm0WqDkGzyxju2EZGD2wA==
+
+"@types/lodash.flatten@^4.4.7":
+  version "4.4.7"
+  resolved "https://registry.yarnpkg.com/@types/lodash.flatten/-/lodash.flatten-4.4.7.tgz#0072c8fc0b7e2d0741c118c9bbcb1c1f3602504e"
+  integrity sha512-6yyP/mHEKL2sa86V61F7TnEcUKlLML9+aWI7TCKvnS4SFt7RD4zTVwkdDgluOJqxVkwZ/2z7HvtRs/7j/Uru7g==
+  dependencies:
+    "@types/lodash" "*"
+
+"@types/lodash.isempty@^4.4.7":
+  version "4.4.7"
+  resolved "https://registry.yarnpkg.com/@types/lodash.isempty/-/lodash.isempty-4.4.7.tgz#b1015d1adba560daf560ad04f294848939e75317"
+  integrity sha512-YOzlpoIn9jrfHzjIukKnu9Le3tmi+0PhUdOt2rMpJW/4J6jX7s0HeBatXdh9QckLga8qt4EKBxVIEqtEq6pzLg==
+  dependencies:
+    "@types/lodash" "*"
 
 "@types/lodash.uniqueid@^4.0.6":
   version "4.0.6"
@@ -5989,6 +6007,11 @@ lodash.flatmap@^4.5.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/lodash.flatmap/-/lodash.flatmap-4.5.0.tgz#ef8cbf408f6e48268663345305c6acc0b778702e"
   integrity sha1-74y/QI9uSCaGYzRTBcaswLd4cC4=
+
+lodash.flatten@^4.4.0:
+  version "4.4.0"
+  resolved "https://registry.yarnpkg.com/lodash.flatten/-/lodash.flatten-4.4.0.tgz#f31c22225a9632d2bbf8e4addbef240aa765a61f"
+  integrity sha1-8xwiIlqWMtK7+OSt2+8kCqdlph8=
 
 lodash.flow@^3.3.0:
   version "3.5.0"

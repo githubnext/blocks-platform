@@ -1,7 +1,9 @@
+import * as Immer from "immer";
 import { Box, Button, Link, useTheme } from "@primer/react";
 import { default as NextLink } from "next/link";
 import {
   getBlockKey,
+  useFileContent,
   useGetBranches,
   useManageBlock,
   useMetadata,
@@ -20,10 +22,12 @@ import { RepoHeader } from "./repo-header";
 import { Sidebar } from "./Sidebar";
 import { GeneralBlock } from "./general-block";
 import { UpdateCodeModal } from "./UpdateCodeModal";
+import { CommitCodeDialog } from "./commit-code-dialog";
 import type { RepoFiles } from "@githubnext/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   PlusIcon,
+  RepoPushIcon,
   ScreenFullIcon,
   ScreenNormalIcon,
 } from "@primer/octicons-react";
@@ -31,6 +35,13 @@ import {
 const BlockPicker = dynamic(() => import("./block-picker"), { ssr: false });
 
 type Context = { repo: string; owner: string; path: string; sha: string };
+
+type UpdatedContent = {
+  sha: string;
+  original: string;
+  content: string;
+};
+type UpdatedContents = Record<string, UpdatedContent>;
 
 type HeaderProps = {
   isFullscreen: boolean;
@@ -110,6 +121,7 @@ type FileTreePaneProps = {
   repo: string;
   files: undefined | RepoFiles;
   path: string;
+  updatedContents: UpdatedContents;
 };
 
 function FileTreePane({
@@ -118,6 +130,7 @@ function FileTreePane({
   repo,
   files,
   path,
+  updatedContents,
 }: FileTreePaneProps) {
   return (
     <AnimatePresence initial={false}>
@@ -144,6 +157,7 @@ function FileTreePane({
               owner={owner}
               repo={repo}
               files={files}
+              updatedContents={updatedContents}
               activeFilePath={path}
             />
           )}
@@ -162,6 +176,7 @@ type BlockPaneHeaderProps = {
   metadata: any;
   setRequestedMetadata: (metadata: any) => void;
   context: Context;
+  onSaveChanges: () => void;
 };
 
 function BlockPaneHeader({
@@ -173,6 +188,7 @@ function BlockPaneHeader({
   metadata,
   setRequestedMetadata,
   context,
+  onSaveChanges,
 }: BlockPaneHeaderProps) {
   const router = useRouter();
 
@@ -192,6 +208,15 @@ function BlockPaneHeader({
           justifyContent="space-between"
         >
           <Box display="flex" alignItems="center" className="space-x-2">
+            <Button
+              key={"Save"}
+              variant={"primary"}
+              leadingIcon={RepoPushIcon}
+              disabled={!onSaveChanges}
+              onClick={onSaveChanges}
+            >
+              Save
+            </Button>
             <BlockPicker
               path={path}
               type={isFolder ? "folder" : "file"}
@@ -211,7 +236,7 @@ function BlockPaneHeader({
                   setRequestedMetadata(newMetadata);
                 }}
               >
-                Set as default for all users
+                Make default
               </Button>
             )}
           </Box>
@@ -277,10 +302,111 @@ function BlockPaneHeader({
   );
 }
 
+type BlockPaneBlockProps = {
+  token: string;
+  block: Block;
+  fileInfo: RepoFiles[0];
+  path: string;
+  context: Context;
+  isFolder: boolean;
+  theme: string;
+  branchName: string;
+  updatedContents: UpdatedContents;
+  setUpdatedContents: (_: UpdatedContents) => void;
+};
+
+function BlockPaneBlock({
+  token,
+  block,
+  fileInfo,
+  path,
+  context,
+  isFolder,
+  theme,
+  branchName,
+  updatedContents,
+  setUpdatedContents,
+}: BlockPaneBlockProps) {
+  const size = fileInfo.size || 0;
+  const fileSizeLimit = 1500000; // 1.5Mb
+  const isTooLarge = size > fileSizeLimit;
+
+  const showUpdatedContents =
+    updatedContents[path] && context.sha === branchName;
+
+  const { data: fileData } = useFileContent(
+    {
+      repo: context.repo,
+      owner: context.owner,
+      path: path,
+      fileRef: context.sha,
+    },
+    {
+      enabled: !isFolder && !showUpdatedContents && !isTooLarge,
+      cacheTime: 0,
+    }
+  );
+
+  let content = "";
+  let onRequestUpdateContent = (_: string) => {};
+
+  if (showUpdatedContents) {
+    content = updatedContents[path].content;
+    onRequestUpdateContent = (newContent: string) => {
+      setUpdatedContents(
+        Immer.produce(updatedContents, (updatedContents) => {
+          if (newContent === updatedContents[path].original) {
+            delete updatedContents[path];
+          } else {
+            updatedContents[path].content = newContent;
+          }
+        })
+      );
+    };
+  } else if (fileData) {
+    content = fileData.content;
+    if (context.sha === branchName) {
+      onRequestUpdateContent = (newContent: string) => {
+        setUpdatedContents(
+          Immer.produce(updatedContents, (updatedContents) => {
+            if (newContent !== content) {
+              updatedContents[path] = {
+                sha: fileData.context.sha,
+                original: content,
+                content: newContent,
+              };
+            }
+          })
+        );
+      };
+    }
+  }
+
+  if (isTooLarge)
+    return (
+      <div className="italic p-4 pt-40 text-center mx-auto text-gray-600">
+        Oh boy, that's a honkin file! It's {size / 1000} KBs.
+      </div>
+    );
+
+  return (
+    <GeneralBlock
+      key={block.id}
+      // @ts-ignore
+      context={context}
+      theme={theme || "light"}
+      block={block}
+      token={token}
+      branchName={branchName}
+      content={content}
+      onRequestUpdateContent={onRequestUpdateContent}
+    />
+  );
+}
+
 type BlockPaneProps = {
   fileInfo: RepoFiles[0];
   path: string;
-  timeline: undefined | RepoTimeline;
   token: string;
   metadata: any;
   setRequestedMetadata: (metadata: any) => void;
@@ -288,12 +414,14 @@ type BlockPaneProps = {
   context: Context;
   theme: string;
   branchName: string;
+  updatedContents: UpdatedContents;
+  setUpdatedContents: (_: UpdatedContents) => void;
+  onSaveChanges: () => void;
 };
 
 function BlockPane({
   fileInfo,
   path,
-  timeline,
   token,
   metadata,
   setRequestedMetadata,
@@ -301,14 +429,13 @@ function BlockPane({
   context,
   theme,
   branchName,
+  updatedContents,
+  setUpdatedContents,
+  onSaveChanges,
 }: BlockPaneProps) {
   const router = useRouter();
 
   const isFolder = fileInfo.type !== "blob";
-
-  const size = fileInfo.size || 0;
-  const fileSizeLimit = 1500000; // 1.5Mb
-  const isTooLarge = size > fileSizeLimit;
 
   const manageBlockResult = useManageBlock({
     path,
@@ -349,23 +476,23 @@ function BlockPane({
           metadata,
           setRequestedMetadata,
           context,
+          onSaveChanges,
         }}
       />
-      {isTooLarge && (
-        <div className="italic p-4 pt-40 text-center mx-auto text-gray-600">
-          Oh boy, that's a honkin file! It's {size / 1000} KBs.
-        </div>
-      )}
-      {!isTooLarge && block && (
-        <GeneralBlock
-          key={block.id}
-          // @ts-ignore
-          context={context}
-          theme={theme || "light"}
-          timeline={timeline}
-          block={block}
-          token={token}
-          branchName={branchName}
+      {block && (
+        <BlockPaneBlock
+          {...{
+            token,
+            block,
+            fileInfo,
+            path,
+            context,
+            isFolder,
+            theme,
+            branchName,
+            updatedContents,
+            setUpdatedContents,
+          }}
         />
       )}
     </>
@@ -377,6 +504,8 @@ type CommitsPaneProps = {
   context: Context;
   branchName: string;
   timeline: undefined | RepoTimeline;
+  updatedContent: undefined | UpdatedContent;
+  clearUpdatedContent: () => void;
 };
 
 function CommitsPane({
@@ -384,6 +513,8 @@ function CommitsPane({
   context,
   branchName,
   timeline,
+  updatedContent,
+  clearUpdatedContent,
 }: CommitsPaneProps) {
   return (
     <AnimatePresence initial={false}>
@@ -401,6 +532,8 @@ function CommitsPane({
             context={context}
             branchName={branchName}
             timeline={timeline}
+            updatedContent={updatedContent}
+            clearUpdatedContent={clearUpdatedContent}
           />
         </motion.div>
       )}
@@ -476,6 +609,25 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
     branchName,
   });
 
+  let isBranchable =
+    context.sha === branchName ||
+    (timeline && timeline.length > 0 && timeline[0].sha === branchName);
+
+  const [updatedContents, setUpdatedContents] = useState<UpdatedContents>({});
+  const [showCommitCodeDialog, setShowCommitCodeDialog] = useState(false);
+  const onSaveChanges = updatedContents[path]
+    ? () => {
+        setShowCommitCodeDialog(true);
+      }
+    : undefined;
+  const updatedContent = updatedContents[path];
+  const clearUpdatedContent = () =>
+    setUpdatedContents(
+      Immer.produce(updatedContents, (updatedContents) => {
+        delete updatedContents[path];
+      })
+    );
+
   return (
     <div className="flex flex-col w-full h-screen overflow-hidden">
       <Header
@@ -497,6 +649,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
             repo,
             files,
             path,
+            updatedContents,
           }}
         />
         <div className="flex-1 overflow-hidden">
@@ -505,7 +658,6 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
               {...{
                 fileInfo,
                 path,
-                timeline,
                 token,
                 metadata,
                 setRequestedMetadata,
@@ -513,6 +665,9 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
                 context,
                 theme,
                 branchName,
+                updatedContents,
+                setUpdatedContents,
+                onSaveChanges,
               }}
             />
           )}
@@ -523,6 +678,8 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
           context={context}
           branchName={branchName}
           timeline={timeline}
+          updatedContent={updatedContent}
+          clearUpdatedContent={clearUpdatedContent}
         />
       </div>
       {!!requestedMetadata && (
@@ -535,6 +692,27 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
             onUpdateMetadata(requestedMetadata, `.github/blocks/all.json`);
           }}
           onClose={() => setRequestedMetadata(null)}
+        />
+      )}
+      {!!showCommitCodeDialog && updatedContents[path] && (
+        <CommitCodeDialog
+          repo={repo}
+          owner={owner}
+          path={path}
+          sha={context.sha}
+          newCode={updatedContents[path].content}
+          currentCode={updatedContents[path].original}
+          onCommit={() => {
+            setShowCommitCodeDialog(false);
+            clearUpdatedContent();
+          }}
+          onCancel={() => {
+            setShowCommitCodeDialog(false);
+          }}
+          isOpen
+          token={token}
+          branchName={branchName}
+          branchingDisabled={!isBranchable}
         />
       )}
     </div>

@@ -45,12 +45,9 @@ export const Item = ({
   const relevantBlockOptions = useMemo(() => {
     if (type !== "file") return null;
     const extension = path?.split(".").pop();
-    console.log(extension, blockOptions);
     return blockOptions.filter((block: any) => {
       // don't include example Blocks
-      if (
-        block.title === "Example File Block"
-      ) {
+      if (block.title === "Example File Block") {
         return false;
       }
 
@@ -65,8 +62,7 @@ export const Item = ({
       if (block.extensions) {
         const extension = path.split(".").pop();
         return (
-          block.extensions.includes("*") ||
-          block.extensions.includes(extension)
+          block.extensions.includes("*") || block.extensions.includes(extension)
         );
       }
 

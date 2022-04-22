@@ -3,8 +3,11 @@ import {
   GitCommitIcon,
   SidebarCollapseIcon,
   SidebarExpandIcon,
+  XCircleIcon,
 } from "@primer/octicons-react";
 import { Avatar, Box, IconButton, Label, Text, Timeline } from "@primer/react";
+import { useSession } from "next-auth/react";
+import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { getRelativeTime } from "lib/date-utils";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -14,14 +17,19 @@ type ActivityFeedProps = {
   context: Omit<FileContext, "file">;
   branchName: string;
   timeline: undefined | RepoTimeline;
+  updatedContent: undefined | {};
+  clearUpdatedContent: () => void;
 };
 
 export const ActivityFeed = ({
   context,
   branchName,
   timeline,
+  updatedContent,
+  clearUpdatedContent,
 }: ActivityFeedProps) => {
   const { path } = context;
+  const session = useSession();
 
   const [open, setOpen] = useState(true);
 
@@ -58,21 +66,55 @@ export const ActivityFeed = ({
           </Box>
         </Box>
         {timeline && (
-          <Timeline>
-            {timeline.map((item, index) => {
-              const sha = index ? item.sha : branchName;
+          <LayoutGroup>
+            <Timeline>
+              <AnimatePresence initial={false}>
+                {updatedContent && (
+                  <motion.div layout layoutId="ghost-commit">
+                    <Commit
+                      username={session.data.user?.name}
+                      message={"Working changes"}
+                      isSelected={context.sha === branchName}
+                      onClickRef={branchName}
+                      onRemove={clearUpdatedContent}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              {timeline.map((item, index) => {
+                // When `context.sha === branchName` (i.e. `fileRef` is empty or
+                // set to `branchName`) we show the current version of the file.
+                // If there is updated content for the file, the current version
+                // is the ghost commit; otherwise it is the tip of the selected
+                // branch.
+                //
+                // To make it easier to compare an older version of a file against
+                // the current version, clicking the selected version takes you to
+                // the current version (so you can swap between them with repeated
+                // clicks).
 
-              return (
-                <Commit
-                  {...item}
-                  sha={sha}
-                  defaultSha={branchName}
-                  isSelected={context.sha === sha || context.sha === item.sha}
-                  key={item.sha}
-                />
-              );
-            })}
-          </Timeline>
+                const isCurrent = index === 0 && !updatedContent;
+
+                const isSelected =
+                  item.sha === context.sha ||
+                  (isCurrent && context.sha === branchName);
+
+                const onClickRef =
+                  isSelected || isCurrent ? branchName : item.sha;
+
+                return (
+                  <motion.div layout layoutId={item.sha}>
+                    <Commit
+                      {...item}
+                      onClickRef={onClickRef}
+                      isSelected={isSelected}
+                      key={item.sha}
+                    />
+                  </motion.div>
+                );
+              })}
+            </Timeline>
+          </LayoutGroup>
         )}
       </div>
     </div>
@@ -81,11 +123,11 @@ export const ActivityFeed = ({
 
 type CommitProps = {
   isSelected: boolean;
-  date: string;
+  date?: string;
   message: string;
   username: string;
-  sha: string;
-  defaultSha: string;
+  onClickRef: string;
+  onRemove?: () => void;
 };
 
 const Commit = ({
@@ -93,8 +135,8 @@ const Commit = ({
   date,
   username,
   message,
-  sha,
-  defaultSha,
+  onClickRef,
+  onRemove,
 }: CommitProps) => {
   const router = useRouter();
   return (
@@ -103,22 +145,31 @@ const Commit = ({
       href={{
         query: {
           ...router.query,
-          fileRef: isSelected ? defaultSha : sha,
+          fileRef: onClickRef,
         },
       }}
     >
       <a
-        className={`text-left px-2 cursor-pointer overflow-hidden ${
+        className={`block text-left px-2 cursor-pointer overflow-hidden ${
           isSelected ? "bg-[#0A69DA] text-white" : "hover:bg-indigo-50"
         }`}
       >
         <Timeline.Item>
+          {onRemove && (
+            <button className="absolute top-2 right-1" onClick={onRemove}>
+              <XCircleIcon fill={isSelected ? "white" : ""} size={16} />
+            </button>
+          )}
           <Timeline.Badge>
             <GitCommitIcon />
           </Timeline.Badge>
           <Timeline.Body className={`${isSelected ? "!text-white" : ""}`}>
             <div>
-              <Text fontWeight="medium" as="p">
+              <Text
+                fontStyle={onRemove ? "italic" : ""}
+                fontWeight="medium"
+                as="p"
+              >
                 {message}
               </Text>
               <div className="mt-1 flex items-center gap-1">
@@ -132,7 +183,9 @@ const Commit = ({
                 <Text fontWeight="bold" fontSize="12px" as="span">
                   {username}
                 </Text>
-                <Text fontSize="12px">{getRelativeTime(new Date(date))}</Text>
+                {date && (
+                  <Text fontSize="12px">{getRelativeTime(new Date(date))}</Text>
+                )}
               </div>
             </div>
           </Timeline.Body>

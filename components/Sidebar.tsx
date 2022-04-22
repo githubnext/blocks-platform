@@ -5,7 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 import { IoFolderOpenOutline, IoFolderOutline } from "react-icons/io5";
-import { VscSymbolFile } from "react-icons/vsc";
+import {
+  VscSymbolFile,
+  VscCircleOutline,
+  VscCircleFilled,
+} from "react-icons/vsc";
 import { getNestedFileTree } from "@githubnext/utils";
 import type { RepoFiles } from "@githubnext/utils";
 import languageColors from "../language-colors.json";
@@ -40,6 +44,7 @@ type SidebarProps = {
   files: RepoFiles;
   fileChanges?: FileChanges;
   activeFilePath: string;
+  updatedContents: Record<string, unknown>;
 };
 
 const doShowPills = false;
@@ -49,6 +54,7 @@ export const Sidebar = ({
   fileChanges = {},
   files = [],
   activeFilePath = "",
+  updatedContents,
 }: SidebarProps) => {
   if (!files.map) return null;
 
@@ -81,6 +87,7 @@ export const Sidebar = ({
             fileChangesScale={fileChangesScale}
             fileChanges={fileChanges}
             canCollapse={false}
+            updatedContents={updatedContents}
           />
         </div>
       </Box>
@@ -97,26 +104,18 @@ type ItemProps = {
   fileChangesScale: FileChangesScale;
   fileChanges: FileChanges;
   canCollapse?: boolean;
+  updatedContents: Record<string, unknown>;
 };
 
 const Item = (props: ItemProps) => {
   if (props.children.length) {
-    return (
-      <Folder
-        {...props}
-        activeFilePath={props.activeFilePath}
-        allUsers={props.allUsers}
-        fileChangesScale={props.fileChangesScale}
-        fileChanges={props.fileChanges}
-      />
-    );
+    return <Folder {...props} />;
   }
   return (
     <File
       {...props}
       isActive={props.activeFilePath === props.path}
       activeUsers={props.allUsers.filter((user) => user.path === props.path)}
-      fileChangesScale={props.fileChangesScale}
       date={props.fileChanges[props.path]?.date}
     />
   );
@@ -131,6 +130,7 @@ type FolderProps = {
   fileChangesScale: FileChangesScale;
   fileChanges: FileChanges;
   canCollapse?: boolean;
+  updatedContents: Record<string, unknown>;
 };
 
 const Folder = ({
@@ -142,6 +142,7 @@ const Folder = ({
   fileChangesScale,
   fileChanges,
   canCollapse = true,
+  updatedContents,
 }: FolderProps) => {
   const [isExpanded, setIsExpanded] = useState(!canCollapse);
   const router = useRouter();
@@ -183,7 +184,7 @@ const Folder = ({
         }}
       >
         <a
-          className={`relative flex items-center text-left w-full whitespace-nowrap overflow-ellipsis ${
+          className={`relative flex items-center justify-between py-2 pl-3 pr-3 text-left w-full text-sm whitespace-nowrap overflow-ellipsis ${
             isActive ? "bg-gray-50 border-gray-200" : " border-transparent"
           } border border-r-0`}
           onClick={() => {
@@ -191,17 +192,27 @@ const Folder = ({
             setIsExpanded(!isExpanded);
           }}
         >
-          <button
-            className="mr-2 text-sm pl-3 py-2 hover:text-indigo-700"
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              setIsExpanded(!isExpanded);
-            }}
-          >
-            {isExpanded ? <IoFolderOpenOutline /> : <IoFolderOutline />}
-          </button>
-          <div className="py-2 pr-3">{name}</div>
+          <div className="flex items-center flex-1 max-w-full">
+            <button
+              className="mr-2 hover:text-indigo-700"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                setIsExpanded(!isExpanded);
+              }}
+            >
+              {isExpanded ? <IoFolderOpenOutline /> : <IoFolderOutline />}
+            </button>
+            <div className="max-w-full flex-1 overflow-hidden overflow-ellipsis">
+              {name}
+            </div>
+            <div>
+              {!isExpanded &&
+                Object.keys(updatedContents).some((path2) =>
+                  path2.startsWith(path)
+                ) && <VscCircleOutline />}
+            </div>
+          </div>
           {doShowPills && (
             <div className="ml-auto flex p-1 border-[1px] border-gray-200 rounded-full">
               {children.slice(0, 10).map((file) => (
@@ -234,6 +245,7 @@ const Folder = ({
                 allUsers={allUsers}
                 fileChangesScale={fileChangesScale}
                 fileChanges={fileChanges}
+                updatedContents={updatedContents}
               />
             ))}
         </div>
@@ -249,6 +261,7 @@ type FileProps = {
   fileChangesScale: FileChangesScale;
   date?: number;
   isActive: boolean;
+  updatedContents: Record<string, unknown>;
 };
 
 const File = ({
@@ -258,6 +271,7 @@ const File = ({
   fileChangesScale,
   date,
   isActive,
+  updatedContents,
 }: FileProps) => {
   const router = useRouter();
   const query = router.query;
@@ -291,6 +305,7 @@ const File = ({
           <div className="max-w-full flex-1 overflow-hidden overflow-ellipsis">
             {name}
           </div>
+          <div>{updatedContents[path] && <VscCircleFilled />}</div>
         </div>
         <div className="group flex items-center h-0">
           {activeUsers.map((user) => (

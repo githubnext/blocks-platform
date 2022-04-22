@@ -65,16 +65,6 @@ export const getFileContent: QueryFunction<
 
   const file = path.split("/").pop() || "";
 
-  const context = {
-    download_url: apiUrl,
-    file,
-    path: path,
-    repo: repo,
-    owner: owner,
-    sha: fileRef || "",
-    username: "mona",
-  };
-
   const res = await meta.ghapi(apiUrl);
   if (res.status !== 200) {
     if (res.status === 404) {
@@ -85,6 +75,16 @@ export const getFileContent: QueryFunction<
   }
   const encodedContent = res.data.content;
   const content = Buffer.from(encodedContent, "base64").toString("utf8");
+
+  const context = {
+    download_url: apiUrl,
+    file,
+    path: path,
+    repo: repo,
+    owner: owner,
+    sha: res.data.sha,
+    username: "mona",
+  };
 
   return {
     content,
@@ -198,7 +198,7 @@ export const getRepoTimeline: QueryFunction<
 
   const commits: RepoTimeline = commitsRes.data.map((commit: Commit) => ({
     date: commit.commit.author.date,
-    username: commit.author.login,
+    username: commit.author?.login,
     message: commit.commit.message,
     url: commit.html_url,
     sha: commit.sha,

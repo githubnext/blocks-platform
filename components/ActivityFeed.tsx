@@ -70,7 +70,7 @@ export const ActivityFeed = ({
             <Timeline>
               <AnimatePresence initial={false}>
                 {updatedContent && (
-                  <motion.div layout layoutId="ghost-commit">
+                  <motion.div layout layoutId="ghost-commit" className="z-10">
                     <Commit
                       username={session.data.user?.name}
                       message={"Working changes"}

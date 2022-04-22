@@ -1,5 +1,6 @@
 import { FullPageLoader } from "components/full-page-loader";
 import { RepoDetail } from "components/repo-detail";
+import { AppContext } from "context";
 import {
   getRepoInfoWithContributorsSSR,
   makeGitHubAPIInstance,
@@ -13,6 +14,7 @@ import { useEffect, useState } from "react";
 import { dehydrate, QueryClient, useQueryClient } from "react-query";
 
 function RepoDetailContainer(props: { hasRepoInstallation: boolean }) {
+  const { hasRepoInstallation } = props;
   const [loaded, setLoaded] = useState(false);
 
   const queryClient = useQueryClient();
@@ -43,8 +45,12 @@ function RepoDetailContainer(props: { hasRepoInstallation: boolean }) {
   }
 
   if (status === "authenticated" && session && loaded) {
-    // @ts-ignore
-    return <RepoDetail token={session?.token} />;
+    return (
+      <AppContext.Provider value={{ hasRepoInstallation }}>
+        {/* @ts-ignore */}
+        <RepoDetail token={session?.token} />
+      </AppContext.Provider>
+    );
   }
 
   // TODO: Handle errors here

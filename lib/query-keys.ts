@@ -41,6 +41,11 @@ export interface BlockContentKeyParams {
   id: string;
 }
 
+export interface CheckAccessParams {
+  repo: string;
+  owner: string;
+}
+
 function makeFactory<Key, Params>(
   key: Key
 ): { key: Key; factory: (params: Params) => [Key, Params] } {
@@ -62,6 +67,7 @@ export const QueryKeyMap = {
   blockContent: makeFactory<"blockContent", BlockContentKeyParams>(
     "blockContent"
   ),
+  checkAccess: makeFactory<"checkAccess", CheckAccessParams>("checkAccess"),
 };
 
 type KeyName = keyof typeof QueryKeyMap;

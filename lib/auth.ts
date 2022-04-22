@@ -3,7 +3,7 @@ import { createAppAuth } from "@octokit/auth-app";
 
 // This Octokit instance is used to make authenticated requests via JWT to select endpoints on the GitHub API.
 // (JWT, meaning time based token signed by the GitHub App's private certificate).
-export const makeAppOctokit = (installationId: number) =>
+export const makeAppOctokit = (installationId?: number) =>
   new Octokit({
     authStrategy: createAppAuth,
     auth: {

@@ -1,5 +1,12 @@
 import * as Immer from "immer";
-import { Box, Button, Link, useTheme } from "@primer/react";
+import {
+  Box,
+  Button,
+  Flash,
+  Link,
+  StyledOcticon,
+  useTheme,
+} from "@primer/react";
 import { default as NextLink } from "next/link";
 import {
   getBlockKey,
@@ -15,7 +22,7 @@ import {
 import type { UseManageBlockResult } from "hooks";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useContext } from "react";
 import { FullPageLoader } from "./full-page-loader";
 import { ActivityFeed } from "./ActivityFeed";
 import { GitHubHeader } from "./github-header";
@@ -27,11 +34,12 @@ import { CommitCodeDialog } from "./commit-code-dialog";
 import type { RepoFiles } from "@githubnext/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  PlusIcon,
   RepoPushIcon,
   ScreenFullIcon,
   ScreenNormalIcon,
+  AlertIcon,
 } from "@primer/octicons-react";
+import { AppContext } from "context";
 
 const BlockPicker = dynamic(() => import("./block-picker"), { ssr: false });
 
@@ -192,12 +200,29 @@ function BlockPaneHeader({
   onSaveChanges,
 }: BlockPaneHeaderProps) {
   const router = useRouter();
+  const appContext = useContext(AppContext);
 
   const { block, setBlock, defaultBlock } = manageBlockResult.data ?? {};
   const isDefaultBlock = getBlockKey(block) === getBlockKey(defaultBlock);
 
   return (
     <div className="flex-none top-0 z-10">
+      {!appContext.hasRepoInstallation && (
+        <Flash className="text-sm" full variant="warning">
+          <StyledOcticon icon={AlertIcon} />
+          The Blocks GitHub app is not installed on this repository. You won't
+          be able to save changes to files or open pull-requests.{" "}
+          <Link
+            underline
+            muted
+            target="_blank"
+            rel="noopener"
+            href={`https://github.com/apps/${process.env.NEXT_PUBLIC_GITHUB_APP_SLUG}/installations/new`}
+          >
+            Grant access
+          </Link>
+        </Flash>
+      )}
       <div>
         <Box
           bg="canvas.subtle"
@@ -213,7 +238,7 @@ function BlockPaneHeader({
               key={"Save"}
               variant={"primary"}
               leadingIcon={RepoPushIcon}
-              disabled={!onSaveChanges}
+              disabled={!onSaveChanges || !appContext.hasRepoInstallation}
               onClick={onSaveChanges}
             >
               Save

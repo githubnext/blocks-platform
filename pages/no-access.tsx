@@ -1,36 +1,21 @@
-import axios from "axios";
+import { useCheckRepoAccess } from "hooks";
 import { useRouter } from "next/router";
-import { useQuery } from "react-query";
-
-const checkAccess = async ({
-  owner,
-  repo,
-}: {
-  owner: string;
-  repo: string;
-}) => {
-  const res = await axios.get(`/api/check-access`, {
-    params: {
-      owner,
-      repo,
-    },
-  });
-  return res.data;
-};
 
 export default function NoAccess() {
   const router = useRouter();
   const { owner, repo, reason } = router.query as Record<string, string>;
 
-  useQuery(["checkAccess", owner, repo], () => checkAccess({ owner, repo }), {
-    refetchInterval: 5000,
-    enabled: router.isReady,
-    onSuccess: (hasAccess) => {
-      if (hasAccess) {
-        router.push(`/${owner}/${repo}`);
-      }
-    },
-  });
+  useCheckRepoAccess(
+    { owner, repo },
+    {
+      enabled: router.isReady,
+      onSuccess: (hasAccess) => {
+        if (hasAccess) {
+          router.push(`/${owner}/${repo}`);
+        }
+      },
+    }
+  );
 
   return (
     <div className="flex flex-col items-center justify-center h-full text-center">

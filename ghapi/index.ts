@@ -4,6 +4,7 @@ import axios, { AxiosInstance } from "axios";
 import { Base64 } from "js-base64";
 import {
   BranchesKeyParams,
+  CheckAccessParams,
   FileKeyParams,
   FilesKeyParams,
   FolderKeyParams,
@@ -342,4 +343,21 @@ export const searchRepos: QueryFunction<RepoSearchResult[]> = async (ctx) => {
     };
   });
   return data;
+};
+export const checkAccess: QueryFunction<
+  boolean,
+  GenericQueryKey<CheckAccessParams>
+> = async (ctx) => {
+  let params = ctx.queryKey[1];
+  const { owner, repo } = params;
+
+  // We don't have access to the meta object in this code path, so we have to use the global Axios instance.
+  const res = await axios.get(`/api/check-access`, {
+    params: {
+      owner,
+      repo,
+    },
+  });
+
+  return res.data;
 };

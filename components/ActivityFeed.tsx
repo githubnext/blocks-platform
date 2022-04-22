@@ -162,9 +162,9 @@ const Commit = ({
       >
         <Timeline.Item>
           {onRemove && (
-            <div className="absolute top-2 right-1" onClick={onRemove}>
+            <button className="absolute top-2 right-1" onClick={onRemove}>
               <XCircleIcon fill={isSelected ? "white" : ""} size={16} />
-            </div>
+            </button>
           )}
           <Timeline.Badge>
             <GitCommitIcon />

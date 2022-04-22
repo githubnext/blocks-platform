@@ -36,10 +36,12 @@ const BlockPicker = dynamic(() => import("./block-picker"), { ssr: false });
 
 type Context = { repo: string; owner: string; path: string; sha: string };
 
-type UpdatedContents = Record<
-  string,
-  { sha: string; original: string; content: string }
->;
+type UpdatedContent = {
+  sha: string;
+  original: string;
+  content: string;
+};
+type UpdatedContents = Record<string, UpdatedContent>;
 
 type HeaderProps = {
   isFullscreen: boolean;
@@ -329,6 +331,9 @@ function BlockPaneBlock({
   const fileSizeLimit = 1500000; // 1.5Mb
   const isTooLarge = size > fileSizeLimit;
 
+  const showUpdatedContents =
+    updatedContents[path] && context.sha === branchName;
+
   const { data: fileData } = useFileContent(
     {
       repo: context.repo,
@@ -337,14 +342,15 @@ function BlockPaneBlock({
       fileRef: context.sha,
     },
     {
-      enabled: !isFolder && !updatedContents[path] && !isTooLarge,
+      enabled: !isFolder && !showUpdatedContents && !isTooLarge,
       cacheTime: 0,
     }
   );
 
-  let content: string;
-  let onRequestUpdateContent: (_: string) => void;
-  if (updatedContents[path]) {
+  let content = "";
+  let onRequestUpdateContent = (_: string) => {};
+
+  if (showUpdatedContents) {
     content = updatedContents[path].content;
     onRequestUpdateContent = (newContent: string) => {
       setUpdatedContents(
@@ -359,22 +365,21 @@ function BlockPaneBlock({
     };
   } else if (fileData) {
     content = fileData.content;
-    onRequestUpdateContent = (newContent: string) => {
-      setUpdatedContents(
-        Immer.produce(updatedContents, (updatedContents) => {
-          if (newContent !== content) {
-            updatedContents[path] = {
-              sha: fileData.context.sha,
-              original: content,
-              content: newContent,
-            };
-          }
-        })
-      );
-    };
-  } else {
-    content = "";
-    onRequestUpdateContent = (newContent: string) => {};
+    if (context.sha === branchName) {
+      onRequestUpdateContent = (newContent: string) => {
+        setUpdatedContents(
+          Immer.produce(updatedContents, (updatedContents) => {
+            if (newContent !== content) {
+              updatedContents[path] = {
+                sha: fileData.context.sha,
+                original: content,
+                content: newContent,
+              };
+            }
+          })
+        );
+      };
+    }
   }
 
   if (isTooLarge)
@@ -499,6 +504,8 @@ type CommitsPaneProps = {
   context: Context;
   branchName: string;
   timeline: undefined | RepoTimeline;
+  updatedContent: undefined | UpdatedContent;
+  clearUpdatedContent: () => void;
 };
 
 function CommitsPane({
@@ -506,6 +513,8 @@ function CommitsPane({
   context,
   branchName,
   timeline,
+  updatedContent,
+  clearUpdatedContent,
 }: CommitsPaneProps) {
   return (
     <AnimatePresence initial={false}>
@@ -523,6 +532,8 @@ function CommitsPane({
             context={context}
             branchName={branchName}
             timeline={timeline}
+            updatedContent={updatedContent}
+            clearUpdatedContent={clearUpdatedContent}
           />
         </motion.div>
       )}
@@ -609,6 +620,13 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
         setShowCommitCodeDialog(true);
       }
     : undefined;
+  const updatedContent = updatedContents[path];
+  const clearUpdatedContent = () =>
+    setUpdatedContents(
+      Immer.produce(updatedContents, (updatedContents) => {
+        delete updatedContents[path];
+      })
+    );
 
   return (
     <div className="flex flex-col w-full h-screen overflow-hidden">
@@ -660,6 +678,8 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
           context={context}
           branchName={branchName}
           timeline={timeline}
+          updatedContent={updatedContent}
+          clearUpdatedContent={clearUpdatedContent}
         />
       </div>
       {!!requestedMetadata && (
@@ -679,11 +699,15 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
           repo={repo}
           owner={owner}
           path={path}
+          sha={context.sha}
           newCode={updatedContents[path].content}
           currentCode={updatedContents[path].original}
-          onClose={() => {
+          onCommit={() => {
             setShowCommitCodeDialog(false);
-            setUpdatedContents({}); // TODO(jaked) drops changes on cancel
+            clearUpdatedContent();
+          }}
+          onCancel={() => {
+            setShowCommitCodeDialog(false);
           }}
           isOpen
           token={token}

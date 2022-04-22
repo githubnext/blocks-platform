@@ -26,7 +26,8 @@ import { useQueryClient } from "react-query";
 import { diffAsText } from "unidiff";
 
 interface CommitCodeDialogProps {
-  onClose: () => void;
+  onCommit: () => void;
+  onCancel: () => void;
   isOpen: boolean;
   newCode: string;
   currentCode?: string;
@@ -48,7 +49,8 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
   const [commitType, setCommitType] = useState<CommitType>("currentBranch");
   const [newBranchName, setNewBranchName] = useState("");
   const {
-    onClose,
+    onCommit,
+    onCancel,
     isOpen,
     currentCode,
     newCode,
@@ -69,7 +71,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
     error: updateContentsError,
   } = useUpdateFileContents({
     onSuccess: async (newSha) => {
-      onClose();
+      onCommit();
       await queryClient.invalidateQueries(QueryKeyMap.file.key);
       await queryClient.invalidateQueries(QueryKeyMap.timeline.key);
 
@@ -94,7 +96,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
   } = useCreateBranchAndPR({
     onSuccess: async (res) => {
       window.open(res.html_url, "_blank");
-      onClose();
+      onCommit();
       setTitle("");
       setBody("");
       setCommitType("currentBranch");
@@ -165,7 +167,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
       isOpen={isOpen}
       title="Commit changes"
       wide
-      onDismiss={onClose}
+      onDismiss={onCancel}
     >
       <Dialog.Header>Editing {path}</Dialog.Header>
 
@@ -288,7 +290,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
         </div>
       </div>
       <footer className="p-4 border-t flex items-center justify-end gap-2">
-        <Button disabled={isLoading} variant="danger" onClick={onClose}>
+        <Button disabled={isLoading} variant="danger" onClick={onCancel}>
           Cancel
         </Button>
         <Button

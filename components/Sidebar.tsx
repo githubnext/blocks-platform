@@ -5,7 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 import { IoFolderOpenOutline, IoFolderOutline } from "react-icons/io5";
-import { VscSymbolFile, VscCircleFilled } from "react-icons/vsc";
+import {
+  VscSymbolFile,
+  VscCircleOutline,
+  VscCircleFilled,
+} from "react-icons/vsc";
 import { getNestedFileTree } from "@githubnext/utils";
 import type { RepoFiles } from "@githubnext/utils";
 import languageColors from "../language-colors.json";
@@ -180,7 +184,7 @@ const Folder = ({
         }}
       >
         <a
-          className={`relative flex items-center text-left w-full whitespace-nowrap overflow-ellipsis ${
+          className={`relative flex items-center justify-between py-2 pl-3 pr-3 text-left w-full text-sm whitespace-nowrap overflow-ellipsis ${
             isActive ? "bg-gray-50 border-gray-200" : " border-transparent"
           } border border-r-0`}
           onClick={() => {
@@ -188,17 +192,27 @@ const Folder = ({
             setIsExpanded(!isExpanded);
           }}
         >
-          <button
-            className="mr-2 text-sm pl-3 py-2 hover:text-indigo-700"
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              setIsExpanded(!isExpanded);
-            }}
-          >
-            {isExpanded ? <IoFolderOpenOutline /> : <IoFolderOutline />}
-          </button>
-          <div className="py-2 pr-3">{name}</div>
+          <div className="flex items-center flex-1 max-w-full">
+            <button
+              className="mr-2 hover:text-indigo-700"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                setIsExpanded(!isExpanded);
+              }}
+            >
+              {isExpanded ? <IoFolderOpenOutline /> : <IoFolderOutline />}
+            </button>
+            <div className="max-w-full flex-1 overflow-hidden overflow-ellipsis">
+              {name}
+            </div>
+            <div>
+              {!isExpanded &&
+                Object.keys(updatedContents).some((path2) =>
+                  path2.startsWith(path)
+                ) && <VscCircleOutline />}
+            </div>
+          </div>
           {doShowPills && (
             <div className="ml-auto flex p-1 border-[1px] border-gray-200 rounded-full">
               {children.slice(0, 10).map((file) => (
@@ -291,9 +305,7 @@ const File = ({
           <div className="max-w-full flex-1 overflow-hidden overflow-ellipsis">
             {name}
           </div>
-          <div>
-            {updatedContents[path] !== undefined && <VscCircleFilled />}
-          </div>
+          <div>{updatedContents[path] && <VscCircleFilled />}</div>
         </div>
         <div className="group flex items-center h-0">
           {activeUsers.map((user) => (

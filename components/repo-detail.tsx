@@ -251,6 +251,7 @@ function BlockPaneHeader({
             />
             {!isDefaultBlock && token && (
               <Button
+                disabled={!appContext.hasRepoInstallation}
                 onClick={() => {
                   const newMetadata = {
                     ...metadata,

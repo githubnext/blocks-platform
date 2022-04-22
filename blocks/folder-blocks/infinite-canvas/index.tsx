@@ -4,7 +4,7 @@ import { Buffer } from "buffer";
 import { FilePicker } from "./FilePicker";
 import { useDrag } from "./useDrag";
 import { Item } from "./Item";
-import { flatten } from "lodash";
+import flatten from "lodash.flatten";
 // import './.css'";
 
 const width = 5000;
@@ -100,16 +100,16 @@ export default function (
     const url = "https://blocks-marketplace.githubnext.com/api/blocks";
     const res = await fetch(url).then((res) => res.json());
     const exampleBlocks = res || [];
-    setBlockOptions(flatten(
-      exampleBlocks
-        .map((blocksRepo: any) => (
-          blocksRepo.blocks.map(block => ({
+    setBlockOptions(
+      flatten(
+        exampleBlocks.map((blocksRepo: any) =>
+          blocksRepo.blocks.map((block) => ({
             ...block,
             owner: blocksRepo.owner,
             repo: blocksRepo.repo,
           }))
-        )))
-      .map((block: Block) => ({
+        )
+      ).map((block: Block) => ({
         ...block,
         key: getBlockKey(block),
       }))
@@ -163,8 +163,8 @@ export default function (
                   title: "Code block",
                   owner: "githubnext",
                   repo: "blocks-examples",
-                  "sandbox": false,
-                  "entry": "/src/blocks/file-blocks/code/index.tsx",
+                  sandbox: false,
+                  entry: "/src/blocks/file-blocks/code/index.tsx",
                 },
               },
             ];

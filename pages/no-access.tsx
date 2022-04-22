@@ -20,7 +20,7 @@ const checkAccess = async ({
 
 export default function NoAccess() {
   const router = useRouter();
-  const { owner, repo } = router.query as Record<string, string>;
+  const { owner, repo, reason } = router.query as Record<string, string>;
 
   useQuery(["checkAccess", owner, repo], () => checkAccess({ owner, repo }), {
     refetchInterval: 5000,
@@ -35,11 +35,21 @@ export default function NoAccess() {
   return (
     <div className="flex flex-col items-center justify-center h-full text-center">
       <h3 className="font-bold text-lg">
-        Our GitHub App can't find this repo ({owner}/{repo})
+        {reason === "org-not-installed" ? (
+          <>
+            You don't have our GitHub App installed on the {owner} organization.
+          </>
+        ) : reason === "repo-not-installed" ? (
+          <>
+            Our GitHub App is installed on the {owner} organization, but not on
+            this repository ({repo}).
+          </>
+        ) : (
+          <>
+            Our GitHub App can't find this repo ({owner}/{repo})
+          </>
+        )}
       </h3>
-      <p className="text-gray-700 mt-2">
-        Have you installed the app on this particular repository?
-      </p>
       <div className="mt-4">
         <a
           target="_blank"

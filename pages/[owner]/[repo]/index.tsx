@@ -52,19 +52,6 @@ function RepoDetailContainer() {
 
 export default RepoDetailContainer;
 
-const NO_ACCESS_REDIRECT = ({
-  owner,
-  repo,
-}: {
-  owner: string;
-  repo: string;
-}) => ({
-  redirect: {
-    destination: `/no-access?owner=${owner}&repo=${repo}`,
-    permanent: false,
-  },
-});
-
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const query = context.query;
   const { repo, owner } = query as Record<string, string>;
@@ -83,14 +70,58 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   const octokit = makeOctokitInstance(session.token);
 
-  // Next, check whether the user (and by extension, the GitHub App) has access to the repo.
+  let isPublicRepo = false;
   try {
-    // Is this a reliable way to determine if the app is authenticated for the given repo?
-    // Do we need to use "octokit.rest.apps.getRepoInstallation" instead?
-    await octokit.repos.get({ owner, repo });
-  } catch (e) {
-    return NO_ACCESS_REDIRECT({ repo, owner });
+    const { data: repoInfo } = await octokit.repos.get({
+      owner,
+      repo,
+    });
+
+    isPublicRepo = repoInfo.private === false;
+  } catch {}
+
+  // is there an installation on the org?
+  // TODO: handle pagination or switch to getOrgInstallation
+  const installationsRes =
+    await octokit.apps.listInstallationsForAuthenticatedUser();
+
+  const orgInstallation = installationsRes.data.installations.find(
+    (installation) =>
+      installation.account?.login.toLowerCase() === owner.toLowerCase()
+  );
+  if (!orgInstallation && !isPublicRepo) {
+    return {
+      redirect: {
+        destination: `/no-access?owner=${owner}&repo=${repo}&reason=org-not-installed`,
+        permanent: false,
+      },
+    };
   }
+
+  // do we have access to the repo?
+  // TODO: handle pagination or switch to getRepoInstallation
+  const repoInstallationRes =
+    await octokit.apps.listInstallationReposForAuthenticatedUser({
+      installation_id: orgInstallation.id,
+    });
+  const repoInstallation = repoInstallationRes.data.repositories.find(
+    (repo) => repo.name.toLowerCase() === repo.name.toLowerCase()
+  );
+
+  if (!repoInstallation && !isPublicRepo) {
+    return {
+      redirect: {
+        destination: `/no-access?owner=${owner}&repo=${repo}&reason=repo-not-installed`,
+        permanent: false,
+      },
+    };
+  }
+
+  // TODO: let's use this to have a second stage of auth
+  // for writing to un-authed public repos
+  const permissions = orgInstallation?.permissions || {
+    contents: "read",
+  };
 
   await queryClient.prefetchQuery(
     QueryKeyMap.info.factory({ owner, repo }),

@@ -198,7 +198,7 @@ export const getRepoTimeline: QueryFunction<
 
   const commits: RepoTimeline = commitsRes.data.map((commit: Commit) => ({
     date: commit.commit.author.date,
-    username: commit.author.login,
+    username: commit.author?.login,
     message: commit.commit.message,
     url: commit.html_url,
     sha: commit.sha,

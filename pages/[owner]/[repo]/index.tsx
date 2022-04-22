@@ -5,13 +5,14 @@ import {
   makeGitHubAPIInstance,
   makeOctokitInstance,
 } from "ghapi";
+import { makeAppOctokit } from "lib/auth";
 import { QueryKeyMap } from "lib/query-keys";
 import { GetServerSidePropsContext } from "next";
 import { getSession, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { dehydrate, QueryClient, useQueryClient } from "react-query";
 
-function RepoDetailContainer() {
+function RepoDetailContainer(props: { hasRepoInstallation: boolean }) {
   const [loaded, setLoaded] = useState(false);
 
   const queryClient = useQueryClient();
@@ -98,17 +99,20 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     };
   }
 
-  // do we have access to the repo?
-  // TODO: handle pagination or switch to getRepoInstallation
-  const repoInstallationRes =
-    await octokit.apps.listInstallationReposForAuthenticatedUser({
-      installation_id: orgInstallation.id,
-    });
-  const repoInstallation = repoInstallationRes.data.repositories.find(
-    (repo) => repo.name.toLowerCase() === repo.name.toLowerCase()
-  );
+  const appOctokit = makeAppOctokit(orgInstallation.id);
+  let hasRepoInstallation: boolean;
 
-  if (!repoInstallation && !isPublicRepo) {
+  try {
+    await appOctokit.apps.getRepoInstallation({
+      owner,
+      repo,
+    });
+    hasRepoInstallation = true;
+  } catch (e) {
+    hasRepoInstallation = false;
+  }
+
+  if (!hasRepoInstallation && !isPublicRepo) {
     return {
       redirect: {
         destination: `/no-access?owner=${owner}&repo=${repo}&reason=repo-not-installed`,
@@ -135,6 +139,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   return {
     props: {
+      hasRepoInstallation,
       dehydratedState: dehydrate(queryClient),
     },
   };

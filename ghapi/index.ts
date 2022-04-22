@@ -199,6 +199,7 @@ export const getRepoTimeline: QueryFunction<
 
   const commits: RepoTimeline = commitsRes.data.map((commit: Commit) => ({
     date: commit.commit.author.date,
+    // Ran into an error where the author was null.
     username: commit.author?.login,
     message: commit.commit.message,
     url: commit.html_url,

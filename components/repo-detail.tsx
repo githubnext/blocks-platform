@@ -3,6 +3,7 @@ import { Box, Button, Link, useTheme } from "@primer/react";
 import { default as NextLink } from "next/link";
 import {
   getBlockKey,
+  useCallbackWithProps,
   useFileContent,
   useGetBranches,
   useManageBlock,
@@ -347,39 +348,66 @@ function BlockPaneBlock({
     }
   );
 
-  let content = "";
-  let onRequestUpdateContent = (_: string) => {};
+  type onRequestUpdateContentProps = {
+    path: string;
+    context: Context;
+    updatedContents: UpdatedContents;
+    setUpdatedContents: (_: UpdatedContents) => void;
+    showUpdatedContents: boolean;
+    fileData: FileData;
+  };
 
+  const onRequestUpdateContent = useCallbackWithProps(
+    ({
+        path,
+        context,
+        updatedContents,
+        setUpdatedContents,
+        showUpdatedContents,
+        fileData,
+      }: onRequestUpdateContentProps) =>
+      (newContent: string) => {
+        if (showUpdatedContents) {
+          setUpdatedContents(
+            Immer.produce(updatedContents, (updatedContents) => {
+              if (newContent === updatedContents[path].original) {
+                delete updatedContents[path];
+              } else {
+                updatedContents[path].content = newContent;
+              }
+            })
+          );
+        } else if (fileData) {
+          if (context.sha === branchName) {
+            setUpdatedContents(
+              Immer.produce(updatedContents, (updatedContents) => {
+                if (newContent !== fileData.content) {
+                  updatedContents[path] = {
+                    sha: fileData.context.sha,
+                    original: fileData.content,
+                    content: newContent,
+                  };
+                }
+              })
+            );
+          }
+        }
+      },
+    {
+      path,
+      context,
+      updatedContents,
+      setUpdatedContents,
+      showUpdatedContents,
+      fileData,
+    }
+  );
+
+  let content: string = "";
   if (showUpdatedContents) {
     content = updatedContents[path].content;
-    onRequestUpdateContent = (newContent: string) => {
-      setUpdatedContents(
-        Immer.produce(updatedContents, (updatedContents) => {
-          if (newContent === updatedContents[path].original) {
-            delete updatedContents[path];
-          } else {
-            updatedContents[path].content = newContent;
-          }
-        })
-      );
-    };
   } else if (fileData) {
     content = fileData.content;
-    if (context.sha === branchName) {
-      onRequestUpdateContent = (newContent: string) => {
-        setUpdatedContents(
-          Immer.produce(updatedContents, (updatedContents) => {
-            if (newContent !== content) {
-              updatedContents[path] = {
-                sha: fileData.context.sha,
-                original: content,
-                content: newContent,
-              };
-            }
-          })
-        );
-      };
-    }
   }
 
   if (isTooLarge)

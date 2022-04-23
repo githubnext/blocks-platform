@@ -31,7 +31,7 @@ import {
 } from "lib/query-keys";
 import { isArray } from "lodash";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   useMutation,
   UseMutationOptions,
@@ -503,4 +503,14 @@ export function useBlockContent(
     refetchOnReconnect: false,
     ...config,
   });
+}
+
+// like `useCallback`, but always returns the same function
+export function useCallbackWithProps<A, R, P>(
+  callback: (props: P) => (arg: A) => R,
+  props: P
+): (arg: A) => R {
+  const propsRef = useRef<P>();
+  propsRef.current = props;
+  return useCallback((arg: A) => callback(propsRef.current)(arg), []);
 }

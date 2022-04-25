@@ -16,11 +16,13 @@ import {
   RepoContext,
   RepoSearchResult,
   searchRepos,
+  checkAccess,
 } from "ghapi";
 import { Base64 } from "js-base64";
 import {
   BlockContentKeyParams,
   BranchesKeyParams,
+  CheckAccessParams,
   FileKeyParams,
   FilesKeyParams,
   FolderKeyParams,
@@ -114,7 +116,7 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
       sha: fileSha,
     });
     return res.data.commit.sha;
-  } catch (e) {}
+  } catch (e) { }
 }
 
 export function useUpdateFileContents(
@@ -365,8 +367,8 @@ export function useManageBlock({
   let fallbackDefaultBlock: Block = overrideDefaultBlocks[extension]
     ? exampleBlocks.find((b) => b.id === overrideDefaultBlocks[extension])
     : // the first example block is always the code block,
-      // so let's default to the second one, when available
-      exampleBlocks[1] || exampleBlocks[0];
+    // so let's default to the second one, when available
+    exampleBlocks[1] || exampleBlocks[0];
 
   if (
     !fallbackDefaultBlock ||
@@ -515,4 +517,15 @@ export function useCallbackWithProps<P, A, R>(
   const propsRef = useRef<P>();
   propsRef.current = props;
   return useCallback((arg: A) => callback(propsRef.current)(arg), []);
+}
+
+export function useCheckRepoAccess(
+  params: CheckAccessParams,
+  config?: UseQueryOptions<boolean>
+): UseQueryResult<boolean> {
+  return useQuery(QueryKeyMap.checkAccess.factory(params), checkAccess, {
+    refetchInterval: 5000,
+    retry: false,
+    ...config,
+  });
 }

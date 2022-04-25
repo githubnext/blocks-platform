@@ -1,9 +1,11 @@
 import { Octokit } from "@octokit/rest";
 import { Endpoints } from "@octokit/types";
 import axios, { AxiosInstance } from "axios";
+import { signOut } from "next-auth/react";
 import { Base64 } from "js-base64";
 import {
   BranchesKeyParams,
+  CheckAccessParams,
   FileKeyParams,
   FilesKeyParams,
   FolderKeyParams,
@@ -35,16 +37,30 @@ export interface SearchContextWithToken extends SearchContext {
   token: string;
 }
 
-export function makeGitHubAPIInstance(token) {
-  return axios.create({
+export function makeGitHubAPIInstance(token: string) {
+  let instance = axios.create({
     baseURL: "https://api.github.com",
     headers: {
       Authorization: `token ${token}`,
     },
   });
+
+  instance.interceptors.response.use(
+    function (response) {
+      return response;
+    },
+    function (error) {
+      if (error.response.status === 401) {
+        signOut();
+      }
+      return Promise.reject(error);
+    }
+  );
+
+  return instance;
 }
 
-export function makeOctokitInstance(token) {
+export function makeOctokitInstance(token: string) {
   return new Octokit({ auth: token });
 }
 
@@ -199,6 +215,7 @@ export const getRepoTimeline: QueryFunction<
 
   const commits: RepoTimeline = commitsRes.data.map((commit: Commit) => ({
     date: commit.commit.author.date,
+    // Ran into an error where the author was null.
     username: commit.author?.login,
     message: commit.commit.message,
     url: commit.html_url,
@@ -341,4 +358,22 @@ export const searchRepos: QueryFunction<RepoSearchResult[]> = async (ctx) => {
     };
   });
   return data;
+};
+export const checkAccess: QueryFunction<
+  boolean,
+  GenericQueryKey<CheckAccessParams>
+> = async (ctx) => {
+  let params = ctx.queryKey[1];
+  const { owner, repo } = params;
+
+  let getParams = {
+    owner,
+    repo,
+  };
+
+  let response = await axios.get(`/api/check-access`, {
+    params: getParams,
+  });
+
+  return response.data;
 };

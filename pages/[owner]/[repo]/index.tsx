@@ -23,6 +23,7 @@ function RepoDetailContainer() {
     if (status !== "authenticated" || loaded) return;
 
     let meta = {
+      token: session?.token,
       ghapi: makeGitHubAPIInstance(session?.token),
       octokit: makeOctokitInstance(session?.token),
     };

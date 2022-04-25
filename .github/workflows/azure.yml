@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NEXT_PUBLIC_MARKETPLACE_URL: "https://blocks-marketplace.githubnext.com"
+      NEXT_PUBLIC_GITHUB_APP_SLUG: "blocks-prototype-staging"
     steps:
       - uses: actions/checkout@v2
 

@@ -506,7 +506,7 @@ export function useBlockContent(
 }
 
 // like `useCallback`, but always returns the same function
-export function useCallbackWithProps<A, R, P>(
+export function useCallbackWithProps<P, A, R>(
   callback: (props: P) => (arg: A) => R,
   props: P
 ): (arg: A) => R {

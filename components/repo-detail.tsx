@@ -348,15 +348,6 @@ function BlockPaneBlock({
     }
   );
 
-  type onRequestUpdateContentProps = {
-    path: string;
-    context: Context;
-    updatedContents: UpdatedContents;
-    setUpdatedContents: (_: UpdatedContents) => void;
-    showUpdatedContents: boolean;
-    fileData: FileData;
-  };
-
   const onRequestUpdateContent = useCallbackWithProps(
     ({
         path,
@@ -365,7 +356,7 @@ function BlockPaneBlock({
         setUpdatedContents,
         showUpdatedContents,
         fileData,
-      }: onRequestUpdateContentProps) =>
+      }) =>
       (newContent: string) => {
         if (showUpdatedContents) {
           setUpdatedContents(

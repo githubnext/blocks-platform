@@ -486,7 +486,7 @@ export const getBlockContent: QueryFunction<
   const { owner, repo, id } = params;
   let meta = ctx.meta as unknown as BlocksQueryMeta;
 
-  const url = `${process.env.NEXT_PUBLIC_MARKETPLACE_URL}/api/get-block-content?owner=${owner}&repo=${repo}&id=${id}`;
+  const url = `${window.location.origin}/api/get-block-content?owner=${owner}&repo=${repo}&id=${id}`;
 
   const res = await meta.ghapi(url);
   return res.data.content;

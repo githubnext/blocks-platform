@@ -45,8 +45,8 @@ function RepoDetailContainer(props: { hasRepoInstallation: boolean }) {
 
     let meta = {
       token: session?.token,
-      ghapi: makeGitHubAPIInstance(session?.token),
-      octokit: makeOctokitInstance(session?.token),
+      ghapi: makeGitHubAPIInstance(session?.token as string),
+      octokit: makeOctokitInstance(session?.token as string),
     };
 
     queryClient.setDefaultOptions({
@@ -105,7 +105,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     });
 
     isPublicRepo = repoInfo.private === false;
-  } catch {}
+  } catch { }
 
   // is there an installation on the org?
   // TODO: handle pagination or switch to getOrgInstallation

@@ -36,7 +36,7 @@ export interface SearchContextWithToken extends SearchContext {
   token: string;
 }
 
-export function makeGitHubAPIInstance(token) {
+export function makeGitHubAPIInstance(token: string) {
   return axios.create({
     baseURL: "https://api.github.com",
     headers: {
@@ -45,7 +45,7 @@ export function makeGitHubAPIInstance(token) {
   });
 }
 
-export function makeOctokitInstance(token) {
+export function makeOctokitInstance(token: string) {
   return new Octokit({ auth: token });
 }
 

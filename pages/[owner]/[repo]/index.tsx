@@ -95,7 +95,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     };
   }
 
-  const octokit = makeOctokitInstance(session.token);
+  const octokit = makeOctokitInstance(session.token as string);
 
   let isPublicRepo = false;
   try {

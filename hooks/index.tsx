@@ -39,7 +39,6 @@ import {
   UseQueryOptions,
 } from "react-query";
 import type { QueryFunction, UseQueryResult } from "react-query";
-import sanitizeId from "utils/sanitize-id";
 
 export function useFileContent(
   params: FileKeyParams,
@@ -487,9 +486,7 @@ export const getBlockContent: QueryFunction<
   const { owner, repo, id } = params;
   let meta = ctx.meta as unknown as BlocksQueryMeta;
 
-  const url = `/api/get-block-content?owner=${sanitizeId(
-    owner
-  )}&repo=${sanitizeId(repo)}&id=${id}`;
+  const url = `/api/get-block-content?owner=${owner}&repo=${repo}&id=${id}`;
 
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${meta.token}` },

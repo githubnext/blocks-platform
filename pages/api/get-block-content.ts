@@ -3,6 +3,7 @@ import streamifier from "streamifier";
 import { unzipSync } from "zlib";
 import type { NextApiRequest, NextApiResponse } from "next";
 import Cors from "cors";
+import sanitizeId from "utils/sanitize-id";
 
 type Data = {
   content?: {
@@ -28,14 +29,16 @@ export default async function handler(
     });
   });
 
-  const { owner, repo, id } = req.query;
+  const { owner, repo, id } = req.query as Record<string, string>;
 
   const authorization: Record<string, string> = req.headers["authorization"]
     ? { authorization: req.headers["authorization"] }
     : {};
 
   // @ts-ignore
-  const releaseInfoUrl = `https://api.github.com/repos/${owner}/${repo}/releases/latest`;
+  const releaseInfoUrl = `https://api.github.com/repos/${sanitizeId(
+    owner
+  )}/${sanitizeId(repo)}/releases/latest`;
   const releaseInfo = await fetch(releaseInfoUrl, {
     headers: authorization,
   }).then((r) => r.json());

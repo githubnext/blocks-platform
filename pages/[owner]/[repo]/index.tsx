@@ -125,7 +125,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     };
   }
 
-  const appOctokit = makeAppOctokit(orgInstallation.id);
+  const appOctokit = makeAppOctokit(orgInstallation?.id);
   let hasRepoInstallation: boolean;
 
   try {

@@ -683,7 +683,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
             rel="noopener"
             href={`https://github.com/apps/${process.env.NEXT_PUBLIC_GITHUB_APP_SLUG}/installations/new`}
           >
-            Grant access
+            Install app
           </Link>
         </Flash>
       )}

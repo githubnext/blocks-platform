@@ -1,6 +1,7 @@
 import { Octokit } from "@octokit/rest";
 import { Endpoints } from "@octokit/types";
 import axios, { AxiosInstance } from "axios";
+import { signOut } from "next-auth/react";
 import { Base64 } from "js-base64";
 import {
   BranchesKeyParams,
@@ -37,12 +38,26 @@ export interface SearchContextWithToken extends SearchContext {
 }
 
 export function makeGitHubAPIInstance(token: string) {
-  return axios.create({
+  let instance = axios.create({
     baseURL: "https://api.github.com",
     headers: {
       Authorization: `token ${token}`,
     },
   });
+
+  instance.interceptors.response.use(
+    function (response) {
+      return response;
+    },
+    function (error) {
+      if (error.response.status === 401) {
+        signOut();
+      }
+      return Promise.reject(error);
+    }
+  );
+
+  return instance;
 }
 
 export function makeOctokitInstance(token: string) {

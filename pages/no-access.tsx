@@ -44,7 +44,7 @@ export default function NoAccess() {
             href={`https://github.com/apps/${process.env.NEXT_PUBLIC_GITHUB_APP_SLUG}/installations/new`}
             className="inline-block px-3 py-1 text-sm rounded font-medium bg-[#2da44e] text-white"
           >
-            Grant Access
+            Install app.
           </a>
         </div>
       </div>

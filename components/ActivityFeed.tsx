@@ -70,7 +70,11 @@ export const ActivityFeed = ({
             <Timeline>
               <AnimatePresence initial={false}>
                 {updatedContent && (
-                  <motion.div layout layoutId="ghost-commit" className="z-10">
+                  <motion.div
+                    layoutId="ghost-commit"
+                    key="ghost-commit"
+                    className="z-10"
+                  >
                     <Commit
                       username={session.data.user?.name}
                       message={"Working changes"}
@@ -103,7 +107,7 @@ export const ActivityFeed = ({
                   isSelected || isCurrent ? branchName : item.sha;
 
                 return (
-                  <motion.div layout layoutId={item.sha}>
+                  <motion.div layout layoutId={item.sha} key={item.sha}>
                     <Commit
                       {...item}
                       onClickRef={onClickRef}

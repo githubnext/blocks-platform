@@ -1,6 +1,7 @@
 import axios from "axios";
 import NextAuth from "next-auth";
 import GithubProvider from "next-auth/providers/github";
+import { GITHUB_STARS } from "../../../lib";
 
 const USER_ALLOW_LIST = ["Krzysztof-Cieslak", "dsyme"];
 
@@ -57,7 +58,11 @@ export default NextAuth({
     async signIn({ profile }) {
       const isHubber = profile.site_admin;
       const isGuest = USER_ALLOW_LIST.includes(profile.login);
-      return isHubber || isGuest;
+      const isStar = Boolean(
+        GITHUB_STARS.find((star) => star.id === profile.id)
+      );
+
+      return isHubber || isGuest || isStar;
     },
     async jwt({ token, account, user }) {
       // Only runs on initial sign in

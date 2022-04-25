@@ -21,15 +21,9 @@ export default function NoAccess() {
     <div className="flex flex-col items-center justify-center h-full text-center">
       <div className="max-w-2xl mx-auto px-4">
         <h3 className="font-bold text-lg">
-          {reason === "org-not-installed" ? (
+          {reason === "repo-not-installed" ? (
             <>
-              You don't have our GitHub App installed on the {owner}{" "}
-              organization.
-            </>
-          ) : reason === "repo-not-installed" ? (
-            <>
-              Our GitHub App is installed on the {owner} organization, but not
-              on this repository ({repo}).
+              Our GitHub App is not installed on {owner}/{repo}.
             </>
           ) : (
             <>

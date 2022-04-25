@@ -107,38 +107,17 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     isPublicRepo = repoInfo.private === false;
   } catch { }
 
-  // is there an installation on the org?
-  // TODO: handle pagination or switch to getOrgInstallation
-  const installationsRes =
-    await octokit.apps.listInstallationsForAuthenticatedUser();
+  const octokitWithJwt = makeAppOctokit();
 
-  const orgInstallation = installationsRes.data.installations.find(
-    (installation) =>
-      installation.account?.login.toLowerCase() === owner.toLowerCase()
-  );
-  if (!orgInstallation && !isPublicRepo) {
-    return {
-      redirect: {
-        destination: `/no-access?owner=${owner}&repo=${repo}&reason=org-not-installed`,
-        permanent: false,
-      },
-    };
-  }
-
-  const appOctokit = makeAppOctokit(orgInstallation?.id);
-  let hasRepoInstallation: boolean;
-
+  let repoInstallation;
   try {
-    await appOctokit.apps.getRepoInstallation({
+    repoInstallation = await octokitWithJwt.apps.getRepoInstallation({
       owner,
       repo,
     });
-    hasRepoInstallation = true;
-  } catch (e) {
-    hasRepoInstallation = false;
-  }
+  } catch (e) {}
 
-  if (!hasRepoInstallation && !isPublicRepo) {
+  if (!repoInstallation && !isPublicRepo) {
     return {
       redirect: {
         destination: `/no-access?owner=${owner}&repo=${repo}&reason=repo-not-installed`,
@@ -146,12 +125,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       },
     };
   }
-
-  // TODO: let's use this to have a second stage of auth
-  // for writing to un-authed public repos
-  const permissions = orgInstallation?.permissions || {
-    contents: "read",
-  };
 
   await queryClient.prefetchQuery(
     QueryKeyMap.info.factory({ owner, repo }),
@@ -165,7 +138,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   return {
     props: {
-      hasRepoInstallation,
+      hasRepoInstallation: !!repoInstallation,
       dehydratedState: dehydrate(queryClient),
     },
   };

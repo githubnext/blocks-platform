@@ -486,10 +486,12 @@ export const getBlockContent: QueryFunction<
   const { owner, repo, id } = params;
   let meta = ctx.meta as unknown as BlocksQueryMeta;
 
-  const url = `${window.location.origin}/api/get-block-content?owner=${owner}&repo=${repo}&id=${id}`;
+  const url = `/api/get-block-content?owner=${owner}&repo=${repo}&id=${id}`;
 
-  const res = await meta.ghapi(url);
-  return res.data.content;
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${meta.token}` },
+  });
+  return (await res.json()).content;
 };
 
 export function useBlockContent(

@@ -49,6 +49,7 @@ export function makeOctokitInstance(token) {
 }
 
 export interface BlocksQueryMeta {
+  token: string;
   ghapi: AxiosInstance;
   octokit: Octokit;
 }

@@ -41,6 +41,8 @@ import {
   UseQueryOptions,
 } from "react-query";
 import type { QueryFunction, UseQueryResult } from "react-query";
+import { useSession } from "next-auth/react";
+import { CODEX_BLOCKS } from "../lib";
 
 export function useFileContent(
   params: FileKeyParams,
@@ -116,7 +118,7 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
       sha: fileSha,
     });
     return res.data.commit.sha;
-  } catch (e) { }
+  } catch (e) {}
 }
 
 export function useUpdateFileContents(
@@ -367,8 +369,8 @@ export function useManageBlock({
   let fallbackDefaultBlock: Block = overrideDefaultBlocks[extension]
     ? exampleBlocks.find((b) => b.id === overrideDefaultBlocks[extension])
     : // the first example block is always the code block,
-    // so let's default to the second one, when available
-    exampleBlocks[1] || exampleBlocks[0];
+      // so let's default to the second one, when available
+      exampleBlocks[1] || exampleBlocks[0];
 
   if (
     !fallbackDefaultBlock ||
@@ -427,7 +429,11 @@ export function useFilteredBlocksRepos(
   path: string | undefined = undefined,
   type: "file" | "folder" = "file"
 ): UseQueryResult<BlocksRepo[]> {
+  const {
+    data: { user },
+  } = useSession();
   const allBlocksReposResult = useAllBlocksRepos();
+
   return useMemo(() => {
     if (allBlocksReposResult.status !== "success") return allBlocksReposResult;
     return {
@@ -435,6 +441,17 @@ export function useFilteredBlocksRepos(
       data: allBlocksReposResult.data
         .map((repo) => {
           const filteredBlocks = repo.blocks.filter((block: Block) => {
+            if (
+              // @ts-ignore
+              user.isStar &&
+              Boolean(
+                CODEX_BLOCKS.find((cb) => {
+                  return cb.id === block.id && repo.full_name === cb.repo;
+                })
+              )
+            ) {
+              return false;
+            }
             // don't include example Blocks
             if (
               block.title === "Example File Block" ||

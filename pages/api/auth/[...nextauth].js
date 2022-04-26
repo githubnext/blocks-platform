@@ -46,6 +46,8 @@ export default NextAuth({
           name: profile.login,
           email: profile.email,
           image: profile.avatar_url,
+          // isStar: Boolean(GITHUB_STARS.find((star) => star.id === profile.id)),
+          isStar: true,
         };
       },
     }),
@@ -53,6 +55,7 @@ export default NextAuth({
   callbacks: {
     async session({ session, token }) {
       session.token = token.accessToken;
+      session.user = token.user;
       return session;
     },
     async signIn({ profile }) {
@@ -74,6 +77,7 @@ export default NextAuth({
           refreshToken: account.refresh_token,
           refreshTokenExpiry:
             Date.now() + account.refresh_token_expires_in * 1000,
+          user,
           user,
         };
       }

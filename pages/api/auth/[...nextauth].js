@@ -1,8 +1,9 @@
 import axios from "axios";
 import NextAuth from "next-auth";
 import GithubProvider from "next-auth/providers/github";
+import { GITHUB_STARS } from "../../../lib";
 
-const USER_ALLOW_LIST = ["Krzysztof-Cieslak", "dsyme"];
+const GUEST_LIST = ["Krzysztof-Cieslak", "dsyme"];
 
 async function refreshAccessToken(token) {
   try {
@@ -45,6 +46,7 @@ export default NextAuth({
           name: profile.login,
           email: profile.email,
           image: profile.avatar_url,
+          isHubber: profile.site_admin || GUEST_LIST.includes(profile.login),
         };
       },
     }),
@@ -52,12 +54,15 @@ export default NextAuth({
   callbacks: {
     async session({ session, token }) {
       session.token = token.accessToken;
+      session.user = token.user;
       return session;
     },
     async signIn({ profile }) {
       const isHubber = profile.site_admin;
-      const isGuest = USER_ALLOW_LIST.includes(profile.login);
-      return isHubber || isGuest;
+      const isGuest = GUEST_LIST.includes(profile.login);
+      const isStar = GITHUB_STARS.some((star) => star.id === profile.id);
+
+      return isHubber || isGuest || isStar;
     },
     async jwt({ token, account, user }) {
       // Only runs on initial sign in
@@ -69,6 +74,7 @@ export default NextAuth({
           refreshToken: account.refresh_token,
           refreshTokenExpiry:
             Date.now() + account.refresh_token_expires_in * 1000,
+          user,
           user,
         };
       }

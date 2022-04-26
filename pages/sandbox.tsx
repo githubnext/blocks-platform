@@ -41,7 +41,7 @@ function SandboxInner() {
 }
 
 export default function Sandbox() {
-  const { status } = useSession();
+  const { status, data } = useSession();
 
   if (status === "loading") {
     return (

@@ -3,6 +3,7 @@ import * as Immer from "immer";
 import { Flash, Link, StyledOcticon, useTheme } from "@primer/react";
 import { AlertIcon } from "@primer/octicons-react";
 import {
+  getBlockKey,
   useGetBranches,
   useMetadata,
   useRepoFiles,
@@ -20,6 +21,8 @@ import BlockPane from "./BlockPane";
 import CommitsPane from "./CommitsPane";
 import type { RepoFiles } from "@githubnext/utils";
 import { AppContext } from "context";
+import { CODEX_BLOCKS } from "lib";
+import { useSession } from "next-auth/react";
 
 export type Context = {
   repo: string;
@@ -238,10 +241,14 @@ interface RepoDetailProps {
 export function RepoDetail({ token }: RepoDetailProps) {
   const router = useRouter();
   const {
+    data: { user },
+  } = useSession();
+  const {
     repo,
     owner,
     branch: branchParam,
     path = "",
+    blockKey,
   } = router.query as Record<string, string>;
 
   const repoInfo = useRepoInfo({ repo, owner });
@@ -293,9 +300,17 @@ export function RepoDetail({ token }: RepoDetailProps) {
     { enabled: Boolean(branchName) }
   );
 
+  const accessProhibited =
+    user.isHubber &&
+    CODEX_BLOCKS.some((cb) => {
+      // @ts-ignore
+      return getBlockKey(cb) === blockKey;
+    });
   const queries = [repoInfo, branches, repoFiles, repoTimeline];
+  const hasQueryErrors = queries.some((res) => res.status === "error");
+  const showErrorState = hasQueryErrors || accessProhibited;
 
-  if (queries.some((res) => res.status === "error")) {
+  if (showErrorState) {
     const error = queries.find((res) => res.error)?.error;
     return (
       <div className="p-4 pt-40 text-center mx-auto text-red-600">

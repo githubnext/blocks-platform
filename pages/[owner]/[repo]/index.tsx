@@ -15,8 +15,11 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { dehydrate, QueryClient, useQueryClient } from "react-query";
 
-function RepoDetailContainer(props: { hasRepoInstallation: boolean }) {
-  const { hasRepoInstallation } = props;
+function RepoDetailContainer(props: {
+  hasRepoInstallation: boolean;
+  installationUrl: string;
+}) {
+  const { hasRepoInstallation, installationUrl } = props;
   const router = useRouter();
   const [localHasRepoInstallation, setLocalHasRepoInstallation] =
     useState(hasRepoInstallation);
@@ -68,7 +71,7 @@ function RepoDetailContainer(props: { hasRepoInstallation: boolean }) {
         value={{ hasRepoInstallation: localHasRepoInstallation }}
       >
         {/* @ts-ignore */}
-        <RepoDetail token={session?.token} />
+        <RepoDetail token={session?.token} installationUrl={installationUrl} />
       </AppContext.Provider>
     );
   }
@@ -105,7 +108,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     });
 
     isPublicRepo = repoInfo.private === false;
-  } catch { }
+  } catch {}
 
   const octokitWithJwt = makeAppOctokit();
 
@@ -136,9 +139,12 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       })
   );
 
+  const installationUrl = `https://github.com/apps/${process.env.GITHUB_APP_SLUG}/installations/new`;
+
   return {
     props: {
       hasRepoInstallation: !!repoInstallation,
+      installationUrl,
       dehydratedState: dehydrate(queryClient),
     },
   };

@@ -45,10 +45,19 @@ interface RepoDetailInnerProps {
   branchName: string;
   files: undefined | RepoFiles;
   timeline: undefined | RepoTimeline;
+  installationUrl: string;
 }
 
 export function RepoDetailInner(props: RepoDetailInnerProps) {
-  const { token, repoInfo, branches, branchName, files, timeline } = props;
+  const {
+    token,
+    repoInfo,
+    branches,
+    branchName,
+    files,
+    timeline,
+    installationUrl,
+  } = props;
   const router = useRouter();
   const { setColorMode } = useTheme();
   const {
@@ -149,7 +158,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
             muted
             target="_blank"
             rel="noopener"
-            href={`https://github.com/apps/${process.env.NEXT_PUBLIC_GITHUB_APP_SLUG}/installations/new`}
+            href={installationUrl}
           >
             Install app
           </Link>
@@ -236,9 +245,10 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
 
 interface RepoDetailProps {
   token: string;
+  installationUrl: string;
 }
 
-export function RepoDetail({ token }: RepoDetailProps) {
+export function RepoDetail({ token, installationUrl }: RepoDetailProps) {
   const router = useRouter();
   const {
     data: { user },
@@ -329,6 +339,7 @@ export function RepoDetail({ token }: RepoDetailProps) {
         branchName={branchName}
         files={repoFiles.data}
         timeline={repoTimeline.data}
+        installationUrl={installationUrl}
       />
     );
   } else {

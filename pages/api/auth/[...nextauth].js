@@ -46,8 +46,7 @@ export default NextAuth({
           name: profile.login,
           email: profile.email,
           image: profile.avatar_url,
-          // isStar: Boolean(GITHUB_STARS.find((star) => star.id === profile.id)),
-          isStar: true,
+          isStar: Boolean(GITHUB_STARS.find((star) => star.id === profile.id)),
         };
       },
     }),

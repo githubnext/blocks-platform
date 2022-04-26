@@ -442,7 +442,6 @@ export function useFilteredBlocksRepos(
         .map((repo) => {
           const filteredBlocks = repo.blocks.filter((block: Block) => {
             if (
-              // @ts-ignore
               user.isStar &&
               Boolean(
                 CODEX_BLOCKS.find((cb) => {

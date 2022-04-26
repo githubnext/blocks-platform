@@ -835,13 +835,7 @@ export function RepoDetail({ token }: RepoDetailProps) {
   );
 
   const accessProhibited =
-    // @ts-ignore
-    user.isStar &&
-    Boolean(
-      CODEX_BLOCKS.find((cb) => {
-        return cb.blockKey === blockKey;
-      })
-    );
+    user.isStar && Boolean(CODEX_BLOCKS.find((cb) => cb.blockKey === blockKey));
   const queries = [repoInfo, branches, repoFiles, repoTimeline];
   const hasQueryErrors = queries.some((res) => res.status === "error");
   const showErrorState = hasQueryErrors || accessProhibited;

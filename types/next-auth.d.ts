@@ -6,7 +6,7 @@ declare module "next-auth" {
       name: string;
       email: string;
       image: string;
-      isStar: boolean;
+      isHubber: boolean;
       id: number;
     };
   }

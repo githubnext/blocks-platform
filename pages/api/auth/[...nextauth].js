@@ -3,7 +3,7 @@ import NextAuth from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import { GITHUB_STARS } from "../../../lib";
 
-const USER_ALLOW_LIST = ["Krzysztof-Cieslak", "dsyme"];
+const GUEST_LIST = ["Krzysztof-Cieslak", "dsyme"];
 
 async function refreshAccessToken(token) {
   try {
@@ -46,7 +46,7 @@ export default NextAuth({
           name: profile.login,
           email: profile.email,
           image: profile.avatar_url,
-          isStar: Boolean(GITHUB_STARS.find((star) => star.id === profile.id)),
+          isHubber: profile.site_admin || GUEST_LIST.includes(profile.login),
         };
       },
     }),
@@ -59,10 +59,8 @@ export default NextAuth({
     },
     async signIn({ profile }) {
       const isHubber = profile.site_admin;
-      const isGuest = USER_ALLOW_LIST.includes(profile.login);
-      const isStar = Boolean(
-        GITHUB_STARS.find((star) => star.id === profile.id)
-      );
+      const isGuest = GUEST_LIST.includes(profile.login);
+      const isStar = GITHUB_STARS.some((star) => star.id === profile.id);
 
       return isHubber || isGuest || isStar;
     },

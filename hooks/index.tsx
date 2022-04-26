@@ -442,12 +442,14 @@ export function useFilteredBlocksRepos(
         .map((repo) => {
           const filteredBlocks = repo.blocks.filter((block: Block) => {
             if (
-              user.isStar &&
-              Boolean(
-                CODEX_BLOCKS.find((cb) => {
-                  return cb.id === block.id && repo.full_name === cb.repo;
-                })
-              )
+              !user.isHubber &&
+              CODEX_BLOCKS.some((cb) => {
+                return (
+                  block.id === cb.id &&
+                  repo.owner === cb.owner &&
+                  repo.repo === cb.repo
+                );
+              })
             ) {
               return false;
             }

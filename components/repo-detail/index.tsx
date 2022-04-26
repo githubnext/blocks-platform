@@ -301,7 +301,7 @@ export function RepoDetail({ token }: RepoDetailProps) {
   );
 
   const accessProhibited =
-    user.isHubber &&
+    !user.isHubber &&
     CODEX_BLOCKS.some((cb) => {
       // @ts-ignore
       return getBlockKey(cb) === blockKey;

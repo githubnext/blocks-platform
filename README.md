@@ -36,7 +36,7 @@ GITHUB_PRIVATE_KEY="""
 -----END RSA PRIVATE KEY-----
 """ # the contents of the private key file
 GITHUB_SECRET="..." # your app's "Client secret"
-NEXT_PUBLIC_GITHUB_APP_SLUG="..." # the last path segment of the "Public link"
+GITHUB_APP_SLUG="..." # the last path segment of the "Public link"
 NEXT_PUBLIC_MARKETPLACE_URL="https://blocks-marketplace.githubnext.com" # you can override this to develop `blocks-marketplace` locally
 NEXTAUTH_SECRET="secret"
 NEXTAUTH_URL="http://localhost:3000"

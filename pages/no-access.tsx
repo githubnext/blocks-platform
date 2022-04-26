@@ -1,7 +1,11 @@
 import { useCheckRepoAccess } from "hooks";
 import { useRouter } from "next/router";
 
-export default function NoAccess() {
+export default function NoAccess({
+  installationUrl,
+}: {
+  installationUrl: string;
+}) {
   const router = useRouter();
   const { owner, repo, reason } = router.query as Record<string, string>;
 
@@ -35,7 +39,7 @@ export default function NoAccess() {
           <a
             target="_blank"
             rel="noopener"
-            href={`https://github.com/apps/${process.env.NEXT_PUBLIC_GITHUB_APP_SLUG}/installations/new`}
+            href={installationUrl}
             className="inline-block px-3 py-1 text-sm rounded font-medium bg-[#2da44e] text-white"
           >
             Install app.
@@ -44,4 +48,13 @@ export default function NoAccess() {
       </div>
     </div>
   );
+}
+
+export function getServerSideProps() {
+  const installationUrl = `https://github.com/apps/${process.env.GITHUB_APP_SLUG}/installations/new`;
+  return {
+    props: {
+      installationUrl,
+    },
+  };
 }

@@ -3,6 +3,7 @@ import * as Immer from "immer";
 import { Flash, Link, StyledOcticon, useTheme } from "@primer/react";
 import { AlertIcon } from "@primer/octicons-react";
 import {
+  getBlockKey,
   useGetBranches,
   useMetadata,
   useRepoFiles,
@@ -300,13 +301,11 @@ export function RepoDetail({ token }: RepoDetailProps) {
   );
 
   const accessProhibited =
-    // @ts-ignore
-    user.isStar &&
-    Boolean(
-      CODEX_BLOCKS.find((cb) => {
-        return cb.blockKey === blockKey;
-      })
-    );
+    user.isHubber &&
+    CODEX_BLOCKS.some((cb) => {
+      // @ts-ignore
+      return getBlockKey(cb) === blockKey;
+    });
   const queries = [repoInfo, branches, repoFiles, repoTimeline];
   const hasQueryErrors = queries.some((res) => res.status === "error");
   const showErrorState = hasQueryErrors || accessProhibited;

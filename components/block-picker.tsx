@@ -28,9 +28,7 @@ interface BlockPickerProps {
 
 export default function BlockPicker(props: BlockPickerProps) {
   const { button, value, path, type, installationUrl, onChange } = props;
-  const [searchTerm, setSearchTerm] = useState(
-    "https://github.com/Wattenberger/geojson-block"
-  );
+  const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const lowerSearchTerm = searchTerm.toLowerCase();
   const queryClient = useQueryClient();

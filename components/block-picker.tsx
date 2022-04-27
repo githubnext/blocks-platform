@@ -55,7 +55,15 @@ export default function BlockPicker(props: BlockPickerProps) {
     : blockRepos;
 
   return (
-    <ActionMenu open={isOpen} onOpenChange={setIsOpen}>
+    <ActionMenu
+      open={isOpen}
+      onOpenChange={(isOpen) => {
+        setIsOpen(isOpen);
+        if (!isOpen) {
+          setSearchTerm("");
+        }
+      }}
+    >
       <ActionMenu.Button aria-expanded={isOpen} disabled={!blockRepos}>
         {button ?? `Block: ${value?.title}`}
       </ActionMenu.Button>

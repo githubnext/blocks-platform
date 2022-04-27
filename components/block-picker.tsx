@@ -4,25 +4,57 @@ import {
   SearchIcon,
   VerifiedIcon,
 } from "@primer/octicons-react";
-import { Link, ActionList, ActionMenu, Text, TextInput } from "@primer/react";
-import { BlocksRepo, useFilteredBlocksRepos } from "hooks";
+import {
+  Link,
+  ActionList,
+  ActionMenu,
+  Text,
+  TextInput,
+  Button,
+} from "@primer/react";
+import { BlocksRepo, useFilteredBlocksRepos, useBlocksFromRepo } from "hooks";
+import { QueryKeyMap } from "lib/query-keys";
 import { useState } from "react";
+import { useQueryClient } from "react-query";
 
 interface BlockPickerProps {
   button?: React.ReactNode;
   value?: Block;
   path?: string;
   type: "file" | "folder";
+  installationUrl: string;
   onChange: (newType: Block) => void;
 }
 
 export default function BlockPicker(props: BlockPickerProps) {
-  const { button, value, path, type, onChange } = props;
-  const [searchTerm, setSearchTerm] = useState("");
+  const { button, value, path, type, installationUrl, onChange } = props;
+  const [searchTerm, setSearchTerm] = useState(
+    "https://github.com/Wattenberger/geojson-block"
+  );
   const [isOpen, setIsOpen] = useState(false);
   const lowerSearchTerm = searchTerm.toLowerCase();
+  const queryClient = useQueryClient();
 
   const { data: blockRepos } = useFilteredBlocksRepos(path, type);
+
+  // allow user to search for Blocks on a specific repo
+  const isSearchTermUrl = lowerSearchTerm.includes("github.com");
+  const [searchTermOwner, searchTermRepo] = (searchTerm || "")
+    .split("/")
+    .slice(-2);
+  const { data: blocksUrlBlocks, status: blocksUrlStatus } = useBlocksFromRepo(
+    {
+      owner: searchTermOwner,
+      repo: searchTermRepo,
+    },
+    {
+      enabled: isSearchTermUrl,
+    }
+  );
+
+  const blocksList = isSearchTermUrl
+    ? [blocksUrlBlocks].filter(Boolean)
+    : blockRepos;
 
   return (
     <ActionMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -30,25 +62,66 @@ export default function BlockPicker(props: BlockPickerProps) {
         {button ?? `Block: ${value?.title}`}
       </ActionMenu.Button>
 
-      <ActionMenu.Overlay width="medium">
+      <ActionMenu.Overlay width="large">
         <div className="px-3 pt-3 w-full">
           <TextInput
             value={searchTerm}
-            icon={SearchIcon}
+            leadingVisual={SearchIcon}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search blocks"
+            placeholder="Search blocks or paste repo URL"
             className="!pl-2 w-full"
           />
         </div>
-        <ActionList>
-          <ActionList.Group title="Blocks" selectionVariant="single">
-            <div className="max-h-[calc(100vh-20em)] overflow-auto">
-              {blockRepos &&
-                blockRepos.map((repo, index) => {
-                  if (index > 15) return null;
+        {isSearchTermUrl && blocksUrlStatus === "loading" && (
+          <div className="px-3 py-6 mb-1 w-full text-center italic">
+            <Text color="fg.muted">
+              Loading Blocks from the{" "}
+              <strong>
+                {searchTermOwner}/{searchTermRepo}
+              </strong>{" "}
+              repository
+            </Text>
+          </div>
+        )}
+        {isSearchTermUrl && blocksUrlStatus === "error" && (
+          <div className="py-5 mb-1 w-full text-center flex flex-col items-center">
+            <Text color="fg.muted" className="px-5">
+              We weren't able to find the{" "}
+              <strong>
+                {searchTermOwner}/{searchTermRepo}
+              </strong>{" "}
+              repo. If it's private, make sure our GitHub App has access to it.
+            </Text>
+
+            <div className="flex mt-4">
+              <a
+                target="_blank"
+                rel="noopener"
+                href={installationUrl}
+                className="mr-2"
+              >
+                <Button variant="primary">Update App access</Button>
+              </a>
+              <Button
+                onClick={() => {
+                  queryClient.invalidateQueries(QueryKeyMap.blocksRepo.key);
+                }}
+              >
+                Try again
+              </Button>
+            </div>
+          </div>
+        )}
+        {!!blocksList?.length && (
+          <ActionList>
+            <ActionList.Group title="Blocks" selectionVariant="single">
+              <div className="max-h-[calc(100vh-25em)] overflow-auto">
+                {blocksList.map((repo, index) => {
+                  if (index > 50) return null;
                   return repo.blocks.map((block) => {
                     if (
                       searchTerm &&
+                      !isSearchTermUrl &&
                       !block.title.toLowerCase().includes(lowerSearchTerm)
                     )
                       return null;
@@ -64,9 +137,10 @@ export default function BlockPicker(props: BlockPickerProps) {
                     );
                   });
                 })}
-            </div>
-          </ActionList.Group>
-        </ActionList>
+              </div>
+            </ActionList.Group>
+          </ActionList>
+        )}
       </ActionMenu.Overlay>
     </ActionMenu>
   );

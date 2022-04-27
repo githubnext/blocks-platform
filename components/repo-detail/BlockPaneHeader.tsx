@@ -25,6 +25,7 @@ type BlockPaneHeaderProps = {
   metadata: any;
   setRequestedMetadata: (metadata: any) => void;
   context: Context;
+  installationUrl: string;
   onSaveChanges: () => void;
 };
 
@@ -37,6 +38,7 @@ export default function BlockPaneHeader({
   metadata,
   setRequestedMetadata,
   context,
+  installationUrl,
   onSaveChanges,
 }: BlockPaneHeaderProps) {
   const router = useRouter();
@@ -72,6 +74,7 @@ export default function BlockPaneHeader({
               type={isFolder ? "folder" : "file"}
               onChange={setBlock}
               value={block}
+              installationUrl={installationUrl}
             />
             {!isDefaultBlock && token && (
               <Button

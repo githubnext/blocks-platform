@@ -4,6 +4,7 @@ import axios, { AxiosInstance } from "axios";
 import { signOut } from "next-auth/react";
 import { Base64 } from "js-base64";
 import {
+  BlocksKeyParams,
   BranchesKeyParams,
   CheckAccessParams,
   FileKeyParams,
@@ -14,6 +15,7 @@ import {
   TimelineKeyParams,
 } from "lib/query-keys";
 import { QueryFunction } from "react-query";
+import { BlocksRepo } from "hooks";
 export interface RepoContext {
   repo: string;
   owner: string;
@@ -242,6 +244,56 @@ export const getRepoFiles: QueryFunction<
 
   const files = fileTreeRes.data.tree;
   return files;
+};
+
+export const getBlocksFromRepo: QueryFunction<
+  BlocksRepo,
+  GenericQueryKey<BlocksKeyParams>
+> = async (ctx) => {
+  let params = ctx.queryKey[1];
+  let meta = ctx.meta as unknown as BlocksQueryMeta;
+  const { owner, repo } = params;
+  if (!owner || !repo) {
+    return undefined;
+  }
+
+  const packageJsonUrl = `/repos/${owner}/${repo}/contents/package.json`;
+  const packageJsonRes = await meta.ghapi(packageJsonUrl);
+
+  const encodedContent = packageJsonRes.data.content;
+  const content = Buffer.from(encodedContent, "base64").toString("utf8");
+  const packageJson = JSON.parse(content);
+
+  const blocks = packageJson.blocks.map((block) => ({
+    ...block,
+    owner,
+    repo,
+  }));
+
+  const data: BlocksRepo = {
+    owner,
+    repo,
+    blocks,
+    full_name: `${owner}/${repo}`,
+    // we don't use any of the below at the moment
+    id: 0,
+    html_url: "",
+    description: "",
+    stars: 0,
+    watchers: 0,
+    language: "",
+    topics: [""],
+    release: {
+      tag_name: "",
+      name: "",
+      tarball_url: "",
+      zipball_url: "",
+      published_at: "",
+      browser_download_url: "",
+    },
+  };
+
+  return data;
 };
 
 export const getBranches: QueryFunction<

@@ -13,8 +13,16 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   const appOctokit = makeAppOctokit();
 
   try {
-    await appOctokit.apps.getRepoInstallation({ owner, repo });
-    res.status(200).send(true);
+    const repoInstallationRes = await appOctokit.apps.getRepoInstallation({
+      owner,
+      repo,
+    });
+    const repoInstallation = repoInstallationRes.data;
+    const hasAccess =
+      repoInstallation &&
+      // the installation is not necessarily accessible to the user
+      repoInstallation.account.id === session.user.id;
+    res.status(200).send(hasAccess);
   } catch (e) {
     res.status(200).send(false);
   }

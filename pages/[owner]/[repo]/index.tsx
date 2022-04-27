@@ -98,29 +98,33 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     };
   }
 
-  const octokit = makeOctokitInstance(session.token as string);
-
-  let isPublicRepo = false;
-  try {
-    const { data: repoInfo } = await octokit.repos.get({
-      owner,
-      repo,
-    });
-
-    isPublicRepo = repoInfo.private === false;
-  } catch {}
-
   const octokitWithJwt = makeAppOctokit();
 
   let repoInstallation;
   try {
-    repoInstallation = await octokitWithJwt.apps.getRepoInstallation({
+    // keep in mind: this will return _any_ installation for the app,
+    // not just ones that the user has access to.
+    const repoInstallationRes = await octokitWithJwt.apps.getRepoInstallation({
       owner,
       repo,
     });
+    repoInstallation = repoInstallationRes.data;
   } catch (e) {}
 
-  if (!repoInstallation && !isPublicRepo) {
+  const octokitWithUserJwt = makeAppOctokit(repoInstallation?.id);
+  let repoInfo;
+  try {
+    // we want to make this query using the installation,
+    // in case the installation doesn't have access, but the user does
+    const repoRes = await octokitWithUserJwt.repos.get({
+      owner,
+      repo,
+    });
+
+    repoInfo = repoRes.data;
+  } catch {}
+
+  if (!repoInfo) {
     return {
       redirect: {
         destination: `/no-access?owner=${owner}&repo=${repo}&reason=repo-not-installed`,
@@ -143,7 +147,10 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   return {
     props: {
-      hasRepoInstallation: !!repoInstallation,
+      hasRepoInstallation:
+        !!repoInstallation &&
+        // the installation is not necessarily accessible to the user
+        repoInstallation.account.id === session.user.id,
       installationUrl,
       dehydratedState: dehydrate(queryClient),
     },

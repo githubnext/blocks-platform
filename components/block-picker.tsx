@@ -55,15 +55,7 @@ export default function BlockPicker(props: BlockPickerProps) {
     : blockRepos;
 
   return (
-    <ActionMenu
-      open={isOpen}
-      onOpenChange={(isOpen) => {
-        setIsOpen(isOpen);
-        if (!isOpen) {
-          setSearchTerm("");
-        }
-      }}
-    >
+    <ActionMenu open={isOpen} onOpenChange={setIsOpen}>
       <ActionMenu.Button aria-expanded={isOpen} disabled={!blockRepos}>
         {button ?? `Block: ${value?.title}`}
       </ActionMenu.Button>
@@ -137,8 +129,11 @@ export default function BlockPicker(props: BlockPickerProps) {
                         block={block}
                         value={value}
                         repo={repo}
-                        onChange={onChange}
-                        setIsOpen={setIsOpen}
+                        onChange={(block) => {
+                          onChange(block);
+                          setIsOpen(false);
+                          setSearchTerm("");
+                        }}
                       />
                     );
                   });
@@ -156,13 +151,11 @@ const BlockItem = ({
   block,
   value,
   repo,
-  setIsOpen,
   onChange,
 }: {
   block: Block;
   value: Block;
   repo: BlocksRepo;
-  setIsOpen: (isOpen: boolean) => void;
   onChange: (newType: Block) => void;
 }) => {
   const isExampleBlock = repo.full_name === `githubnext/blocks-examples`;
@@ -177,7 +170,6 @@ const BlockItem = ({
           repo: repo.repo,
         };
         onChange(enhancedBlock);
-        setIsOpen(false);
       }}
     >
       <div className="font-semibold">{block.title}</div>

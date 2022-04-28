@@ -41,8 +41,7 @@ export default function BlockPicker(props: BlockPickerProps) {
   const isSearchTermUrl = debouncedSearchTerm.includes("github.com");
   const [searchTermOwner, searchTermRepo] = (debouncedSearchTerm || "")
     .split("/")
-    .slice(-2);
-
+    .slice(3);
   const { data: blocksUrlBlocks, status: blocksUrlStatus } = useBlocksFromRepo(
     {
       owner: searchTermOwner,

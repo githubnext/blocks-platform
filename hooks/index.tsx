@@ -365,12 +365,12 @@ export function useManageBlock({
     repo: storedDefaultBlockRepo,
   });
 
-  if (
-    filteredBlocksReposResult.status !== "success" ||
-    blockKeyResult.status !== "success" ||
-    storedDefaultBlockResult.status !== "success"
-  )
-    return filteredBlocksReposResult as UseManageBlockResult;
+  const incomplete = [
+    filteredBlocksReposResult,
+    blockKeyResult,
+    storedDefaultBlockResult,
+  ].find((r) => r.status !== "success");
+  if (incomplete) return incomplete as UseManageBlockResult;
 
   const blocksRepos = [
     ...filteredBlocksReposResult.data,
@@ -422,7 +422,7 @@ export function useManageBlock({
   }
 
   const defaultBlock = blockFromMetadata || fallbackDefaultBlock;
-  let block = blockInUrl || defaultBlock;
+  const block = blockInUrl || defaultBlock;
 
   const setBlock = (block: Block) => {
     if (!block) return;

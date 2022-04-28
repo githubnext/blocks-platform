@@ -189,6 +189,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
                 context,
                 theme,
                 branchName,
+                installationUrl,
                 updatedContents,
                 setUpdatedContents,
                 onSaveChanges,

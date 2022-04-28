@@ -46,6 +46,11 @@ export interface CheckAccessParams {
   owner: string;
 }
 
+export interface BlocksKeyParams {
+  owner: string;
+  repo: string;
+}
+
 function makeFactory<Key, Params>(
   key: Key
 ): { key: Key; factory: (params: Params) => [Key, Params] } {
@@ -62,6 +67,7 @@ export const QueryKeyMap = {
   files: makeFactory<"files", FilesKeyParams>("files"),
   file: makeFactory<"file", FileKeyParams>("file"),
   blocksRepos: makeFactory<"blocksRepos", {}>("blocksRepos"),
+  blocksRepo: makeFactory<"blocksRepo", BlocksKeyParams>("blocksRepo"),
   branches: makeFactory<"branches", BranchesKeyParams>("branches"),
   searchRepos: makeFactory<"searchRepos", string>("searchRepos"),
   blockContent: makeFactory<"blockContent", BlockContentKeyParams>(

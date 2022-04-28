@@ -35,15 +35,17 @@ export default async function handler(
     ? { authorization: req.headers["authorization"] }
     : {};
 
-  // @ts-ignore
-  const releaseInfoUrl = `https://api.github.com/repos/${sanitizeId(
+  const apiBaseUrl = `https://api.github.com/repos/${sanitizeId(
     owner
-  )}/${sanitizeId(repo)}/releases/latest`;
+  )}/${sanitizeId(repo)}`;
+
+  // @ts-ignore
+  const releaseInfoUrl = `${apiBaseUrl}/releases/latest`;
   const releaseInfo = await fetch(releaseInfoUrl, {
     headers: authorization,
   }).then((r) => r.json());
 
-  const assets = releaseInfo.assets;
+  const assets = releaseInfo.assets || [];
   const asset = assets.find((a: any) => a.name === `${id}.tar.gz`);
   if (!asset) {
     res.status(404).json({
@@ -51,17 +53,21 @@ export default async function handler(
     });
     return;
   }
-  const assetUrl = asset.browser_download_url;
+  const assetUrl = `${apiBaseUrl}/releases/assets/${asset.id}`;
 
   const assetContentRes = await fetch(assetUrl, {
     headers: {
       ...authorization,
-      "Accept-Encoding": "gzip",
+      Accept: "application/octet-stream",
     },
   });
+  if (assetContentRes.status !== 200) {
+    res.status(404).json({
+      message: `We had trouble downloading an asset from ${assetUrl}`,
+    });
+  }
   // @ts-ignore
   const buffer = await assetContentRes.buffer();
-
   const text = await untar(buffer);
 
   res.status(200).json({ content: text });

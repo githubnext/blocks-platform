@@ -16,6 +16,7 @@ type BlockPaneProps = {
   context: Context;
   theme: string;
   branchName: string;
+  installationUrl: string;
   updatedContents: UpdatedContents;
   setUpdatedContents: (_: UpdatedContents) => void;
   onSaveChanges: () => void;
@@ -31,6 +32,7 @@ export default function BlockPane({
   context,
   theme,
   branchName,
+  installationUrl,
   updatedContents,
   setUpdatedContents,
   onSaveChanges,
@@ -78,6 +80,7 @@ export default function BlockPane({
           metadata,
           setRequestedMetadata,
           context,
+          installationUrl,
           onSaveChanges,
         }}
       />

@@ -17,9 +17,11 @@ import {
   RepoSearchResult,
   searchRepos,
   checkAccess,
+  getBlocksFromRepo,
 } from "ghapi";
 import { Base64 } from "js-base64";
 import {
+  BlocksKeyParams,
   BlockContentKeyParams,
   BranchesKeyParams,
   CheckAccessParams,
@@ -228,6 +230,23 @@ export function useRepoTimeline(
   });
 }
 
+export function useBlocksFromRepo(
+  params: BlocksKeyParams,
+  config?: UseQueryOptions<BlocksRepo>
+) {
+  return useQuery<
+    BlocksRepo,
+    any,
+    BlocksRepo,
+    GenericQueryKey<BlocksKeyParams>
+  >(QueryKeyMap.blocksRepo.factory(params), getBlocksFromRepo, {
+    cacheTime: 0,
+    refetchOnWindowFocus: false,
+    retry: false,
+    ...config,
+  });
+}
+
 export function useRepoFiles(
   params: FilesKeyParams,
   config?: UseQueryOptions<RepoFiles>
@@ -310,7 +329,7 @@ export const getBlockKey = (block: Block) =>
 
 interface UseManageBlockParams {
   path: string;
-  storedDefaultBlock: string;
+  storedDefaultBlock?: string;
   isFolder: boolean;
 }
 
@@ -322,21 +341,42 @@ export type UseManageBlockResult = UseQueryResult<{
 
 export function useManageBlock({
   path,
-  storedDefaultBlock,
+  storedDefaultBlock = "",
   isFolder,
 }: UseManageBlockParams): UseManageBlockResult {
   const router = useRouter();
-  const { blockKey = "" } = router.query;
+  const { blockKey = "" } = router.query as Record<string, string>;
 
   const filteredBlocksReposResult = useFilteredBlocksRepos(
     path,
     isFolder ? "folder" : "file"
   );
 
-  if (filteredBlocksReposResult.status !== "success")
-    return filteredBlocksReposResult as UseManageBlockResult;
+  // do we need to load any Blocks from private repos?
+  const [blockKeyOwner, blockKeyRepo] = blockKey.split("__");
+  const blockKeyResult = useBlocksFromRepo({
+    owner: blockKeyOwner,
+    repo: blockKeyRepo,
+  });
+  const [storedDefaultBlockOwner, storedDefaultBlockRepo] =
+    storedDefaultBlock.split("__");
+  const storedDefaultBlockResult = useBlocksFromRepo({
+    owner: storedDefaultBlockOwner,
+    repo: storedDefaultBlockRepo,
+  });
 
-  const blocksRepos = filteredBlocksReposResult.data;
+  const incomplete = [
+    filteredBlocksReposResult,
+    blockKeyResult,
+    storedDefaultBlockResult,
+  ].find((r) => r.status !== "success");
+  if (incomplete) return incomplete as UseManageBlockResult;
+
+  const blocksRepos = [
+    ...filteredBlocksReposResult.data,
+    blockKeyResult.data,
+    storedDefaultBlockResult.data,
+  ].filter(Boolean);
 
   const exampleBlocks =
     blocksRepos.find(
@@ -354,7 +394,9 @@ export function useManageBlock({
       (b) => b.owner === blockOwner && b.repo === blockRepo
     );
     const block = blocksRepo?.blocks.find((b) => b.id === blockId);
-    if (!block) return null;
+    if (!block) {
+      return null;
+    }
     if (isFolder !== (block.type === "folder")) return null;
     return {
       ...block,

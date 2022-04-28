@@ -16,6 +16,7 @@ import { BlocksRepo, useFilteredBlocksRepos, useBlocksFromRepo } from "hooks";
 import { QueryKeyMap } from "lib/query-keys";
 import { useState } from "react";
 import { useQueryClient } from "react-query";
+import { useDebounce } from "use-debounce";
 
 interface BlockPickerProps {
   button?: React.ReactNode;
@@ -31,15 +32,17 @@ export default function BlockPicker(props: BlockPickerProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const lowerSearchTerm = searchTerm.toLowerCase();
+  let [debouncedSearchTerm] = useDebounce(lowerSearchTerm, 300);
   const queryClient = useQueryClient();
 
   const { data: blockRepos } = useFilteredBlocksRepos(path, type);
 
   // allow user to search for Blocks on a specific repo
-  const isSearchTermUrl = lowerSearchTerm.includes("github.com");
-  const [searchTermOwner, searchTermRepo] = (searchTerm || "")
+  const isSearchTermUrl = debouncedSearchTerm.includes("github.com");
+  const [searchTermOwner, searchTermRepo] = (debouncedSearchTerm || "")
     .split("/")
     .slice(-2);
+
   const { data: blocksUrlBlocks, status: blocksUrlStatus } = useBlocksFromRepo(
     {
       owner: searchTermOwner,

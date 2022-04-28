@@ -257,14 +257,18 @@ export const getBlocksFromRepo: QueryFunction<
     return undefined;
   }
 
-  const packageJsonUrl = `/repos/${owner}/${repo}/contents/package.json`;
-  const packageJsonRes = await meta.ghapi(packageJsonUrl);
+  let packageJson;
+  try {
+    const packageJsonUrl = `/repos/${owner}/${repo}/contents/package.json`;
+    const packageJsonRes = await meta.ghapi(packageJsonUrl);
+    const encodedContent = packageJsonRes.data.content;
+    const content = Buffer.from(encodedContent, "base64").toString("utf8");
+    packageJson = JSON.parse(content);
+  } catch {
+    return undefined;
+  }
 
-  const encodedContent = packageJsonRes.data.content;
-  const content = Buffer.from(encodedContent, "base64").toString("utf8");
-  const packageJson = JSON.parse(content);
-
-  const blocks = packageJson.blocks.map((block) => ({
+  const blocks = (packageJson.blocks || []).map((block) => ({
     ...block,
     owner,
     repo,

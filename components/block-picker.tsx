@@ -113,6 +113,17 @@ export default function BlockPicker(props: BlockPickerProps) {
             </div>
           </div>
         )}
+        {isSearchTermUrl && blocksUrlStatus === "success" && !blocksUrlBlocks && (
+          <div className="py-5 mb-1 w-full text-center flex flex-col items-center">
+            <Text color="fg.muted" className="px-5">
+              We weren't able to find any Blocks in{" "}
+              <strong>
+                {searchTermOwner}/{searchTermRepo}
+              </strong>
+              .
+            </Text>
+          </div>
+        )}
         {!!blocksList?.length && (
           <ActionList>
             <ActionList.Group title="Blocks" selectionVariant="single">

@@ -12,6 +12,7 @@ import { QueryKeyMap } from "lib/query-keys";
 import { GetServerSidePropsContext } from "next";
 import { getSession, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { getUserInstallationForRepo } from "pages/api/check-access";
 import { useEffect, useState } from "react";
 import { dehydrate, QueryClient, useQueryClient } from "react-query";
 
@@ -98,25 +99,19 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     };
   }
 
-  const octokitWithJwt = makeAppOctokit();
+  // get the installation for the repo, if the user has access
+  const repoInstallation = await getUserInstallationForRepo({
+    token: session?.token as string,
+    owner,
+    repo,
+  });
 
-  let repoInstallation;
-  try {
-    // keep in mind: this will return _any_ installation for the app,
-    // not just ones that the user has access to.
-    const repoInstallationRes = await octokitWithJwt.apps.getRepoInstallation({
-      owner,
-      repo,
-    });
-    repoInstallation = repoInstallationRes.data;
-  } catch (e) {}
+  const octokit = makeOctokitInstance(session?.token as string);
 
-  const octokitWithUserJwt = makeAppOctokit(repoInstallation?.id);
   let repoInfo;
   try {
-    // we want to make this query using the installation,
-    // in case the installation doesn't have access, but the user does
-    const repoRes = await octokitWithUserJwt.repos.get({
+    // check to see if the user has access to the repo
+    const repoRes = await octokit.repos.get({
       owner,
       repo,
     });
@@ -147,10 +142,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   return {
     props: {
-      hasRepoInstallation:
-        !!repoInstallation &&
-        // the installation is not necessarily accessible to the user
-        repoInstallation.account.id === session.user.id,
+      hasRepoInstallation: !!repoInstallation,
       installationUrl,
       dehydratedState: dehydrate(queryClient),
     },

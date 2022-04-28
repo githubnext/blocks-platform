@@ -95,12 +95,16 @@ export default function BlockPaneBlock({
     }
   );
 
-  let content: string = "";
+  let content = "";
+  let originalContent = "";
   if (showUpdatedContents) {
     content = updatedContents[path].content;
+    originalContent = updatedContents[path].original;
   } else if (fileData) {
     content = fileData.content;
+    originalContent = content;
   }
+  const isEditable = context.sha === branchName;
 
   if (isTooLarge)
     return (
@@ -119,6 +123,8 @@ export default function BlockPaneBlock({
       token={token}
       branchName={branchName}
       content={content}
+      originalContent={originalContent}
+      isEditable={isEditable}
       onRequestUpdateContent={onRequestUpdateContent}
     />
   );

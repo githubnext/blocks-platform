@@ -15,6 +15,8 @@ export interface BundleCode {
 interface ExampleBlockProps {
   block: Block;
   contents?: string;
+  originalContent?: string;
+  isEditable?: boolean;
   tree?: RepoFiles;
   metadata?: any;
   context: FileContext | FolderContext;
@@ -37,6 +39,8 @@ export function ExampleBlock(props: ExampleBlockProps) {
   const {
     block,
     contents,
+    originalContent,
+    isEditable,
     tree,
     metadata = {},
     context,
@@ -63,6 +67,8 @@ export function ExampleBlock(props: ExampleBlockProps) {
         key={context.sha}
         block={block}
         content={contents || ""}
+        originalContent={originalContent}
+        isEditable={isEditable}
         tree={tree || []}
         metadata={metadata}
         context={context}

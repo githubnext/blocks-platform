@@ -7,6 +7,8 @@ import { ExampleBlock } from "components/example-block";
 interface SandboxedBlockWrapperProps {
   block: Block;
   contents?: string;
+  originalContent?: string;
+  isEditable?: boolean;
   theme: string;
   tree?: RepoFiles;
   context: FileContext | FolderContext;
@@ -34,6 +36,8 @@ export const SandboxedBlockWrapper = memo(function SandboxedBlockWrapper(
     block,
     metadata,
     contents,
+    originalContent,
+    isEditable,
     theme,
     tree,
     context,
@@ -67,6 +71,8 @@ export const SandboxedBlockWrapper = memo(function SandboxedBlockWrapper(
       <ExampleBlock
         block={block}
         contents={contents}
+        originalContent={originalContent}
+        isEditable={isEditable}
         tree={tree}
         context={fileContext}
         metadata={metadata}
@@ -84,6 +90,8 @@ export const SandboxedBlockWrapper = memo(function SandboxedBlockWrapper(
       <SandboxedBlock
         block={block}
         contents={contents}
+        originalContent={originalContent}
+        isEditable={isEditable}
         tree={tree}
         context={fileContext}
         metadata={metadata}

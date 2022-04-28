@@ -15,6 +15,8 @@ export interface BundleCode {
 interface SandboxedBlockProps {
   block: Block;
   contents?: string;
+  originalContent?: string;
+  isEditable?: boolean;
   tree?: RepoFiles;
   metadata?: any;
   context: FileContext | FolderContext;
@@ -44,6 +46,8 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
   const {
     block,
     contents,
+    originalContent,
+    isEditable,
     tree,
     metadata = {},
     context,
@@ -145,9 +149,27 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
     )
       return;
 
-    const props = { block, content: contents, tree, metadata, context };
+    const props = {
+      block,
+      content: contents,
+      originalContent,
+      isEditable,
+      tree,
+      metadata,
+      context,
+    };
     sandbox.postMessage({ type: "set-props", id, props }, "*");
-  }, [sandbox, block, contents, tree, metadata, context, id]);
+  }, [
+    sandbox,
+    block,
+    contents,
+    originalContent,
+    isEditable,
+    tree,
+    metadata,
+    context,
+    id,
+  ]);
 
   if (!blockContent) return DefaultLoadingState;
   if (status === "loading") return DefaultLoadingState;

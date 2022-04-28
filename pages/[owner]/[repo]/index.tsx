@@ -7,10 +7,9 @@ import {
   makeOctokitInstance,
 } from "ghapi";
 import { useCheckRepoAccess } from "hooks";
-import { makeAppOctokit } from "lib/auth";
 import { QueryKeyMap } from "lib/query-keys";
 import { GetServerSidePropsContext } from "next";
-import { getSession, useSession } from "next-auth/react";
+import { getSession, signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { getUserInstallationForRepo } from "pages/api/check-access";
 import { useEffect, useState } from "react";
@@ -99,14 +98,27 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     };
   }
 
+  const octokit = makeOctokitInstance(session?.token as string);
+
+  // validate the token
+  try {
+    octokit.users.getAuthenticated();
+  } catch (e) {
+    signOut();
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
   // get the installation for the repo, if the user has access
   const repoInstallation = await getUserInstallationForRepo({
     token: session?.token as string,
     owner,
     repo,
   });
-
-  const octokit = makeOctokitInstance(session?.token as string);
 
   let repoInfo;
   try {

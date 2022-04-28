@@ -17,7 +17,6 @@ import {
   RepoSearchResult,
   searchRepos,
   checkAccess,
-  getBlocks,
   getBlocksFromRepo,
 } from "ghapi";
 import { Base64 } from "js-base64";
@@ -366,7 +365,11 @@ export function useManageBlock({
     repo: storedDefaultBlockRepo,
   });
 
-  if (filteredBlocksReposResult.status !== "success")
+  if (
+    filteredBlocksReposResult.status !== "success" ||
+    blockKeyResult.status !== "success" ||
+    storedDefaultBlockResult.status !== "success"
+  )
     return filteredBlocksReposResult as UseManageBlockResult;
 
   const blocksRepos = [
@@ -419,19 +422,7 @@ export function useManageBlock({
   }
 
   const defaultBlock = blockFromMetadata || fallbackDefaultBlock;
-  let block = blockInUrl;
-
-  // fall back to default Block if...
-  if (
-    // we haven't found a Block from the url param, and...
-    !block &&
-    // we don't have a private Block loading from the url param, and...
-    (!blockKey || blockKeyResult.status !== "loading") &&
-    // we don't have a private Block loading from the storedDefaultBlock
-    (!storedDefaultBlock || storedDefaultBlockResult.status !== "loading")
-  ) {
-    block = defaultBlock;
-  }
+  let block = blockInUrl || defaultBlock;
 
   const setBlock = (block: Block) => {
     if (!block) return;

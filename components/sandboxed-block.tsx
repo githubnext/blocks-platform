@@ -21,7 +21,7 @@ interface SandboxedBlockProps {
   metadata?: any;
   context: FileContext | FolderContext;
   onUpdateMetadata: (newMetadata: any) => void;
-  onRequestUpdateContent: (newContent: string) => void;
+  onUpdateContent: (newContent: string) => void;
   onRequestGitHubData: (
     path: string,
     params?: Record<string, any>
@@ -52,7 +52,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
     metadata = {},
     context,
     onUpdateMetadata,
-    onRequestUpdateContent,
+    onUpdateContent,
     onRequestGitHubData,
     onNavigateToPath,
   } = props;
@@ -88,7 +88,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
             break;
 
           case "update-file":
-            onRequestUpdateContent(data.content);
+            onUpdateContent(data.content);
             break;
 
           case "navigate-to-path":

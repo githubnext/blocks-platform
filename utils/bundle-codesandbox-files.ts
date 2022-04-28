@@ -92,7 +92,7 @@ ${cssFilesString}
     }, "*")
   }
 
-  const onRequestUpdateContent = (content) => {
+  const onUpdateContent = (content) => {
     window.parent.postMessage({
       type: "update-file",
       id: "${id}",
@@ -171,7 +171,8 @@ ${cssFilesString}
       {...props}
       onUpdateMetadata={onUpdateMetadata}
       onNavigateToPath={onNavigateToPath}
-      onRequestUpdateContent={onRequestUpdateContent}
+      onUpdateContent={onUpdateContent}
+      onRequestUpdateContent={onUpdateContent} // for backwards compatibility
       onRequestGitHubData={onRequestGitHubData}
     />
   }

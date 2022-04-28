@@ -20,7 +20,7 @@ interface SandboxedBlockWrapperProps {
     block?: Block,
     currentMetadata?: any
   ) => void;
-  onRequestUpdateContent: (newContent: string) => void;
+  onUpdateContent: (newContent: string) => void;
   onRequestGitHubData: (
     path: string,
     params?: Record<string, any>
@@ -43,7 +43,7 @@ export const SandboxedBlockWrapper = memo(function SandboxedBlockWrapper(
     context,
     isEmbedded = false,
     onUpdateMetadata,
-    onRequestUpdateContent,
+    onUpdateContent,
     onRequestGitHubData,
     onNavigateToPath,
   } = props;
@@ -78,7 +78,7 @@ export const SandboxedBlockWrapper = memo(function SandboxedBlockWrapper(
         metadata={metadata}
         isEmbedded={isEmbedded}
         onUpdateMetadata={onUpdateMetadata}
-        onRequestUpdateContent={onRequestUpdateContent}
+        onUpdateContent={onUpdateContent}
         onRequestGitHubData={onRequestGitHubData}
         onNavigateToPath={onNavigateToPath}
       />
@@ -96,7 +96,7 @@ export const SandboxedBlockWrapper = memo(function SandboxedBlockWrapper(
         context={fileContext}
         metadata={metadata}
         onUpdateMetadata={onUpdateMetadata}
-        onRequestUpdateContent={onRequestUpdateContent}
+        onUpdateContent={onUpdateContent}
         onRequestGitHubData={onRequestGitHubData}
         onNavigateToPath={onNavigateToPath}
       />

@@ -49,7 +49,7 @@ export default function BlockPaneBlock({
     }
   );
 
-  const onRequestUpdateContent = useCallbackWithProps(
+  const onUpdateContent = useCallbackWithProps(
     ({
         path,
         context,
@@ -125,7 +125,7 @@ export default function BlockPaneBlock({
       content={content}
       originalContent={originalContent}
       isEditable={isEditable}
-      onRequestUpdateContent={onRequestUpdateContent}
+      onUpdateContent={onUpdateContent}
     />
   );
 }

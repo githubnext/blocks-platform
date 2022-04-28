@@ -27,7 +27,7 @@ interface ExampleBlockProps {
     block?: Block,
     currentMetadata?: any
   ) => void;
-  onRequestUpdateContent: (newContent: string) => void;
+  onUpdateContent: (newContent: string) => void;
   onRequestGitHubData: (
     path: string,
     params?: Record<string, any>
@@ -46,7 +46,7 @@ export function ExampleBlock(props: ExampleBlockProps) {
     context,
     isEmbedded = false,
     onUpdateMetadata,
-    onRequestUpdateContent,
+    onUpdateContent,
     onRequestGitHubData,
     onNavigateToPath,
   } = props;
@@ -74,7 +74,8 @@ export function ExampleBlock(props: ExampleBlockProps) {
         context={context}
         onUpdateMetadata={onUpdateMetadata}
         onNavigateToPath={onNavigateToPath}
-        onRequestUpdateContent={onRequestUpdateContent}
+        onUpdateContent={onUpdateContent}
+        onRequestUpdateContent={onUpdateContent} // for backwards compatibility
         onRequestGitHubData={onRequestGitHubData}
         BlockComponent={!isEmbedded && BlockComponent}
       />
@@ -95,7 +96,7 @@ const BlockComponent = ({
   path,
   tree,
   onUpdateMetadata: originalOnUpdateMetadata,
-  onRequestUpdateContent,
+  onUpdateContent,
   onRequestGitHubData,
   onNavigateToPath,
   ...props
@@ -175,7 +176,7 @@ const BlockComponent = ({
           isEmbedded
           onUpdateMetadata={onUpdateMetadata}
           onNavigateToPath={onNavigateToPath}
-          onRequestUpdateContent={onRequestUpdateContent}
+          onUpdateContent={onUpdateContent}
           onRequestGitHubData={onRequestGitHubData}
         />
       </ErrorBoundary>
@@ -192,7 +193,7 @@ const BlockComponent = ({
         metadata={metadata}
         onUpdateMetadata={onUpdateMetadata}
         onNavigateToPath={onNavigateToPath}
-        onRequestUpdateContent={onRequestUpdateContent}
+        onUpdateContent={onUpdateContent}
         onRequestGitHubData={onRequestGitHubData}
       />
     </ErrorBoundary>

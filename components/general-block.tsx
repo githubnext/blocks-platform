@@ -19,7 +19,7 @@ interface GeneralBlockProps {
   content: string;
   originalContent: string;
   isEditable: boolean;
-  onRequestUpdateContent: (newContent: string) => void;
+  onUpdateContent: (newContent: string) => void;
 }
 
 export function GeneralBlock(props: GeneralBlockProps) {
@@ -32,7 +32,7 @@ export function GeneralBlock(props: GeneralBlockProps) {
     content,
     originalContent,
     isEditable,
-    onRequestUpdateContent,
+    onUpdateContent,
   } = props;
   const { repo, owner, path, sha } = context;
 
@@ -129,7 +129,7 @@ export function GeneralBlock(props: GeneralBlockProps) {
             isEditable={isEditable}
             metadata={metadata}
             onUpdateMetadata={onRequestUpdateMetadata}
-            onRequestUpdateContent={onRequestUpdateContent}
+            onUpdateContent={onUpdateContent}
             onRequestGitHubData={onRequestGitHubData}
             onNavigateToPath={onNavigateToPath}
           />

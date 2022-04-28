@@ -13,6 +13,7 @@ import { getBlockKey } from "hooks";
 import type { UseManageBlockResult } from "hooks";
 import type { Context } from "./index";
 import { AppContext } from "context";
+import { Tooltip } from "components/Tooltip";
 
 const BlockPicker = dynamic(() => import("../block-picker"), { ssr: false });
 
@@ -25,7 +26,6 @@ type BlockPaneHeaderProps = {
   metadata: any;
   setRequestedMetadata: (metadata: any) => void;
   context: Context;
-  installationUrl: string;
   onSaveChanges: () => void;
 };
 
@@ -38,7 +38,6 @@ export default function BlockPaneHeader({
   metadata,
   setRequestedMetadata,
   context,
-  installationUrl,
   onSaveChanges,
 }: BlockPaneHeaderProps) {
   const router = useRouter();
@@ -46,6 +45,8 @@ export default function BlockPaneHeader({
 
   const { block, setBlock, defaultBlock } = manageBlockResult.data ?? {};
   const isDefaultBlock = getBlockKey(block) === getBlockKey(defaultBlock);
+
+  const canSave = appContext.permissions?.push;
 
   return (
     <div className="flex-none top-0 z-10">
@@ -60,21 +61,44 @@ export default function BlockPaneHeader({
           justifyContent="space-between"
         >
           <Box display="flex" alignItems="center" className="space-x-2">
-            <Button
-              key={"Save"}
-              variant={"primary"}
-              leadingIcon={RepoPushIcon}
-              disabled={!onSaveChanges || !appContext.hasRepoInstallation}
-              onClick={onSaveChanges}
-            >
-              Save
-            </Button>
+            {!canSave || !appContext.hasRepoInstallation ? (
+              <Tooltip
+                side="top"
+                text={
+                  !canSave
+                    ? "You don't have permission to update this repo"
+                    : !appContext.hasRepoInstallation
+                    ? "The Blocks GitHub app is not installed on this repository"
+                    : null
+                }
+              >
+                <div className="pointer-events-[all]">
+                  <Button
+                    variant="primary"
+                    leadingIcon={RepoPushIcon}
+                    disabled
+                    className="pointer-events-none"
+                  >
+                    Save
+                  </Button>
+                </div>
+              </Tooltip>
+            ) : (
+              <Button
+                key={"Save"}
+                variant={"primary"}
+                leadingIcon={RepoPushIcon}
+                disabled={!onSaveChanges}
+                onClick={onSaveChanges}
+              >
+                Save
+              </Button>
+            )}
             <BlockPicker
               path={path}
               type={isFolder ? "folder" : "file"}
               onChange={setBlock}
               value={block}
-              installationUrl={installationUrl}
             />
             {!isDefaultBlock && token && (
               <Button

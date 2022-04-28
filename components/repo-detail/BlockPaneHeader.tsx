@@ -72,7 +72,9 @@ export default function BlockPaneHeader({
                     : null
                 }
               >
-                <div className="pointer-events-[all]">
+                {/* wrapper div needed to steal pointer events, */}
+                {/* to prevent collision between disabled button and tooltip attributes */}
+                <div>
                   <Button
                     variant="primary"
                     leadingIcon={RepoPushIcon}

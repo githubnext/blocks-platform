@@ -855,9 +855,9 @@
     unist-util-visit "^1.0.0"
     uuid "^3.3.2"
 
-"@githubnext/blocks-examples@https://api.github.com/repos/githubnext/blocks-examples/tarball/0.12.0":
+"@githubnext/blocks-examples@https://api.github.com/repos/githubnext/blocks-examples/tarball/0.13.1":
   version "0.0.0"
-  resolved "https://api.github.com/repos/githubnext/blocks-examples/tarball/0.12.0#dbccfa04532d79873cfd65ba0bfdd9e8ce45a168"
+  resolved "https://api.github.com/repos/githubnext/blocks-examples/tarball/0.13.1#43ba3cb56843ada358ce2da9938e150868a3db49"
   dependencies:
     "@codemirror/autocomplete" "^0.19.15"
     "@codemirror/closebrackets" "^0.19.1"
@@ -879,7 +879,7 @@
     "@excalidraw/excalidraw" "^0.10.0"
     "@fullstackio/cq" "^6.0.9"
     "@fullstackio/remark-cq" "^6.1.2"
-    "@githubnext/utils" "^0.19.7"
+    "@githubnext/utils" "^0.21.0"
     "@githubocto/flat-ui" "^0.13.4"
     "@loadable/component" "^5.15.0"
     "@mdx-js/runtime" "2.0.0-next.9"
@@ -934,15 +934,6 @@
     styled-components "^5.3.3"
     three "^0.134.0"
     unidiff "^1.0.2"
-
-"@githubnext/utils@^0.19.7":
-  version "0.19.7"
-  resolved "https://registry.yarnpkg.com/@githubnext/utils/-/utils-0.19.7.tgz#c2a29cce364c8de3df4b6c224f566cec59b33454"
-  integrity sha512-gl4a7YfcYmCJuSaZRi4BMTq9Lmfvx4U4k5OzMoISh1auAUPwEwR2F8XNlIsaqVtf9wkWGR6iUkz1UR22BzgCtw==
-  dependencies:
-    "@types/lodash.uniqueid" "^4.0.6"
-    lodash.uniqueid "^4.0.1"
-    zod "^3.11.6"
 
 "@githubnext/utils@^0.21.0":
   version "0.21.0"

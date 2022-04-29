@@ -12,9 +12,10 @@ import {
   TextInput,
   Button,
 } from "@primer/react";
+import { AppContext } from "context";
 import { BlocksRepo, useFilteredBlocksRepos, useBlocksFromRepo } from "hooks";
 import { QueryKeyMap } from "lib/query-keys";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useQueryClient } from "react-query";
 import { useDebounce } from "use-debounce";
 
@@ -23,17 +24,17 @@ interface BlockPickerProps {
   value?: Block;
   path?: string;
   type: "file" | "folder";
-  installationUrl: string;
   onChange: (newType: Block) => void;
 }
 
 export default function BlockPicker(props: BlockPickerProps) {
-  const { button, value, path, type, installationUrl, onChange } = props;
+  const { button, value, path, type, onChange } = props;
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const lowerSearchTerm = searchTerm.toLowerCase();
   let [debouncedSearchTerm] = useDebounce(lowerSearchTerm, 300);
   const queryClient = useQueryClient();
+  const appContext = useContext(AppContext);
 
   const { data: blockRepos } = useFilteredBlocksRepos(path, type);
 
@@ -97,7 +98,7 @@ export default function BlockPicker(props: BlockPickerProps) {
               <a
                 target="_blank"
                 rel="noopener"
-                href={installationUrl}
+                href={appContext.installationUrl}
                 className="mr-2"
               >
                 <Button variant="primary">Update App access</Button>

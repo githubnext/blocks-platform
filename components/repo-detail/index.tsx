@@ -45,19 +45,10 @@ interface RepoDetailInnerProps {
   branchName: string;
   files: undefined | RepoFiles;
   timeline: undefined | RepoTimeline;
-  installationUrl: string;
 }
 
 export function RepoDetailInner(props: RepoDetailInnerProps) {
-  const {
-    token,
-    repoInfo,
-    branches,
-    branchName,
-    files,
-    timeline,
-    installationUrl,
-  } = props;
+  const { token, repoInfo, branches, branchName, files, timeline } = props;
   const router = useRouter();
   const { setColorMode } = useTheme();
   const {
@@ -158,7 +149,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
             muted
             target="_blank"
             rel="noopener"
-            href={installationUrl}
+            href={appContext.installationUrl}
           >
             Install app
           </Link>
@@ -189,7 +180,6 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
                 context,
                 theme,
                 branchName,
-                installationUrl,
                 updatedContents,
                 setUpdatedContents,
                 onSaveChanges,
@@ -246,10 +236,9 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
 
 interface RepoDetailProps {
   token: string;
-  installationUrl: string;
 }
 
-export function RepoDetail({ token, installationUrl }: RepoDetailProps) {
+export function RepoDetail({ token }: RepoDetailProps) {
   const router = useRouter();
   const {
     data: { user },
@@ -340,7 +329,6 @@ export function RepoDetail({ token, installationUrl }: RepoDetailProps) {
         branchName={branchName}
         files={repoFiles.data}
         timeline={repoTimeline.data}
-        installationUrl={installationUrl}
       />
     );
   } else {

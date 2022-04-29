@@ -1,6 +1,6 @@
 import { FullPageLoader } from "components/full-page-loader";
 import { RepoDetail } from "components/repo-detail";
-import { AppContext } from "context";
+import { AppContext, Permissions } from "context";
 import {
   getRepoInfoWithContributorsSSR,
   makeGitHubAPIInstance,
@@ -18,8 +18,9 @@ import { dehydrate, QueryClient, useQueryClient } from "react-query";
 function RepoDetailContainer(props: {
   hasRepoInstallation: boolean;
   installationUrl: string;
+  permissions: Permissions;
 }) {
-  const { hasRepoInstallation, installationUrl } = props;
+  const { hasRepoInstallation, permissions, installationUrl } = props;
   const router = useRouter();
   const [localHasRepoInstallation, setLocalHasRepoInstallation] =
     useState(hasRepoInstallation);
@@ -68,10 +69,14 @@ function RepoDetailContainer(props: {
   if (status === "authenticated" && session && loaded) {
     return (
       <AppContext.Provider
-        value={{ hasRepoInstallation: localHasRepoInstallation }}
+        value={{
+          hasRepoInstallation: localHasRepoInstallation,
+          installationUrl,
+          permissions,
+        }}
       >
         {/* @ts-ignore */}
-        <RepoDetail token={session?.token} installationUrl={installationUrl} />
+        <RepoDetail token={session?.token} />
       </AppContext.Provider>
     );
   }
@@ -152,9 +157,12 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   const installationUrl = `https://github.com/apps/${process.env.GITHUB_APP_SLUG}/installations/new`;
 
+  const permissions = repoInfo.permissions;
+
   return {
     props: {
       hasRepoInstallation: !!repoInstallation,
+      permissions,
       installationUrl,
       dehydratedState: dehydrate(queryClient),
     },

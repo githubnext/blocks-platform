@@ -2,8 +2,8 @@ import {
   SandpackProvider,
   SandpackPreview,
 } from "@codesandbox/sandpack-react/dist/cjs/index.js";
-import { FileContext, FolderContext, RepoFiles } from "@githubnext/utils";
-import { bundleCodesandboxFiles } from "../utils/bundle-codesandbox-files";
+import type { FileContext, FolderContext, RepoFiles } from "@githubnext/utils";
+import { bundleCodesandboxFiles } from "@githubnext/utils";
 import uniqueId from "lodash/uniqueId";
 import React, { useEffect, useMemo, useRef } from "react";
 import { useBlockContent } from "../hooks";
@@ -15,11 +15,13 @@ export interface BundleCode {
 interface SandboxedBlockProps {
   block: Block;
   contents?: string;
+  originalContent?: string;
+  isEditable?: boolean;
   tree?: RepoFiles;
   metadata?: any;
   context: FileContext | FolderContext;
   onUpdateMetadata: (newMetadata: any) => void;
-  onRequestUpdateContent: (newContent: string) => void;
+  onUpdateContent: (newContent: string) => void;
   onRequestGitHubData: (
     path: string,
     params?: Record<string, any>
@@ -44,11 +46,13 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
   const {
     block,
     contents,
+    originalContent,
+    isEditable,
     tree,
     metadata = {},
     context,
     onUpdateMetadata,
-    onRequestUpdateContent,
+    onUpdateContent,
     onRequestGitHubData,
     onNavigateToPath,
   } = props;
@@ -84,7 +88,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
             break;
 
           case "update-file":
-            onRequestUpdateContent(data.content);
+            onUpdateContent(data.content);
             break;
 
           case "navigate-to-path":
@@ -145,9 +149,27 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
     )
       return;
 
-    const props = { block, content: contents, tree, metadata, context };
+    const props = {
+      block,
+      content: contents,
+      originalContent,
+      isEditable,
+      tree,
+      metadata,
+      context,
+    };
     sandbox.postMessage({ type: "set-props", id, props }, "*");
-  }, [sandbox, block, contents, tree, metadata, context, id]);
+  }, [
+    sandbox,
+    block,
+    contents,
+    originalContent,
+    isEditable,
+    tree,
+    metadata,
+    context,
+    id,
+  ]);
 
   if (!blockContent) return DefaultLoadingState;
   if (status === "loading") return DefaultLoadingState;

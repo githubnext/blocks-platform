@@ -7,6 +7,8 @@ import { ExampleBlock } from "components/example-block";
 interface SandboxedBlockWrapperProps {
   block: Block;
   contents?: string;
+  originalContent?: string;
+  isEditable?: boolean;
   theme: string;
   tree?: RepoFiles;
   context: FileContext | FolderContext;
@@ -18,7 +20,7 @@ interface SandboxedBlockWrapperProps {
     block?: Block,
     currentMetadata?: any
   ) => void;
-  onRequestUpdateContent: (newContent: string) => void;
+  onUpdateContent: (newContent: string) => void;
   onRequestGitHubData: (
     path: string,
     params?: Record<string, any>
@@ -34,12 +36,14 @@ export const SandboxedBlockWrapper = memo(function SandboxedBlockWrapper(
     block,
     metadata,
     contents,
+    originalContent,
+    isEditable,
     theme,
     tree,
     context,
     isEmbedded = false,
     onUpdateMetadata,
-    onRequestUpdateContent,
+    onUpdateContent,
     onRequestGitHubData,
     onNavigateToPath,
   } = props;
@@ -67,12 +71,14 @@ export const SandboxedBlockWrapper = memo(function SandboxedBlockWrapper(
       <ExampleBlock
         block={block}
         contents={contents}
+        originalContent={originalContent}
+        isEditable={isEditable}
         tree={tree}
         context={fileContext}
         metadata={metadata}
         isEmbedded={isEmbedded}
         onUpdateMetadata={onUpdateMetadata}
-        onRequestUpdateContent={onRequestUpdateContent}
+        onUpdateContent={onUpdateContent}
         onRequestGitHubData={onRequestGitHubData}
         onNavigateToPath={onNavigateToPath}
       />
@@ -84,11 +90,13 @@ export const SandboxedBlockWrapper = memo(function SandboxedBlockWrapper(
       <SandboxedBlock
         block={block}
         contents={contents}
+        originalContent={originalContent}
+        isEditable={isEditable}
         tree={tree}
         context={fileContext}
         metadata={metadata}
         onUpdateMetadata={onUpdateMetadata}
-        onRequestUpdateContent={onRequestUpdateContent}
+        onUpdateContent={onUpdateContent}
         onRequestGitHubData={onRequestGitHubData}
         onNavigateToPath={onNavigateToPath}
       />

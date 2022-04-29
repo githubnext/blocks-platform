@@ -16,8 +16,10 @@ interface GeneralBlockProps {
   block: Block;
   token: string;
   branchName: string;
-  content: undefined | string;
-  onRequestUpdateContent: (newContent: string) => void;
+  content: string;
+  originalContent: string;
+  isEditable: boolean;
+  onUpdateContent: (newContent: string) => void;
 }
 
 export function GeneralBlock(props: GeneralBlockProps) {
@@ -28,7 +30,9 @@ export function GeneralBlock(props: GeneralBlockProps) {
     token,
     branchName,
     content,
-    onRequestUpdateContent,
+    originalContent,
+    isEditable,
+    onUpdateContent,
   } = props;
   const { repo, owner, path, sha } = context;
 
@@ -121,9 +125,11 @@ export function GeneralBlock(props: GeneralBlockProps) {
             context={updatedContext}
             tree={tree}
             contents={content}
+            originalContent={originalContent}
+            isEditable={isEditable}
             metadata={metadata}
             onUpdateMetadata={onRequestUpdateMetadata}
-            onRequestUpdateContent={onRequestUpdateContent}
+            onUpdateContent={onUpdateContent}
             onRequestGitHubData={onRequestGitHubData}
             onNavigateToPath={onNavigateToPath}
           />

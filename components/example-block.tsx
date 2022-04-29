@@ -15,6 +15,8 @@ export interface BundleCode {
 interface ExampleBlockProps {
   block: Block;
   contents?: string;
+  originalContent?: string;
+  isEditable?: boolean;
   tree?: RepoFiles;
   metadata?: any;
   context: FileContext | FolderContext;
@@ -25,7 +27,7 @@ interface ExampleBlockProps {
     block?: Block,
     currentMetadata?: any
   ) => void;
-  onRequestUpdateContent: (newContent: string) => void;
+  onUpdateContent: (newContent: string) => void;
   onRequestGitHubData: (
     path: string,
     params?: Record<string, any>
@@ -37,12 +39,14 @@ export function ExampleBlock(props: ExampleBlockProps) {
   const {
     block,
     contents,
+    originalContent,
+    isEditable,
     tree,
     metadata = {},
     context,
     isEmbedded = false,
     onUpdateMetadata,
-    onRequestUpdateContent,
+    onUpdateContent,
     onRequestGitHubData,
     onNavigateToPath,
   } = props;
@@ -63,12 +67,15 @@ export function ExampleBlock(props: ExampleBlockProps) {
         key={context.sha}
         block={block}
         content={contents || ""}
+        originalContent={originalContent}
+        isEditable={isEditable}
         tree={tree || []}
         metadata={metadata}
         context={context}
         onUpdateMetadata={onUpdateMetadata}
         onNavigateToPath={onNavigateToPath}
-        onRequestUpdateContent={onRequestUpdateContent}
+        onUpdateContent={onUpdateContent}
+        onRequestUpdateContent={onUpdateContent} // for backwards compatibility
         onRequestGitHubData={onRequestGitHubData}
         BlockComponent={!isEmbedded && BlockComponent}
       />
@@ -89,7 +96,7 @@ const BlockComponent = ({
   path,
   tree,
   onUpdateMetadata: originalOnUpdateMetadata,
-  onRequestUpdateContent,
+  onUpdateContent,
   onRequestGitHubData,
   onNavigateToPath,
   ...props
@@ -164,12 +171,14 @@ const BlockComponent = ({
           block={block}
           context={{ ...props.context, path, file: name, folder: name }}
           contents={contents}
+          originalContent={contents}
+          isEditable={false}
           tree={tree}
           metadata={metadata}
           isEmbedded
           onUpdateMetadata={onUpdateMetadata}
           onNavigateToPath={onNavigateToPath}
-          onRequestUpdateContent={onRequestUpdateContent}
+          onUpdateContent={onUpdateContent}
           onRequestGitHubData={onRequestGitHubData}
         />
       </ErrorBoundary>
@@ -182,11 +191,13 @@ const BlockComponent = ({
         block={block}
         context={{ ...props.context, path, file: name, folder: name }}
         contents={contents}
+        originalContent={contents}
+        isEditable={false}
         tree={tree}
         metadata={metadata}
         onUpdateMetadata={onUpdateMetadata}
         onNavigateToPath={onNavigateToPath}
-        onRequestUpdateContent={onRequestUpdateContent}
+        onUpdateContent={onUpdateContent}
         onRequestGitHubData={onRequestGitHubData}
       />
     </ErrorBoundary>

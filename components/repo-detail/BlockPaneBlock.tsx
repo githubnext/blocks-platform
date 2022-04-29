@@ -1,6 +1,8 @@
 import * as Immer from "immer";
+import { useContext } from "react";
 import type { RepoFiles } from "@githubnext/utils";
 import { useFileContent, useCallbackWithProps } from "hooks";
+import { AppContext } from "context";
 import type { Context, UpdatedContents } from "./index";
 import { GeneralBlock } from "../general-block";
 
@@ -29,12 +31,14 @@ export default function BlockPaneBlock({
   updatedContents,
   setUpdatedContents,
 }: BlockPaneBlockProps) {
+  const appContext = useContext(AppContext);
+
   const size = fileInfo.size || 0;
   const fileSizeLimit = 1500000; // 1.5Mb
   const isTooLarge = size > fileSizeLimit;
 
-  const showUpdatedContents =
-    updatedContents[path] && context.sha === branchName;
+  const onBranchTip = context.sha === branchName;
+  const showUpdatedContents = onBranchTip && updatedContents[path];
 
   const { data: fileData } = useFileContent(
     {
@@ -49,7 +53,7 @@ export default function BlockPaneBlock({
     }
   );
 
-  const onRequestUpdateContent = useCallbackWithProps(
+  const onUpdateContent = useCallbackWithProps(
     ({
         path,
         context,
@@ -70,7 +74,7 @@ export default function BlockPaneBlock({
             })
           );
         } else if (fileData) {
-          if (context.sha === branchName) {
+          if (onBranchTip) {
             setUpdatedContents(
               Immer.produce(updatedContents, (updatedContents) => {
                 if (newContent !== fileData.content) {
@@ -95,12 +99,19 @@ export default function BlockPaneBlock({
     }
   );
 
-  let content: string = "";
+  let content = "";
+  let originalContent = "";
   if (showUpdatedContents) {
     content = updatedContents[path].content;
+    originalContent = updatedContents[path].original;
   } else if (fileData) {
     content = fileData.content;
+    originalContent = content;
   }
+  const isEditable =
+    onBranchTip &&
+    appContext.hasRepoInstallation &&
+    appContext.permissions.push;
 
   if (isTooLarge)
     return (
@@ -119,7 +130,9 @@ export default function BlockPaneBlock({
       token={token}
       branchName={branchName}
       content={content}
-      onRequestUpdateContent={onRequestUpdateContent}
+      originalContent={originalContent}
+      isEditable={isEditable}
+      onUpdateContent={onUpdateContent}
     />
   );
 }

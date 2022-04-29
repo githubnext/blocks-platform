@@ -3,7 +3,7 @@ type schemas = import("@octokit/openapi-types").components["schemas"];
 interface CommonBlockProps {
   metadata: any;
   onUpdateMetadata: () => any;
-  onRequestUpdateContent: () => any;
+  onUpdateContent: () => any;
 }
 
 interface Session {

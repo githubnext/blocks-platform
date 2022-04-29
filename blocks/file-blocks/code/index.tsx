@@ -79,15 +79,12 @@ export default function (props: FileBlockProps) {
   const {
     content,
     context: { path },
-    onRequestUpdateContent,
+    isEditable,
+    onUpdateContent,
   } = props;
 
   const editorRef = React.useRef<HTMLDivElement>(null);
-
-  const viewRef = React.useMemo<{ current: EditorView | null }>(
-    () => ({ current: null }),
-    []
-  );
+  const viewRef = React.useRef<EditorView>();
 
   if (viewRef.current) {
     const view = viewRef.current;
@@ -106,9 +103,10 @@ export default function (props: FileBlockProps) {
       doc: content,
       extensions: [
         extensions,
+        EditorView.editable.of(isEditable),
         EditorView.updateListener.of((v) => {
           if (!v.docChanged) return;
-          onRequestUpdateContent(v.state.doc.sliceString(0));
+          onUpdateContent(v.state.doc.sliceString(0));
         }),
       ],
     });

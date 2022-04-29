@@ -2,8 +2,8 @@ import {
   SandpackProvider,
   SandpackPreview,
 } from "@codesandbox/sandpack-react/dist/cjs/index.js";
-import { FileContext, FolderContext, RepoFiles } from "@githubnext/utils";
-import { bundleCodesandboxFiles } from "../utils/bundle-codesandbox-files";
+import type { FileContext, FolderContext, RepoFiles } from "@githubnext/utils";
+import { bundleCodesandboxFiles } from "@githubnext/utils";
 import uniqueId from "lodash/uniqueId";
 import React, { useEffect, useMemo, useRef } from "react";
 import { useBlockContent } from "../hooks";

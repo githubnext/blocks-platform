@@ -171,6 +171,8 @@ const BlockComponent = ({
           block={block}
           context={{ ...props.context, path, file: name, folder: name }}
           contents={contents}
+          originalContent={contents}
+          isEditable={false}
           tree={tree}
           metadata={metadata}
           isEmbedded
@@ -189,6 +191,8 @@ const BlockComponent = ({
         block={block}
         context={{ ...props.context, path, file: name, folder: name }}
         contents={contents}
+        originalContent={contents}
+        isEditable={false}
         tree={tree}
         metadata={metadata}
         onUpdateMetadata={onUpdateMetadata}

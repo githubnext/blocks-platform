@@ -179,10 +179,12 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
     files && (
       <div ref={sandpackWrapper} className="w-full h-full">
         <SandpackProvider
-          externalResources={["https://cdn.tailwindcss.com"]}
           template="react"
           customSetup={{
-            dependencies: {},
+            dependencies: {
+              "styled-components": "^5.3.3",
+              "@primer/react": "^35.2.0",
+            },
             files,
           }}
           autorun

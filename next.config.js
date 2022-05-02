@@ -18,15 +18,11 @@ module.exports = {
               "default-src 'self'",
               "base-uri 'none'",
               "child-src 'none'",
-              "frame-ancestors 'none'",
+              "frame-ancestors 'self'",
               "object-src 'none'",
               "worker-src 'self'",
               "style-src 'self' 'unsafe-inline'",
-              [
-                "frame-src",
-                // for sandboxed embeds
-                "https://0-10-11-sandpack.codesandbox.io/",
-              ].join(" "),
+              "frame-src 'self'",
               [
                 "script-src",
                 "'self'",

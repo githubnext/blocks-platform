@@ -3,6 +3,7 @@ import { RepoFiles } from "ghapi";
 import { memo, useMemo } from "react";
 import { SandboxedBlock } from "components/sandboxed-block";
 import { ExampleBlock } from "components/example-block";
+import IFramedBlock from "components/iframed-block";
 
 interface SandboxedBlockWrapperProps {
   block: Block;
@@ -56,38 +57,44 @@ export const SandboxedBlockWrapper = memo(function SandboxedBlockWrapper(
     [context, theme]
   );
 
-  if (
-    exampleBlocksRepo === `${block.owner}/${block.repo}` &&
-    block.sandbox === false
-  ) {
-    if (
-      (!contents && block.type === "file") ||
-      (!tree && block.type === "tree")
-    ) {
-      return null;
-    }
+  //   if (
+  //     (!contents && block.type === "file") ||
+  //     (!tree && block.type === "tree")
+  //   ) {
+  //     return null;
+  //   }
+  // if (
+  //   exampleBlocksRepo === `${block.owner}/${block.repo}` &&
+  //   block.sandbox === false
+  // ) {
+  //   if (
+  //     (!contents && block.type === "file") ||
+  //     (!tree && block.type === "tree")
+  //   ) {
+  //     return null;
+  //   }
 
-    return (
-      <ExampleBlock
-        block={block}
-        contents={contents}
-        originalContent={originalContent}
-        isEditable={isEditable}
-        tree={tree}
-        context={fileContext}
-        metadata={metadata}
-        isEmbedded={isEmbedded}
-        onUpdateMetadata={onUpdateMetadata}
-        onUpdateContent={onUpdateContent}
-        onRequestGitHubData={onRequestGitHubData}
-        onNavigateToPath={onNavigateToPath}
-      />
-    );
-  }
+  //   return (
+  //     <ExampleBlock
+  //       block={block}
+  //       contents={contents}
+  //       originalContent={originalContent}
+  //       isEditable={isEditable}
+  //       tree={tree}
+  //       context={fileContext}
+  //       metadata={metadata}
+  //       isEmbedded={isEmbedded}
+  //       onUpdateMetadata={onUpdateMetadata}
+  //       onUpdateContent={onUpdateContent}
+  //       onRequestGitHubData={onRequestGitHubData}
+  //       onNavigateToPath={onNavigateToPath}
+  //     />
+  //   );
+  // }
 
   return (
     <div className="sandbox-wrapper h-full w-full">
-      <SandboxedBlock
+      <IFramedBlock
         block={block}
         contents={contents}
         originalContent={originalContent}

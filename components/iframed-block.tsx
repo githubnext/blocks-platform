@@ -16,7 +16,7 @@ type IFramedBlockProps = {
     block: Block,
     currentMetadata: any
   ) => void;
-  onRequestUpdateContent: (newContent: string) => void;
+  onUpdateContent: (newContent: string) => void;
   onRequestGitHubData: (
     path: string,
     params?: Record<string, any>
@@ -33,7 +33,7 @@ export default ({
   context,
   metadata,
   onUpdateMetadata,
-  onRequestUpdateContent,
+  onUpdateContent,
   onRequestGitHubData,
   onNavigateToPath,
 }: IFramedBlockProps) => {
@@ -81,7 +81,7 @@ export default ({
         break;
 
       case "update-file":
-        onRequestUpdateContent(data.content);
+        onUpdateContent(data.content);
         break;
 
       case "navigate-to-path":
@@ -128,7 +128,7 @@ export default ({
       className={"w-full h-full"}
       ref={iframeRef}
       sandbox={"allow-scripts"}
-      src={`/block-iframe/${block.owner}/${block.repo}/${block.id}/static`}
+      src={`/block-iframe/${block.owner}/${block.repo}/${block.id}`}
     />
   );
 };

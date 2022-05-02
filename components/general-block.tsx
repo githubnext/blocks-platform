@@ -3,7 +3,7 @@ import {
   FolderContext,
   onRequestGitHubData as utilsOnRequestGitHubData,
 } from "@githubnext/utils";
-import { SandboxedBlockWrapper } from "components/sandboxed-block-wrapper";
+import IFramedBlock from "components/iframed-block";
 import { useFolderContent, useMetadata } from "hooks";
 import { useRouter } from "next/router";
 import React, { useMemo } from "react";
@@ -119,9 +119,8 @@ export function GeneralBlock(props: GeneralBlockProps) {
     >
       <ErrorBoundary key={path}>
         <div className="overflow-y-auto flex-1">
-          <SandboxedBlockWrapper
+          <IFramedBlock
             block={block}
-            theme={theme}
             context={updatedContext}
             tree={tree}
             contents={content}

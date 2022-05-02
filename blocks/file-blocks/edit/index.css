@@ -1,4 +1,8 @@
 
+#example-block-edit-block .wrapper {
+  grid-rows: 7em 1fr;
+}
+
 #example-block-edit-block .hljs {
   color: #24292e;
   background: #ffffff;

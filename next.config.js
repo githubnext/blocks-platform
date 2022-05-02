@@ -32,8 +32,6 @@ module.exports = {
                 "'self'",
                 isDev && "'unsafe-eval'",
                 // "https://raw.githubusercontent.com/",
-                // for using Tailwind styles in example Blocks
-                "https://cdn-tailwindcss.vercel.app/",
               ]
                 .filter(Boolean)
                 .join(" "),

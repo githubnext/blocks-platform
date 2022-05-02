@@ -60,7 +60,7 @@ export default ({
     updateIframe();
   }, [context, contents, tree, metadata]);
 
-  const onMessage = useRef((event: MessageEvent) => { });
+  const onMessage = useRef((event: MessageEvent) => {});
   onMessage.current = (event: MessageEvent) => {
     if (!iframeRef.current) return;
     const { data, source } = event;
@@ -128,7 +128,7 @@ export default ({
       className={"w-full h-full"}
       ref={iframeRef}
       sandbox={"allow-scripts"}
-      src={`/block-iframe/${block.owner}/${block.repo}/${block.id}`}
+      src={`/block-iframe/${block.owner}/${block.repo}/${block.id}/static`}
     />
   );
 };

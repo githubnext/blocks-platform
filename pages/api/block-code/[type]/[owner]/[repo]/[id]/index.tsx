@@ -10,12 +10,27 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     ? { authorization: req.headers["authorization"] }
     : {};
 
-  const json = await (
-    await fetch(url, {
-      headers: authorization,
-    })
-  ).json();
-  const content = json.content.find((c) => c.name.endsWith(type)).content;
+  const contentRes = await await fetch(url, {
+    headers: authorization,
+  });
+  if (!contentRes.ok) {
+    console.log(contentRes);
+    res.status(contentRes.status).json({
+      error: contentRes.statusText,
+    });
+    return;
+  }
+
+  const json = await contentRes.json();
+  const contentObject = json.content.find((c) => c.name.endsWith(type));
+  if (!contentObject) {
+    console.log();
+    res.status(404).json({
+      error: "Not found",
+    });
+    return;
+  }
+  const content = contentObject.content;
 
   if (type === "js") {
     const script = `

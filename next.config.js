@@ -45,24 +45,56 @@ module.exports = {
                 // for local dev
                 isDev && "webpack://*",
                 isDev && "ws://*",
-                // for fetching file contents from GitHub
-                "https://raw.githubusercontent.com/",
                 // for hitting the GitHub API
                 "https://api.github.com/",
-                // for getting the source code for custom Blocks
-                process.env.NEXT_PUBLIC_MARKETPLACE_URL,
-                // for sandboxes in the MDX Block
-                "https://codesandbox.io/api/v1/sandboxes/",
                 // for Analytics
                 "https://octo-metrics.azurewebsites.net/api/CaptureEvent",
-                // for sentence-encoder-block
-                "https://tfhub.dev/google/tfjs-model/universal-sentence-encoder-qa-ondevice/",
-                "https://storage.googleapis.com/tfhub-tfjs-modules/google/tfjs-model/universal-sentence-encoder-qa-ondevice/",
-                // for 3d-model block
-                "blob:",
+                // for getting the source code for custom Blocks
+                process.env.NEXT_PUBLIC_MARKETPLACE_URL,
               ]
                 .filter(Boolean)
                 .join(" "),
+            ].join(";"),
+          },
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
+          {
+            key: "X-Frame-Options",
+            value: "SAMEORIGIN",
+          },
+          {
+            key: "X-XSS-Protection",
+            value: "0",
+          },
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+        ],
+      },
+      {
+        source: "/block-iframe/:path*",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: [
+              "sandbox allow-scripts",
+              "default-src *",
+              "base-uri 'none'",
+              "child-src 'none'",
+              "frame-ancestors 'self'",
+              "object-src 'none'",
+              "worker-src 'self'",
+              "connect-src * blob:",
+              "style-src 'unsafe-inline' *",
+              "frame-src 'none'",
+              ["script-src", "'unsafe-eval'", "'unsafe-inline'", "*"]
+                .filter(Boolean)
+                .join(" "),
+              ["img-src", "*"].join(" "),
+              ["connect-src", "*"].filter(Boolean).join(" "),
             ].join(";"),
           },
           {

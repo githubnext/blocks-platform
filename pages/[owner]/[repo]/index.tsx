@@ -105,19 +105,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   const octokit = makeOctokitInstance(session?.token as string);
 
-  // validate the token
-  try {
-    octokit.users.getAuthenticated();
-  } catch (e) {
-    signOut();
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-  }
-
   // get the installation for the repo, if the user has access
   const repoInstallation = await getUserInstallationForRepo({
     token: session?.token as string,

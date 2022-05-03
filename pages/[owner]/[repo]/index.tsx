@@ -32,6 +32,12 @@ function RepoDetailContainer(props: {
     required: true,
   });
 
+  useEffect(() => {
+    if (status === "authenticated" && session.error) {
+      signOut();
+    }
+  }, [session, status]);
+
   useCheckRepoAccess(
     { repo, owner },
     {
@@ -93,8 +99,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const queryClient = new QueryClient();
   const session = await getSession({ req: context.req });
 
-  // First, check if the user is authenticated.
-  if (!session) {
+  // First, check if the user is authenticated or has an invalid session.
+  if (!session || session.error) {
     return {
       redirect: {
         destination: "/",

@@ -17,13 +17,15 @@ async function refreshAccessToken(token) {
       }
     );
 
-    const refreshedToken = res.data;
+    // For whatever reason, res.data is a string (not an object). We can parse it like we would a query param string.
+    const parsedResponse = Object.fromEntries(new URLSearchParams(res.data));
     return {
       ...token,
-      accessToken: refreshedToken.access_token,
-      accessTokenExpiry: refreshedToken.expires_at,
-      refreshToken: refreshedToken.refresh_token ?? token.refreshToken,
-      refreshTokenExpiry: Date.now() + account.refresh_token_expires_in * 1000,
+      accessToken: parsedResponse.access_token,
+      accessTokenExpiry: Date.now() + parsedResponse.expires_in * 1000,
+      refreshToken: parsedResponse.refresh_token,
+      refreshTokenExpiry:
+        Date.now() + parsedResponse.refresh_token_expires_in * 1000,
     };
   } catch (e) {
     return {
@@ -55,6 +57,7 @@ export default NextAuth({
     async session({ session, token }) {
       session.token = token.accessToken;
       session.user = token.user;
+      session.error = token.error;
       return session;
     },
     async signIn({ profile }) {
@@ -65,16 +68,15 @@ export default NextAuth({
       return isHubber || isGuest || isStar;
     },
     async jwt({ token, account, user }) {
-      // Only runs on initial sign in
       if (account && user) {
         return {
           accessToken: account.access_token,
-          // For some reason this date is in seconds, not milliseconds? Not sure if I'm seeing something silly on my end.
+          // For some reason the date returned here is in seconds, not milliseconds.
           accessTokenExpiry: account.expires_at * 1000,
           refreshToken: account.refresh_token,
+          // Refresh tokens are valid for 6 months.
           refreshTokenExpiry:
             Date.now() + account.refresh_token_expires_in * 1000,
-          user,
           user,
         };
       }

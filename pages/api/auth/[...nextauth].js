@@ -14,11 +14,21 @@ async function refreshAccessToken(token) {
         grant_type: "refresh_token",
         client_id: process.env.GITHUB_ID,
         client_secret: process.env.GITHUB_SECRET,
+      },
+      {
+        headers: {
+          Accept: "application/json",
+        },
       }
     );
 
-    // For whatever reason, res.data is a string (not an object). We can parse it like we would a query param string.
-    const parsedResponse = Object.fromEntries(new URLSearchParams(res.data));
+    const parsedResponse = res.data;
+
+    // Sometimes we might get a 200 response but an error message such as "bad_verification_code"
+    if (parsedResponse.error) {
+      throw new Error(parsedResponse.error);
+    }
+
     return {
       ...token,
       accessToken: parsedResponse.access_token,
@@ -81,10 +91,10 @@ export default NextAuth({
         };
       }
 
-      // Return previous token if the access token has not expired yet
-      if (Date.now() < token.accessTokenExpiry) {
-        return token;
-      }
+      // // Return previous token if the access token has not expired yet
+      // if (Date.now() < token.accessTokenExpiry) {
+      //   return token;
+      // }
 
       return await refreshAccessToken(token);
     },

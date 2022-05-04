@@ -38,18 +38,6 @@ function RepoDetailContainer(props: {
     }
   }, [session, status]);
 
-  useCheckRepoAccess(
-    { repo, owner },
-    {
-      enabled: !localHasRepoInstallation,
-      onSuccess: (hasAccess) => {
-        if (hasAccess) {
-          setLocalHasRepoInstallation(true);
-        }
-      },
-    }
-  );
-
   useEffect(() => {
     if (status !== "authenticated" || loaded) return;
 
@@ -81,6 +69,13 @@ function RepoDetailContainer(props: {
           permissions,
         }}
       >
+        {!localHasRepoInstallation && (
+          <CheckAccess
+            repo={repo}
+            owner={owner}
+            onHasRepoSuccess={() => setLocalHasRepoInstallation(true)}
+          />
+        )}
         {/* @ts-ignore */}
         <RepoDetail token={session?.token} />
       </AppContext.Provider>
@@ -161,3 +156,25 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     },
   };
 }
+
+const CheckAccess = ({
+  repo,
+  owner,
+  onHasRepoSuccess,
+}: {
+  repo: string;
+  owner: string;
+  onHasRepoSuccess: () => void;
+}) => {
+  useCheckRepoAccess(
+    { repo, owner },
+    {
+      onSuccess: (hasAccess) => {
+        if (hasAccess) {
+          onHasRepoSuccess();
+        }
+      },
+    }
+  );
+  return null;
+};

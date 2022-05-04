@@ -1,9 +1,16 @@
 import { FullPageLoader } from "components/full-page-loader";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
+import { useEffect } from "react";
 
 function Home() {
-  const { status } = useSession({ required: true });
+  const { status, data } = useSession({ required: true });
+
+  useEffect(() => {
+    if (status === "authenticated" && data.error) {
+      signOut();
+    }
+  }, [data, status]);
 
   if (status === "loading") {
     return <FullPageLoader />;

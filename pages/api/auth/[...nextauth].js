@@ -91,10 +91,10 @@ export default NextAuth({
         };
       }
 
-      // // Return previous token if the access token has not expired yet
-      // if (Date.now() < token.accessTokenExpiry) {
-      //   return token;
-      // }
+      // Return previous token if the access token has not expired yet
+      if (Date.now() < token.accessTokenExpiry) {
+        return token;
+      }
 
       return await refreshAccessToken(token);
     },

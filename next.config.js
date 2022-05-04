@@ -26,6 +26,7 @@ module.exports = {
                 "frame-src",
                 // for sandboxed embeds
                 "https://0-10-11-sandpack.codesandbox.io/",
+                "https://0-19-1-sandpack.codesandbox.io/",
               ].join(" "),
               [
                 "script-src",

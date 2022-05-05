@@ -1,5 +1,6 @@
 import {
   InfoIcon,
+  LinkExternalIcon,
   RepoIcon,
   SearchIcon,
   VerifiedIcon,
@@ -11,6 +12,7 @@ import {
   Text,
   TextInput,
   Button,
+  Box,
 } from "@primer/react";
 import { AppContext } from "context";
 import { BlocksRepo, useFilteredBlocksRepos, useBlocksFromRepo } from "hooks";
@@ -177,6 +179,7 @@ const BlockItem = ({
   return (
     <ActionList.Item
       selected={isSelected}
+      className="group py-2"
       onSelect={() => {
         const enhancedBlock = {
           ...block,
@@ -186,21 +189,31 @@ const BlockItem = ({
         onChange(enhancedBlock);
       }}
     >
-      <div className="font-semibold">{block.title}</div>
-      <ActionList.Description variant="block">
+      <div className="flex justify-between">
+        <div className="font-semibold">{block.title}</div>
+
         <Link
           href={`https://github.com/${repo.full_name}`}
-          className="flex items-center mt-1"
+          className="text-xs mt-[2px] opacity-0 focus:opacity-100 group-hover:opacity-100"
           target="_blank"
           rel="noopener noreferrer"
+          color="fg.muted"
           onClick={(e) => {
             e.stopPropagation();
           }}
         >
+          <Text className="flex items-center" color="fg.muted">
+            View code
+            <LinkExternalIcon className="ml-1 opacity-50" />
+          </Text>
+        </Link>
+      </div>
+      <ActionList.Description variant="block">
+        <Box className="flex items-center mt-1">
           <Text className="mr-1" color="fg.muted">
             <RepoIcon />
           </Text>
-          <Text color="fg.muted" className="underline">
+          <Text color="fg.muted">
             {repo.owner}/{repo.repo}
             {isExampleBlock && (
               <Text ml={1} color="ansi.blue">
@@ -208,7 +221,7 @@ const BlockItem = ({
               </Text>
             )}
           </Text>
-        </Link>
+        </Box>
         <div className="flex items-start mt-1">
           <div className="mr-1">
             <InfoIcon />

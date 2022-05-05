@@ -203,7 +203,10 @@ const Folder = ({
             >
               {isExpanded ? <IoFolderOpenOutline /> : <IoFolderOutline />}
             </button>
-            <div className="max-w-full flex-1 overflow-hidden overflow-ellipsis">
+            <div
+              className="max-w-full flex-1 overflow-hidden overflow-ellipsis"
+              title={name}
+            >
               {name}
             </div>
             <div>
@@ -302,7 +305,10 @@ const File = ({
               <VscSymbolFile className="text-gray-400" />
             )}
           </div>
-          <div className="max-w-full flex-1 overflow-hidden overflow-ellipsis">
+          <div
+            className="max-w-full flex-1 overflow-hidden overflow-ellipsis"
+            title={name}
+          >
             {name}
           </div>
           <div>{updatedContents[path] && <VscCircleFilled />}</div>

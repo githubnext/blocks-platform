@@ -176,9 +176,8 @@ export function useMetadata({
   const { mutateAsync } = useUpdateFileContents({});
   const onUpdateMetadata = useCallback(
     async (contents, overridePath = null) => {
-      console.log(contents, token, overridePath || metadataPath, branchName);
       if (!token) return;
-      const a = await mutateAsync({
+      await mutateAsync({
         content: JSON.stringify(contents, null, 2),
         owner,
         repo,
@@ -187,7 +186,6 @@ export function useMetadata({
         branch: branchName,
         token,
       });
-      console.log(a);
       setMetadata(contents);
     },
     [mutateAsync, owner, repo, metadataPath, filePath, token, branchName]

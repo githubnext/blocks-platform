@@ -94,20 +94,22 @@ async function updateFileContents(params: UseUpdateFileContentParams) {
     auth: params.token,
   });
 
-  const { data } = await octokit.repos.getContent({
-    owner: params.owner,
-    repo: params.repo,
-    path: params.path,
-    ref: params.ref,
-  });
+  let fileSha = params.ref;
+  try {
+    const { data } = await octokit.repos.getContent({
+      owner: params.owner,
+      repo: params.repo,
+      path: params.path,
+      ref: params.ref,
+    });
 
-  let fileSha;
-  // Octokit is silly here and potentially returns an array of contents.
-  if (isArray(data)) {
-    fileSha = data[0].sha;
-  } else {
-    fileSha = data.sha;
-  }
+    // Octokit is silly here and potentially returns an array of contents.
+    if (isArray(data)) {
+      fileSha = data[0].sha;
+    } else {
+      fileSha = data.sha;
+    }
+  } catch (e) {}
 
   try {
     const res = await octokit.repos.createOrUpdateFileContents({
@@ -168,16 +170,15 @@ export function useMetadata({
       const rawString = metadataData.content;
       const metadata = JSON.parse(rawString);
       setMetadata(metadata);
-    } catch (e) {
-      setMetadata({});
-    }
+    } catch (e) {}
   }, [metadataData, branchName]);
 
   const { mutateAsync } = useUpdateFileContents({});
   const onUpdateMetadata = useCallback(
     async (contents, overridePath = null) => {
+      console.log(contents, token, overridePath || metadataPath, branchName);
       if (!token) return;
-      await mutateAsync({
+      const a = await mutateAsync({
         content: JSON.stringify(contents, null, 2),
         owner,
         repo,
@@ -186,6 +187,7 @@ export function useMetadata({
         branch: branchName,
         token,
       });
+      console.log(a);
       setMetadata(contents);
     },
     [mutateAsync, owner, repo, metadataPath, filePath, token, branchName]

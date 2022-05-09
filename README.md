@@ -29,7 +29,7 @@ After creating the app:
 Now fill in `.env.local` as follows:
 
 ```
-GITHUB_ID="..." # your app's "App ID"
+GITHUB_ID="..." # your app's "Client ID"
 GITHUB_PRIVATE_KEY="""
 -----BEGIN RSA PRIVATE KEY-----
 ...

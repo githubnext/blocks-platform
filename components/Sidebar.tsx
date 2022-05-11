@@ -192,15 +192,29 @@ const Folder = ({
       >
         <ActionList.LinkItem
           style={{ paddingLeft: depth * 16 }}
+          sx={{
+            "::before": {
+              content: isActive ? "''" : null,
+              background: "rgb(9, 105, 218)",
+              borderRadius: "6px",
+              width: "4px",
+              height: "24px",
+              position: "absolute",
+              left: "-8px",
+              top: 0,
+              margin: "auto",
+              bottom: 0,
+            },
+            position: "relative",
+          }}
           onClick={(e) => {
-            console.log("clicking a folder", canCollapse, e);
             if (!canCollapse) return;
             setIsExpanded(!isExpanded);
           }}
         >
           <ActionList.LeadingVisual className="ml-1">
             <StyledOcticon
-              sx={{ mr: 1 }}
+              sx={{ mr: 1, color: "fg.muted" }}
               icon={isExpanded ? ChevronDownIcon : ChevronRightIcon}
             />
             <StyledOcticon

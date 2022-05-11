@@ -287,14 +287,6 @@ export const getBlocksFromRepo: QueryFunction<
     watchers: 0,
     language: "",
     topics: [""],
-    release: {
-      tag_name: "",
-      name: "",
-      tarball_url: "",
-      zipball_url: "",
-      published_at: "",
-      browser_download_url: "",
-    },
   };
 
   return data;

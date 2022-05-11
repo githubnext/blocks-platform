@@ -238,14 +238,17 @@ const Folder = ({
           </ActionList.TrailingVisual>
         </ActionList.LinkItem>
       </Link>
+
       {isExpanded && (
         <ActionList
+          data-depth={depth}
           className="!py-0 relative"
           sx={{
             "::before": {
               content: depth === 0 ? null : "''",
               position: "absolute",
-              left: `calc(18px * ${depth} + ${10 - depth * 2}px)`,
+              // Magic number. Seems to achieve the right spacing for optical alignment between the chevron and the vertical line.
+              left: 11 + depth * 16,
               top: 0,
               bottom: 0,
               width: 1,

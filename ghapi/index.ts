@@ -15,7 +15,7 @@ import {
   TimelineKeyParams,
 } from "lib/query-keys";
 import { QueryFunction } from "react-query";
-import { BlocksRepo } from "hooks";
+import { BlocksRepo } from "@githubnext/utils";
 export interface RepoContext {
   repo: string;
   owner: string;

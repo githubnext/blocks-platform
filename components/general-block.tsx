@@ -7,6 +7,9 @@ import { SandboxedBlockWrapper } from "components/sandboxed-block-wrapper";
 import { useFolderContent, useMetadata } from "hooks";
 import { useRouter } from "next/router";
 import React, { useMemo } from "react";
+import { useQueryClient } from "react-query";
+import { QueryKeyMap } from "lib/query-keys";
+import { getAllBlocksRepos } from "ghapi";
 import { ErrorBoundary } from "./error-boundary";
 import { UpdateCodeModal } from "./UpdateCodeModal";
 
@@ -35,6 +38,7 @@ export function GeneralBlock(props: GeneralBlockProps) {
     onUpdateContent,
   } = props;
   const { repo, owner, path, sha } = context;
+  const queryClient = useQueryClient();
 
   const [requestedMetadata, setRequestedMetadata] = React.useState(null);
   const [requestedMetadataExisting, setRequestedMetadataExisting] =
@@ -85,6 +89,12 @@ export function GeneralBlock(props: GeneralBlockProps) {
   const onRequestGitHubData = (path: string, params?: Record<string, any>) =>
     utilsOnRequestGitHubData(path, params, token);
 
+  const onRequestBlocksRepos = () =>
+    queryClient.fetchQuery(
+      QueryKeyMap.blocksRepos.factory({}),
+      getAllBlocksRepos
+    );
+
   const { data: treeData } = useFolderContent(
     {
       repo: repo,
@@ -132,6 +142,7 @@ export function GeneralBlock(props: GeneralBlockProps) {
             onUpdateContent={onUpdateContent}
             onRequestGitHubData={onRequestGitHubData}
             onNavigateToPath={onNavigateToPath}
+            onRequestBlocksRepos={onRequestBlocksRepos}
           />
         </div>
       </ErrorBoundary>

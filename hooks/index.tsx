@@ -1,4 +1,4 @@
-import { RepoFiles } from "@githubnext/utils";
+import { BlocksRepo, RepoFiles } from "@githubnext/utils";
 import { Octokit } from "@octokit/rest";
 import pm from "picomatch";
 import { defaultBlocksRepo as exampleBlocksRepo } from "blocks/index";
@@ -276,20 +276,6 @@ export function useGetBranches(
       ...config,
     }
   );
-}
-
-export interface BlocksRepo {
-  owner: string;
-  repo: string;
-  full_name: string;
-  id: number;
-  html_url: string;
-  description: string;
-  stars: number;
-  watchers: number;
-  language: string;
-  topics: string[];
-  blocks: Block[];
 }
 
 export function useAllBlocksRepos(config?: UseQueryOptions<BlocksRepo[]>) {

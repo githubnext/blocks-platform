@@ -1,19 +1,21 @@
-import { Box } from "@primer/react";
+import { ActionList, Box, StyledOcticon, Truncate } from "@primer/react";
 import { extent, scaleLinear, timeFormat } from "d3";
 import type { ScaleLinear } from "d3";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
-import { IoFolderOpenOutline, IoFolderOutline } from "react-icons/io5";
-import {
-  VscSymbolFile,
-  VscCircleOutline,
-  VscCircleFilled,
-} from "react-icons/vsc";
 import { getNestedFileTree } from "@githubnext/utils";
 import type { RepoFiles } from "@githubnext/utils";
 import languageColors from "../language-colors.json";
 import { Tooltip } from "./Tooltip";
+import {
+  ChevronDownIcon,
+  ChevronRightIcon,
+  FileDirectoryFillIcon,
+  FileDirectoryOpenFillIcon,
+  FileIcon,
+} from "@primer/octicons-react";
+import { VscCircleFilled, VscCircleOutline } from "react-icons/vsc";
 
 // defined in @githubnext/utils but not exported
 interface NestedFileTree {
@@ -76,11 +78,12 @@ export const Sidebar = ({
 
   return (
     <Box className="sidebar h-full overflow-hidden flex-1">
-      <Box className="h-full overflow-auto">
-        <div className="p-2 px-0 text-sm pb-20 text-left">
+      <Box className="h-full overflow-auto p-2">
+        <ActionList>
           <Item
             name={`${owner}/${repo}`}
             path={""}
+            depth={-1}
             children={nestedFiles}
             activeFilePath={activeFilePath}
             allUsers={allUsers}
@@ -89,7 +92,7 @@ export const Sidebar = ({
             canCollapse={false}
             updatedContents={updatedContents}
           />
-        </div>
+        </ActionList>
       </Box>
     </Box>
   );
@@ -101,6 +104,7 @@ type ItemProps = {
   children: NestedFileTree[];
   activeFilePath: string;
   allUsers: User[];
+  depth: number;
   fileChangesScale: FileChangesScale;
   fileChanges: FileChanges;
   canCollapse?: boolean;
@@ -109,11 +113,12 @@ type ItemProps = {
 
 const Item = (props: ItemProps) => {
   if (props.children.length) {
-    return <Folder {...props} />;
+    return <Folder {...props} depth={props.depth + 1} />;
   }
   return (
     <File
       {...props}
+      depth={props.depth + 1}
       isActive={props.activeFilePath === props.path}
       activeUsers={props.allUsers.filter((user) => user.path === props.path)}
       date={props.fileChanges[props.path]?.date}
@@ -124,6 +129,7 @@ const Item = (props: ItemProps) => {
 type FolderProps = {
   name: string;
   path: string;
+  depth: number;
   children: NestedFileTree[];
   activeFilePath: string;
   allUsers: User[];
@@ -143,6 +149,7 @@ const Folder = ({
   fileChanges,
   canCollapse = true,
   updatedContents,
+  depth,
 }: FolderProps) => {
   const [isExpanded, setIsExpanded] = useState(!canCollapse);
   const router = useRouter();
@@ -170,9 +177,8 @@ const Folder = ({
   const isActive = activeFilePath === path;
 
   return (
-    <Box>
+    <>
       <Link
-        shallow
         href={{
           pathname: router.pathname,
           query: {
@@ -182,67 +188,94 @@ const Folder = ({
             fileRef: null,
           },
         }}
+        shallow
       >
-        <a
-          className={`relative flex items-center justify-between py-2 pl-3 pr-3 text-left w-full text-sm whitespace-nowrap overflow-ellipsis ${
-            isActive ? "bg-gray-50 border-gray-200" : " border-transparent"
-          } border border-r-0`}
-          onClick={() => {
+        <ActionList.LinkItem
+          style={{ paddingLeft: depth * 16 }}
+          sx={{
+            "::before": {
+              content: isActive ? "''" : null,
+              background: "rgb(9, 105, 218)",
+              borderRadius: "6px",
+              width: "4px",
+              height: "24px",
+              position: "absolute",
+              left: "-8px",
+              top: 0,
+              margin: "auto",
+              bottom: 0,
+            },
+            position: "relative",
+          }}
+          onClick={(e) => {
             if (!canCollapse) return;
             setIsExpanded(!isExpanded);
           }}
         >
-          <div className="flex items-center flex-1 max-w-full">
-            <button
-              className="mr-2 hover:text-indigo-700"
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                setIsExpanded(!isExpanded);
-              }}
-            >
-              {isExpanded ? <IoFolderOpenOutline /> : <IoFolderOutline />}
-            </button>
-            <div
-              className="max-w-full flex-1 overflow-hidden overflow-ellipsis"
-              title={name}
-            >
-              {name}
-            </div>
+          <ActionList.LeadingVisual className="ml-1">
+            <StyledOcticon
+              sx={{ mr: 1, color: "fg.muted" }}
+              icon={isExpanded ? ChevronDownIcon : ChevronRightIcon}
+            />
+            <StyledOcticon
+              sx={{ color: "#54aeff" }}
+              icon={
+                isExpanded ? FileDirectoryOpenFillIcon : FileDirectoryFillIcon
+              }
+            />
+          </ActionList.LeadingVisual>
+          <span className="ml-1">{name}</span>
+          <ActionList.TrailingVisual className="flex items-center justify-center">
             <div>
               {!isExpanded &&
                 Object.keys(updatedContents).some((path2) =>
                   path2.startsWith(path)
                 ) && <VscCircleOutline />}
             </div>
-          </div>
-          {doShowPills && (
-            <div className="ml-auto flex p-1 border-[1px] border-gray-200 rounded-full">
-              {children.slice(0, 10).map((file) => (
-                <div className="m-[1px]">
-                  <FileDot
-                    name={file.name}
-                    type={file.children?.length ? "folder" : "file"}
-                    key={file.path}
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-          <DateChangedIndicator
-            date={mostRecentChangeDate}
-            fileChangesScale={fileChangesScale}
-          />
-        </a>
+            {doShowPills && (
+              <div className="ml-auto flex p-1 border-[1px] border-gray-200 rounded-full">
+                {children.slice(0, 10).map((file) => (
+                  <div className="m-[1px]">
+                    <FileDot
+                      name={file.name}
+                      type={file.children?.length ? "folder" : "file"}
+                      key={file.path}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+            <DateChangedIndicator
+              date={mostRecentChangeDate}
+              fileChangesScale={fileChangesScale}
+            />
+          </ActionList.TrailingVisual>
+        </ActionList.LinkItem>
       </Link>
 
       {isExpanded && (
-        <div className="pl-6">
+        <ActionList
+          data-depth={depth}
+          className="!py-0 relative"
+          sx={{
+            "::before": {
+              content: depth === 0 ? null : "''",
+              position: "absolute",
+              // Magic number. Seems to achieve the right spacing for optical alignment between the chevron and the vertical line.
+              left: 11 + depth * 16,
+              top: 0,
+              bottom: 0,
+              width: 1,
+              background: "rgba(208, 215, 222, 0.48)",
+            },
+          }}
+        >
           {children
             .sort((a, b) => b.children.length - a.children.length)
             .map((file) => (
               <Item
                 key={file.name}
+                depth={depth}
                 {...file}
                 activeFilePath={activeFilePath}
                 allUsers={allUsers}
@@ -251,15 +284,16 @@ const Folder = ({
                 updatedContents={updatedContents}
               />
             ))}
-        </div>
+        </ActionList>
       )}
-    </Box>
+    </>
   );
 };
 
 type FileProps = {
   name: string;
   path: string;
+  depth: number;
   activeUsers: User[];
   fileChangesScale: FileChangesScale;
   date?: number;
@@ -275,6 +309,7 @@ const File = ({
   date,
   isActive,
   updatedContents,
+  depth,
 }: FileProps) => {
   const router = useRouter();
   const query = router.query;
@@ -292,40 +327,39 @@ const File = ({
         },
       }}
     >
-      <a
-        className={`relative flex items-center justify-between py-2 pl-3 pr-3 text-left w-full text-sm whitespace-nowrap overflow-ellipsis ${
-          isActive ? "bg-gray-50 border-gray-200" : " border-transparent"
-        } border border-r-0`}
+      <ActionList.LinkItem
+        style={{ paddingLeft: depth * 16 }}
+        sx={{
+          "::before": {
+            content: isActive ? "''" : null,
+            background: "rgb(9, 105, 218)",
+            borderRadius: "6px",
+            width: "4px",
+            height: "24px",
+            position: "absolute",
+            left: "-8px",
+            top: 0,
+            margin: "auto",
+            bottom: 0,
+          },
+          position: "relative",
+          backgroundColor: isActive
+            ? "rgba(208, 215, 222, 0.48)"
+            : "transparent",
+        }}
       >
-        <div className="flex items-center flex-1 max-w-full">
-          <div className="mr-2">
-            {doShowPills ? (
-              <FileDot name={name} />
-            ) : (
-              <VscSymbolFile className="text-gray-400" />
-            )}
-          </div>
-          <div
-            className="max-w-full flex-1 overflow-hidden overflow-ellipsis"
-            title={name}
-          >
-            {name}
-          </div>
+        <ActionList.LeadingVisual>
+          <StyledOcticon icon={FileIcon} />
+        </ActionList.LeadingVisual>
+        <Truncate title={name}>{name}</Truncate>
+        <ActionList.TrailingVisual className="flex items-center justify-end">
           <div>{updatedContents[path] && <VscCircleFilled />}</div>
-        </div>
-        <div className="group flex items-center h-0">
-          {activeUsers.map((user) => (
-            <div
-              className="-ml-4 h-8 w-8 rounded-full bg-cover border-[0.2em] border-white group-hover:-ml-1 transition-all"
-              key={user.id}
-              style={{
-                backgroundImage: `url(https://avatars.githubusercontent.com/${user.id})`,
-              }}
-            />
-          ))}
-        </div>
-        <DateChangedIndicator date={date} fileChangesScale={fileChangesScale} />
-      </a>
+          <DateChangedIndicator
+            date={date}
+            fileChangesScale={fileChangesScale}
+          />
+        </ActionList.TrailingVisual>
+      </ActionList.LinkItem>
     </Link>
   );
 };

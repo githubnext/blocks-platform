@@ -224,7 +224,10 @@ const Folder = ({
               }
             />
           </ActionList.LeadingVisual>
-          <span className="ml-1">{name}</span>
+          <div className="ml-2">
+            <Truncate title={name}>{name}</Truncate>
+          </div>
+
           <ActionList.TrailingVisual className="flex items-center justify-center">
             <div>
               {!isExpanded &&

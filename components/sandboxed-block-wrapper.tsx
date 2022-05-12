@@ -1,4 +1,4 @@
-import { FileContext, FolderContext } from "@githubnext/utils";
+import { BlocksRepo, FileContext, FolderContext } from "@githubnext/utils";
 import { RepoFiles } from "ghapi";
 import { memo, useMemo } from "react";
 import { SandboxedBlock } from "components/sandboxed-block";
@@ -26,6 +26,7 @@ interface SandboxedBlockWrapperProps {
     params?: Record<string, any>
   ) => Promise<any>;
   onNavigateToPath: (path: string) => void;
+  onRequestBlocksRepos: () => Promise<BlocksRepo[]>;
 }
 
 const exampleBlocksRepo = "githubnext/blocks-examples";
@@ -46,6 +47,7 @@ export const SandboxedBlockWrapper = memo(function SandboxedBlockWrapper(
     onUpdateContent,
     onRequestGitHubData,
     onNavigateToPath,
+    onRequestBlocksRepos,
   } = props;
 
   const fileContext = useMemo(
@@ -81,6 +83,7 @@ export const SandboxedBlockWrapper = memo(function SandboxedBlockWrapper(
         onUpdateContent={onUpdateContent}
         onRequestGitHubData={onRequestGitHubData}
         onNavigateToPath={onNavigateToPath}
+        onRequestBlocksRepos={onRequestBlocksRepos}
       />
     );
   }

@@ -15,7 +15,8 @@ import {
   Box,
 } from "@primer/react";
 import { AppContext } from "context";
-import { BlocksRepo, useFilteredBlocksRepos, useBlocksFromRepo } from "hooks";
+import { BlocksRepo } from "@githubnext/utils";
+import { useFilteredBlocksRepos, useBlocksFromRepo } from "hooks";
 import { QueryKeyMap } from "lib/query-keys";
 import { useContext, useState } from "react";
 import { useQueryClient } from "react-query";

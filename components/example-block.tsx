@@ -1,4 +1,5 @@
 import {
+  BlocksRepo,
   FileBlockProps,
   FileContext,
   FolderContext,
@@ -33,6 +34,7 @@ interface ExampleBlockProps {
     params?: Record<string, any>
   ) => Promise<any>;
   onNavigateToPath: (path: string) => void;
+  onRequestBlocksRepos: () => Promise<BlocksRepo[]>;
 }
 
 export function ExampleBlock(props: ExampleBlockProps) {
@@ -49,6 +51,7 @@ export function ExampleBlock(props: ExampleBlockProps) {
     onUpdateContent,
     onRequestGitHubData,
     onNavigateToPath,
+    onRequestBlocksRepos,
   } = props;
 
   const Component = components[block.id];
@@ -78,6 +81,7 @@ export function ExampleBlock(props: ExampleBlockProps) {
         onRequestUpdateContent={onUpdateContent} // for backwards compatibility
         onRequestGitHubData={onRequestGitHubData}
         BlockComponent={!isEmbedded && BlockComponent}
+        onRequestBlocksRepos={onRequestBlocksRepos}
       />
     </div>
   );
@@ -90,6 +94,12 @@ type BlockComponentProps = FileBlockProps &
     block: Block;
     path: string;
     tree: RepoFiles;
+    onUpdateMetadata: (
+      newMetadata: any,
+      path?: string,
+      block?: Block,
+      currentMetadata?: any
+    ) => void;
   };
 const BlockComponent = ({
   block,
@@ -99,6 +109,7 @@ const BlockComponent = ({
   onUpdateContent,
   onRequestGitHubData,
   onNavigateToPath,
+  onRequestBlocksRepos,
   ...props
 }: BlockComponentProps) => {
   const [contents, setContents] = useState<string | undefined>(undefined);
@@ -180,6 +191,7 @@ const BlockComponent = ({
           onNavigateToPath={onNavigateToPath}
           onUpdateContent={onUpdateContent}
           onRequestGitHubData={onRequestGitHubData}
+          onRequestBlocksRepos={onRequestBlocksRepos}
         />
       </ErrorBoundary>
     );

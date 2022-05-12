@@ -1,4 +1,4 @@
-import { RepoFiles } from "@githubnext/utils";
+import { BlocksRepo, RepoFiles } from "@githubnext/utils";
 import { Octokit } from "@octokit/rest";
 import pm from "picomatch";
 import { defaultBlocksRepo as exampleBlocksRepo } from "blocks/index";
@@ -7,6 +7,7 @@ import {
   createBranchAndPR,
   CreateBranchParams,
   CreateBranchResponse,
+  getAllBlocksRepos,
   getBranches,
   getFileContent,
   getFolderContent,
@@ -277,38 +278,14 @@ export function useGetBranches(
   );
 }
 
-export interface BlocksRepo {
-  owner: string;
-  repo: string;
-  full_name: string;
-  id: number;
-  html_url: string;
-  description: string;
-  stars: number;
-  watchers: number;
-  language: string;
-  topics: string[];
-  blocks: Block[];
-  release: {
-    tag_name: string;
-    name: string;
-    tarball_url: string;
-    zipball_url: string;
-    published_at: string;
-    browser_download_url: string;
-  };
-}
-
-export function useAllBlocksRepos() {
+export function useAllBlocksRepos(config?: UseQueryOptions<BlocksRepo[]>) {
   return useQuery<BlocksRepo[]>(
     QueryKeyMap.blocksRepos.factory({}),
-    () => {
-      const url = `${process.env.NEXT_PUBLIC_MARKETPLACE_URL}/api/blocks`;
-      return fetch(url).then((res) => res.json());
-    },
+    getAllBlocksRepos,
     {
       refetchOnWindowFocus: false,
       retry: false,
+      ...config,
     }
   );
 }

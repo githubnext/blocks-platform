@@ -52,8 +52,6 @@ module.exports = {
                 "https://raw.githubusercontent.com/",
                 // for hitting the GitHub API
                 "https://api.github.com/",
-                // for getting the source code for custom Blocks
-                process.env.NEXT_PUBLIC_MARKETPLACE_URL,
                 // for sandboxes in the MDX Block
                 "https://codesandbox.io/api/v1/sandboxes/",
                 // for Analytics

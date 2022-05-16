@@ -1,13 +1,22 @@
+import { tw } from "twind";
 import { useEffect, useMemo, useState } from "react";
-import { FolderBlockProps } from "@githubnext/utils";
+import { Block, FolderBlockProps } from "@githubnext/utils";
 import Select from "react-select";
+import { Box, Button, IconButton } from "@primer/react";
+import { TrashIcon } from "@primer/octicons-react";
 
 // Note: We're using a BlockComponent prop here to create nested Blocks.
 // This is only implemented for our own example Blocks, to showcase the concept.
 
 export default function (props: FolderBlockProps) {
-  const { tree, metadata = {}, onUpdateMetadata, BlockComponent } = props;
-  const [blockOptions, setBlockOptions] = useState<any>([]);
+  const {
+    tree,
+    metadata = {},
+    onUpdateMetadata,
+    BlockComponent,
+    onRequestBlocksRepos,
+  } = props;
+  const [blockOptions, setBlockOptions] = useState<Block[]>([]);
   const [blocks, setBlocks] = useState<any>(metadata?.blocks || defaultBlocks);
   useEffect(() => setBlocks(metadata?.blocks || blocks), [metadata]);
   const pathOptions = useMemo(
@@ -18,8 +27,8 @@ export default function (props: FolderBlockProps) {
     [tree]
   );
   const blockOptionsByType = {
-    folder: blockOptions.filter((d: any) => d.type === "folder"),
-    file: blockOptions.filter((d: any) => d.type === "file"),
+    folder: blockOptions.filter((block) => block.type === "folder"),
+    file: blockOptions.filter((block) => block.type === "file"),
   };
   const isDirty =
     JSON.stringify(blocks) !== JSON.stringify(metadata?.blocks || blocks);
@@ -41,13 +50,13 @@ export default function (props: FolderBlockProps) {
   };
 
   const getBlocks = async () => {
-    const url = "https://blocks-marketplace.githubnext.com/api/blocks";
-    const res = await fetch(url).then((res) => res.json());
+    const blocksRepos = await onRequestBlocksRepos();
     const exampleBlocks =
-      res.find((d: any) => d.full_name === "githubnext/blocks-examples")
-        ?.blocks || [];
+      blocksRepos.find(
+        (repo) => repo.full_name === "githubnext/blocks-examples"
+      )?.blocks || [];
     setBlockOptions(
-      exampleBlocks.map((block: any) => ({
+      exampleBlocks.map((block) => ({
         ...block,
         owner: "githubnext",
         repo: "blocks-examples",
@@ -70,9 +79,12 @@ export default function (props: FolderBlockProps) {
       }}
     >
       {blocks.map((block: any, index: number) => (
-        <div
-          className="Box"
-          style={{
+        <Box
+          borderColor="border.default"
+          borderWidth={1}
+          borderStyle="solid"
+          borderRadius={4}
+          sx={{
             margin: "0.5em",
             flex: "1",
             minHeight: 0,
@@ -81,7 +93,14 @@ export default function (props: FolderBlockProps) {
             overflow: "hidden",
           }}
         >
-          <div key={index} className="Box-header d-flex py-2">
+          <Box
+            bg="canvas.subtle"
+            borderColor="border.default"
+            borderStyle="solid"
+            borderBottomWidth={1}
+            key={index}
+            className={tw(`Box-header flex p-2`)}
+          >
             <div>
               <Select
                 options={pathOptions}
@@ -121,33 +140,22 @@ export default function (props: FolderBlockProps) {
                 }}
               />
             </div>
-            <button
-              className="btn btn-danger d-flex flex-items-center mx-1 flex-self-stretch "
-              style={{
-                flex: "none",
-              }}
-              onClick={() => {
-                const newBlocks = [...blocks];
-                newBlocks.splice(index, 1);
-                setBlocks(newBlocks);
-              }}
+            <div
+              className={tw(
+                `flex items-center justify-center ml-2 flex-shrink-0`
+              )}
             >
-              <svg
-                width="1em"
-                height="1em"
-                viewBox="0 0 16 16"
-                className="bi bi-trash"
-                fill="currentColor"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
-                <path
-                  fillRule="evenodd"
-                  d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"
-                />
-              </svg>
-            </button>
-          </div>
+              <IconButton
+                variant="danger"
+                onClick={() => {
+                  const newBlocks = [...blocks];
+                  newBlocks.splice(index, 1);
+                  setBlocks(newBlocks);
+                }}
+                icon={TrashIcon}
+              ></IconButton>
+            </div>
+          </Box>
           {!block.block ? (
             <div
               style={{
@@ -176,11 +184,10 @@ export default function (props: FolderBlockProps) {
               )}
             </div>
           )}
-        </div>
+        </Box>
       ))}
-      <button
-        className="btn"
-        style={{
+      <Button
+        sx={{
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -202,7 +209,7 @@ export default function (props: FolderBlockProps) {
           width="1.3em"
           height="1.3em"
           viewBox="0 0 16 16"
-          className="bi bi-plus"
+          className={tw(`bi bi-plus`)}
           fill="currentColor"
           xmlns="http://www.w3.org/2000/svg"
         >
@@ -215,7 +222,7 @@ export default function (props: FolderBlockProps) {
             d="M7.5 8a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1H8.5V12a.5.5 0 0 1-1 0V8z"
           />
         </svg>
-      </button>
+      </Button>
       {isDirty && (
         <button
           style={{

@@ -9,8 +9,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      NEXT_PUBLIC_MARKETPLACE_URL: "https://blocks-marketplace.githubnext.com"
     steps:
       - uses: actions/checkout@v2
 

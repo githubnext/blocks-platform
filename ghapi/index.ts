@@ -15,7 +15,7 @@ import {
   TimelineKeyParams,
 } from "lib/query-keys";
 import { QueryFunction } from "react-query";
-import { BlocksRepo } from "hooks";
+import { BlocksRepo } from "@githubnext/utils";
 export interface RepoContext {
   repo: string;
   owner: string;
@@ -287,14 +287,6 @@ export const getBlocksFromRepo: QueryFunction<
     watchers: 0,
     language: "",
     topics: [""],
-    release: {
-      tag_name: "",
-      name: "",
-      tarball_url: "",
-      zipball_url: "",
-      published_at: "",
-      browser_download_url: "",
-    },
   };
 
   return data;
@@ -432,4 +424,50 @@ export const checkAccess: QueryFunction<
   });
 
   return response.data;
+};
+
+export const getAllBlocksRepos: QueryFunction<BlocksRepo[]> = async (ctx) => {
+  let octokit = (ctx.meta as unknown as BlocksQueryMeta).octokit;
+  const repos = await octokit.search.repos({
+    q: "topic:github-blocks",
+    order: "desc",
+    sort: "updated",
+    per_page: 100,
+  });
+  const blocks = await Promise.all(
+    repos.data.items.map(async (repo) => {
+      try {
+        const content = await octokit.repos.getContent({
+          owner: repo.owner.login,
+          repo: repo.name,
+          path: "package.json",
+        });
+        if ("content" in content.data) {
+          return (
+            JSON.parse(
+              Buffer.from(content.data.content, "base64").toString("utf8")
+            ).blocks ?? []
+          );
+        } else {
+          return [];
+        }
+      } catch (e) {
+        return [];
+      }
+    })
+  );
+  return repos.data.items.map((repo, i) => ({
+    owner: repo.owner.login,
+    repo: repo.name,
+    full_name: repo.full_name,
+    id: repo.id,
+    html_url: repo.html_url,
+    description: repo.description,
+    stars: repo.stargazers_count,
+    watchers: repo.watchers_count,
+    language: repo.language,
+    topics: repo.topics,
+
+    blocks: blocks[i],
+  }));
 };

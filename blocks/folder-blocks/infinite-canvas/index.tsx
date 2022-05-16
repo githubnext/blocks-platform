@@ -1,4 +1,5 @@
-import { FolderBlockProps, getNestedFileTree } from "@githubnext/utils";
+import { tw } from "twind";
+import { Block, FolderBlockProps, getNestedFileTree } from "@githubnext/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Buffer } from "buffer";
 import { FilePicker } from "./FilePicker";
@@ -6,10 +7,11 @@ import { useDrag } from "./useDrag";
 import { Item } from "./Item";
 import flatten from "lodash.flatten";
 // import './.css'";
+import { Button } from "@primer/react";
 
 const width = 5000;
 const height = 5000;
-const defaultDimensions = [200, 100];
+const defaultDimensions: Dimensions = [200, 100];
 export default function (
   props: FolderBlockProps & {
     metadata: { items: ItemType[] };
@@ -22,6 +24,7 @@ export default function (
     BlockComponent,
     onUpdateMetadata,
     onRequestGitHubData,
+    onRequestBlocksRepos,
   } = props;
 
   const wrapperElement = useRef<HTMLDivElement>(null);
@@ -94,22 +97,21 @@ export default function (
     setItems(metadata.items || placeholderItems);
   }, [metadata]);
 
-  const [blockOptions, setBlockOptions] = useState<any[]>([]);
+  const [blockOptions, setBlockOptions] = useState<Block[]>([]);
 
   const getBlocks = async () => {
-    const url = "https://blocks-marketplace.githubnext.com/api/blocks";
-    const res = await fetch(url).then((res) => res.json());
-    const exampleBlocks = res || [];
+    const blocksRepos = await onRequestBlocksRepos();
+    const exampleBlocks = blocksRepos || [];
     setBlockOptions(
       flatten(
-        exampleBlocks.map((blocksRepo: any) =>
+        exampleBlocks.map((blocksRepo) =>
           blocksRepo.blocks.map((block) => ({
             ...block,
             owner: blocksRepo.owner,
             repo: blocksRepo.repo,
           }))
         )
-      ).map((block: Block) => ({
+      ).map((block) => ({
         ...block,
         key: getBlockKey(block),
       }))
@@ -120,12 +122,11 @@ export default function (
   }, []);
 
   return (
-    <div className="wrapper">
+    <div className={tw(`wrapper`)}>
       {/* add new item buttons */}
-      <div className="position-absolute top-2 left-2 z-10 flex flex-col space-y-2">
+      <div className={tw(`absolute top-2 left-2 z-10 flex flex-col space-y-2`)}>
         {/* add text */}
-        <button
-          className="btn"
+        <Button
           onClick={() => {
             const newItems: ItemType[] = [
               ...items,
@@ -144,7 +145,7 @@ export default function (
           }}
         >
           + Add text
-        </button>
+        </Button>
 
         {/* add new file */}
         <FilePicker
@@ -161,6 +162,7 @@ export default function (
                   type: "file",
                   id: "code-block",
                   title: "Code block",
+                  description: "A basic code block",
                   owner: "githubnext",
                   repo: "blocks-examples",
                   sandbox: false,
@@ -176,7 +178,7 @@ export default function (
 
       {/* our canvas! */}
       <div
-        className="canvas"
+        className={tw(`canvas`)}
         style={{
           width: width,
           height: height,
@@ -185,7 +187,9 @@ export default function (
       >
         {/* our scrolling & panning listener */}
         <div
-          className="position-absolute top-[-50%] right-[-50%] bottom-[-50%] left-[-50%] pan"
+          className={tw(
+            `absolute top-[-50%] right-[-50%] bottom-[-50%] left-[-50%] pan`
+          )}
           ref={wrapperElement}
           style={{
             cursor: isDragging ? "grabbing" : "grab",
@@ -197,7 +201,7 @@ export default function (
           return (
             <Item
               {...item}
-              key={index}
+              key={item.id || index} // to re-render text when placeholder is replaced
               contents={
                 item.type === "file"
                   ? fileContents[item.path || ""] || "Loading file contents..."
@@ -230,8 +234,9 @@ export default function (
 
       {/* save button */}
       {isDirty && (
-        <button
-          className="btn btn-primary position-absolute top-2 right-2"
+        <Button
+          variant="primary"
+          className={tw(`absolute top-2 right-2`)}
           onClick={() => {
             onUpdateMetadata({
               items,
@@ -240,7 +245,7 @@ export default function (
           }}
         >
           Save changes
-        </button>
+        </Button>
       )}
     </div>
   );
@@ -248,6 +253,7 @@ export default function (
 
 const placeholderItems = [
   {
+    id: "placeholder",
     type: "text",
     text: "Start typing or grab a file",
     position: [
@@ -276,10 +282,11 @@ export type ItemType = {
   path?: string;
   text?: string;
   url?: string;
+  id?: string;
   block?: Block;
   position: Position;
   dimensions: Dimensions;
 };
-export type Block = any;
+export type BlockWithKey = Block & { key: string };
 export type Files = ReturnType<typeof getNestedFileTree>;
 export type File = Files[0];

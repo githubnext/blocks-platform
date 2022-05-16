@@ -1,5 +1,7 @@
+import { tw } from "twind";
+import { ActionList, ActionMenu } from "@primer/react";
 import { useState } from "react";
-import { Block } from "./index";
+import { BlockWithKey as Block } from "./index";
 
 export const BlockPicker = ({
   value,
@@ -8,38 +10,33 @@ export const BlockPicker = ({
 }: {
   value: Block;
   onChange: (newBlock: Block) => void;
-  options: any[];
+  options: Block[];
 }) => {
   // needed to close the dropdown, which is an uncontrolled detail element
   const [iteration, setIteration] = useState(0);
 
   return (
-    <details
-      className="dropdown details-reset details-overlay d-inline-block mr-2"
-      key={iteration}
-    >
-      <summary className="btn" aria-haspopup="true">
-        {value?.title || "Block"}
-        <div className="dropdown-caret"></div>
-      </summary>
+    <ActionMenu>
+      <ActionMenu.Button>{value?.title || "Block"}</ActionMenu.Button>
 
-      <ul className="dropdown-menu dropdown-menu-sw max-h-[calc(100vh-16em)] overflow-auto">
-        {options.map((block) => {
-          return (
-            <li key={block.key} className="dropdown-item text-sm">
-              <button
-                onClick={() => {
+      <ActionMenu.Overlay>
+        <ActionList>
+          {options.map((block) => {
+            return (
+              <ActionList.Item
+                onSelect={() => {
                   onChange(block);
                   setIteration(iteration + 1);
                 }}
-                className="truncate w-full text-left"
+                key={block.key}
+                className={tw(`dropdown-item text-sm`)}
               >
                 {block.title}
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-    </details>
+              </ActionList.Item>
+            );
+          })}
+        </ActionList>
+      </ActionMenu.Overlay>
+    </ActionMenu>
   );
 };

@@ -32,17 +32,11 @@ function RepoDetailContainer(props: {
     required: true,
   });
 
-  useCheckRepoAccess(
-    { repo, owner },
-    {
-      enabled: !localHasRepoInstallation,
-      onSuccess: (hasAccess) => {
-        if (hasAccess) {
-          setLocalHasRepoInstallation(true);
-        }
-      },
+  useEffect(() => {
+    if (status === "authenticated" && session.error) {
+      signOut();
     }
-  );
+  }, [session, status]);
 
   useEffect(() => {
     if (status !== "authenticated" || loaded) return;
@@ -75,6 +69,13 @@ function RepoDetailContainer(props: {
           permissions,
         }}
       >
+        {!localHasRepoInstallation && (
+          <CheckAccess
+            repo={repo}
+            owner={owner}
+            onHasRepoSuccess={() => setLocalHasRepoInstallation(true)}
+          />
+        )}
         {/* @ts-ignore */}
         <RepoDetail token={session?.token} />
       </AppContext.Provider>
@@ -93,8 +94,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const queryClient = new QueryClient();
   const session = await getSession({ req: context.req });
 
-  // First, check if the user is authenticated.
-  if (!session) {
+  // First, check if the user is authenticated or has an invalid session.
+  if (!session || session.error) {
     return {
       redirect: {
         destination: "/",
@@ -155,3 +156,25 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     },
   };
 }
+
+const CheckAccess = ({
+  repo,
+  owner,
+  onHasRepoSuccess,
+}: {
+  repo: string;
+  owner: string;
+  onHasRepoSuccess: () => void;
+}) => {
+  useCheckRepoAccess(
+    { repo, owner },
+    {
+      onSuccess: (hasAccess) => {
+        if (hasAccess) {
+          onHasRepoSuccess();
+        }
+      },
+    }
+  );
+  return null;
+};

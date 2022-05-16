@@ -1,8 +1,0 @@
-/* for example Block styles */
-// load CSS variables outside, since they latch onto :root
-@import "@primer/css/color-modes/index.scss";
-
-// scope Primer styles to our example Blocks
-.example-block:not(#example-block-explain-block) {
-  @import "@primer/css";
-}

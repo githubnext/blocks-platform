@@ -87,12 +87,9 @@ module.exports = {
               "worker-src 'self'",
               "connect-src * blob:",
               "style-src 'unsafe-inline' *",
-              "frame-src 'none'",
-              ["script-src", "'unsafe-eval'", "'unsafe-inline'", "*"]
-                .filter(Boolean)
-                .join(" "),
-              ["img-src", "*"].join(" "),
-              ["connect-src", "*"].filter(Boolean).join(" "),
+              "frame-src *",
+              "script-src 'unsafe-eval' 'unsafe-inline' *",
+              "img-src *",
             ].join(";"),
           },
           {

@@ -63,7 +63,7 @@ export default ({
   const onMessage = useRef((event: MessageEvent) => {});
   onMessage.current = (event: MessageEvent) => {
     if (!iframeRef.current) return;
-    const { data, source } = event;
+    const { data, origin, source } = event;
     if (source !== iframeRef.current.contentWindow) return;
 
     switch (data.type) {
@@ -94,20 +94,22 @@ export default ({
             source.postMessage(
               {
                 type: "github-data--response",
+                requestId: data.requestId,
                 data: res,
               },
-              "*"
+              origin
             );
           })
           .catch((e) => {
             source.postMessage(
               {
                 type: "github-data--response",
+                requestId: data.requestId,
                 // Error is not always serializable
                 // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm#things_that_dont_work_with_structured_clone
                 error: e instanceof Error ? e.message : e,
               },
-              "*"
+              origin
             );
           });
         break;

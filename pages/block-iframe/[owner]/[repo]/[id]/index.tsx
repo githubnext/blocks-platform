@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-import PrimerReact from "@primer/react";
+import * as PrimerReact from "@primer/react";
+import { ThemeProvider, BaseStyles } from "@primer/react";
 import Head from "next/head";
 import Script from "next/script";
 import { GetServerSidePropsContext } from "next";
@@ -13,6 +14,72 @@ import sanitizeId from "utils/sanitize-id";
 type Asset = {
   name: string;
   content: string;
+};
+
+const onUpdateMetadata = (newMetadata) => {
+  window.parent.postMessage(
+    {
+      type: "update-metadata",
+      id: "${id}",
+      metadata: newMetadata,
+    },
+    "*"
+  );
+};
+
+const onNavigateToPath = (path) => {
+  window.parent.postMessage(
+    {
+      type: "navigate-to-path",
+      id: "${id}",
+      path,
+    },
+    "*"
+  );
+};
+
+const onUpdateContent = (content) => {
+  window.parent.postMessage(
+    {
+      type: "update-file",
+      id: "${id}",
+      content: content,
+    },
+    "*"
+  );
+};
+
+const pendingRequests = {};
+
+let uniqueId = 0;
+const getUniqueId = () => {
+  uniqueId++;
+  return uniqueId;
+};
+
+const onRequestGitHubData = (path, params) => {
+  // for responses to this specific request
+  const requestId = `github-data--request--${getUniqueId()}`;
+
+  window.parent.postMessage(
+    {
+      type: "github-data--request",
+      id: "${id}",
+      requestId,
+      path,
+      params,
+    },
+    "*"
+  );
+
+  return new Promise((resolve, reject) => {
+    pendingRequests[requestId] = { resolve, reject };
+    const maxDelay = 1000 * 5;
+    window.setTimeout(() => {
+      delete pendingRequests[requestId];
+      reject(new Error("Timeout"));
+    }, maxDelay);
+  });
 };
 
 const Page = ({ assets }: { assets: Asset[] }) => {
@@ -49,6 +116,18 @@ const Page = ({ assets }: { assets: Asset[] }) => {
         case "set-props":
           setProps(data.props);
           break;
+
+        case "github-data--response":
+          const request = pendingRequests[event.data.requestId];
+          if (!request) return;
+          delete pendingRequests[event.data.requestId];
+
+          if ("error" in event.data) {
+            request.reject(event.data.error);
+          } else {
+            request.resolve(event.data.data);
+          }
+          break;
       }
     };
     addEventListener("message", onMessage);
@@ -60,7 +139,22 @@ const Page = ({ assets }: { assets: Asset[] }) => {
       <Head>
         <style>{/* {css} */}</style>
       </Head>
-      {Block && props && <Block.default {...props} />}
+      {Block && props && (
+        <ThemeProvider>
+          <BaseStyles>
+            <Block.default
+              // recreate the block if we change file or version
+              key={props.context.sha}
+              {...props}
+              onUpdateMetadata={onUpdateMetadata}
+              onNavigateToPath={onNavigateToPath}
+              onUpdateContent={onUpdateContent}
+              onRequestUpdateContent={onUpdateContent} // for backwards compatibility
+              onRequestGitHubData={onRequestGitHubData}
+            />
+          </BaseStyles>
+        </ThemeProvider>
+      )}
       <Script id="block-code" strategy="afterInteractive">
         {`
 var BlockBundle = ({ React, ReactDOM, PrimerReact }) => {
@@ -71,7 +165,8 @@ var BlockBundle = ({ React, ReactDOM, PrimerReact }) => {
       case "react-dom":
         return ReactDOM;
       case "@primer/react":
-        return PrimerReact;
+      case "@primer/components":
+          return PrimerReact;
       default:
         console.log("no module '" + name + "'");
         return null;

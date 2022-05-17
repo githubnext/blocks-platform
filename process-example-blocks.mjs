@@ -2,8 +2,8 @@ import fse from "fs-extra";
 import _ from "lodash";
 
 const moduleLocation = "./node_modules/@githubnext/blocks-examples";
-const blocksLocation = moduleLocation + "/src/blocks";
-const packageJsonLocation = moduleLocation + "/package.json";
+const blocksLocation = moduleLocation + "/blocks";
+const blocksConfigLocation = moduleLocation + "/blocks.config.json";
 const newLocation = "./blocks";
 const indexFile = newLocation + "/index.js";
 
@@ -21,12 +21,8 @@ async function init() {
       }
     }
   );
-  const blocksPackageJsonContents = await fse.readFile(
-    packageJsonLocation,
-    "utf8"
-  );
-  const blocksPackageJson = JSON.parse(blocksPackageJsonContents);
-  const blocks = blocksPackageJson.blocks;
+  const blocksConfigContents = await fse.readFile(blocksConfigLocation, "utf8");
+  const blocks = JSON.parse(blocksConfigContents);
   await createIndexFile(blocks);
   await processFiles(blocks);
   await copyExcalidrawAssetsToLocal();
@@ -41,7 +37,7 @@ async function createIndexFile(blocks) {
   indexContents += `import dynamic from "next/dynamic";\n\n`;
   blocks.forEach((block) => {
     blocksObject[`'${block.id}'`] = convertIdToVariableName(block.id);
-    const blockPath = block.entry.split("/").slice(3).join("/");
+    const blockPath = block.entry.split("/").slice(1).join("/");
     indexContents += `const ${convertIdToVariableName(
       block.id
     )} = dynamic(() => import("./${blockPath}"), {ssr:false});\n`;

@@ -1,4 +1,4 @@
-import { BlocksRepo, RepoFiles } from "@githubnext/utils";
+import { BlocksRepo, RepoFiles } from "@githubnext/blocks";
 import { Octokit } from "@octokit/rest";
 import pm from "picomatch";
 import { defaultBlocksRepo as exampleBlocksRepo } from "blocks/index";
@@ -46,6 +46,7 @@ import {
 import type { QueryFunction, UseQueryResult } from "react-query";
 import { useSession } from "next-auth/react";
 import { CODEX_BLOCKS } from "../lib";
+import { Session } from "next-auth";
 
 export function useFileContent(
   params: FileKeyParams,
@@ -291,7 +292,7 @@ export function useAllBlocksRepos(config?: UseQueryOptions<BlocksRepo[]>) {
 }
 
 const defaultFileBlock = {
-  id: "file-block",
+  id: "code-block",
   owner: "githubnext",
   repo: "blocks-examples",
 } as Block;
@@ -323,11 +324,12 @@ export function useManageBlock({
 }: UseManageBlockParams): UseManageBlockResult {
   const router = useRouter();
   const { blockKey = "" } = router.query as Record<string, string>;
+  const {
+    data: { user },
+  } = useSession();
 
-  const filteredBlocksReposResult = useFilteredBlocksRepos(
-    path,
-    isFolder ? "folder" : "file"
-  );
+  const type = isFolder ? "folder" : "file";
+  const filteredBlocksReposResult = useFilteredBlocksRepos(path, type);
 
   // do we need to load any Blocks from private repos?
   const [blockKeyOwner, blockKeyRepo] = blockKey.split("__");
@@ -349,10 +351,18 @@ export function useManageBlock({
   ].find((r) => r.status !== "success");
   if (incomplete) return incomplete as UseManageBlockResult;
 
+  const filterBlocksRepo = (repo) => {
+    if (!repo) return repo;
+    return {
+      ...repo,
+      blocks: repo.blocks.filter(filterBlock({ path, type, user, repo })),
+    };
+  };
+
   const blocksRepos = [
     ...filteredBlocksReposResult.data,
-    blockKeyResult.data,
-    storedDefaultBlockResult.data,
+    filterBlocksRepo(blockKeyResult.data),
+    filterBlocksRepo(storedDefaultBlockResult.data),
   ].filter(Boolean);
 
   const exampleBlocks =
@@ -459,45 +469,9 @@ export function useFilteredBlocksRepos(
       ...allBlocksReposResult,
       data: allBlocksReposResult.data
         .map((repo) => {
-          const filteredBlocks = repo.blocks.filter((block: Block) => {
-            if (
-              !user.isHubber &&
-              CODEX_BLOCKS.some((cb) => {
-                return (
-                  block.id === cb.id &&
-                  repo.owner === cb.owner &&
-                  repo.repo === cb.repo
-                );
-              })
-            ) {
-              return false;
-            }
-            // don't include example Blocks
-            if (
-              block.title === "Example File Block" ||
-              block.title === "Example Folder Block"
-            ) {
-              return false;
-            }
-
-            if (block.type !== type) return false;
-
-            if (path === undefined) return true;
-
-            if (Boolean(block.matches)) {
-              return pm(block.matches, { bash: true, dot: true })(path);
-            }
-
-            if (block.extensions) {
-              const extension = path.split(".").pop();
-              return (
-                block.extensions.includes("*") ||
-                block.extensions.includes(extension)
-              );
-            }
-
-            return true;
-          });
+          const filteredBlocks = repo.blocks.filter(
+            filterBlock({ path, type, user, repo })
+          );
           return {
             ...repo,
             blocks: filteredBlocks.map((b) => ({
@@ -511,6 +485,55 @@ export function useFilteredBlocksRepos(
     };
   }, [allBlocksReposResult.data, path]);
 }
+
+const filterBlock =
+  ({
+    path,
+    repo,
+    user,
+    type,
+  }: {
+    path: string | undefined;
+    repo: RepoContext;
+    user: Session["user"];
+    type: "file" | "folder";
+  }) =>
+  (block: Block) => {
+    if (
+      !user.isHubber &&
+      CODEX_BLOCKS.some((cb) => {
+        return (
+          block.id === cb.id && repo.owner === cb.owner && repo.repo === cb.repo
+        );
+      })
+    ) {
+      return false;
+    }
+    // don't include example Blocks
+    if (
+      block.title === "Example File Block" ||
+      block.title === "Example Folder Block"
+    ) {
+      return false;
+    }
+
+    if (block.type !== type) return false;
+
+    if (path === undefined) return true;
+
+    if (Boolean(block.matches)) {
+      return pm(block.matches, { bash: true, dot: true })(path);
+    }
+
+    if (block.extensions) {
+      const extension = path.split(".").pop();
+      return (
+        block.extensions.includes("*") || block.extensions.includes(extension)
+      );
+    }
+
+    return true;
+  };
 
 export interface BlockContent {
   name: string;

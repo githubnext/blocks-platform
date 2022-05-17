@@ -1,5 +1,5 @@
 import { tw } from "twind";
-import { FileBlockProps } from "@githubnext/utils";
+import { FileBlockProps } from "@githubnext/blocks";
 // @ts-ignore
 import MDX from "@mdx-js/runtime";
 import { Avatar, Box, StateLabel } from "@primer/react";

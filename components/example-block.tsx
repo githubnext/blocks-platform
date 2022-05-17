@@ -4,7 +4,7 @@ import {
   FileContext,
   FolderContext,
   RepoFiles,
-} from "@githubnext/utils";
+} from "@githubnext/blocks";
 import React, { useEffect, useState } from "react";
 import components from "./../blocks";
 import { SandboxedBlock } from "./sandboxed-block";

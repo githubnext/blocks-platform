@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FolderBlockProps } from "@githubnext/utils";
+import { FolderBlockProps } from "@githubnext/blocks";
 
 export default function (props: FolderBlockProps) {
   const { onRequestGitHubData } = props;

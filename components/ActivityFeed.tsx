@@ -1,4 +1,4 @@
-import { FileContext } from "@githubnext/utils";
+import { FileContext } from "@githubnext/blocks";
 import {
   GitCommitIcon,
   SidebarCollapseIcon,

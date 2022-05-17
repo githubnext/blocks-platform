@@ -1,5 +1,5 @@
 import { tw } from "twind";
-import { FileBlockProps } from "@githubnext/utils";
+import { FileBlockProps } from "@githubnext/blocks";
 import { Grid } from "@githubocto/flat-ui";
 import { csvFormat, csvParseRows } from "d3";
 import { useMemo } from "react";

@@ -4,8 +4,8 @@ import type { ScaleLinear } from "d3";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
-import { getNestedFileTree } from "@githubnext/utils";
-import type { RepoFiles } from "@githubnext/utils";
+import { getNestedFileTree } from "@githubnext/blocks";
+import type { RepoFiles } from "@githubnext/blocks";
 import languageColors from "../language-colors.json";
 import { Tooltip } from "./Tooltip";
 import {
@@ -17,7 +17,7 @@ import {
 } from "@primer/octicons-react";
 import { VscCircleFilled, VscCircleOutline } from "react-icons/vsc";
 
-// defined in @githubnext/utils but not exported
+// defined in @githubnext/blocks but not exported
 interface NestedFileTree {
   children: NestedFileTree[];
   name: string;

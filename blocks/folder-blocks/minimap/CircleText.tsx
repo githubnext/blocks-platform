@@ -1,4 +1,3 @@
-import uniqueId from "lodash/uniqueId";
 import { useMemo } from "react";
 
 export const CircleText = ({ r = 10, rotate = 0, text = "", ...props }) => {
@@ -25,3 +24,8 @@ export const CircleText = ({ r = 10, rotate = 0, text = "", ...props }) => {
     </>
   );
 };
+
+let id = 0;
+function uniqueId(prefix = "") {
+  return `${prefix}${id++}`;
+}

@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import type { RepoFiles } from "@githubnext/utils";
+import type { RepoFiles } from "@githubnext/blocks";
 import type { UpdatedContents } from "./index";
 import { Sidebar } from "../Sidebar";
 

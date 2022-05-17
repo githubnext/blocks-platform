@@ -2,7 +2,7 @@ import {
   FileContext,
   FolderContext,
   onRequestGitHubData as utilsOnRequestGitHubData,
-} from "@githubnext/utils";
+} from "@githubnext/blocks";
 import { SandboxedBlockWrapper } from "components/sandboxed-block-wrapper";
 import { useFolderContent, useMetadata } from "hooks";
 import { useRouter } from "next/router";

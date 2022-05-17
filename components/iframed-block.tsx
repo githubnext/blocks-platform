@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { FileContext, FolderContext } from "@githubnext/utils";
+import { BlocksRepo, FileContext, FolderContext } from "@githubnext/utils";
 import { RepoFiles } from "ghapi";
 
 type IFramedBlockProps = {
@@ -22,6 +22,7 @@ type IFramedBlockProps = {
     params?: Record<string, any>
   ) => Promise<any>;
   onNavigateToPath: (path: string) => void;
+  onRequestBlocksRepos: () => Promise<BlocksRepo[]>;
 };
 
 export default ({

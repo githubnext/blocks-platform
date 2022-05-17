@@ -180,8 +180,6 @@ ${jsString}
   );
 };
 
-// force server-side rendering instead of static generation
-// otherwise `router.query` is not filled in on the server
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const query = context.query;
   const { repo, owner, id } = query as Record<string, string>;
@@ -229,13 +227,10 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const buffer = await assetContentRes.buffer();
   const assets = await untar(buffer);
 
-  // TODO: look into caching
-  // https://nextjs.org/docs/basic-features/data-fetching/get-server-side-props#caching-with-server-side-rendering-ssr
-  // eg:
-  // res.setHeader(
-  //   'Cache-Control',
-  //   'public, s-maxage=10, stale-while-revalidate=59'
-  // )
+  context.res.setHeader(
+    "Cache-Control",
+    "public, s-maxage=3600, stale-while-revalidate=60"
+  );
 
   return {
     props: {

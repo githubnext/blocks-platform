@@ -19,7 +19,7 @@ type ActivityFeedProps = {
   timeline: undefined | RepoTimeline;
   updatedContent: undefined | {};
   clearUpdatedContent: () => void;
-  blockType: "folder" | "file";
+  blockType?: "folder" | "file";
 };
 
 export const ActivityFeed = ({
@@ -58,7 +58,9 @@ export const ActivityFeed = ({
           <Box
             sx={{ fontWeight: "bold", display: "flex", alignItems: "center" }}
           >
-            <div className="flex-none">Commits for this {blockType}</div>
+            <div className="flex-none">
+              Commits {blockType ? `for this ${blockType}` : ""}
+            </div>
           </Box>
         </Box>
         {timeline && (

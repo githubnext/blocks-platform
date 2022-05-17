@@ -200,7 +200,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
           timeline={timeline}
           updatedContent={updatedContent}
           clearUpdatedContent={clearUpdatedContent}
-          blockType={blockTypes[fileInfo.type]}
+          blockType={blockTypes[fileInfo?.type]}
         />
       </div>
       {!!requestedMetadata && (

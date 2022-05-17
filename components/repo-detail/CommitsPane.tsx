@@ -9,7 +9,7 @@ type CommitsPaneProps = {
   timeline: undefined | RepoTimeline;
   updatedContent: undefined | UpdatedContent;
   clearUpdatedContent: () => void;
-  blockType: "folder" | "file";
+  blockType?: "folder" | "file";
 };
 
 export default function CommitsPane({

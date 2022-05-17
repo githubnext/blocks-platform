@@ -456,7 +456,6 @@ export const getAllBlocksRepos: QueryFunction<BlocksRepo[]> = async (ctx) => {
           path: "blocks.config.json",
         });
         if (blocksConfigRes) {
-          console.log("blocksConfigRes", blocksConfigRes);
           return (
             JSON.parse(
               Buffer.from(blocksConfigRes.content, "base64").toString("utf8")

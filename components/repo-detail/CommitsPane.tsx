@@ -9,6 +9,7 @@ type CommitsPaneProps = {
   timeline: undefined | RepoTimeline;
   updatedContent: undefined | UpdatedContent;
   clearUpdatedContent: () => void;
+  blockType: "folder" | "file";
 };
 
 export default function CommitsPane({
@@ -18,6 +19,7 @@ export default function CommitsPane({
   timeline,
   updatedContent,
   clearUpdatedContent,
+  blockType,
 }: CommitsPaneProps) {
   return (
     <AnimatePresence initial={false}>
@@ -37,6 +39,7 @@ export default function CommitsPane({
             timeline={timeline}
             updatedContent={updatedContent}
             clearUpdatedContent={clearUpdatedContent}
+            blockType={blockType}
           />
         </motion.div>
       )}

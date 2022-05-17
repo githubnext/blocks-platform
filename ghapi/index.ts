@@ -479,7 +479,6 @@ export const getAllBlocksRepos: QueryFunction<BlocksRepo[]> = async (ctx) => {
           return [];
         }
       } catch (e) {
-        console.log(e);
         return [];
       }
     })

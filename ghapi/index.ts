@@ -470,7 +470,6 @@ export const getAllBlocksRepos: QueryFunction<BlocksRepo[]> = async (ctx) => {
           repo: repo.name,
           path: "package.json",
         });
-        console.log("packageJsonRes", packageJsonRes);
         if (packageJsonRes) {
           return (
             JSON.parse(

@@ -147,9 +147,9 @@ export const RepoHeader = ({
       <UnderlineNav sx={{ mb: "-1px" }}>
         {repoHeaderLinks.map(([label, Icon], i) => (
           <UnderlineNav.Link
-            href="#"
             key={label}
             selected={!i}
+            aria-disabled="true"
             sx={{
               mx: 2,
               display: "flex",

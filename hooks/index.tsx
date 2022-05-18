@@ -355,7 +355,9 @@ export function useManageBlock({
     if (!repo) return repo;
     return {
       ...repo,
-      blocks: repo.blocks.filter(filterBlock({ path, type, user, repo })),
+      blocks: (repo.blocks || []).filter(
+        filterBlock({ path, type, user, repo })
+      ),
     };
   };
 
@@ -469,7 +471,7 @@ export function useFilteredBlocksRepos(
       ...allBlocksReposResult,
       data: allBlocksReposResult.data
         .map((repo) => {
-          const filteredBlocks = repo.blocks.filter(
+          const filteredBlocks = (repo.blocks || []).filter(
             filterBlock({ path, type, user, repo })
           );
           return {

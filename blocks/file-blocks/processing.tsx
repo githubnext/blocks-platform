@@ -1,5 +1,5 @@
 import { createRef, useEffect } from "react";
-import { FileBlockProps } from "@githubnext/utils";
+import { FileBlockProps } from "@githubnext/blocks";
 import p5 from "p5";
 
 export default function (props: FileBlockProps) {

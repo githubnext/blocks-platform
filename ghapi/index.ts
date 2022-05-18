@@ -15,7 +15,7 @@ import {
   TimelineKeyParams,
 } from "lib/query-keys";
 import { QueryFunction } from "react-query";
-import { BlocksRepo } from "@githubnext/utils";
+import { BlocksRepo } from "@githubnext/blocks";
 export interface RepoContext {
   repo: string;
   owner: string;
@@ -257,39 +257,38 @@ export const getBlocksFromRepo: QueryFunction<
     return undefined;
   }
 
-  let packageJson;
   try {
-    const packageJsonUrl = `/repos/${owner}/${repo}/contents/package.json`;
-    const packageJsonRes = await meta.ghapi(packageJsonUrl);
-    const encodedContent = packageJsonRes.data.content;
+    const blocksConfigUrl = `/repos/${owner}/${repo}/contents/blocks.config.json`;
+    const blocksConfigRes = await meta.ghapi(blocksConfigUrl);
+    const encodedContent = blocksConfigRes.data.content;
     const content = Buffer.from(encodedContent, "base64").toString("utf8");
-    packageJson = JSON.parse(content);
+    const rawBlocks = JSON.parse(content);
+
+    const blocks = (rawBlocks || []).map((block) => ({
+      ...block,
+      owner,
+      repo,
+    }));
+
+    const data: BlocksRepo = {
+      owner,
+      repo,
+      blocks,
+      full_name: `${owner}/${repo}`,
+      // we don't use any of the below at the moment
+      id: 0,
+      html_url: "",
+      description: "",
+      stars: 0,
+      watchers: 0,
+      language: "",
+      topics: [""],
+    };
+
+    return data;
   } catch {
     return undefined;
   }
-
-  const blocks = (packageJson.blocks || []).map((block) => ({
-    ...block,
-    owner,
-    repo,
-  }));
-
-  const data: BlocksRepo = {
-    owner,
-    repo,
-    blocks,
-    full_name: `${owner}/${repo}`,
-    // we don't use any of the below at the moment
-    id: 0,
-    html_url: "",
-    description: "",
-    stars: 0,
-    watchers: 0,
-    language: "",
-    topics: [""],
-  };
-
-  return data;
 };
 
 export const getBranches: QueryFunction<
@@ -426,6 +425,20 @@ export const checkAccess: QueryFunction<
   return response.data;
 };
 
+type getContentParams = Parameters<Octokit["repos"]["getContent"]>[0];
+type getContentResult =
+  Endpoints["GET /repos/{owner}/{repo}/contents/{path}"]["response"]["data"][0];
+const tryToGetContent = async (
+  octokit: Octokit,
+  params: getContentParams
+): Promise<getContentResult | undefined> => {
+  try {
+    const res = await octokit.repos.getContent(params);
+    return res.data;
+  } catch {
+    return undefined;
+  }
+};
 export const getAllBlocksRepos: QueryFunction<BlocksRepo[]> = async (ctx) => {
   let octokit = (ctx.meta as unknown as BlocksQueryMeta).octokit;
   const repos = await octokit.search.repos({
@@ -437,15 +450,29 @@ export const getAllBlocksRepos: QueryFunction<BlocksRepo[]> = async (ctx) => {
   const blocks = await Promise.all(
     repos.data.items.map(async (repo) => {
       try {
-        const content = await octokit.repos.getContent({
+        const blocksConfigRes = await tryToGetContent(octokit, {
+          owner: repo.owner.login,
+          repo: repo.name,
+          path: "blocks.config.json",
+        });
+        if (blocksConfigRes) {
+          return (
+            JSON.parse(
+              Buffer.from(blocksConfigRes.content, "base64").toString("utf8")
+            ) ?? []
+          );
+        }
+
+        // check package.json for backwards compatibility
+        const packageJsonRes = await tryToGetContent(octokit, {
           owner: repo.owner.login,
           repo: repo.name,
           path: "package.json",
         });
-        if ("content" in content.data) {
+        if (packageJsonRes) {
           return (
             JSON.parse(
-              Buffer.from(content.data.content, "base64").toString("utf8")
+              Buffer.from(packageJsonRes.content, "base64").toString("utf8")
             ).blocks ?? []
           );
         } else {

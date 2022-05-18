@@ -3,7 +3,7 @@ import { tw } from "twind";
 import { PerspectiveCamera, useGLTF } from "@react-three/drei";
 import { Canvas, useLoader, useStore } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { FileBlockProps } from "@githubnext/utils";
+import { FileBlockProps } from "@githubnext/blocks";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 const LControl = () => {

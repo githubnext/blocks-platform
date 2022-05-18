@@ -1,6 +1,6 @@
 import { tw } from "twind";
 import { useEffect, useMemo, useState } from "react";
-import { Block, FolderBlockProps } from "@githubnext/utils";
+import { Block, FolderBlockProps } from "@githubnext/blocks";
 import Select from "react-select";
 import { Box, Button, IconButton } from "@primer/react";
 import { TrashIcon } from "@primer/octicons-react";

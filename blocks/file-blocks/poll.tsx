@@ -1,5 +1,5 @@
 import { tw } from "twind";
-import { FileBlockProps } from "@githubnext/utils"; // to import tailwind css
+import { FileBlockProps } from "@githubnext/blocks"; // to import tailwind css
 
 export default function (props: FileBlockProps) {
   const { content, isEditable, onUpdateContent } = props;

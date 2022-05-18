@@ -1,5 +1,5 @@
 import { tw } from "twind";
-import { FileBlockProps } from "@githubnext/utils";
+import { FileBlockProps } from "@githubnext/blocks";
 import {
   Fragment,
   useEffect,

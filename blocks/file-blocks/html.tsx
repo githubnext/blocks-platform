@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { FileBlockProps } from "@githubnext/utils";
+import { FileBlockProps } from "@githubnext/blocks";
 import DOMPurify from "dompurify";
 
 export default function (props: FileBlockProps) {

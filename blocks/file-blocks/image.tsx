@@ -1,4 +1,4 @@
-import { FileBlockProps } from "@githubnext/utils";
+import { FileBlockProps } from "@githubnext/blocks";
 
 export default function (props: FileBlockProps) {
   const { context } = props;

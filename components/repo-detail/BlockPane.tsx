@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useRouter } from "next/router";
-import type { RepoFiles } from "@githubnext/utils";
+import type { RepoFiles } from "@githubnext/blocks";
 import type { Context, UpdatedContents } from "./index";
 import { getBlockKey, useManageBlock } from "hooks";
 import BlockPaneHeader from "./BlockPaneHeader";

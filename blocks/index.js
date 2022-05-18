@@ -61,10 +61,7 @@ export const defaultBlocksRepo = {
       "title": "Code block",
       "description": "A basic code block",
       "sandbox": false,
-      "entry": "/src/blocks/file-blocks/code/index.tsx",
-      "extensions": [
-        "*"
-      ],
+      "entry": "blocks/file-blocks/code/index.tsx",
       "matches": [
         "*"
       ],
@@ -76,10 +73,7 @@ export const defaultBlocksRepo = {
       "title": "Drawing block",
       "description": "A whiteboard tool",
       "sandbox": false,
-      "entry": "/src/blocks/file-blocks/excalidraw/index.tsx",
-      "extensions": [
-        "excalidraw"
-      ],
+      "entry": "blocks/file-blocks/excalidraw/index.tsx",
       "matches": [
         "*.excalidraw"
       ],
@@ -91,11 +85,7 @@ export const defaultBlocksRepo = {
       "title": "HTML block",
       "description": "View HTML content",
       "sandbox": false,
-      "entry": "/src/blocks/file-blocks/html.tsx",
-      "extensions": [
-        "html",
-        "svelte"
-      ],
+      "entry": "blocks/file-blocks/html.tsx",
       "matches": [
         "*.html",
         "*.svelte"
@@ -108,10 +98,7 @@ export const defaultBlocksRepo = {
       "title": "Styleguide block",
       "description": "View selectors in a css file",
       "sandbox": false,
-      "entry": "/src/blocks/file-blocks/css.tsx",
-      "extensions": [
-        "css"
-      ],
+      "entry": "blocks/file-blocks/css.tsx",
       "matches": [
         "*.css"
       ],
@@ -123,14 +110,7 @@ export const defaultBlocksRepo = {
       "title": "Image block",
       "description": "View images",
       "sandbox": false,
-      "entry": "/src/blocks/file-blocks/image.tsx",
-      "extensions": [
-        "png",
-        "jpg",
-        "jpeg",
-        "gif",
-        "svg"
-      ],
+      "entry": "blocks/file-blocks/image.tsx",
       "matches": [
         "*.png",
         "*.jpg",
@@ -146,14 +126,7 @@ export const defaultBlocksRepo = {
       "title": "Object explorer",
       "description": "An interactive view of JSON objects",
       "sandbox": false,
-      "entry": "/src/blocks/file-blocks/json.tsx",
-      "extensions": [
-        "json",
-        "webmanifest",
-        "prettierrc",
-        "yaml",
-        "yml"
-      ],
+      "entry": "blocks/file-blocks/json.tsx",
       "matches": [
         "*.json",
         "*.webmanifest",
@@ -171,11 +144,7 @@ export const defaultBlocksRepo = {
       "title": "GeoJSON explorer",
       "description": "View & edit GeoJSON data",
       "sandbox": false,
-      "entry": "/src/blocks/file-blocks/geojson.tsx",
-      "extensions": [
-        "json",
-        "geojson"
-      ],
+      "entry": "blocks/file-blocks/geojson.tsx",
       "matches": [
         "*.geo.json",
         "*.geojson"
@@ -188,11 +157,7 @@ export const defaultBlocksRepo = {
       "title": "3D block",
       "description": "A block for 3d files",
       "sandbox": false,
-      "entry": "/src/blocks/file-blocks/3d-files.tsx",
-      "extensions": [
-        "gltf",
-        "glb"
-      ],
+      "entry": "blocks/file-blocks/3d-files.tsx",
       "matches": [
         "*.gltf",
         "*.glb"
@@ -205,10 +170,7 @@ export const defaultBlocksRepo = {
       "title": "Flat data block",
       "description": "A block for flat data files",
       "sandbox": false,
-      "entry": "/src/blocks/file-blocks/flat.tsx",
-      "extensions": [
-        "csv"
-      ],
+      "entry": "blocks/file-blocks/flat.tsx",
       "matches": [
         "*.csv"
       ],
@@ -220,10 +182,7 @@ export const defaultBlocksRepo = {
       "title": "Poll block",
       "description": "View simple polls beautifully",
       "sandbox": false,
-      "entry": "/src/blocks/file-blocks/poll.tsx",
-      "extensions": [
-        "json"
-      ],
+      "entry": "blocks/file-blocks/poll.tsx",
       "matches": [
         "*.json"
       ],
@@ -235,10 +194,7 @@ export const defaultBlocksRepo = {
       "title": "Chart block",
       "description": "An interactive chart block",
       "sandbox": false,
-      "entry": "/src/blocks/file-blocks/charts/index.tsx",
-      "extensions": [
-        "csv"
-      ],
+      "entry": "blocks/file-blocks/charts/index.tsx",
       "matches": [
         "*.csv"
       ],
@@ -250,11 +206,7 @@ export const defaultBlocksRepo = {
       "title": "Markdown",
       "description": "View markdown files. You can also view live repo info, using Issues, Releases, and Commits custom components, as well as live code examples with CodeSandbox.",
       "sandbox": true,
-      "entry": "/src/blocks/file-blocks/live-markdown/index.tsx",
-      "extensions": [
-        "md",
-        "mdx"
-      ],
+      "entry": "blocks/file-blocks/live-markdown/index.tsx",
       "matches": [
         "*.md",
         "*.mdx"
@@ -267,11 +219,7 @@ export const defaultBlocksRepo = {
       "title": "React component feedback",
       "description": "Give feedback on a React component",
       "sandbox": false,
-      "entry": "/src/blocks/file-blocks/annotate-react/index.tsx",
-      "extensions": [
-        "jsx",
-        "tsx"
-      ],
+      "entry": "blocks/file-blocks/annotate-react/index.tsx",
       "matches": [
         "*.jsx",
         "*.tsx"
@@ -284,10 +232,7 @@ export const defaultBlocksRepo = {
       "title": "Sentence encoder block",
       "description": "Experiment with your sentence-encoder",
       "sandbox": false,
-      "entry": "/src/blocks/file-blocks/sentence-encoder.tsx",
-      "extensions": [
-        "json"
-      ],
+      "entry": "blocks/file-blocks/sentence-encoder.tsx",
       "matches": [
         "*.json"
       ],
@@ -299,10 +244,7 @@ export const defaultBlocksRepo = {
       "title": "Processing block",
       "description": "Run your p5.js sketches",
       "sandbox": true,
-      "entry": "/src/blocks/file-blocks/processing.tsx",
-      "extensions": [
-        "js"
-      ],
+      "entry": "blocks/file-blocks/processing.tsx",
       "matches": [
         "*.js"
       ],
@@ -314,13 +256,7 @@ export const defaultBlocksRepo = {
       "title": "Summarize block",
       "description": "Summarize parts of a file using ML",
       "sandbox": false,
-      "entry": "/src/blocks/file-blocks/summarize/index.tsx",
-      "extensions": [
-        "js",
-        "ts",
-        "tsx",
-        "jsx"
-      ],
+      "entry": "blocks/file-blocks/summarize/index.tsx",
       "matches": [
         "*.js",
         "*.ts",
@@ -335,15 +271,7 @@ export const defaultBlocksRepo = {
       "title": "Explain block",
       "description": "Explain parts of a file using ML",
       "sandbox": false,
-      "entry": "/src/blocks/file-blocks/explain/index.tsx",
-      "extensions": [
-        "js",
-        "ts",
-        "tsx",
-        "jsx",
-        "rb",
-        "py"
-      ],
+      "entry": "blocks/file-blocks/explain/index.tsx",
       "matches": [
         "*.js",
         "*.ts",
@@ -360,10 +288,7 @@ export const defaultBlocksRepo = {
       "title": "Edit code",
       "description": "Edit code by prompting a Machine Learning model",
       "sandbox": false,
-      "entry": "/src/blocks/file-blocks/edit/index.tsx",
-      "extensions": [
-        "*"
-      ],
+      "entry": "blocks/file-blocks/edit/index.tsx",
       "matches": [
         "*"
       ],
@@ -375,7 +300,7 @@ export const defaultBlocksRepo = {
       "title": "Minimap",
       "description": "A visualization of your folders and files",
       "sandbox": false,
-      "entry": "/src/blocks/folder-blocks/minimap/index.tsx",
+      "entry": "blocks/folder-blocks/minimap/index.tsx",
       "example_path": "https://github.com/githubnext/blocks-tutorial"
     },
     {
@@ -384,7 +309,7 @@ export const defaultBlocksRepo = {
       "title": "Overview",
       "description": "An overview of a folder: including README, license, and recent activity",
       "sandbox": false,
-      "entry": "/src/blocks/folder-blocks/overview/index.tsx",
+      "entry": "blocks/folder-blocks/overview/index.tsx",
       "example_path": "https://github.com/githubnext/blocks-tutorial"
     },
     {
@@ -393,7 +318,7 @@ export const defaultBlocksRepo = {
       "title": "Dashboard",
       "description": "A dashboard of Blocks",
       "sandbox": false,
-      "entry": "/src/blocks/folder-blocks/dashboard/index.tsx",
+      "entry": "blocks/folder-blocks/dashboard/index.tsx",
       "example_path": "https://github.com/githubnext/blocks-tutorial"
     },
     {
@@ -402,7 +327,7 @@ export const defaultBlocksRepo = {
       "title": "Code Tour",
       "description": "Create documented tours of your code",
       "sandbox": false,
-      "entry": "/src/blocks/folder-blocks/code-tour/index.tsx",
+      "entry": "blocks/folder-blocks/code-tour/index.tsx",
       "example_path": "https://github.com/githubnext/blocks-tutorial"
     },
     {
@@ -411,7 +336,7 @@ export const defaultBlocksRepo = {
       "title": "Infinite Canvas",
       "description": "View and annotate your files in an infinite canvas",
       "sandbox": false,
-      "entry": "/src/blocks/folder-blocks/infinite-canvas/index.tsx",
+      "entry": "blocks/folder-blocks/infinite-canvas/index.tsx",
       "example_path": "https://github.com/githubnext/blocks-tutorial"
     }
   ],

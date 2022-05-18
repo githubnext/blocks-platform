@@ -1,4 +1,4 @@
-import { BlocksRepo, FileContext, FolderContext } from "@githubnext/utils";
+import { BlocksRepo, FileContext, FolderContext } from "@githubnext/blocks";
 import { RepoFiles } from "ghapi";
 import { memo, useMemo } from "react";
 import { SandboxedBlock } from "components/sandboxed-block";

@@ -1,6 +1,6 @@
 import { tw } from "twind";
 import "@tensorflow/tfjs";
-import { FileBlockProps } from "@githubnext/utils";
+import { FileBlockProps } from "@githubnext/blocks";
 import { useEffect, useState } from "react";
 import * as use from "@tensorflow-models/universal-sentence-encoder";
 import { UniversalSentenceEncoderQnA } from "@tensorflow-models/universal-sentence-encoder/dist/use_qna";

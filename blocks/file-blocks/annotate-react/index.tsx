@@ -1,6 +1,6 @@
 // @ts-ignore
 import { tw } from "twind";
-import { FileBlockProps } from "@githubnext/utils";
+import { FileBlockProps } from "@githubnext/blocks";
 import { useState } from "react";
 // @ts-ignore
 import Annotation from "react-image-annotation";

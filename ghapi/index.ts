@@ -1,5 +1,6 @@
 import { Octokit } from "@octokit/rest";
 import { Endpoints } from "@octokit/types";
+import { components } from "@octokit/openapi-types";
 import axios, { AxiosInstance } from "axios";
 import { signOut } from "next-auth/react";
 import { Base64 } from "js-base64";
@@ -426,15 +427,15 @@ export const checkAccess: QueryFunction<
 };
 
 type getContentParams = Parameters<Octokit["repos"]["getContent"]>[0];
-type getContentResult =
-  Endpoints["GET /repos/{owner}/{repo}/contents/{path}"]["response"]["data"][0];
+type getContentResult = components["schemas"]["content-file"];
 const tryToGetContent = async (
   octokit: Octokit,
   params: getContentParams
 ): Promise<getContentResult | undefined> => {
   try {
     const res = await octokit.repos.getContent(params);
-    return res.data;
+    // `getContent` returns different types for different kinds of object, but we only ever request files
+    return res.data as getContentResult;
   } catch {
     return undefined;
   }

@@ -45,8 +45,8 @@ function App({ Component, pageProps: { session, ...pageProps } }) {
     <QueryClientProvider client={queryClient} contextSharing={true}>
       <Head>
         <meta name="robots" content="noindex,nofollow" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
         <title>GitHub Blocks</title>
       </Head>
       <Hydrate state={pageProps.dehydratedState}>

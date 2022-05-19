@@ -106,16 +106,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const queryClient = new QueryClient();
   const session = await getSession({ req: context.req });
 
-  // First, check if the user is authenticated or has an invalid session.
-  if (!session || session.error) {
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-  }
-
   const octokit = makeOctokitInstance(session?.token as string);
 
   // get the installation for the repo, if the user has access

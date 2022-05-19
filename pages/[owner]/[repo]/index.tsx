@@ -68,8 +68,8 @@ function RepoDetailContainer(props: {
           <title>
             {/* mimicking github.com's title */}
             GitHub Blocks:
-            {Boolean(path) && ` ${repo}/${path}`}
-            {Boolean(branch) && ` at ${branch}`}
+            {path ? ` ${repo}/${path}` : ` ${repo}`}
+            {branch ? ` at ${branch}` : ""}
             {` · ${owner}/${repo}`}
           </title>
         </Head>

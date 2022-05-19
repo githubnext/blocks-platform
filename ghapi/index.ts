@@ -287,8 +287,14 @@ export const getBlocksFromRepo: QueryFunction<
     };
 
     return data;
-  } catch {
-    return undefined;
+  } catch (e) {
+    const repoRes = await meta.ghapi.get(`/repos/${owner}/${repo}`);
+    const getIfRepoExists = repoRes.data.id;
+    if (!getIfRepoExists) {
+      throw new Error(`Could not find blocks.config.json in ${owner}/${repo}`);
+    } else {
+      return undefined;
+    }
   }
 };
 

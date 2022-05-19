@@ -1018,10 +1018,10 @@
     styled-components "^5.3.5"
     vite "^2.9.8"
 
-"@githubnext/blocks@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@githubnext/blocks/-/blocks-1.0.1.tgz#ce87fa2089099672664e19a977a870967186cec3"
-  integrity sha512-kk+71+ZSAwB8DqfxagxKU++MkfMaaZ/MJkpzi73P9u8sY54K+QiBLFa8GNzllIQjth/pWMYWfiuUl8AmPQtPeQ==
+"@githubnext/blocks@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@githubnext/blocks/-/blocks-1.0.4.tgz#7061c1efdd166419d55bd8b91b49ae3ca7c7b1a8"
+  integrity sha512-bnoN2E3vXYtwUgR2xN+l98/dYtvPDS9YmIFlO5EM0WxpB9FcnnlQAlNAsQ6Jaam424bpALgwQ1qfKRLfwwsiMA==
   dependencies:
     "@loadable/component" "^5.15.0"
     "@octokit/openapi-types" "^11.2.0"

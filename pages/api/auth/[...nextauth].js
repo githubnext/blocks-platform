@@ -98,5 +98,16 @@ export default NextAuth({
 
       return await refreshAccessToken(token);
     },
+    async redirect({ url, baseUrl }) {
+      // Allows relative callback URLs
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      // replace origin with baseUrl
+      // to fix bonkers behavior from next-auth
+      // fix in the works: https://github.com/nextauthjs/next-auth/pull/4534
+      const origin = baseUrl;
+      const urlPath = new URL(url).pathname;
+      const newPath = `${origin}${urlPath}`;
+      return newPath;
+    },
   },
 });

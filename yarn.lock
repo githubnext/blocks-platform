@@ -926,9 +926,9 @@
     unist-util-visit "^1.0.0"
     uuid "^3.3.2"
 
-"@githubnext/blocks-examples@https://api.github.com/repos/githubnext/blocks-examples/tarball/0.16.0":
+"@githubnext/blocks-examples@https://api.github.com/repos/githubnext/blocks-examples/tarball/0.16.1":
   version "0.0.0"
-  resolved "https://api.github.com/repos/githubnext/blocks-examples/tarball/0.16.0#c646963691feacb2a1d593ee9d73920dacbf0d44"
+  resolved "https://api.github.com/repos/githubnext/blocks-examples/tarball/0.16.1#577ef1ba1cc75b4df34a45c7c5dcaa5077771f8e"
   dependencies:
     "@codemirror/autocomplete" "^0.19.15"
     "@codemirror/closebrackets" "^0.19.1"
@@ -950,7 +950,7 @@
     "@excalidraw/excalidraw" "^0.10.0"
     "@fullstackio/cq" "^6.0.9"
     "@fullstackio/remark-cq" "^6.1.2"
-    "@githubnext/blocks" "^1.0.0"
+    "@githubnext/blocks" "^1.0.2"
     "@githubocto/flat-ui" "^0.14.1"
     "@mdx-js/runtime" "2.0.0-next.9"
     "@octokit/rest" "^18.12.0"
@@ -994,31 +994,7 @@
     twind "^0.16.17"
     unidiff "^1.0.2"
 
-"@githubnext/blocks@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@githubnext/blocks/-/blocks-1.0.0.tgz#5f3058edce9d49fc26708ff93700a389ddfa2710"
-  integrity sha512-JVvs88CMw2C2y22/S7H+h4GEO8kCOkC08A4Vg587A9Xh1Ru2ewSalYlTxD2cmt93X7QjRrLdN0dP8BEBpC5PcA==
-  dependencies:
-    "@loadable/component" "^5.15.0"
-    "@octokit/openapi-types" "^11.2.0"
-    "@primer/react" "^35.2.1"
-    "@types/lodash.uniqueid" "^4.0.6"
-    "@vitejs/plugin-react" "^1.3.2"
-    chalk "^4.1.2"
-    chokidar "^3.5.3"
-    cross-spawn "^7.0.3"
-    dotenv "^16.0.1"
-    dotenv-expand "^8.0.3"
-    express "^4.18.1"
-    git-url-parse "^11.6.0"
-    lodash.uniqueid "^4.0.1"
-    prettier "^2.6.2"
-    react-error-boundary "^3.1.4"
-    react-query "^3.39.0"
-    styled-components "^5.3.5"
-    vite "^2.9.8"
-
-"@githubnext/blocks@^1.0.4":
+"@githubnext/blocks@^1.0.2", "@githubnext/blocks@^1.0.4":
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@githubnext/blocks/-/blocks-1.0.4.tgz#7061c1efdd166419d55bd8b91b49ae3ca7c7b1a8"
   integrity sha512-bnoN2E3vXYtwUgR2xN+l98/dYtvPDS9YmIFlO5EM0WxpB9FcnnlQAlNAsQ6Jaam424bpALgwQ1qfKRLfwwsiMA==

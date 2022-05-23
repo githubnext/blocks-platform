@@ -74,18 +74,6 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
       onCommit();
       await queryClient.invalidateQueries(QueryKeyMap.file.key);
       await queryClient.invalidateQueries(QueryKeyMap.timeline.key);
-
-      router.push(
-        {
-          pathname: router.pathname,
-          query: {
-            ...router.query,
-            fileRef: newSha,
-          },
-        },
-        null,
-        { shallow: true }
-      );
     },
   });
 

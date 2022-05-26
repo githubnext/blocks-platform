@@ -62,7 +62,6 @@ export default function BlockPicker(props: BlockPickerProps) {
       enabled: isSearchTermUrl,
     }
   );
-  console.log(blocksUrlBlocks);
 
   const blocksList = isSearchTermUrl
     ? [blocksUrlBlocks].filter(Boolean)

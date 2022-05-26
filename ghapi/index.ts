@@ -17,6 +17,7 @@ import {
 } from "lib/query-keys";
 import { QueryFunction } from "react-query";
 import { BlocksRepo } from "@githubnext/blocks";
+import { filterBlock } from "../hooks";
 export interface RepoContext {
   repo: string;
   owner: string;
@@ -265,7 +266,8 @@ export const getBlocksFromRepo: QueryFunction<
     const content = Buffer.from(encodedContent, "base64").toString("utf8");
     const rawBlocks = JSON.parse(content);
 
-    const blocks = (rawBlocks || []).map((block) => ({
+    const filter = filterBlock(params);
+    const blocks = (rawBlocks || []).filter(filter).map((block) => ({
       ...block,
       owner,
       repo,

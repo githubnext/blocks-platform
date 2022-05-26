@@ -334,12 +334,18 @@ export function useManageBlock({
   // do we need to load any Blocks from private repos?
   const [blockKeyOwner, blockKeyRepo] = blockKey.split("__");
   const blockKeyResult = useBlocksFromRepo({
+    path,
+    type,
+    user,
     owner: blockKeyOwner,
     repo: blockKeyRepo,
   });
   const [storedDefaultBlockOwner, storedDefaultBlockRepo] =
     storedDefaultBlock.split("__");
   const storedDefaultBlockResult = useBlocksFromRepo({
+    path,
+    type,
+    user,
     owner: storedDefaultBlockOwner,
     repo: storedDefaultBlockRepo,
   });
@@ -351,20 +357,10 @@ export function useManageBlock({
   ].find((r) => r.status !== "success");
   if (incomplete) return incomplete as UseManageBlockResult;
 
-  const filterBlocksRepo = (repo) => {
-    if (!repo) return repo;
-    return {
-      ...repo,
-      blocks: (repo.blocks || []).filter(
-        filterBlock({ path, type, user, repo })
-      ),
-    };
-  };
-
   const blocksRepos = [
     ...filteredBlocksReposResult.data,
-    filterBlocksRepo(blockKeyResult.data),
-    filterBlocksRepo(storedDefaultBlockResult.data),
+    blockKeyResult.data,
+    storedDefaultBlockResult.data,
   ].filter(Boolean);
 
   const exampleBlocks =
@@ -488,15 +484,17 @@ export function useFilteredBlocksRepos(
   }, [allBlocksReposResult.data, path]);
 }
 
-const filterBlock =
+export const filterBlock =
   ({
     path,
     repo,
+    owner,
     user,
     type,
   }: {
     path: string | undefined;
-    repo: RepoContext;
+    repo: string;
+    owner: string;
     user: Session["user"];
     type: "file" | "folder";
   }) =>
@@ -504,9 +502,7 @@ const filterBlock =
     if (
       !user.isHubber &&
       CODEX_BLOCKS.some((cb) => {
-        return (
-          block.id === cb.id && repo.owner === cb.owner && repo.repo === cb.repo
-        );
+        return block.id === cb.id && owner === cb.owner && repo === cb.repo;
       })
     ) {
       return false;

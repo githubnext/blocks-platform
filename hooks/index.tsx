@@ -468,7 +468,13 @@ export function useFilteredBlocksRepos(
       data: allBlocksReposResult.data
         .map((repo) => {
           const filteredBlocks = (repo.blocks || []).filter(
-            filterBlock({ path, type, user, repo })
+            filterBlock({
+              path,
+              type,
+              user,
+              owner: repo.owner,
+              repo: repo.repo,
+            })
           );
           return {
             ...repo,

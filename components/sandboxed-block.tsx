@@ -48,7 +48,7 @@ const stateStyles = {
 const DefaultLoadingState = <div style={stateStyles}>Loading...</div>;
 const DefaultErrorState = <div style={stateStyles}>Error...</div>;
 
-function mkResponse<T>(
+function handleResponse<T>(
   p: Promise<T>,
   {
     id,
@@ -130,7 +130,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
             break;
 
           case "github-data--request":
-            mkResponse(onRequestGitHubData(data.path, data.params), {
+            handleResponse(onRequestGitHubData(data.path, data.params), {
               id,
               requestId: data.requestId,
               type: "github-data--response",
@@ -139,7 +139,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
             break;
 
           case "store-get--request":
-            mkResponse(onStoreGet(data.key), {
+            handleResponse(onStoreGet(data.key), {
               id,
               requestId: data.requestId,
               type: "store-get--response",
@@ -148,7 +148,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
             break;
 
           case "store-set--request":
-            mkResponse(onStoreSet(data.key, data.value), {
+            handleResponse(onStoreSet(data.key, data.value), {
               id,
               requestId: data.requestId,
               type: "store-set--response",

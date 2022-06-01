@@ -105,7 +105,7 @@ ${cssFilesString}
     return uniqueId
   }
 
-  const mkRequest = (type, args) => {
+  const makeRequest = (type, args) => {
     // for responses to this specific request
     const requestId = type + "--request--" + getUniqueId();
 
@@ -127,15 +127,15 @@ ${cssFilesString}
   }
 
   const onRequestGitHubData = (path, params) => {
-    return mkRequest("github-data", { path, params });
+    return makeRequest("github-data", { path, params });
   };
 
   const onStoreGet = (key) => {
-    return mkRequest("store-get", { key });
+    return makeRequest("store-get", { key });
   };
 
   const onStoreSet = (key, value) => {
-    return mkRequest("store-set", { key, value });
+    return makeRequest("store-set", { key, value });
   };
 
   export default function WrappedBlock() {

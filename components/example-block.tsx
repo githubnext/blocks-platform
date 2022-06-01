@@ -34,6 +34,8 @@ interface ExampleBlockProps {
     params?: Record<string, any>
   ) => Promise<any>;
   onNavigateToPath: (path: string) => void;
+  onStoreGet: (key: string) => Promise<any>;
+  onStoreSet: (key: string, value: any) => Promise<void>;
   onRequestBlocksRepos: () => Promise<BlocksRepo[]>;
 }
 
@@ -52,6 +54,8 @@ export function ExampleBlock(props: ExampleBlockProps) {
     onRequestGitHubData,
     onNavigateToPath,
     onRequestBlocksRepos,
+    onStoreGet,
+    onStoreSet,
   } = props;
 
   const Component = components[block.id];
@@ -80,6 +84,8 @@ export function ExampleBlock(props: ExampleBlockProps) {
         onUpdateContent={onUpdateContent}
         onRequestUpdateContent={onUpdateContent} // for backwards compatibility
         onRequestGitHubData={onRequestGitHubData}
+        onStoreGet={onStoreGet}
+        onStoreSet={onStoreSet}
         BlockComponent={!isEmbedded && BlockComponent}
         onRequestBlocksRepos={onRequestBlocksRepos}
       />
@@ -109,6 +115,8 @@ const BlockComponent = ({
   onUpdateContent,
   onRequestGitHubData,
   onNavigateToPath,
+  onStoreGet,
+  onStoreSet,
   onRequestBlocksRepos,
   ...props
 }: BlockComponentProps) => {
@@ -191,6 +199,8 @@ const BlockComponent = ({
           onNavigateToPath={onNavigateToPath}
           onUpdateContent={onUpdateContent}
           onRequestGitHubData={onRequestGitHubData}
+          onStoreGet={onStoreGet}
+          onStoreSet={onStoreSet}
           onRequestBlocksRepos={onRequestBlocksRepos}
         />
       </ErrorBoundary>
@@ -211,6 +221,8 @@ const BlockComponent = ({
         onNavigateToPath={onNavigateToPath}
         onUpdateContent={onUpdateContent}
         onRequestGitHubData={onRequestGitHubData}
+        onStoreGet={onStoreGet}
+        onStoreSet={onStoreSet}
       />
     </ErrorBoundary>
   );

@@ -120,6 +120,13 @@ export function GeneralBlock(props: GeneralBlockProps) {
     [context, name, type]
   );
 
+  const onStoreGet = (key: string) => {
+    return Promise.resolve(undefined);
+  };
+  const onStoreSet = (key: string, value: string) => {
+    return Promise.resolve(void 0);
+  };
+
   return (
     <div
       className="flex flex-col"
@@ -130,19 +137,23 @@ export function GeneralBlock(props: GeneralBlockProps) {
       <ErrorBoundary key={path}>
         <div className="overflow-y-auto flex-1">
           <SandboxedBlockWrapper
-            block={block}
-            theme={theme}
-            context={updatedContext}
-            tree={tree}
-            contents={content}
-            originalContent={originalContent}
-            isEditable={isEditable}
-            metadata={metadata}
-            onUpdateMetadata={onRequestUpdateMetadata}
-            onUpdateContent={onUpdateContent}
-            onRequestGitHubData={onRequestGitHubData}
-            onNavigateToPath={onNavigateToPath}
-            onRequestBlocksRepos={onRequestBlocksRepos}
+            {...{
+              block,
+              theme,
+              context: updatedContext,
+              tree,
+              contents: content,
+              originalContent,
+              isEditable,
+              metadata,
+              onUpdateMetadata: onRequestUpdateMetadata,
+              onUpdateContent,
+              onRequestGitHubData,
+              onNavigateToPath,
+              onStoreGet,
+              onStoreSet,
+              onRequestBlocksRepos,
+            }}
           />
         </div>
       </ErrorBoundary>

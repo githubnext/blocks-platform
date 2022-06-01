@@ -31,6 +31,8 @@ interface SandboxedBlockProps {
     params?: Record<string, any>
   ) => Promise<any>;
   onNavigateToPath: (path: string) => void;
+  onStoreGet: (key: string) => Promise<any>;
+  onStoreSet: (key: string, value: any) => Promise<void>;
 }
 
 const stateStyles = {
@@ -46,6 +48,32 @@ const stateStyles = {
 const DefaultLoadingState = <div style={stateStyles}>Loading...</div>;
 const DefaultErrorState = <div style={stateStyles}>Error...</div>;
 
+function mkResponse<T>(
+  p: Promise<T>,
+  {
+    id,
+    requestId,
+    type,
+    origin,
+  }: {
+    id: string;
+    requestId: string;
+    type: string;
+    origin: string;
+  }
+) {
+  return p
+    .then((response) => {
+      window.postMessage({ type, id, requestId, response }, origin);
+    })
+    .catch((e) => {
+      // Error is not always serializable
+      // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm#things_that_dont_work_with_structured_clone
+      const error = e instanceof Error ? e.message : e;
+      window.postMessage({ type, id, requestId, error }, origin);
+    });
+}
+
 export function SandboxedBlock(props: SandboxedBlockProps) {
   const {
     block,
@@ -59,6 +87,8 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
     onUpdateContent,
     onRequestGitHubData,
     onNavigateToPath,
+    onStoreGet,
+    onStoreSet,
   } = props;
   const { status, data: blockContent } = useBlockContent({
     owner: block.owner,
@@ -100,31 +130,30 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
             break;
 
           case "github-data--request":
-            onRequestGitHubData(data.path, data.params)
-              .then((res) => {
-                window.postMessage(
-                  {
-                    type: "github-data--response",
-                    id,
-                    requestId: data.requestId,
-                    data: res,
-                  },
-                  origin
-                );
-              })
-              .catch((e) => {
-                window.postMessage(
-                  {
-                    type: "github-data--response",
-                    id,
-                    requestId: data.requestId,
-                    // Error is not always serializable
-                    // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm#things_that_dont_work_with_structured_clone
-                    error: e instanceof Error ? e.message : e,
-                  },
-                  origin
-                );
-              });
+            mkResponse(onRequestGitHubData(data.path, data.params), {
+              id,
+              requestId: data.requestId,
+              type: "github-data--response",
+              origin,
+            });
+            break;
+
+          case "store-get--request":
+            mkResponse(onStoreGet(data.key), {
+              id,
+              requestId: data.requestId,
+              type: "store-get--response",
+              origin,
+            });
+            break;
+
+          case "store-set--request":
+            mkResponse(onStoreSet(data.key, data.value), {
+              id,
+              requestId: data.requestId,
+              type: "store-set--response",
+              origin,
+            });
             break;
         }
       }

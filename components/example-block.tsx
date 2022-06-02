@@ -1,4 +1,5 @@
 import {
+  Block,
   BlocksRepo,
   FileBlockProps,
   FileContext,

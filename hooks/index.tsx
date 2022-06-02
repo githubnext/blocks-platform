@@ -1,4 +1,4 @@
-import { BlocksRepo, RepoFiles } from "@githubnext/blocks";
+import { Block, BlocksRepo, RepoFiles } from "@githubnext/blocks";
 import { Octokit } from "@octokit/rest";
 import pm from "picomatch";
 import { defaultBlocksRepo as exampleBlocksRepo } from "blocks/index";

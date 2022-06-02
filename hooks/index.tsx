@@ -478,11 +478,7 @@ export function useFilteredBlocksRepos(
           );
           return {
             ...repo,
-            blocks: filteredBlocks.map((b) => ({
-              ...b,
-              owner: repo.owner,
-              repo: repo.repo,
-            })),
+            blocks: filteredBlocks,
           };
         })
         .filter((repo) => repo?.blocks?.length),

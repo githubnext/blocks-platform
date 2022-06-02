@@ -39,7 +39,7 @@ const makePartitionKey = ({ owner, repo }: { owner: string; repo: string }) => {
   // https://stackoverflow.com/questions/59081778/rules-for-special-characters-in-github-repository-name
   // partition keys disallow / \ # ?
   // https://docs.microsoft.com/en-us/rest/api/storageservices/Understanding-the-Table-Service-Data-Model#characters-disallowed-in-key-fields
-  return `${owner}^${repo}`;
+  return encodeURIComponent(`${owner}/${repo}`);
 };
 
 export const storeGet = async ({
@@ -62,7 +62,7 @@ export const storeGet = async ({
   try {
     const result = await tableClient.getEntity(
       makePartitionKey({ owner, repo }),
-      key
+      encodeURIComponent(key)
     );
     return JSON.parse(result.value as string);
   } catch (e) {
@@ -96,7 +96,7 @@ export const storeSet = async ({
   });
   const entity = {
     partitionKey: makePartitionKey({ owner, repo }),
-    rowKey: key,
+    rowKey: encodeURIComponent(key),
     // TODO(jaked)
     // we pass JSON in the request, Next.js decodes it, then we re-encode it
     // don't do that
@@ -122,5 +122,8 @@ export const storeDelete = async ({
     blockRepoId,
     blockId,
   });
-  return tableClient.deleteEntity(makePartitionKey({ owner, repo }), key);
+  return tableClient.deleteEntity(
+    makePartitionKey({ owner, repo }),
+    encodeURIComponent(key)
+  );
 };

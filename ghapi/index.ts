@@ -16,7 +16,7 @@ import {
   TimelineKeyParams,
 } from "lib/query-keys";
 import { QueryFunction } from "react-query";
-import { BlocksRepo } from "@githubnext/blocks";
+import { Block, BlocksRepo } from "@githubnext/blocks";
 import { filterBlock } from "../hooks";
 export interface RepoContext {
   repo: string;
@@ -260,6 +260,8 @@ export const getBlocksFromRepo: QueryFunction<
   }
 
   try {
+    const repoRes = await meta.ghapi.get(`/repos/${owner}/${repo}`);
+
     const blocksConfigUrl = `/repos/${owner}/${repo}/contents/blocks.config.json`;
     const blocksConfigRes = await meta.ghapi(blocksConfigUrl);
     const encodedContent = blocksConfigRes.data.content;
@@ -267,19 +269,20 @@ export const getBlocksFromRepo: QueryFunction<
     const rawBlocks = JSON.parse(content);
 
     const filter = filterBlock(params);
-    const blocks = (rawBlocks || []).filter(filter).map((block) => ({
+    const blocks = (rawBlocks || []).filter(filter).map((block: Block) => ({
       ...block,
-      owner,
-      repo,
+      owner: repoRes.data.owner.login,
+      repo: repoRes.data.name,
+      repoId: repoRes.data.id,
     }));
 
-    const data: BlocksRepo = {
+    return {
       owner,
       repo,
       blocks,
       full_name: `${owner}/${repo}`,
+      id: repoRes.data.id,
       // we don't use any of the below at the moment
-      id: 0,
       html_url: "",
       description: "",
       stars: 0,
@@ -287,16 +290,8 @@ export const getBlocksFromRepo: QueryFunction<
       language: "",
       topics: [""],
     };
-
-    return data;
   } catch (e) {
-    const repoRes = await meta.ghapi.get(`/repos/${owner}/${repo}`);
-    const getIfRepoExists = repoRes.data.id;
-    if (!getIfRepoExists) {
-      throw new Error(`Could not find blocks.config.json in ${owner}/${repo}`);
-    } else {
-      return undefined;
-    }
+    return undefined;
   }
 };
 
@@ -456,7 +451,7 @@ export const getAllBlocksRepos: QueryFunction<BlocksRepo[]> = async (ctx) => {
     sort: "updated",
     per_page: 100,
   });
-  const blocks = await Promise.all(
+  const blocks: Block[][] = await Promise.all(
     repos.data.items.map(async (repo) => {
       try {
         const blocksConfigRes = await tryToGetContent(octokit, {
@@ -492,7 +487,7 @@ export const getAllBlocksRepos: QueryFunction<BlocksRepo[]> = async (ctx) => {
       }
     })
   );
-  return repos.data.items.map((repo, i) => ({
+  return repos.data.items.map<BlocksRepo>((repo, i) => ({
     owner: repo.owner.login,
     repo: repo.name,
     full_name: repo.full_name,
@@ -504,6 +499,11 @@ export const getAllBlocksRepos: QueryFunction<BlocksRepo[]> = async (ctx) => {
     language: repo.language,
     topics: repo.topics,
 
-    blocks: blocks[i],
+    blocks: blocks[i].map<Block>((b) => ({
+      ...b,
+      owner: repo.owner.login,
+      repo: repo.name,
+      repoId: repo.id,
+    })),
   }));
 };

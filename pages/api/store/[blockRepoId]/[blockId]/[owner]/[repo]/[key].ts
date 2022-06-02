@@ -26,7 +26,11 @@ export default async function handler(
         repo,
         key,
       });
-      res.status(200).send(value);
+      if (value === undefined) {
+        res.status(404).end();
+      } else {
+        res.status(200).send(value);
+      }
       return;
 
     case "PUT":

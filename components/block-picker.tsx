@@ -189,12 +189,7 @@ const BlockItem = ({
       selected={isSelected}
       className="group py-2"
       onSelect={() => {
-        const enhancedBlock = {
-          ...block,
-          owner: repo.owner,
-          repo: repo.repo,
-        };
-        onChange(enhancedBlock);
+        onChange(block);
       }}
     >
       <div className="flex justify-between">

@@ -26,7 +26,7 @@ const makeTableClient = async ({
 }) => {
   // table names are case-insensitive and must satisfy /^[A-Za-z][A-Za-z0-9]{2,62}$/
   // https://docs.microsoft.com/en-us/rest/api/storageservices/understanding-the-table-service-data-model#table-names
-  // hm - seems to be allowed
+  // but - seems to be allowed
   // TODO(jaked) check allowed characters in blockId
   const tableName = `repo-${blockRepoId}-${blockId}`;
   await serviceClient.createTable(tableName);
@@ -35,8 +35,6 @@ const makeTableClient = async ({
 };
 
 const makePartitionKey = ({ owner, repo }: { owner: string; repo: string }) => {
-  // separator should not be a valid character in GitHub owners / repos
-  // https://stackoverflow.com/questions/59081778/rules-for-special-characters-in-github-repository-name
   // partition keys disallow / \ # ?
   // https://docs.microsoft.com/en-us/rest/api/storageservices/Understanding-the-Table-Service-Data-Model#characters-disallowed-in-key-fields
   return encodeURIComponent(`${owner}/${repo}`);

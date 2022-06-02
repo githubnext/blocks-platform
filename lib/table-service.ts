@@ -62,7 +62,7 @@ export const storeGet = async ({
       makePartitionKey({ owner, repo }),
       encodeURIComponent(key)
     );
-    return JSON.parse(result.value as string);
+    return JSON.parse(new TextDecoder().decode(result.value as Uint8Array));
   } catch (e) {
     if (e.name === "RestError" && e.statusCode === 404) {
       return undefined;
@@ -98,7 +98,7 @@ export const storeSet = async ({
     // TODO(jaked)
     // we pass JSON in the request, Next.js decodes it, then we re-encode it
     // don't do that
-    value: JSON.stringify(value),
+    value: new TextEncoder().encode(JSON.stringify(value)),
   };
   return tableClient.upsertEntity(entity);
 };

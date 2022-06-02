@@ -12,13 +12,14 @@ export default async function handler(
     return;
   }
 
-  const { blockOwnerId, blockRepoId, blockId, owner, repo, key } =
-    req.query as Record<string, string>;
+  const { blockRepoId, blockId, owner, repo, key } = req.query as Record<
+    string,
+    string
+  >;
 
   switch (req.method) {
     case "GET":
       const value = await storeGet({
-        blockOwnerId,
         blockRepoId,
         blockId,
         owner,
@@ -30,7 +31,6 @@ export default async function handler(
 
     case "PUT":
       await storeSet({
-        blockOwnerId,
         blockRepoId,
         blockId,
         owner,
@@ -43,7 +43,6 @@ export default async function handler(
 
     case "DELETE":
       await storeDelete({
-        blockOwnerId,
         blockRepoId,
         blockId,
         owner,

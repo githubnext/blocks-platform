@@ -17,7 +17,7 @@ export default async function handler(
 
   switch (req.method) {
     case "GET":
-      const value = storeGet({
+      const value = await storeGet({
         blockOwnerId,
         blockRepoId,
         blockId,
@@ -29,7 +29,7 @@ export default async function handler(
       return;
 
     case "PUT":
-      storeSet({
+      await storeSet({
         blockOwnerId,
         blockRepoId,
         blockId,
@@ -42,7 +42,7 @@ export default async function handler(
       return;
 
     case "DELETE":
-      storeDelete({
+      await storeDelete({
         blockOwnerId,
         blockRepoId,
         blockId,

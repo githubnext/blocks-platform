@@ -1,6 +1,11 @@
-export function NextOctocat() {
+export function NextOctocat({ className }) {
   return (
-    <svg viewBox="0 0 717 506" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg
+      viewBox="0 0 717 506"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
       <path
         fillRule="evenodd"
         clipRule="evenodd"

@@ -1,31 +1,16 @@
-import React from "react";
 import { tw } from "twind";
 import { FileBlockProps } from "@githubnext/blocks"; // to import tailwind css
 
 export default function (props: FileBlockProps) {
-  const { context, content, isEditable, onStoreGet, onStoreSet } = props;
-  const [poll, setPoll] = React.useState(JSON.parse(content));
-
-  React.useEffect(() => {
-    Promise.all(
-      poll.options.map(option => onStoreGet(`${context.path}/${option.text}`))
-    ).then(values => {
-      const newPoll = { ...poll };
-      for (let i = 0; i < values.length; i++) {
-        newPoll.options[i].votes = values[i] ?? 0;
-      }
-      setPoll(newPoll);
-    });
-  }, []);
+  const { content, isEditable, onUpdateContent } = props;
+  const poll = JSON.parse(content);
 
   const onClick = (index: number) => {
-    return async () => {
-      poll.options[index].votes += 1;
-      await onStoreSet(
-        `${context.path}/${poll.options[index].text}`,
-        poll.options[index].votes
-      );
-      setPoll({ ... poll });
+    if (!isEditable) return;
+    return () => {
+      const newPoll = { ...poll };
+      newPoll.options[index].votes += 1;
+      onUpdateContent(JSON.stringify(newPoll));
     };
   };
 
@@ -58,12 +43,13 @@ export default function (props: FileBlockProps) {
                 {option.votes} votes
               </span>
               <button
+                disabled={!isEditable}
                 className={tw(
                   `bg-transparent hover:bg-blue-500 text-blue-400 hover:text-white px-2 border border-blue-500 hover:border-transparent rounded ${
                     !isEditable ? "pointer-events-none" : ""
                   }`
                 )}
-                onClick={onClick(index)}
+                onClick={() => onClick(index)}
               >
                 Vote
               </button>

@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getSession } from "next-auth/react";
+import { makeOctokitInstance } from "ghapi";
 import { storeDelete, storeGet, storeSet } from "lib/table-service";
 
 export default async function handler(
@@ -16,6 +17,14 @@ export default async function handler(
     string,
     string
   >;
+
+  try {
+    const octokit = makeOctokitInstance(session.token as string);
+    await octokit.repos.get({ owner, repo });
+  } catch (e) {
+    res.status(401).send("Unauthorized.");
+    return;
+  }
 
   switch (req.method) {
     case "GET":

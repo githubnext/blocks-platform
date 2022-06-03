@@ -124,7 +124,7 @@ export function GeneralBlock(props: GeneralBlockProps) {
   const makeStoreURL = (key: string) =>
     `/api/store/${block.repoId}/${
       block.id
-    }/${repo}/${owner}/${encodeURIComponent(key)}`;
+    }/${owner}/${repo}/${encodeURIComponent(key)}`;
 
   const onStoreGet = async (key: string) => {
     const res = await fetch(makeStoreURL(key));

@@ -1,4 +1,9 @@
-import { BlocksRepo, FileContext, FolderContext } from "@githubnext/blocks";
+import {
+  Block,
+  BlocksRepo,
+  FileContext,
+  FolderContext,
+} from "@githubnext/blocks";
 import { RepoFiles } from "ghapi";
 import { memo, useMemo } from "react";
 import { SandboxedBlock } from "components/sandboxed-block";
@@ -26,6 +31,8 @@ interface SandboxedBlockWrapperProps {
     params?: Record<string, any>
   ) => Promise<any>;
   onNavigateToPath: (path: string) => void;
+  onStoreGet: (key: string) => Promise<any>;
+  onStoreSet: (key: string, value: any) => Promise<void>;
   onRequestBlocksRepos: () => Promise<BlocksRepo[]>;
 }
 
@@ -47,6 +54,8 @@ export const SandboxedBlockWrapper = memo(function SandboxedBlockWrapper(
     onUpdateContent,
     onRequestGitHubData,
     onNavigateToPath,
+    onStoreGet,
+    onStoreSet,
     onRequestBlocksRepos,
   } = props;
 
@@ -71,19 +80,23 @@ export const SandboxedBlockWrapper = memo(function SandboxedBlockWrapper(
 
     return (
       <ExampleBlock
-        block={block}
-        contents={contents}
-        originalContent={originalContent}
-        isEditable={isEditable}
-        tree={tree}
-        context={fileContext}
-        metadata={metadata}
-        isEmbedded={isEmbedded}
-        onUpdateMetadata={onUpdateMetadata}
-        onUpdateContent={onUpdateContent}
-        onRequestGitHubData={onRequestGitHubData}
-        onNavigateToPath={onNavigateToPath}
-        onRequestBlocksRepos={onRequestBlocksRepos}
+        {...{
+          block,
+          contents,
+          originalContent,
+          isEditable,
+          tree,
+          context: fileContext,
+          metadata,
+          isEmbedded,
+          onUpdateMetadata,
+          onUpdateContent,
+          onRequestGitHubData,
+          onStoreGet,
+          onStoreSet,
+          onNavigateToPath,
+          onRequestBlocksRepos,
+        }}
       />
     );
   }
@@ -91,17 +104,21 @@ export const SandboxedBlockWrapper = memo(function SandboxedBlockWrapper(
   return (
     <div className="sandbox-wrapper h-full w-full">
       <SandboxedBlock
-        block={block}
-        contents={contents}
-        originalContent={originalContent}
-        isEditable={isEditable}
-        tree={tree}
-        context={fileContext}
-        metadata={metadata}
-        onUpdateMetadata={onUpdateMetadata}
-        onUpdateContent={onUpdateContent}
-        onRequestGitHubData={onRequestGitHubData}
-        onNavigateToPath={onNavigateToPath}
+        {...{
+          block,
+          contents,
+          originalContent,
+          isEditable,
+          tree,
+          context: fileContext,
+          metadata,
+          onUpdateMetadata,
+          onUpdateContent,
+          onRequestGitHubData,
+          onStoreGet,
+          onStoreSet,
+          onNavigateToPath,
+        }}
       />
     </div>
   );

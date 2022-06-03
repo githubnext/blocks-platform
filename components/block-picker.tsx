@@ -15,7 +15,7 @@ import {
   Box,
 } from "@primer/react";
 import { AppContext } from "context";
-import { BlocksRepo } from "@githubnext/blocks";
+import { Block, BlocksRepo } from "@githubnext/blocks";
 import { useFilteredBlocksRepos, useBlocksFromRepo } from "hooks";
 import { QueryKeyMap } from "lib/query-keys";
 import { useContext, useState } from "react";
@@ -189,12 +189,7 @@ const BlockItem = ({
       selected={isSelected}
       className="group py-2"
       onSelect={() => {
-        const enhancedBlock = {
-          ...block,
-          owner: repo.owner,
-          repo: repo.repo,
-        };
-        onChange(enhancedBlock);
+        onChange(block);
       }}
     >
       <div className="flex justify-between">

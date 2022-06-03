@@ -1,4 +1,5 @@
 import {
+  Block,
   FileContext,
   FolderContext,
   onRequestGitHubData as utilsOnRequestGitHubData,
@@ -120,6 +121,30 @@ export function GeneralBlock(props: GeneralBlockProps) {
     [context, name, type]
   );
 
+  const makeStoreURL = (key: string) =>
+    `/api/store/${block.repoId}/${
+      block.id
+    }/${owner}/${repo}/${encodeURIComponent(key)}`;
+
+  const onStoreGet = async (key: string): Promise<any> => {
+    const res = await fetch(makeStoreURL(key));
+    if (res.status === 404) return undefined;
+    else return await res.json();
+  };
+
+  const onStoreSet = async (key: string, value: string): Promise<void> => {
+    return (
+      value === undefined
+        ? fetch(makeStoreURL(key), {
+            method: "DELETE",
+          })
+        : fetch(makeStoreURL(key), {
+            method: "PUT",
+            body: JSON.stringify(value),
+          })
+    ).then((_) => undefined);
+  };
+
   return (
     <div
       className="flex flex-col"
@@ -130,19 +155,23 @@ export function GeneralBlock(props: GeneralBlockProps) {
       <ErrorBoundary key={path}>
         <div className="overflow-y-auto flex-1">
           <SandboxedBlockWrapper
-            block={block}
-            theme={theme}
-            context={updatedContext}
-            tree={tree}
-            contents={content}
-            originalContent={originalContent}
-            isEditable={isEditable}
-            metadata={metadata}
-            onUpdateMetadata={onRequestUpdateMetadata}
-            onUpdateContent={onUpdateContent}
-            onRequestGitHubData={onRequestGitHubData}
-            onNavigateToPath={onNavigateToPath}
-            onRequestBlocksRepos={onRequestBlocksRepos}
+            {...{
+              block,
+              theme,
+              context: updatedContext,
+              tree,
+              contents: content,
+              originalContent,
+              isEditable,
+              metadata,
+              onUpdateMetadata: onRequestUpdateMetadata,
+              onUpdateContent,
+              onRequestGitHubData,
+              onNavigateToPath,
+              onStoreGet,
+              onStoreSet,
+              onRequestBlocksRepos,
+            }}
           />
         </div>
       </ErrorBoundary>

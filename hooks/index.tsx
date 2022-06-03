@@ -1,4 +1,4 @@
-import { BlocksRepo, RepoFiles } from "@githubnext/blocks";
+import { Block, BlocksRepo, RepoFiles } from "@githubnext/blocks";
 import { Octokit } from "@octokit/rest";
 import pm from "picomatch";
 import { defaultBlocksRepo as exampleBlocksRepo } from "blocks/index";
@@ -478,11 +478,7 @@ export function useFilteredBlocksRepos(
           );
           return {
             ...repo,
-            blocks: filteredBlocks.map((b) => ({
-              ...b,
-              owner: repo.owner,
-              repo: repo.repo,
-            })),
+            blocks: filteredBlocks,
           };
         })
         .filter((repo) => repo?.blocks?.length),

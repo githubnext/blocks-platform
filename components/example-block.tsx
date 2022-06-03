@@ -1,4 +1,5 @@
 import {
+  Block,
   BlocksRepo,
   FileBlockProps,
   FileContext,
@@ -34,6 +35,8 @@ interface ExampleBlockProps {
     params?: Record<string, any>
   ) => Promise<any>;
   onNavigateToPath: (path: string) => void;
+  onStoreGet: (key: string) => Promise<any>;
+  onStoreSet: (key: string, value: any) => Promise<void>;
   onRequestBlocksRepos: () => Promise<BlocksRepo[]>;
 }
 
@@ -52,6 +55,8 @@ export function ExampleBlock(props: ExampleBlockProps) {
     onRequestGitHubData,
     onNavigateToPath,
     onRequestBlocksRepos,
+    onStoreGet,
+    onStoreSet,
   } = props;
 
   const Component = components[block.id];
@@ -66,22 +71,26 @@ export function ExampleBlock(props: ExampleBlockProps) {
       id={`example-block-${block.id}`}
     >
       <Component
-        // recreate the block if we change file or version
-        key={context.sha}
-        block={block}
-        content={contents || ""}
-        originalContent={originalContent}
-        isEditable={isEditable}
-        tree={tree || []}
-        metadata={metadata}
-        context={context}
-        onUpdateMetadata={onUpdateMetadata}
-        onNavigateToPath={onNavigateToPath}
-        onUpdateContent={onUpdateContent}
-        onRequestUpdateContent={onUpdateContent} // for backwards compatibility
-        onRequestGitHubData={onRequestGitHubData}
-        BlockComponent={!isEmbedded && BlockComponent}
-        onRequestBlocksRepos={onRequestBlocksRepos}
+        {...{
+          // recreate the block if we change file or version
+          key: context.sha,
+          block,
+          content: contents || "",
+          originalContent,
+          isEditable,
+          tree: tree || [],
+          metadata,
+          context,
+          onUpdateMetadata,
+          onNavigateToPath,
+          onUpdateContent,
+          onRequestUpdateContent: onUpdateContent, // for backwards compatibility
+          onRequestGitHubData,
+          onStoreGet,
+          onStoreSet,
+          BlockComponent: !isEmbedded && BlockComponent,
+          onRequestBlocksRepos,
+        }}
       />
     </div>
   );
@@ -109,6 +118,8 @@ const BlockComponent = ({
   onUpdateContent,
   onRequestGitHubData,
   onNavigateToPath,
+  onStoreGet,
+  onStoreSet,
   onRequestBlocksRepos,
   ...props
 }: BlockComponentProps) => {
@@ -179,19 +190,23 @@ const BlockComponent = ({
     return (
       <ErrorBoundary key={path}>
         <ExampleBlock
-          block={block}
-          context={{ ...props.context, path, file: name, folder: name }}
-          contents={contents}
-          originalContent={contents}
-          isEditable={false}
-          tree={tree}
-          metadata={metadata}
-          isEmbedded
-          onUpdateMetadata={onUpdateMetadata}
-          onNavigateToPath={onNavigateToPath}
-          onUpdateContent={onUpdateContent}
-          onRequestGitHubData={onRequestGitHubData}
-          onRequestBlocksRepos={onRequestBlocksRepos}
+          {...{
+            block,
+            context: { ...props.context, path, file: name, folder: name },
+            contents,
+            originalContent: contents,
+            isEditable: false,
+            tree,
+            metadata,
+            isEmbedded: true,
+            onUpdateMetadata,
+            onNavigateToPath,
+            onUpdateContent,
+            onRequestGitHubData,
+            onStoreGet,
+            onStoreSet,
+            onRequestBlocksRepos,
+          }}
         />
       </ErrorBoundary>
     );
@@ -200,17 +215,21 @@ const BlockComponent = ({
   return (
     <ErrorBoundary key={path}>
       <SandboxedBlock
-        block={block}
-        context={{ ...props.context, path, file: name, folder: name }}
-        contents={contents}
-        originalContent={contents}
-        isEditable={false}
-        tree={tree}
-        metadata={metadata}
-        onUpdateMetadata={onUpdateMetadata}
-        onNavigateToPath={onNavigateToPath}
-        onUpdateContent={onUpdateContent}
-        onRequestGitHubData={onRequestGitHubData}
+        {...{
+          block,
+          context: { ...props.context, path, file: name, folder: name },
+          contents,
+          originalContent: contents,
+          isEditable: false,
+          tree,
+          metadata,
+          onUpdateMetadata,
+          onNavigateToPath,
+          onUpdateContent,
+          onRequestGitHubData,
+          onStoreGet,
+          onStoreSet,
+        }}
       />
     </ErrorBoundary>
   );

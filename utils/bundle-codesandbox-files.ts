@@ -1,5 +1,3 @@
-import uniqueId from "lodash.uniqueid";
-
 type Block = {
   id: string;
   type: string;
@@ -107,16 +105,15 @@ ${cssFilesString}
     return uniqueId
   }
 
-  const onRequestGitHubData = (path, params) => {
+  const makeRequest = (type, args) => {
     // for responses to this specific request
-    const requestId = "${uniqueId("github-data--request--")}--" + getUniqueId()
+    const requestId = type + "--" + getUniqueId();
 
     window.parent.postMessage({
-      type: "github-data--request",
+      type,
       id: "${id}",
       requestId,
-      path,
-      params,
+      ...args
     }, "*");
 
     return new Promise((resolve, reject) => {
@@ -127,6 +124,18 @@ ${cssFilesString}
         reject(new Error("Timeout"));
       }, maxDelay);
     });
+  }
+
+  const onRequestGitHubData = (path, params) => {
+    return makeRequest("github-data--request", { path, params });
+  };
+
+  const onStoreGet = (key) => {
+    return makeRequest("store-get--request", { key });
+  };
+
+  const onStoreSet = (key, value) => {
+    return makeRequest("store-set--request", { key, value });
   };
 
   export default function WrappedBlock() {
@@ -143,6 +152,8 @@ ${cssFilesString}
             break;
 
           case "github-data--response":
+          case "store-get--response":
+          case "store-set--response":
             const request = pendingRequests[event.data.requestId];
             if (!request) return;
             delete pendingRequests[event.data.requestId];
@@ -150,7 +161,7 @@ ${cssFilesString}
             if ('error' in event.data) {
               request.reject(event.data.error);
             } else {
-              request.resolve(event.data.data);
+              request.resolve(event.data.response);
             }
             break;
         }
@@ -176,6 +187,8 @@ ${cssFilesString}
             onUpdateContent={onUpdateContent}
             onRequestUpdateContent={onUpdateContent} // for backwards compatibility
             onRequestGitHubData={onRequestGitHubData}
+            onStoreGet={onStoreGet}
+            onStoreSet={onStoreSet}
           />
         </BaseStyles>
       </ThemeProvider>

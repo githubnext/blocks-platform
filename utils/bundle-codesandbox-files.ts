@@ -107,7 +107,7 @@ ${cssFilesString}
 
   const makeRequest = (type, args) => {
     // for responses to this specific request
-    const requestId = type + "--request--" + getUniqueId();
+    const requestId = type + "--" + getUniqueId();
 
     window.parent.postMessage({
       type,
@@ -127,15 +127,15 @@ ${cssFilesString}
   }
 
   const onRequestGitHubData = (path, params) => {
-    return makeRequest("github-data", { path, params });
+    return makeRequest("github-data--request", { path, params });
   };
 
   const onStoreGet = (key) => {
-    return makeRequest("store-get", { key });
+    return makeRequest("store-get--request", { key });
   };
 
   const onStoreSet = (key, value) => {
-    return makeRequest("store-set", { key, value });
+    return makeRequest("store-set--request", { key, value });
   };
 
   export default function WrappedBlock() {
@@ -187,6 +187,8 @@ ${cssFilesString}
             onUpdateContent={onUpdateContent}
             onRequestUpdateContent={onUpdateContent} // for backwards compatibility
             onRequestGitHubData={onRequestGitHubData}
+            onStoreGet={onStoreGet}
+            onStoreSet={onStoreSet}
           />
         </BaseStyles>
       </ThemeProvider>

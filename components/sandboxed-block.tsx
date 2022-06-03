@@ -7,8 +7,8 @@ import {
   FileContext,
   FolderContext,
   RepoFiles,
-  bundleCodesandboxFiles,
 } from "@githubnext/blocks";
+import { bundleCodesandboxFiles } from "../utils/bundle-codesandbox-files";
 import uniqueId from "lodash/uniqueId";
 import React, { useEffect, useMemo, useRef } from "react";
 import { useBlockContent } from "../hooks";
@@ -52,27 +52,30 @@ const DefaultErrorState = <div style={stateStyles}>Error...</div>;
 function handleResponse<T>(
   p: Promise<T>,
   {
+    window,
     id,
     requestId,
     type,
     origin,
   }: {
+    window: Window;
     id: string;
     requestId: string;
     type: string;
     origin: string;
   }
 ) {
-  return p
-    .then((response) => {
+  return p.then(
+    (response) => {
       window.postMessage({ type, id, requestId, response }, origin);
-    })
-    .catch((e) => {
+    },
+    (e) => {
       // Error is not always serializable
       // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm#things_that_dont_work_with_structured_clone
       const error = e instanceof Error ? e.message : e;
       window.postMessage({ type, id, requestId, error }, origin);
-    });
+    }
+  );
 }
 
 export function SandboxedBlock(props: SandboxedBlockProps) {
@@ -132,6 +135,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
 
           case "github-data--request":
             handleResponse(onRequestGitHubData(data.path, data.params), {
+              window,
               id,
               requestId: data.requestId,
               type: "github-data--response",
@@ -141,6 +145,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
 
           case "store-get--request":
             handleResponse(onStoreGet(data.key), {
+              window,
               id,
               requestId: data.requestId,
               type: "store-get--response",
@@ -150,6 +155,7 @@ export function SandboxedBlock(props: SandboxedBlockProps) {
 
           case "store-set--request":
             handleResponse(onStoreSet(data.key, data.value), {
+              window,
               id,
               requestId: data.requestId,
               type: "store-set--response",

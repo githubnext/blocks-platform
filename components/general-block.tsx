@@ -126,23 +126,23 @@ export function GeneralBlock(props: GeneralBlockProps) {
       block.id
     }/${owner}/${repo}/${encodeURIComponent(key)}`;
 
-  const onStoreGet = async (key: string) => {
+  const onStoreGet = async (key: string): Promise<any> => {
     const res = await fetch(makeStoreURL(key));
     if (res.status === 404) return undefined;
     else return await res.json();
   };
 
-  const onStoreSet = async (key: string, value: string) => {
-    if (value === undefined) {
-      return fetch(makeStoreURL(key), {
-        method: "DELETE",
-      }) as unknown as Promise<void>;
-    } else {
-      return fetch(makeStoreURL(key), {
-        method: "PUT",
-        body: JSON.stringify(value),
-      }) as unknown as Promise<void>;
-    }
+  const onStoreSet = async (key: string, value: string): Promise<void> => {
+    return (
+      value === undefined
+        ? fetch(makeStoreURL(key), {
+            method: "DELETE",
+          })
+        : fetch(makeStoreURL(key), {
+            method: "PUT",
+            body: JSON.stringify(value),
+          })
+    ).then((_) => undefined);
   };
 
   return (

@@ -172,7 +172,9 @@ export const defaultBlocksRepo = {
       "sandbox": false,
       "entry": "blocks/file-blocks/flat.tsx",
       "matches": [
-        "*.csv"
+        "*.csv",
+        "*.yml",
+        "*.yaml"
       ],
       "example_path": "https://github.com/githubnext/blocks-tutorial/blob/main/data.csv"
     },

@@ -926,9 +926,9 @@
     unist-util-visit "^1.0.0"
     uuid "^3.3.2"
 
-"@githubnext/blocks-examples@https://api.github.com/repos/githubnext/blocks-examples/tarball/0.16.1":
+"@githubnext/blocks-examples@https://api.github.com/repos/githubnext/blocks-examples/tarball/0.16.2":
   version "0.0.0"
-  resolved "https://api.github.com/repos/githubnext/blocks-examples/tarball/0.16.1#577ef1ba1cc75b4df34a45c7c5dcaa5077771f8e"
+  resolved "https://api.github.com/repos/githubnext/blocks-examples/tarball/0.16.2#85c159a80923eb6c1996f9402c8de7ab459db0e5"
   dependencies:
     "@codemirror/autocomplete" "^0.19.15"
     "@codemirror/closebrackets" "^0.19.1"

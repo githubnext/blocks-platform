@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@codesandbox/sandpack-react": "^0.19.6",
-    "@githubnext/blocks-examples": "https://api.github.com/repos/githubnext/blocks-examples/tarball/0.16.1",
+    "@githubnext/blocks-examples": "https://api.github.com/repos/githubnext/blocks-examples/tarball/0.16.2",
     "@githubnext/blocks": "^1.0.4",
     "@octokit/auth-app": "^3.6.1",
     "@octokit/rest": "^18.12.0",

@@ -1,5 +1,5 @@
 import { tw } from "twind";
-import { FileBlockProps, getLanguageFromFilename } from "@githubnext/utils";
+import { FileBlockProps, getLanguageFromFilename } from "@githubnext/blocks";
 import { RocketIcon } from "@primer/octicons-react";
 import axios from "axios";
 import { useMemo, useState } from "react";

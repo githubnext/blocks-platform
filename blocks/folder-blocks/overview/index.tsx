@@ -1,6 +1,6 @@
 import { tw } from "twind";
 import { useCallback, useEffect, useState } from "react";
-import { FolderBlockProps } from "@githubnext/utils";
+import { FolderBlockProps } from "@githubnext/blocks";
 import { Endpoints } from "@octokit/types";
 import { getRelativeTime } from "./utils";
 import { Heading, Link, Text, Label } from "@primer/react";

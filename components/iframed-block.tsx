@@ -1,5 +1,10 @@
 import React, { useEffect, useRef } from "react";
-import { BlocksRepo, FileContext, FolderContext } from "@githubnext/utils";
+import {
+  Block,
+  BlocksRepo,
+  FileContext,
+  FolderContext,
+} from "@githubnext/blocks";
 import { RepoFiles } from "ghapi";
 
 type IFramedBlockProps = {
@@ -21,9 +26,38 @@ type IFramedBlockProps = {
     path: string,
     params?: Record<string, any>
   ) => Promise<any>;
+  onStoreGet: (key: string) => Promise<any>;
+  onStoreSet: (key: string, value: any) => Promise<void>;
   onNavigateToPath: (path: string) => void;
   onRequestBlocksRepos: () => Promise<BlocksRepo[]>;
 };
+
+function handleResponse<T>(
+  p: Promise<T>,
+  {
+    window,
+    requestId,
+    type,
+    origin,
+  }: {
+    window: Window;
+    requestId: string;
+    type: string;
+    origin: string;
+  }
+) {
+  return p.then(
+    (response) => {
+      window.postMessage({ type, requestId, response }, "*");
+    },
+    (e) => {
+      // Error is not always serializable
+      // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm#things_that_dont_work_with_structured_clone
+      const error = e instanceof Error ? e.message : e;
+      window.postMessage({ type, requestId, error }, "*");
+    }
+  );
+}
 
 export default ({
   block,
@@ -36,6 +70,8 @@ export default ({
   onUpdateMetadata,
   onUpdateContent,
   onRequestGitHubData,
+  onStoreGet,
+  onStoreSet,
   onNavigateToPath,
 }: IFramedBlockProps) => {
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
@@ -48,8 +84,11 @@ export default ({
       {
         type: "set-props",
         props: {
+          block,
           context,
           content: contents,
+          originalContent,
+          isEditable,
           tree,
           metadata,
         },
@@ -59,13 +98,14 @@ export default ({
   };
   useEffect(() => {
     updateIframe();
-  }, [context, contents, tree, metadata]);
+  }, [block, context, contents, originalContent, isEditable, tree, metadata]);
 
   const onMessage = useRef((event: MessageEvent) => {});
   onMessage.current = (event: MessageEvent) => {
     if (!iframeRef.current) return;
     const { data, origin, source } = event;
     if (source !== iframeRef.current.contentWindow) return;
+    const window = source as Window;
 
     switch (data.type) {
       case "loaded":
@@ -90,29 +130,30 @@ export default ({
         break;
 
       case "github-data--request":
-        onRequestGitHubData(data.path, data.params)
-          .then((res) => {
-            source.postMessage(
-              {
-                type: "github-data--response",
-                requestId: data.requestId,
-                data: res,
-              },
-              origin
-            );
-          })
-          .catch((e) => {
-            source.postMessage(
-              {
-                type: "github-data--response",
-                requestId: data.requestId,
-                // Error is not always serializable
-                // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm#things_that_dont_work_with_structured_clone
-                error: e instanceof Error ? e.message : e,
-              },
-              origin
-            );
-          });
+        handleResponse(onRequestGitHubData(data.path, data.params), {
+          window,
+          requestId: data.requestId,
+          type: "github-data--response",
+          origin,
+        });
+        break;
+
+      case "store-get--request":
+        handleResponse(onStoreGet(data.key), {
+          window,
+          requestId: data.requestId,
+          type: "store-get--response",
+          origin,
+        });
+        break;
+
+      case "store-set--request":
+        handleResponse(onStoreSet(data.key, data.value), {
+          window,
+          requestId: data.requestId,
+          type: "store-set--response",
+          origin,
+        });
         break;
     }
   };

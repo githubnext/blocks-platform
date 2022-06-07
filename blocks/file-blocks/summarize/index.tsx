@@ -1,4 +1,4 @@
-import { FileBlockProps, getLanguageFromFilename } from "@githubnext/utils";
+import { FileBlockProps, getLanguageFromFilename } from "@githubnext/blocks";
 import { FoldIcon, UnfoldIcon } from "@primer/octicons-react";
 import { Button } from "@primer/react";
 import axios from "axios";

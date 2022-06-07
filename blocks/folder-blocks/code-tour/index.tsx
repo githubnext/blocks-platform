@@ -1,6 +1,6 @@
 import { tw } from "twind";
 import cq from "@fullstackio/cq";
-import { FolderBlockProps, getLanguageFromFilename } from "@githubnext/utils";
+import { FolderBlockProps, getLanguageFromFilename } from "@githubnext/blocks";
 import debounce from "lodash/debounce";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Select from "react-select";

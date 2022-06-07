@@ -1,14 +1,14 @@
-import { FileContext } from "@githubnext/utils";
+import { FileContext } from "@githubnext/blocks";
 import {
   GitCommitIcon,
   SidebarCollapseIcon,
   SidebarExpandIcon,
   XCircleIcon,
 } from "@primer/octicons-react";
-import { Avatar, Box, IconButton, Label, Text, Timeline } from "@primer/react";
-import { useSession } from "next-auth/react";
+import { Avatar, Box, IconButton, Text, Timeline } from "@primer/react";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { getRelativeTime } from "lib/date-utils";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -19,6 +19,7 @@ type ActivityFeedProps = {
   timeline: undefined | RepoTimeline;
   updatedContent: undefined | {};
   clearUpdatedContent: () => void;
+  blockType?: "folder" | "file";
 };
 
 export const ActivityFeed = ({
@@ -27,8 +28,8 @@ export const ActivityFeed = ({
   timeline,
   updatedContent,
   clearUpdatedContent,
+  blockType,
 }: ActivityFeedProps) => {
-  const { path } = context;
   const session = useSession();
 
   const [open, setOpen] = useState(true);
@@ -57,12 +58,9 @@ export const ActivityFeed = ({
           <Box
             sx={{ fontWeight: "bold", display: "flex", alignItems: "center" }}
           >
-            <div className="flex-none">Commits</div>
-            {path && (
-              <Label className="min-w-0 ml-2 flex-1 truncate leading-6">
-                {path}
-              </Label>
-            )}
+            <div className="flex-none">
+              Commits {blockType ? `for this ${blockType}` : ""}
+            </div>
           </Box>
         </Box>
         {timeline && (

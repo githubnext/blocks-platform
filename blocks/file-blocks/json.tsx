@@ -1,4 +1,4 @@
-import { FileBlockProps } from "@githubnext/utils";
+import { FileBlockProps } from "@githubnext/blocks";
 import { useMemo } from "react";
 import ReactJson from "react-json-view";
 import type { InteractionProps } from "react-json-view";

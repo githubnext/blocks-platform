@@ -20,7 +20,6 @@ const onUpdateMetadata = (newMetadata) => {
   window.parent.postMessage(
     {
       type: "update-metadata",
-      id: "${id}",
       metadata: newMetadata,
     },
     "*"
@@ -31,7 +30,6 @@ const onNavigateToPath = (path) => {
   window.parent.postMessage(
     {
       type: "navigate-to-path",
-      id: "${id}",
       path,
     },
     "*"
@@ -42,7 +40,6 @@ const onUpdateContent = (content) => {
   window.parent.postMessage(
     {
       type: "update-file",
-      id: "${id}",
       content: content,
     },
     "*"
@@ -57,17 +54,15 @@ const getUniqueId = () => {
   return uniqueId;
 };
 
-const onRequestGitHubData = (path, params) => {
+const makeRequest = (type, args) => {
   // for responses to this specific request
-  const requestId = `github-data--request--${getUniqueId()}`;
+  const requestId = type + "--" + getUniqueId();
 
   window.parent.postMessage(
     {
-      type: "github-data--request",
-      id: "${id}",
+      type,
       requestId,
-      path,
-      params,
+      ...args,
     },
     "*"
   );
@@ -80,6 +75,18 @@ const onRequestGitHubData = (path, params) => {
       reject(new Error("Timeout"));
     }, maxDelay);
   });
+};
+
+const onRequestGitHubData = (path, params) => {
+  return makeRequest("github-data--request", { path, params });
+};
+
+const onStoreGet = (key) => {
+  return makeRequest("store-get--request", { key });
+};
+
+const onStoreSet = (key, value) => {
+  return makeRequest("store-set--request", { key, value });
 };
 
 const Page = ({ assets }: { assets: Asset[] }) => {
@@ -118,6 +125,8 @@ const Page = ({ assets }: { assets: Asset[] }) => {
           break;
 
         case "github-data--response":
+        case "store-get--response":
+        case "store-set--response":
           const request = pendingRequests[event.data.requestId];
           if (!request) return;
           delete pendingRequests[event.data.requestId];
@@ -125,7 +134,7 @@ const Page = ({ assets }: { assets: Asset[] }) => {
           if ("error" in event.data) {
             request.reject(event.data.error);
           } else {
-            request.resolve(event.data.data);
+            request.resolve(event.data.response);
           }
           break;
       }
@@ -151,6 +160,8 @@ const Page = ({ assets }: { assets: Asset[] }) => {
               onUpdateContent={onUpdateContent}
               onRequestUpdateContent={onUpdateContent} // for backwards compatibility
               onRequestGitHubData={onRequestGitHubData}
+              onStoreGet={onStoreGet}
+              onStoreSet={onStoreSet}
             />
           </BaseStyles>
         </ThemeProvider>

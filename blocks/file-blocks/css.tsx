@@ -2,13 +2,12 @@ import { tw } from "twind";
 import { useEffect, useMemo } from "react";
 // @ts-ignore: no types
 import { toJSON } from "cssjson";
-import { FileBlockProps } from "@githubnext/utils";
+import { FileBlockProps } from "@githubnext/blocks";
 
 export default function (props: FileBlockProps) {
   const { content } = props;
 
   const { tree, flattenedRules, widelyApplicableAttributes } = useMemo(() => {
-    console.log(content);
     let tree = { children: [] };
     try {
       tree = toJSON(content);

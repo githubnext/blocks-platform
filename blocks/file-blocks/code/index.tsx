@@ -1,7 +1,7 @@
 import { tw } from "twind";
 // import './.css'";
 import React from "react";
-import { FileBlockProps } from "@githubnext/utils";
+import { FileBlockProps } from "@githubnext/blocks";
 
 import {
   highlightSpecialChars,

@@ -1,5 +1,5 @@
 import { tw } from "twind";
-import { FileBlockProps, getLanguageFromFilename } from "@githubnext/utils";
+import { FileBlockProps, getLanguageFromFilename } from "@githubnext/blocks";
 import { useCallback, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import SyntaxHighlighter from "react-syntax-highlighter";

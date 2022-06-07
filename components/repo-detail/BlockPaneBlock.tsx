@@ -1,6 +1,6 @@
 import * as Immer from "immer";
 import { useContext } from "react";
-import type { RepoFiles } from "@githubnext/utils";
+import type { Block, RepoFiles } from "@githubnext/blocks";
 import { useFileContent, useCallbackWithProps } from "hooks";
 import { AppContext } from "context";
 import type { Context, UpdatedContents } from "./index";

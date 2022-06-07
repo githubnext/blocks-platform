@@ -15,12 +15,13 @@ import {
   Box,
 } from "@primer/react";
 import { AppContext } from "context";
-import { BlocksRepo } from "@githubnext/utils";
+import { Block, BlocksRepo } from "@githubnext/blocks";
 import { useFilteredBlocksRepos, useBlocksFromRepo } from "hooks";
 import { QueryKeyMap } from "lib/query-keys";
 import { useContext, useState } from "react";
 import { useQueryClient } from "react-query";
 import { useDebounce } from "use-debounce";
+import { useSession } from "next-auth/react";
 
 interface BlockPickerProps {
   button?: React.ReactNode;
@@ -38,6 +39,9 @@ export default function BlockPicker(props: BlockPickerProps) {
   let [debouncedSearchTerm] = useDebounce(lowerSearchTerm, 300);
   const queryClient = useQueryClient();
   const appContext = useContext(AppContext);
+  const {
+    data: { user },
+  } = useSession();
 
   const { data: blockRepos } = useFilteredBlocksRepos(path, type);
 
@@ -50,6 +54,9 @@ export default function BlockPicker(props: BlockPickerProps) {
     {
       owner: searchTermOwner,
       repo: searchTermRepo,
+      path,
+      type,
+      user,
     },
     {
       enabled: isSearchTermUrl,
@@ -182,12 +189,7 @@ const BlockItem = ({
       selected={isSelected}
       className="group py-2"
       onSelect={() => {
-        const enhancedBlock = {
-          ...block,
-          owner: repo.owner,
-          repo: repo.repo,
-        };
-        onChange(enhancedBlock);
+        onChange(block);
       }}
     >
       <div className="flex justify-between">

@@ -1,5 +1,6 @@
 import { Octokit } from "@octokit/rest";
 import { Endpoints } from "@octokit/types";
+import { components } from "@octokit/openapi-types";
 import axios, { AxiosInstance } from "axios";
 import { signOut } from "next-auth/react";
 import { Base64 } from "js-base64";
@@ -15,7 +16,8 @@ import {
   TimelineKeyParams,
 } from "lib/query-keys";
 import { QueryFunction } from "react-query";
-import { BlocksRepo } from "@githubnext/utils";
+import { Block, BlocksRepo } from "@githubnext/blocks";
+import { filterBlock } from "../hooks";
 export interface RepoContext {
   repo: string;
   owner: string;
@@ -257,39 +259,40 @@ export const getBlocksFromRepo: QueryFunction<
     return undefined;
   }
 
-  let packageJson;
   try {
-    const packageJsonUrl = `/repos/${owner}/${repo}/contents/package.json`;
-    const packageJsonRes = await meta.ghapi(packageJsonUrl);
-    const encodedContent = packageJsonRes.data.content;
+    const repoRes = await meta.ghapi.get(`/repos/${owner}/${repo}`);
+
+    const blocksConfigUrl = `/repos/${owner}/${repo}/contents/blocks.config.json`;
+    const blocksConfigRes = await meta.ghapi(blocksConfigUrl);
+    const encodedContent = blocksConfigRes.data.content;
     const content = Buffer.from(encodedContent, "base64").toString("utf8");
-    packageJson = JSON.parse(content);
-  } catch {
+    const rawBlocks = JSON.parse(content);
+
+    const filter = filterBlock(params);
+    const blocks = (rawBlocks || []).filter(filter).map((block: Block) => ({
+      ...block,
+      owner: repoRes.data.owner.login,
+      repo: repoRes.data.name,
+      repoId: repoRes.data.id,
+    }));
+
+    return {
+      owner,
+      repo,
+      blocks,
+      full_name: `${owner}/${repo}`,
+      id: repoRes.data.id,
+      // we don't use any of the below at the moment
+      html_url: "",
+      description: "",
+      stars: 0,
+      watchers: 0,
+      language: "",
+      topics: [""],
+    };
+  } catch (e) {
     return undefined;
   }
-
-  const blocks = (packageJson.blocks || []).map((block) => ({
-    ...block,
-    owner,
-    repo,
-  }));
-
-  const data: BlocksRepo = {
-    owner,
-    repo,
-    blocks,
-    full_name: `${owner}/${repo}`,
-    // we don't use any of the below at the moment
-    id: 0,
-    html_url: "",
-    description: "",
-    stars: 0,
-    watchers: 0,
-    language: "",
-    topics: [""],
-  };
-
-  return data;
 };
 
 export const getBranches: QueryFunction<
@@ -426,6 +429,20 @@ export const checkAccess: QueryFunction<
   return response.data;
 };
 
+type getContentParams = Parameters<Octokit["repos"]["getContent"]>[0];
+type getContentResult = components["schemas"]["content-file"];
+const tryToGetContent = async (
+  octokit: Octokit,
+  params: getContentParams
+): Promise<getContentResult | undefined> => {
+  try {
+    const res = await octokit.repos.getContent(params);
+    // `getContent` returns different types for different kinds of object, but we only ever request files
+    return res.data as getContentResult;
+  } catch {
+    return undefined;
+  }
+};
 export const getAllBlocksRepos: QueryFunction<BlocksRepo[]> = async (ctx) => {
   let octokit = (ctx.meta as unknown as BlocksQueryMeta).octokit;
   const repos = await octokit.search.repos({
@@ -434,18 +451,32 @@ export const getAllBlocksRepos: QueryFunction<BlocksRepo[]> = async (ctx) => {
     sort: "updated",
     per_page: 100,
   });
-  const blocks = await Promise.all(
+  const blocks: Block[][] = await Promise.all(
     repos.data.items.map(async (repo) => {
       try {
-        const content = await octokit.repos.getContent({
+        const blocksConfigRes = await tryToGetContent(octokit, {
+          owner: repo.owner.login,
+          repo: repo.name,
+          path: "blocks.config.json",
+        });
+        if (blocksConfigRes) {
+          return (
+            JSON.parse(
+              Buffer.from(blocksConfigRes.content, "base64").toString("utf8")
+            ) ?? []
+          );
+        }
+
+        // check package.json for backwards compatibility
+        const packageJsonRes = await tryToGetContent(octokit, {
           owner: repo.owner.login,
           repo: repo.name,
           path: "package.json",
         });
-        if ("content" in content.data) {
+        if (packageJsonRes) {
           return (
             JSON.parse(
-              Buffer.from(content.data.content, "base64").toString("utf8")
+              Buffer.from(packageJsonRes.content, "base64").toString("utf8")
             ).blocks ?? []
           );
         } else {
@@ -456,7 +487,7 @@ export const getAllBlocksRepos: QueryFunction<BlocksRepo[]> = async (ctx) => {
       }
     })
   );
-  return repos.data.items.map((repo, i) => ({
+  return repos.data.items.map<BlocksRepo>((repo, i) => ({
     owner: repo.owner.login,
     repo: repo.name,
     full_name: repo.full_name,
@@ -468,6 +499,11 @@ export const getAllBlocksRepos: QueryFunction<BlocksRepo[]> = async (ctx) => {
     language: repo.language,
     topics: repo.topics,
 
-    blocks: blocks[i],
+    blocks: blocks[i].map<Block>((b) => ({
+      ...b,
+      owner: repo.owner.login,
+      repo: repo.name,
+      repoId: repo.id,
+    })),
   }));
 };

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 // @ts-ignore
 import { Tree } from "./Tree";
-import { FolderBlockProps, getNestedFileTree } from "@githubnext/utils";
+import { FolderBlockProps, getNestedFileTree } from "@githubnext/blocks";
 
 export default function (props: FolderBlockProps) {
   const { tree, onNavigateToPath } = props;

@@ -20,7 +20,7 @@ export default async function handler(
     return;
   }
 
-  if (!session) {
+  if (!session?.user.isHubber) {
     res.status(401).send("Unauthorized.");
     return;
   }

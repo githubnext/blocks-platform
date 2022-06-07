@@ -1,5 +1,5 @@
 import { tw } from "twind";
-import { FileBlockProps } from "@githubnext/utils";
+import { FileBlockProps } from "@githubnext/blocks";
 import { ActionList, ActionMenu, Text } from "@primer/react";
 import { parse } from "papaparse";
 import { useEffect, useMemo, useState } from "react";

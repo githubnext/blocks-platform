@@ -19,7 +19,7 @@ import Header from "./Header";
 import FileTreePane from "./FileTreePane";
 import BlockPane from "./BlockPane";
 import CommitsPane from "./CommitsPane";
-import type { RepoFiles } from "@githubnext/utils";
+import type { RepoFiles } from "@githubnext/blocks";
 import { AppContext } from "context";
 import { CODEX_BLOCKS } from "lib";
 import { useSession } from "next-auth/react";
@@ -46,6 +46,11 @@ interface RepoDetailInnerProps {
   files: undefined | RepoFiles;
   timeline: undefined | RepoTimeline;
 }
+
+const blockTypes = {
+  tree: "folder",
+  blob: "file",
+};
 
 export function RepoDetailInner(props: RepoDetailInnerProps) {
   const { token, repoInfo, branches, branchName, files, timeline } = props;
@@ -195,6 +200,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
           timeline={timeline}
           updatedContent={updatedContent}
           clearUpdatedContent={clearUpdatedContent}
+          blockType={blockTypes[fileInfo?.type]}
         />
       </div>
       {!!requestedMetadata && (

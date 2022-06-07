@@ -51,19 +51,6 @@ type CommitBrief = {
 
 type RepoTimeline = CommitBrief[];
 
-interface Block {
-  id: string;
-  type: string;
-  title: string;
-  description: string;
-  sandbox?: boolean;
-  entry: string;
-  extensions?: string[];
-  matches?: string[];
-  owner?: string;
-  repo?: string;
-}
-
 interface User {
   name: string;
   image: string;

@@ -1,3 +1,5 @@
+import { Session } from "next-auth";
+
 export interface FolderKeyParams {
   repo: string;
   owner: string;
@@ -49,6 +51,9 @@ export interface CheckAccessParams {
 export interface BlocksKeyParams {
   owner: string;
   repo: string;
+  path: string | undefined;
+  type: "file" | "folder";
+  user: Session["user"];
 }
 
 function makeFactory<Key, Params>(

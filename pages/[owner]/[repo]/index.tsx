@@ -10,6 +10,7 @@ import { useCheckRepoAccess } from "hooks";
 import { QueryKeyMap } from "lib/query-keys";
 import { GetServerSidePropsContext } from "next";
 import { getSession, signOut, useSession } from "next-auth/react";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import { getUserInstallationForRepo } from "pages/api/check-access";
 import { useEffect, useState } from "react";
@@ -24,7 +25,7 @@ function RepoDetailContainer(props: {
   const router = useRouter();
   const [localHasRepoInstallation, setLocalHasRepoInstallation] =
     useState(hasRepoInstallation);
-  const { repo, owner } = router.query as Record<string, string>;
+  const { repo, owner, branch, path } = router.query as Record<string, string>;
   const [loaded, setLoaded] = useState(false);
 
   const queryClient = useQueryClient();
@@ -62,23 +63,34 @@ function RepoDetailContainer(props: {
 
   if (status === "authenticated" && session && loaded) {
     return (
-      <AppContext.Provider
-        value={{
-          hasRepoInstallation: localHasRepoInstallation,
-          installationUrl,
-          permissions,
-        }}
-      >
-        {!localHasRepoInstallation && (
-          <CheckAccess
-            repo={repo}
-            owner={owner}
-            onHasRepoSuccess={() => setLocalHasRepoInstallation(true)}
-          />
-        )}
-        {/* @ts-ignore */}
-        <RepoDetail token={session?.token} />
-      </AppContext.Provider>
+      <>
+        <Head>
+          <title>
+            {/* mimicking github.com's title */}
+            GitHub Blocks:
+            {path ? ` ${repo}/${path}` : ` ${repo}`}
+            {branch ? ` at ${branch}` : ""}
+            {` · ${owner}/${repo}`}
+          </title>
+        </Head>
+        <AppContext.Provider
+          value={{
+            hasRepoInstallation: localHasRepoInstallation,
+            installationUrl,
+            permissions,
+          }}
+        >
+          {!localHasRepoInstallation && (
+            <CheckAccess
+              repo={repo}
+              owner={owner}
+              onHasRepoSuccess={() => setLocalHasRepoInstallation(true)}
+            />
+          )}
+          {/* @ts-ignore */}
+          <RepoDetail token={session?.token} />
+        </AppContext.Provider>
+      </>
     );
   }
 
@@ -93,16 +105,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const { repo, owner } = query as Record<string, string>;
   const queryClient = new QueryClient();
   const session = await getSession({ req: context.req });
-
-  // First, check if the user is authenticated or has an invalid session.
-  if (!session || session.error) {
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-  }
 
   const octokit = makeOctokitInstance(session?.token as string);
 

@@ -95,6 +95,9 @@ const Page = ({ assets }: { assets: Asset[] }) => {
 
   const jsString =
     assets.find((asset) => asset.name.endsWith(".js"))?.content || "";
+  const cssStrings = assets
+    .filter((asset) => asset.name.endsWith(".css"))
+    .map((asset) => asset.content);
 
   useEffect(() => {
     if (!global.BlockBundle) return;
@@ -139,7 +142,9 @@ const Page = ({ assets }: { assets: Asset[] }) => {
   return (
     <>
       <Head>
-        <style>{/* {css} */}</style>
+        {cssStrings.map((cssString) => (
+          <style>{cssString}</style>
+        ))}
       </Head>
       {Block && props && (
         <ThemeProvider>

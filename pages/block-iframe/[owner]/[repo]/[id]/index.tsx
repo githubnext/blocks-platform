@@ -102,19 +102,6 @@ const Page = ({ assets }: { assets: Asset[] }) => {
   }, []);
 
   useEffect(() => {
-    const onLoad = () => {
-      window.parent.postMessage(
-        {
-          type: "loaded",
-        },
-        "*"
-      );
-    };
-    addEventListener("load", onLoad);
-    return () => removeEventListener("load", onLoad);
-  }, []);
-
-  useEffect(() => {
     const onMessage = (event: MessageEvent) => {
       const { data, source } = event;
       if (source !== window.parent) return;
@@ -140,6 +127,12 @@ const Page = ({ assets }: { assets: Asset[] }) => {
       }
     };
     addEventListener("message", onMessage);
+    window.parent.postMessage(
+      {
+        type: "loaded",
+      },
+      "*"
+    );
     return () => removeEventListener("message", onMessage);
   }, []);
 

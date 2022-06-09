@@ -113,7 +113,6 @@ type BlockComponentProps = FileBlockProps &
 const BlockComponent = ({
   block,
   path,
-  tree,
   onUpdateMetadata: originalOnUpdateMetadata,
   onUpdateContent,
   onRequestGitHubData,
@@ -124,19 +123,43 @@ const BlockComponent = ({
   ...props
 }: BlockComponentProps) => {
   const [contents, setContents] = useState<string | undefined>(undefined);
+  const [tree, setTree] = useState<RepoFiles | undefined>(undefined);
   const [metadata, setMetadata] = useState<any>({});
 
   const getData = async () => {
-    if (block.type !== "file") return;
-    const apiUrl = `/repos/${props.context.owner}/${props.context.repo}/contents/${path}`;
-    const params =
-      props.context.sha && props.context.sha !== "HEAD"
-        ? { ref: props.context.sha }
-        : {};
-    const res = await onRequestGitHubData(apiUrl, params);
-    const encodedContent = res.content;
-    const data = Buffer.from(encodedContent, "base64").toString("utf8");
-    setContents(data);
+    if (block.type === "file") {
+      const apiUrl = `/repos/${props.context.owner}/${props.context.repo}/contents/${path}`;
+      const params =
+        props.context.sha && props.context.sha !== "HEAD"
+          ? { ref: props.context.sha }
+          : {};
+      const res = await onRequestGitHubData(apiUrl, params);
+      const encodedContent = res.content;
+      const data = Buffer.from(encodedContent, "base64").toString("utf8");
+      setContents(data);
+    } else if (block.type === "folder") {
+      const apiUrl = `/repos/${props.context.owner}/${props.context.repo}/git/trees/${props.context.sha}?recursive=1`;
+      const res = await onRequestGitHubData(apiUrl);
+
+      const rawTree = res.tree;
+
+      const files = (rawTree as TreeItem[]).filter((item) => {
+        return item.path?.includes(path);
+      });
+
+      const tree = files.map((item) => {
+        return {
+          path: item.path || "",
+          mode: item.mode || "",
+          type: item.type || "",
+          sha: item.sha || "",
+          size: item.size || 0,
+          url: item.url || "",
+        };
+      });
+
+      setTree(tree);
+    }
   };
   const getMetadata = async () => {
     if (metadata) return;

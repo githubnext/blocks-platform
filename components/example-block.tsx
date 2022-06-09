@@ -197,7 +197,10 @@ const BlockComponent = ({
     };
   }, []);
 
-  if (block.type === "file" && !contents)
+  if (
+    (block.type === "file" && !contents) ||
+    (block.type === "folder" && !tree)
+  )
     return <div className="p-10">Loading...</div>;
   if (!block.id) return null;
 

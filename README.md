@@ -39,6 +39,8 @@ GITHUB_SECRET="..." # your app's "Client secret"
 GITHUB_APP_SLUG="..." # the last path segment of the "Public link"
 NEXTAUTH_SECRET="secret"
 NEXTAUTH_URL="http://localhost:3000"
+# if you're running the sandbox app locally
+NEXT_PUBLIC_SANDBOX_DOMAIN=http://localhost:3001
 ```
 
 To start working:

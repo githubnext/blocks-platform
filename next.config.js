@@ -22,7 +22,7 @@ module.exports = {
               "object-src 'none'",
               "worker-src 'self'",
               "style-src 'self' 'unsafe-inline'",
-              "frame-src 'self'",
+              `frame-src 'self' ${process.env.NEXT_PUBLIC_SANDBOX_DOMAIN}`,
               [
                 "script-src",
                 "'self'",

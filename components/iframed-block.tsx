@@ -5,7 +5,12 @@ import {
   FileContext,
   FolderContext,
 } from "@githubnext/blocks";
-import { RepoFiles } from "ghapi";
+import { getFileContent, getFolderContent, RepoFiles } from "ghapi";
+import axios from "axios";
+import { getMetadataPath } from "./general-block";
+import { QueryKeyMap } from "lib/query-keys";
+import { useQueryClient } from "react-query";
+import { FileKeyParams, FolderKeyParams } from "lib/query-keys";
 
 type IFramedBlockProps = {
   block: Block;
@@ -38,12 +43,10 @@ function handleResponse<T>(
     window,
     requestId,
     type,
-    origin,
   }: {
     window: Window;
     requestId: string;
     type: string;
-    origin: string;
   }
 ) {
   return p.then(
@@ -72,14 +75,27 @@ export default ({
   onRequestGitHubData,
   onStoreGet,
   onStoreSet,
+  onRequestBlocksRepos,
   onNavigateToPath,
 }: IFramedBlockProps) => {
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
+  const [isLoaded, setIsLoaded] = React.useState(false);
+  const [bundle, setBundle] = React.useState<Asset[] | undefined>(undefined);
+  const queryClient = useQueryClient();
 
   const updateIframe = () => {
+    if (!isLoaded) return;
     if (!iframeRef.current?.contentWindow) return;
     if (!contents && block.type === "file") return;
     if (!tree && block.type === "tree") return;
+    if (!iframeRef.current?.contentWindow) return;
+    iframeRef.current.contentWindow.postMessage(
+      {
+        type: "set-bundle",
+        bundle,
+      },
+      "*"
+    );
     iframeRef.current.contentWindow.postMessage(
       {
         type: "set-props",
@@ -98,7 +114,98 @@ export default ({
   };
   useEffect(() => {
     updateIframe();
-  }, [block, context, contents, originalContent, isEditable, tree, metadata]);
+  }, [
+    block,
+    context,
+    contents,
+    originalContent,
+    isEditable,
+    tree,
+    metadata,
+    bundle,
+    isLoaded,
+  ]);
+
+  const getFileContentLocal = async (params: FileKeyParams) => {
+    try {
+      const res = await queryClient.fetchQuery(
+        [QueryKeyMap.file.key, params],
+        (queryParams) => {
+          return getFileContent({
+            ...queryParams,
+            queryKey: [queryParams.queryKey[0][0], params],
+          });
+        }
+      );
+      return res.content;
+    } catch (e) {
+      return null;
+    }
+  };
+  const getFolderContentLocal = async (params: FolderKeyParams) => {
+    try {
+      const res = await queryClient.fetchQuery(
+        QueryKeyMap.folder.key,
+        (queryParams) => {
+          return getFolderContent({
+            ...queryParams,
+            queryKey: [queryParams.queryKey[0], params],
+          });
+        }
+      );
+      return res.tree;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const getMetadata = async (
+    context: FileContext | FolderContext,
+    block: Block
+  ) => {
+    const url = block.entry && getMetadataPath(block, context.path);
+    return await getFileContentLocal({
+      repo: context.repo,
+      owner: context.owner,
+      path: url,
+      fileRef: context.sha,
+    });
+  };
+
+  const getBlockComponent = async (
+    context: FileContext | FolderContext,
+    block: Block
+  ) => {
+    const bundle = await getBundle(block);
+    const metadata = await getMetadata(context, block);
+    const content =
+      block.type !== "file"
+        ? undefined
+        : await getFileContentLocal({
+            repo: context.repo,
+            owner: context.owner,
+            path: context.path,
+            fileRef: context.sha,
+          });
+    const tree =
+      block.type === "folder"
+        ? await getFolderContentLocal({
+            repo: context.repo,
+            owner: context.owner,
+            path: context.path,
+            fileRef: context.sha,
+          })
+        : undefined;
+    const props = {
+      metadata,
+      content,
+      tree,
+    };
+    return {
+      bundle,
+      props,
+    };
+  };
 
   const onMessage = useRef((event: MessageEvent) => {});
   onMessage.current = (event: MessageEvent) => {
@@ -106,59 +213,78 @@ export default ({
     const { data, origin, source } = event;
     if (source !== iframeRef.current.contentWindow) return;
     const window = source as Window;
-
     switch (data.type) {
       case "loaded":
-        updateIframe();
+        setIsLoaded(true);
         break;
 
       case "update-metadata":
         onUpdateMetadata(
-          data.metadata,
-          data.path,
-          data.block,
-          data.currentMetadata
+          data.payload.metadata,
+          data.payload.path,
+          data.payload.block,
+          data.payload.currentMetadata
         );
         break;
 
       case "update-file":
-        onUpdateContent(data.content);
+        onUpdateContent(data.payload.content);
         break;
 
       case "navigate-to-path":
-        onNavigateToPath(data.path);
+        onNavigateToPath(data.payload.path);
         break;
 
       case "github-data--request":
-        handleResponse(onRequestGitHubData(data.path, data.params), {
-          window,
-          requestId: data.requestId,
-          type: "github-data--response",
-          origin,
-        });
+        handleResponse(
+          onRequestGitHubData(data.payload.path, data.payload.params),
+          {
+            window,
+            requestId: data.requestId,
+            type: "github-data--response",
+          }
+        );
         break;
 
       case "store-get--request":
-        handleResponse(onStoreGet(data.key), {
+        handleResponse(onStoreGet(data.payload.key), {
           window,
           requestId: data.requestId,
           type: "store-get--response",
-          origin,
         });
         break;
 
       case "store-set--request":
-        handleResponse(onStoreSet(data.key, data.value), {
+        handleResponse(onStoreSet(data.payload.key, data.payload.value), {
           window,
           requestId: data.requestId,
           type: "store-set--response",
-          origin,
         });
+        break;
+
+      case "blocks-repos--request":
+        handleResponse(onRequestBlocksRepos(data.payload.path), {
+          window,
+          requestId: data.requestId,
+          type: "blocks-repos--response",
+        });
+        break;
+
+      case "get-bundle--request":
+        console.log("get bundle", data);
+        handleResponse(
+          getBlockComponent(data.payload.context, data.payload.block),
+          {
+            window,
+            requestId: data.requestId,
+            type: "get-bundle--response",
+          }
+        );
         break;
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     const onMessageInstance = (event: MessageEvent) => {
       onMessage.current(event);
     };
@@ -167,12 +293,38 @@ export default ({
     return () => removeEventListener("message", onMessageInstance);
   }, []);
 
+  const updateBundle = async () => {
+    setBundle(undefined);
+    const bundle = await getBundle(block);
+    setBundle(bundle);
+  };
+  useEffect(() => {
+    updateBundle();
+  }, [block.owner, block.repo, block.id]);
+
   return (
     <iframe
       className={"w-full h-full"}
       ref={iframeRef}
-      sandbox={"allow-scripts"}
-      src={`/block-iframe/${block.owner}/${block.repo}/${block.id}`}
+      sandbox={"allow-scripts allow-same-origin"}
+      src={`${process.env.NEXT_PUBLIC_SANDBOX_DOMAIN}/${block.owner}/${block.repo}/${block.id}`}
+      // src={`/block-iframe/${block.owner}/${block.repo}/${block.id}`}
     />
   );
+};
+
+type Asset = {
+  name: string;
+  content: string;
+};
+
+const getBundle = async (block: Block) => {
+  const url = `/api/get-block-content?owner=${block.owner}&repo=${block.repo}&id=${block.id}`;
+  const bundle = await axios(url)
+    .then((res) => res.data)
+    .catch((e) => {
+      console.error(e);
+      return null;
+    });
+  return bundle?.content;
 };

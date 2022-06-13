@@ -81,50 +81,8 @@ export default ({
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
   const [isLoaded, setIsLoaded] = React.useState(false);
   const [bundle, setBundle] = React.useState<Asset[] | undefined>(undefined);
+  const [blockProps, setBlockProps] = React.useState<any>({});
   const queryClient = useQueryClient();
-
-  const updateIframe = () => {
-    if (!isLoaded) return;
-    if (!iframeRef.current?.contentWindow) return;
-    if (!contents && block.type === "file") return;
-    if (!tree && block.type === "tree") return;
-    if (!iframeRef.current?.contentWindow) return;
-    iframeRef.current.contentWindow.postMessage(
-      {
-        type: "set-bundle",
-        bundle,
-      },
-      "*"
-    );
-    iframeRef.current.contentWindow.postMessage(
-      {
-        type: "set-props",
-        props: {
-          block,
-          context,
-          content: contents,
-          originalContent,
-          isEditable,
-          tree,
-          metadata,
-        },
-      },
-      "*"
-    );
-  };
-  useEffect(() => {
-    updateIframe();
-  }, [
-    block,
-    context,
-    contents,
-    originalContent,
-    isEditable,
-    tree,
-    metadata,
-    bundle,
-    isLoaded,
-  ]);
 
   const getFileContentLocal = async (params: FileKeyParams) => {
     try {
@@ -172,11 +130,10 @@ export default ({
     });
   };
 
-  const getBlockComponent = async (
+  const getBlockProps = async (
     context: FileContext | FolderContext,
     block: Block
   ) => {
-    const bundle = await getBundle(block);
     const metadata = await getMetadata(context, block);
     const content =
       block.type !== "file"
@@ -196,14 +153,10 @@ export default ({
             fileRef: context.sha,
           })
         : undefined;
-    const props = {
+    return {
       metadata,
       content,
       tree,
-    };
-    return {
-      bundle,
-      props,
     };
   };
 
@@ -271,9 +224,15 @@ export default ({
         break;
 
       case "get-bundle--request":
-        console.log("get bundle", data);
+        handleResponse(getBundle(data.payload.block), {
+          window,
+          requestId: data.requestId,
+          type: "get-bundle--response",
+        });
+        break;
+      case "get-props--request":
         handleResponse(
-          getBlockComponent(data.payload.context, data.payload.block),
+          getBlockProps(data.payload.context, data.payload.block),
           {
             window,
             requestId: data.requestId,
@@ -293,13 +252,63 @@ export default ({
     return () => removeEventListener("message", onMessageInstance);
   }, []);
 
-  const updateBundle = async () => {
-    setBundle(undefined);
+  const updateBundle = () => {
+    if (!isLoaded) return;
+    if (!iframeRef.current?.contentWindow) return;
+    iframeRef.current.contentWindow.postMessage(
+      {
+        type: "set-bundle",
+        bundle,
+      },
+      "*"
+    );
+  };
+  const updateProps = () => {
+    if (!isLoaded) return;
+    if (!iframeRef.current?.contentWindow) return;
+    iframeRef.current.contentWindow.postMessage(
+      {
+        type: "set-props",
+        props: {
+          block,
+          context,
+          content: contents,
+          originalContent,
+          isEditable,
+          tree,
+          metadata,
+        },
+      },
+      "*"
+    );
+  };
+  useEffect(() => {
+    updateBundle();
+  }, [bundle, isLoaded]);
+  useEffect(() => {
+    updateProps();
+  }, [
+    block.owner,
+    block.repo,
+    block.id,
+    context.owner,
+    context.repo,
+    context.path,
+    context.sha,
+    contents,
+    isEditable,
+    tree,
+    metadata,
+    isLoaded,
+  ]);
+
+  const fetchBundle = async () => {
+    // setBundle(undefined);
     const bundle = await getBundle(block);
     setBundle(bundle);
   };
   useEffect(() => {
-    updateBundle();
+    fetchBundle();
   }, [block.owner, block.repo, block.id]);
 
   return (

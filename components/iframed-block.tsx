@@ -316,7 +316,7 @@ export default ({
       className={"w-full h-full"}
       ref={iframeRef}
       sandbox={"allow-scripts allow-same-origin"}
-      src={`${process.env.NEXT_PUBLIC_SANDBOX_DOMAIN}/${block.owner}/${block.repo}/${block.id}`}
+      src={process.env.NEXT_PUBLIC_SANDBOX_DOMAIN}
       // src={`/block-iframe/${block.owner}/${block.repo}/${block.id}`}
     />
   );

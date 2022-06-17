@@ -116,20 +116,20 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
     context.sha === branchName ||
     (timeline && timeline.length > 0 && timeline[0].sha === branchName);
 
-  const [updatedContents, setUpdatedContents] = useState<UpdatedContents>({});
-  const [showCommitCodeDialog, setShowCommitCodeDialog] = useState(false);
-  const onSaveChanges = updatedContents[path]
-    ? () => {
-        setShowCommitCodeDialog(true);
-      }
-    : undefined;
-  const updatedContent = updatedContents[path];
-  const clearUpdatedContent = () =>
-    setUpdatedContents(
-      Immer.produce(updatedContents, (updatedContents) => {
-        delete updatedContents[path];
-      })
-    );
+  // const [appContext.stagedContent, setUpdatedContents] = useState<UpdatedContents>({});
+  // const [showCommitCodeDialog, setShowCommitCodeDialog] = useState(false);
+  // const onSaveChanges = appContext.stagedContent[path]
+  //   ? () => {
+  //     setShowCommitCodeDialog(true);
+  //   }
+  //   : undefined;
+  // const updatedContent = appContext.stagedContent[path];
+  // const clearUpdatedContent = () =>
+  //   setUpdatedContents(
+  //     Immer.produce(appContext.stagedContent, (appContext.stagedContent) => {
+  //       delete appContext.stagedContent[path];
+  //     })
+  //   );
 
   return (
     <div className="flex flex-col w-full h-screen overflow-hidden">
@@ -169,7 +169,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
             repo,
             files,
             path,
-            updatedContents,
+            updatedContents: appContext.stagedContent,
           }}
         />
         <div className="flex-1 overflow-hidden">
@@ -185,9 +185,9 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
                 context,
                 theme,
                 branchName,
-                updatedContents,
-                setUpdatedContents,
-                onSaveChanges,
+                updatedContents: appContext.stagedContent,
+                // setUpdatedContents,
+                // onSaveChanges,
               }}
             />
           )}
@@ -198,8 +198,8 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
           context={context}
           branchName={branchName}
           timeline={timeline}
-          updatedContent={updatedContent}
-          clearUpdatedContent={clearUpdatedContent}
+          updatedContent={appContext.stagedContent}
+          // clearUpdatedContent={clearUpdatedContent}
           blockType={blockTypes[fileInfo?.type]}
         />
       </div>
@@ -215,14 +215,14 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
           onClose={() => setRequestedMetadata(null)}
         />
       )}
-      {!!showCommitCodeDialog && updatedContents[path] && (
+      {/* {!!showCommitCodeDialog && appContext.stagedContent[path] && (
         <CommitCodeDialog
           repo={repo}
           owner={owner}
           path={path}
           sha={context.sha}
-          newCode={updatedContents[path].content}
-          currentCode={updatedContents[path].original}
+          newCode={appContext.stagedContent[path].content}
+          currentCode={appContext.stagedContent[path].original}
           onCommit={() => {
             setShowCommitCodeDialog(false);
             clearUpdatedContent();
@@ -234,6 +234,20 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
           token={token}
           branchName={branchName}
           branchingDisabled={!isBranchable}
+        />
+      )} */}
+
+      {!!appContext.requestedContent && (
+        <UpdateCodeModal
+          isLoggedIn={!!token}
+          path={appContext.requestedContent.path}
+          newCode={appContext.requestedContent.newCode}
+          currentCode={appContext.requestedContent.currentCode}
+          onSubmit={appContext.requestedContent.onSubmit}
+          onClose={() => {
+            appContext.requestedContent.onClose();
+            appContext.setRequestedContent(null);
+          }}
         />
       )}
     </div>

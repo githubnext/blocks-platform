@@ -1,6 +1,12 @@
 import { FullPageLoader } from "components/full-page-loader";
 import { RepoDetail } from "components/repo-detail";
-import { AppContext, Permissions } from "context";
+import {
+  AppContext,
+  Content,
+  Permissions,
+  RequestedContent,
+  StagedContent,
+} from "context";
 import {
   getRepoInfoWithContributorsSSR,
   makeGitHubAPIInstance,
@@ -27,6 +33,9 @@ function RepoDetailContainer(props: {
     useState(hasRepoInstallation);
   const { repo, owner, branch, path } = router.query as Record<string, string>;
   const [loaded, setLoaded] = useState(false);
+  const [stagedContent, setStagedContent] = useState<StagedContent>({});
+  const [requestedContent, setRequestedContent] =
+    useState<RequestedContent>(null);
 
   const queryClient = useQueryClient();
   const { data: session, status } = useSession({
@@ -78,6 +87,11 @@ function RepoDetailContainer(props: {
             hasRepoInstallation: localHasRepoInstallation,
             installationUrl,
             permissions,
+            token: session?.token as string,
+            stagedContent,
+            setStagedContent,
+            requestedContent,
+            setRequestedContent,
           }}
         >
           {!localHasRepoInstallation && (

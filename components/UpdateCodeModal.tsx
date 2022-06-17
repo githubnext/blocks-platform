@@ -8,15 +8,15 @@ export const UpdateCodeModal = ({
   newCode,
   currentCode = "",
   isLoggedIn = false,
-  onSubmit,
-  onClose,
+  onSubmit = () => {},
+  onClose = () => {},
 }: {
   path: string;
   newCode: string;
   currentCode?: string;
   isLoggedIn: boolean;
-  onSubmit: (metadata: any) => void;
-  onClose: () => void;
+  onSubmit?: (code: string) => void;
+  onClose?: () => void;
 }) => {
   const diff = diffAsText(currentCode, newCode);
   const files = parseDiff(diff);

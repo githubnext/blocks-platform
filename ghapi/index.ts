@@ -15,7 +15,7 @@ import {
   InfoKeyParams,
   TimelineKeyParams,
 } from "lib/query-keys";
-import { QueryFunction } from "react-query";
+import { QueryFunction, QueryFunctionContext } from "react-query";
 import { Block, BlocksRepo } from "@githubnext/blocks";
 import { filterBlock } from "../hooks";
 export interface RepoContext {
@@ -74,10 +74,9 @@ export interface BlocksQueryMeta {
   octokit: Octokit;
 }
 
-export const getFileContent: QueryFunction<
-  FileData,
-  GenericQueryKey<FileKeyParams>
-> = async (ctx) => {
+export const getFileContent: (
+  ctx: QueryFunctionContext<GenericQueryKey<FileKeyParams>>
+) => Promise<FileData> = async (ctx) => {
   let meta = ctx.meta as unknown as BlocksQueryMeta;
   let params = ctx.queryKey[1];
   const { path, owner, repo, fileRef = "HEAD" } = params;
@@ -112,6 +111,22 @@ export const getFileContent: QueryFunction<
     context,
   };
 };
+
+export const getMetadata: (
+  ctx: QueryFunctionContext<GenericQueryKey<FileKeyParams>>
+) => Promise<any> = (ctx) =>
+  getFileContent(ctx).then(
+    (data) => {
+      try {
+        return JSON.parse(data.content);
+      } catch {
+        return {};
+      }
+    },
+    (err) => {
+      return {};
+    }
+  );
 
 export const getFolderContent: QueryFunction<
   FolderData,

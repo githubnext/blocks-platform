@@ -26,7 +26,7 @@ import { AppContext } from "context";
 import { CODEX_BLOCKS } from "lib";
 import { useSession } from "next-auth/react";
 import { QueryKeyMap } from "lib/query-keys";
-import { getFileContent, getFolderContent } from "ghapi";
+import { getFileContent, getFolderContent, getMetadata } from "ghapi";
 
 export type Context = {
   repo: string;
@@ -152,32 +152,21 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
 
     // fetch metadata for the block and path
     const metadataPath = getMetadataPath(block, path);
-    const metadata = queryClient
-      .fetchQuery(
-        QueryKeyMap.file.factory({
-          ...context,
-          path: metadataPath,
-          // TODO(jaked) branchName doesn't make sense for a file in another repo
-          // maybe metadata should always be on main?
-          fileRef: branchName,
-        }),
-        getFileContent,
-        {
-          retry: false,
-        }
-      )
-      .then(
-        (data) => {
-          try {
-            return JSON.parse(data.content);
-          } catch (e) {
-            return {};
-          }
-        },
-        (_) => {
-          return {};
-        }
-      );
+    const metadata = queryClient.fetchQuery(
+      QueryKeyMap.file.factory({
+        owner: context.owner,
+        repo: context.repo,
+        path: metadataPath,
+        // TODO(jaked) branchName doesn't make sense for a file in another repo
+        // maybe metadata should always be on main?
+        fileRef: branchName,
+      }),
+      getMetadata,
+      {
+        retry: false,
+        staleTime: 300000,
+      }
+    );
 
     const fileInfo =
       path === ""
@@ -215,7 +204,12 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
       const isTooLarge = size > fileSizeLimit;
 
       const fileData = queryClient.fetchQuery(
-        QueryKeyMap.file.factory(context),
+        QueryKeyMap.file.factory({
+          owner: context.owner,
+          repo: context.repo,
+          path: context.path,
+          fileRef: context.sha,
+        }),
         getFileContent,
         {
           retry: false,

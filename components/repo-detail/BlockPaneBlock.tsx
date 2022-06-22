@@ -1,138 +1,105 @@
-import * as Immer from "immer";
-import { useContext } from "react";
-import type { Block, RepoFiles } from "@githubnext/blocks";
-import { useFileContent, useCallbackWithProps } from "hooks";
-import { AppContext } from "context";
-import type { Context, UpdatedContents } from "./index";
-import { GeneralBlock } from "../general-block";
+import React from "react";
+import type { Block } from "@githubnext/blocks";
+import type { Context } from "./index";
+import { useMetadata } from "hooks";
+import { useRouter } from "next/router";
+import { ErrorBoundary } from "../error-boundary";
+import { UpdateCodeModal } from "../UpdateCodeModal";
 
 type BlockPaneBlockProps = {
   token: string;
   block: Block;
-  fileInfo: RepoFiles[0];
-  path: string;
   context: Context;
-  isFolder: boolean;
-  theme: string;
   branchName: string;
-  updatedContents: UpdatedContents;
-  setUpdatedContents: (_: UpdatedContents) => void;
 };
 
 export default function BlockPaneBlock({
   token,
   block,
-  fileInfo,
-  path,
   context,
-  isFolder,
-  theme,
   branchName,
-  updatedContents,
-  setUpdatedContents,
 }: BlockPaneBlockProps) {
-  const appContext = useContext(AppContext);
-
-  const size = fileInfo.size || 0;
-  const fileSizeLimit = 1500000; // 1.5Mb
-  const isTooLarge = size > fileSizeLimit;
-
-  const onBranchTip = context.sha === branchName;
-  const showUpdatedContents = onBranchTip && updatedContents[path];
-
-  const { data: fileData } = useFileContent(
-    {
-      repo: context.repo,
-      owner: context.owner,
-      path: path,
-      fileRef: context.sha,
-    },
-    {
-      enabled: !isFolder && !showUpdatedContents && !isTooLarge,
-      cacheTime: 0,
-    }
-  );
-
-  const onUpdateContent = useCallbackWithProps(
-    ({
-        path,
-        context,
-        updatedContents,
-        setUpdatedContents,
-        showUpdatedContents,
-        fileData,
-      }) =>
-      (newContent: string) => {
-        if (showUpdatedContents) {
-          setUpdatedContents(
-            Immer.produce(updatedContents, (updatedContents) => {
-              if (newContent === updatedContents[path].original) {
-                delete updatedContents[path];
-              } else {
-                updatedContents[path].content = newContent;
-              }
-            })
-          );
-        } else if (fileData) {
-          if (onBranchTip) {
-            setUpdatedContents(
-              Immer.produce(updatedContents, (updatedContents) => {
-                if (newContent !== fileData.content) {
-                  updatedContents[path] = {
-                    sha: fileData.context.sha,
-                    original: fileData.content,
-                    content: newContent,
-                  };
-                }
-              })
-            );
-          }
-        }
-      },
-    {
-      path,
-      context,
-      updatedContents,
-      setUpdatedContents,
-      showUpdatedContents,
-      fileData,
-    }
-  );
-
-  let content = "";
-  let originalContent = "";
-  if (showUpdatedContents) {
-    content = updatedContents[path].content;
-    originalContent = updatedContents[path].original;
-  } else if (fileData) {
-    content = fileData.content;
-    originalContent = content;
-  }
-  const isEditable =
-    onBranchTip &&
-    appContext.hasRepoInstallation &&
-    appContext.permissions.push;
-
+  /*
   if (isTooLarge)
     return (
       <div className="italic p-4 pt-40 text-center mx-auto text-gray-600">
         Oh boy, that's a honkin file! It's {size / 1000} KBs.
       </div>
     );
+  */
+
+  const { repo, owner, path, sha } = context;
+
+  const [requestedMetadata, setRequestedMetadata] = React.useState(null);
+  const [requestedMetadataExisting, setRequestedMetadataExisting] =
+    React.useState(null);
+  const [requestedMetadataPath, setRequestedMetadataPath] =
+    React.useState(null);
+  const [requestedMetadataPathFull, setRequestedMetadataPathFull] =
+    React.useState(null);
+
+  const router = useRouter();
+
+  const blockKey = getBlockKey(block);
+  const { metadata, onUpdateMetadata } = useMetadata({
+    owner: owner as string,
+    repo: repo as string,
+    metadataPath: block.entry && getMetadataPath(block, path),
+    filePath: path,
+    token: token,
+    branchName,
+  });
+  const type = block.type;
 
   return (
-    <GeneralBlock
-      key={block.id}
-      // @ts-ignore
-      context={context}
-      theme={theme || "light"}
-      block={block}
-      token={token}
-      branchName={branchName}
-      content={content}
-      originalContent={originalContent}
-      isEditable={isEditable}
-      onUpdateContent={onUpdateContent}
-    />
+    <div
+      className="flex flex-col"
+      style={{
+        height: "calc(100% - 3.3em)",
+      }}
+    >
+      <ErrorBoundary key={path}>
+        <div className="overflow-y-auto flex-1">
+          <iframe
+            key={block.id}
+            className={"w-full h-full"}
+            sandbox={"allow-scripts allow-same-origin"}
+            src={`${
+              process.env.NEXT_PUBLIC_SANDBOX_DOMAIN
+            }#${encodeURIComponent(JSON.stringify({ block, context }))}`}
+          />
+        </div>
+      </ErrorBoundary>
+      {!!requestedMetadata && (
+        <UpdateCodeModal
+          isLoggedIn={!!token}
+          path={`.github/blocks/${type}/${blockKey}.json`}
+          newCode={JSON.stringify(requestedMetadata, null, 2)}
+          currentCode={
+            requestedMetadataExisting || JSON.stringify(metadata, null, 2)
+          }
+          onSubmit={() => {
+            onUpdateMetadata(
+              requestedMetadata,
+              requestedMetadataPathFull || ""
+            );
+            setTimeout(() => {
+              window.postMessage({
+                type: "updated-metadata",
+                path: requestedMetadataPath,
+              });
+            }, 1000);
+          }}
+          onClose={() => setRequestedMetadata(null)}
+        />
+      )}
+    </div>
   );
 }
+
+export const getBlockKey = (block) =>
+  `${block?.owner}/${block?.repo}__${block?.id}`.replace(/\//g, "__");
+export const getMetadataPath = (block, path) =>
+  `.github/blocks/${block?.type}/${getBlockKey(block)}/${encodeURIComponent(
+    path
+  )}.json`;

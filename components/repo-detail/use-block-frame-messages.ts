@@ -1,5 +1,6 @@
 import { useContext, useEffect, useRef } from "react";
 import { useQueryClient, QueryClient } from "react-query";
+import type { NextRouter } from "next/router";
 import { useRouter } from "next/router";
 import type { Block, RepoFiles } from "@githubnext/blocks";
 import { onRequestGitHubData } from "@githubnext/blocks";
@@ -273,6 +274,166 @@ type BlockFrame = {
   context: Context;
 };
 
+function handleLoaded({
+  setProps,
+  blockFrames,
+  blockFrame,
+  window,
+  data,
+}: {
+  setProps: (window: Window, block: Block, context: Context) => void;
+  blockFrames: BlockFrame[];
+  blockFrame: BlockFrame;
+  window: Window;
+  data: any;
+}) {
+  const { block, context } = JSON.parse(
+    decodeURIComponent(data.hash.substring(1))
+  );
+  if (blockFrame) {
+    const blockChanged =
+      blockFrame.block.owner !== block.owner ||
+      blockFrame.block.repo !== block.repo ||
+      blockFrame.block.id !== block.id;
+    const contextChanged =
+      blockFrame.context.owner !== context.owner ||
+      blockFrame.context.repo !== context.repo ||
+      blockFrame.context.path !== context.path ||
+      blockFrame.context.sha !== context.sha;
+    if (blockChanged) {
+      setBundle(blockFrame.window, block);
+    }
+    if (blockChanged || contextChanged) {
+      setProps(blockFrame.window, block, context);
+    }
+    blockFrame.block = block;
+    blockFrame.context = context;
+  } else {
+    const blockFrame = { window, block, context };
+    blockFrames.push(blockFrame);
+    setBundle(window, block);
+    setProps(window, block, context);
+  }
+}
+
+function handleGitHubDataRequest({
+  token,
+  blockFrame,
+  data,
+}: {
+  token: string;
+  blockFrame: BlockFrame;
+  data: any;
+}) {
+  handleResponse(
+    onRequestGitHubData(data.payload.path, data.payload.params, token),
+    {
+      window: blockFrame.window,
+      requestId: data.requestId,
+      type: "github-data--response",
+    }
+  );
+}
+
+function handleNavigateToPath({
+  router,
+  data,
+}: {
+  router: NextRouter;
+  data: any;
+}) {
+  router.push(
+    {
+      pathname: router.pathname,
+      query: { ...router.query, path: data.payload.path },
+    },
+    null,
+    { shallow: true }
+  );
+}
+
+function handleblocksRepoRequest({
+  queryClient,
+  blockFrame,
+  data,
+}: {
+  queryClient: QueryClient;
+  blockFrame: BlockFrame;
+  data: any;
+}) {
+  handleResponse(
+    queryClient.fetchQuery(
+      QueryKeyMap.blocksRepos.factory({}),
+      getAllBlocksRepos,
+      {
+        staleTime: 5 * 60 * 1000,
+      }
+    ),
+    {
+      window: blockFrame.window,
+      requestId: data.requestId,
+      type: "blocks-repos--response",
+    }
+  );
+}
+
+function makeStoreURL(block: Block, context: Context, key: string) {
+  const encodedKey = encodeURIComponent(key);
+  const { id, repoId } = block;
+  const { owner, repo } = context;
+  return `/api/store/${repoId}/${id}/${owner}/${repo}/${encodedKey}`;
+}
+
+function handleStoreGetRequest({
+  blockFrame,
+  data,
+}: {
+  blockFrame: BlockFrame;
+  data: any;
+}) {
+  const { key } = data.payload;
+  const storeURL = makeStoreURL(blockFrame.block, blockFrame.context, key);
+
+  const res = fetch(storeURL).then((res) => {
+    if (res.status === 404) return undefined;
+    else return res.json();
+  });
+  handleResponse(res, {
+    window: blockFrame.window,
+    requestId: data.requestId,
+    type: "store-get--response",
+  });
+}
+
+function handleStoreSetRequest({
+  blockFrame,
+  data,
+}: {
+  blockFrame: BlockFrame;
+  data: any;
+}) {
+  const { key, value } = data.payload;
+  const storeURL = makeStoreURL(blockFrame.block, blockFrame.context, key);
+
+  let res;
+  if (value === undefined) {
+    res = fetch(storeURL, { method: "DELETE" });
+  } else {
+    res = fetch(storeURL, {
+      method: "PUT",
+      body: JSON.stringify(value),
+    });
+  }
+  handleResponse(
+    res.then(() => undefined),
+    {
+      window: blockFrame.window,
+      requestId: data.requestId,
+      type: "store-set--response",
+    }
+  );
+}
+
 function useBlockFrameMessages({
   token,
   owner,
@@ -314,116 +475,30 @@ function useBlockFrameMessages({
 
     switch (data.type) {
       case "loaded":
-        {
-          const { block, context } = JSON.parse(
-            decodeURIComponent(data.hash.substring(1))
-          );
-          if (blockFrame) {
-            const blockChanged =
-              blockFrame.block.owner !== block.owner ||
-              blockFrame.block.repo !== block.repo ||
-              blockFrame.block.id !== block.id;
-            const contextChanged =
-              blockFrame.context.owner !== context.owner ||
-              blockFrame.context.repo !== context.repo ||
-              blockFrame.context.path !== context.path ||
-              blockFrame.context.sha !== context.sha;
-            if (blockChanged) {
-              setBundle(blockFrame.window, block);
-            }
-            if (blockChanged || contextChanged) {
-              setProps(blockFrame.window, block, context);
-            }
-            blockFrame.block = block;
-            blockFrame.context = context;
-          } else {
-            const window = source as Window;
-            const blockFrame = { window, block, context };
-            blockFrames.current.push(blockFrame);
-            setBundle(window, block);
-            setProps(window, block, context);
-          }
-        }
-        break;
+        return handleLoaded({
+          setProps,
+          blockFrames: blockFrames.current,
+          blockFrame,
+          window: source as Window,
+          data,
+        });
+
+      // TODO(jaked) handle unloading iframes
 
       case "github-data--request":
-        handleResponse(
-          onRequestGitHubData(data.payload.path, data.payload.params, token),
-          {
-            window: blockFrame.window,
-            requestId: data.requestId,
-            type: "github-data--response",
-          }
-        );
-        break;
+        return handleGitHubDataRequest({ token, blockFrame, data });
 
       case "navigate-to-path":
-        router.push(
-          {
-            pathname: router.pathname,
-            query: { ...router.query, path: data.payload.path },
-          },
-          null,
-          { shallow: true }
-        );
+        return handleNavigateToPath({ router, data });
 
       case "blocks-repos--request":
-        handleResponse(
-          queryClient.fetchQuery(
-            QueryKeyMap.blocksRepos.factory({}),
-            getAllBlocksRepos,
-            {
-              staleTime: 5 * 60 * 1000,
-            }
-          ),
-          {
-            window: blockFrame.window,
-            requestId: data.requestId,
-            type: "blocks-repos--response",
-          }
-        );
-        break;
+        return handleblocksRepoRequest({ queryClient, blockFrame, data });
 
       case "store-get--request":
-      case "store-set--request":
-        {
-          const { key, value } = data.payload;
-          const encodedKey = encodeURIComponent(key);
-          const { id, repoId } = blockFrame.block;
-          const { owner, repo } = blockFrame.context;
-          const storeURL = `/api/store/${repoId}/${id}/${owner}/${repo}/${encodedKey}`;
+        return handleStoreGetRequest({ blockFrame, data });
 
-          if (data.type === "store-get--request") {
-            const res = fetch(storeURL).then((res) => {
-              if (res.status === 404) return undefined;
-              else return res.json();
-            });
-            handleResponse(res, {
-              window: blockFrame.window,
-              requestId: data.requestId,
-              type: "store-get--response",
-            });
-          } else {
-            let res;
-            if (value === undefined) {
-              res = fetch(storeURL, { method: "DELETE" });
-            } else {
-              res = fetch(storeURL, {
-                method: "PUT",
-                body: JSON.stringify(value),
-              });
-            }
-            handleResponse(
-              res.then(() => undefined),
-              {
-                window: blockFrame.window,
-                requestId: data.requestId,
-                type: "store-set--response",
-              }
-            );
-          }
-        }
-        break;
+      case "store-set--request":
+        return handleStoreSetRequest({ blockFrame, data });
 
       /*
       case "update-metadata":

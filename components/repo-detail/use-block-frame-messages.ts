@@ -1,3 +1,4 @@
+import * as Immer from "immer";
 import { useContext, useEffect, useRef } from "react";
 import { useQueryClient, QueryClient } from "react-query";
 import type { NextRouter } from "next/router";
@@ -16,6 +17,18 @@ import type { AppContextValue } from "context";
 import { AppContext } from "context";
 import { Context, UpdatedContents } from "./index";
 
+type BlockFrame = {
+  window: Window;
+  block: Block;
+  context: Context;
+  props: any;
+};
+
+const getMetadataPath = (block: Block, path: string) =>
+  `.github/blocks/${block.type}/${getBlockKey(block)}/${encodeURIComponent(
+    path
+  )}.json`;
+
 const setBundle = async (window: Window, block: Block) => {
   const url = `/api/get-block-content?owner=${block.owner}&repo=${block.repo}&id=${block.id}`;
   const res = await fetch(url);
@@ -31,7 +44,16 @@ const setBundle = async (window: Window, block: Block) => {
   }
 };
 
-const makeSetProps =
+const setProps = (blockFrame: BlockFrame, props: any) => {
+  blockFrame.props = props;
+  blockFrame.window.postMessage(
+    { type: "set-props", props },
+    // TODO(jaked) origin should be blocks-sandbox
+    "*"
+  );
+};
+
+const makeSetInitialProps =
   ({
     queryClient,
     appContext,
@@ -49,7 +71,8 @@ const makeSetProps =
     files: RepoFiles;
     updatedContents: UpdatedContents;
   }) =>
-  (window: Window, block: Block, context: Context) => {
+  (blockFrame: BlockFrame) => {
+    const { window, block, context } = blockFrame;
     const path = context.path;
 
     // TODO(jaked) handle requests for other repos
@@ -90,18 +113,13 @@ const makeSetProps =
         }
       );
       Promise.all([metadata, treeData]).then(([metadata, treeData]) => {
-        window.postMessage(
-          {
-            type: "set-props",
-            props: {
-              block,
-              context, // TODO(jaked) add file / folder name
-              metadata,
-              tree: treeData.tree,
-            },
-          },
-          "*"
-        ); // TODO(jaked) origin should be blocks-sandbox
+        const props = {
+          block,
+          context, // TODO(jaked) add file / folder name
+          metadata,
+          tree: treeData.tree,
+        };
+        setProps(blockFrame, props);
       });
     } else {
       const size = fileInfo.size || 0;
@@ -143,55 +161,18 @@ const makeSetProps =
           appContext.hasRepoInstallation &&
           appContext.permissions.push;
 
-        window.postMessage(
-          {
-            type: "set-props",
-            props: {
-              block,
-              context, // TODO(jaked) add file / folder name
-              metadata,
-              content,
-              originalContent,
-              isEditable,
-            },
-          },
-          "*"
-        ); // TODO(jaked) origin should be blocks-sandbox
+        const props = {
+          block,
+          context, // TODO(jaked) add file / folder name
+          metadata,
+          content,
+          originalContent,
+          isEditable,
+        };
+        setProps(blockFrame, props);
       });
     }
   };
-
-const getMetadataPath = (block, path) =>
-  `.github/blocks/${block?.type}/${getBlockKey(block)}/${encodeURIComponent(
-    path
-  )}.json`;
-
-function handleResponse<T>(
-  p: Promise<T>,
-  {
-    window,
-    requestId,
-    type,
-  }: {
-    window: Window;
-    requestId: string;
-    type: string;
-  }
-) {
-  return p.then(
-    (response) => {
-      // TODO(jaked) origin should be blocks-sandbox
-      window.postMessage({ type, requestId, response }, "*");
-    },
-    (e) => {
-      // Error is not always serializable
-      // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm#things_that_dont_work_with_structured_clone
-      const error = e instanceof Error ? e.message : e;
-      // TODO(jaked) origin should be blocks-sandbox
-      window.postMessage({ type, requestId, error }, "*");
-    }
-  );
-}
 
 /*
   const onRequestUpdateMetadata = async (
@@ -220,73 +201,41 @@ function handleResponse<T>(
   );
 */
 
-/*
-const onUpdateContent = useCallbackWithProps(
-  ({
-      path,
-      context,
-      updatedContents,
-      setUpdatedContents,
-      showUpdatedContents,
-      fileData,
-    }) =>
-    (newContent: string) => {
-      if (showUpdatedContents) {
-        setUpdatedContents(
-          Immer.produce(updatedContents, (updatedContents) => {
-            if (newContent === updatedContents[path].original) {
-              delete updatedContents[path];
-            } else {
-              updatedContents[path].content = newContent;
-            }
-          })
-        );
-      } else if (fileData) {
-        if (onBranchTip) {
-          setUpdatedContents(
-            Immer.produce(updatedContents, (updatedContents) => {
-              if (newContent !== fileData.content) {
-                updatedContents[path] = {
-                  sha: fileData.context.sha,
-                  original: fileData.content,
-                  content: newContent,
-                };
-              }
-            })
-          );
-        }
-      }
-    },
-  {
-    path,
-    context,
-    updatedContents,
-    setUpdatedContents,
-    showUpdatedContents,
-    fileData,
-  }
-);
-*/
-
-type BlockFrame = {
-  window: Window;
-  block: Block;
-  context: Context;
-};
-
 function handleLoaded({
-  setProps,
+  queryClient,
+  appContext,
+  owner,
+  repo,
+  branchName,
+  files,
+  updatedContents,
   blockFrames,
   blockFrame,
   window,
   data,
 }: {
-  setProps: (window: Window, block: Block, context: Context) => void;
+  queryClient: QueryClient;
+  appContext: AppContextValue;
+  owner: string;
+  repo: string;
+  branchName: string;
+  files: RepoFiles;
+  updatedContents: UpdatedContents;
   blockFrames: BlockFrame[];
   blockFrame: BlockFrame;
   window: Window;
   data: any;
 }) {
+  const setInitialProps = makeSetInitialProps({
+    queryClient,
+    appContext,
+    owner,
+    repo,
+    branchName,
+    files,
+    updatedContents,
+  });
+
   const { block, context } = JSON.parse(
     decodeURIComponent(data.hash.substring(1))
   );
@@ -300,20 +249,49 @@ function handleLoaded({
       blockFrame.context.repo !== context.repo ||
       blockFrame.context.path !== context.path ||
       blockFrame.context.sha !== context.sha;
+
+    blockFrame.block = block;
+    blockFrame.context = context;
+
     if (blockChanged) {
       setBundle(blockFrame.window, block);
     }
     if (blockChanged || contextChanged) {
-      setProps(blockFrame.window, block, context);
+      setInitialProps(blockFrame);
     }
-    blockFrame.block = block;
-    blockFrame.context = context;
   } else {
-    const blockFrame = { window, block, context };
+    const blockFrame = { window, block, context, props: {} };
     blockFrames.push(blockFrame);
     setBundle(window, block);
-    setProps(window, block, context);
+    setInitialProps(blockFrame);
   }
+}
+
+function handleResponse<T>(
+  p: Promise<T>,
+  {
+    window,
+    requestId,
+    type,
+  }: {
+    window: Window;
+    requestId: string;
+    type: string;
+  }
+) {
+  return p.then(
+    (response) => {
+      // TODO(jaked) origin should be blocks-sandbox
+      window.postMessage({ type, requestId, response }, "*");
+    },
+    (e) => {
+      // Error is not always serializable
+      // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm#things_that_dont_work_with_structured_clone
+      const error = e instanceof Error ? e.message : e;
+      // TODO(jaked) origin should be blocks-sandbox
+      window.postMessage({ type, requestId, error }, "*");
+    }
+  );
 }
 
 function handleGitHubDataRequest({
@@ -434,6 +412,51 @@ function handleStoreSetRequest({
   );
 }
 
+function handleUpdateFile({
+  updatedContents,
+  setUpdatedContents,
+  blockFrame,
+  data,
+}: {
+  updatedContents: UpdatedContents;
+  setUpdatedContents: (_: UpdatedContents) => void;
+  blockFrame: BlockFrame;
+  data: any;
+}) {
+  const context = blockFrame.context;
+  const path = context.path;
+  const newContent = data.payload.content;
+
+  if (!blockFrame.props.isEditable) return;
+
+  if (path in updatedContents) {
+    setUpdatedContents(
+      Immer.produce(updatedContents, (updatedContents) => {
+        if (newContent === updatedContents[path].original) {
+          delete updatedContents[path];
+        } else {
+          updatedContents[path].content = newContent;
+        }
+      })
+    );
+  } else {
+    const content = blockFrame.props.originalContent;
+    const sha = blockFrame.props.context.sha;
+
+    setUpdatedContents(
+      Immer.produce(updatedContents, (updatedContents) => {
+        if (newContent !== content) {
+          updatedContents[path] = {
+            sha,
+            original: content,
+            content: newContent,
+          };
+        }
+      })
+    );
+  }
+}
+
 function useBlockFrameMessages({
   token,
   owner,
@@ -441,6 +464,7 @@ function useBlockFrameMessages({
   branchName,
   files,
   updatedContents,
+  setUpdatedContents,
 }: {
   token: string;
   owner: string;
@@ -448,22 +472,25 @@ function useBlockFrameMessages({
   branchName: string;
   files: RepoFiles;
   updatedContents: UpdatedContents;
+  setUpdatedContents: (_: UpdatedContents) => void;
 }) {
   const appContext = useContext(AppContext);
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const setProps = makeSetProps({
-    queryClient,
-    owner,
-    repo,
-    branchName,
-    files,
-    updatedContents,
-    appContext,
-  });
-
   const blockFrames = useRef<BlockFrame[]>([]);
+
+  // update blocks with content changes
+  for (const blockFrame of blockFrames.current) {
+    const path = blockFrame.context.path;
+    if (path in updatedContents) {
+      const { content } = updatedContents[path];
+      if (blockFrame.props.content !== content) {
+        const props = { ...blockFrame.props, content };
+        setProps(blockFrame, props);
+      }
+    }
+  }
 
   const onMessage = useRef((event: MessageEvent) => {});
   onMessage.current = (event: MessageEvent) => {
@@ -476,7 +503,13 @@ function useBlockFrameMessages({
     switch (data.type) {
       case "loaded":
         return handleLoaded({
-          setProps,
+          queryClient,
+          appContext,
+          owner,
+          repo,
+          branchName,
+          files,
+          updatedContents,
           blockFrames: blockFrames.current,
           blockFrame,
           window: source as Window,
@@ -500,6 +533,14 @@ function useBlockFrameMessages({
       case "store-set--request":
         return handleStoreSetRequest({ blockFrame, data });
 
+      case "update-file":
+        return handleUpdateFile({
+          updatedContents,
+          setUpdatedContents,
+          blockFrame,
+          data,
+        });
+
       /*
       case "update-metadata":
         onUpdateMetadata(
@@ -508,10 +549,6 @@ function useBlockFrameMessages({
           data.payload.block,
           data.payload.currentMetadata
         );
-        break;
-
-      case "update-file":
-        onUpdateContent(data.payload.content);
         break;
 */
     }

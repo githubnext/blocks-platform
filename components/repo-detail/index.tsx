@@ -139,6 +139,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
     branchName,
     files,
     updatedContents,
+    setUpdatedContents,
   });
 
   return (

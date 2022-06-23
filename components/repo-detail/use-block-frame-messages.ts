@@ -1,18 +1,33 @@
 import { useContext, useEffect, useRef } from "react";
 import { useQueryClient, QueryClient } from "react-query";
-import axios from "axios";
+import { useRouter } from "next/router";
 import type { Block, RepoFiles } from "@githubnext/blocks";
+import { onRequestGitHubData } from "@githubnext/blocks";
 import { QueryKeyMap } from "lib/query-keys";
-import { getFileContent, getFolderContent, getMetadata } from "ghapi";
+import {
+  getAllBlocksRepos,
+  getFileContent,
+  getFolderContent,
+  getMetadata,
+} from "ghapi";
 import { getBlockKey } from "hooks";
-import { AppContext, AppContextValue } from "context";
+import type { AppContextValue } from "context";
+import { AppContext } from "context";
 import { Context, UpdatedContents } from "./index";
 
-const setBundle = (window: Window, block: Block) => {
-  getBundle(block).then((bundle) => {
-    // TODO(jaked) origin should be blocks-sandbox
-    window.postMessage({ type: "set-bundle", bundle }, "*");
-  });
+const setBundle = async (window: Window, block: Block) => {
+  const url = `/api/get-block-content?owner=${block.owner}&repo=${block.repo}&id=${block.id}`;
+  const res = await fetch(url);
+  if (res.ok) {
+    const bundle = await res.json();
+    window.postMessage(
+      { type: "set-bundle", bundle: bundle.content },
+      // TODO(jaked) origin should be blocks-sandbox
+      "*"
+    );
+  } else {
+    console.error(res);
+  }
 };
 
 const makeSetProps =
@@ -54,7 +69,7 @@ const makeSetProps =
       getMetadata,
       {
         retry: false,
-        staleTime: 300000,
+        staleTime: 5 * 60 * 1000,
       }
     );
 
@@ -145,21 +160,10 @@ const makeSetProps =
     }
   };
 
-export const getMetadataPath = (block, path) =>
+const getMetadataPath = (block, path) =>
   `.github/blocks/${block?.type}/${getBlockKey(block)}/${encodeURIComponent(
     path
   )}.json`;
-
-const getBundle = async (block: Block) => {
-  const url = `/api/get-block-content?owner=${block.owner}&repo=${block.repo}&id=${block.id}`;
-  const bundle = await axios(url)
-    .then((res) => res.data)
-    .catch((e) => {
-      console.error(e);
-      return null;
-    });
-  return bundle?.content;
-};
 
 function handleResponse<T>(
   p: Promise<T>,
@@ -175,12 +179,14 @@ function handleResponse<T>(
 ) {
   return p.then(
     (response) => {
+      // TODO(jaked) origin should be blocks-sandbox
       window.postMessage({ type, requestId, response }, "*");
     },
     (e) => {
       // Error is not always serializable
       // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm#things_that_dont_work_with_structured_clone
       const error = e instanceof Error ? e.message : e;
+      // TODO(jaked) origin should be blocks-sandbox
       window.postMessage({ type, requestId, error }, "*");
     }
   );
@@ -200,25 +206,6 @@ function handleResponse<T>(
     setRequestedMetadataPath(pathToUpdate);
     setRequestedMetadataPathFull(getMetadataPath(blockToUpdate, pathToUpdate));
   };
-  const onNavigateToPath = (path: string) => {
-    router.push(
-      {
-        pathname: router.pathname,
-        query: { ...query, path: path },
-      },
-      null,
-      { shallow: true }
-    );
-  };
-
-  const onRequestGitHubData = (path: string, params?: Record<string, any>) =>
-    utilsOnRequestGitHubData(path, params, token);
-
-  const onRequestBlocksRepos = () =>
-    queryClient.fetchQuery(
-      QueryKeyMap.blocksRepos.factory({}),
-      getAllBlocksRepos
-    );
 
   const name = path.split("/").pop();
 
@@ -230,30 +217,6 @@ function handleResponse<T>(
       } as FileContext | FolderContext),
     [context, name, type]
   );
-
-  const makeStoreURL = (key: string) =>
-    `/api/store/${block.repoId}/${
-      block.id
-    }/${owner}/${repo}/${encodeURIComponent(key)}`;
-
-  const onStoreGet = async (key: string): Promise<any> => {
-    const res = await fetch(makeStoreURL(key));
-    if (res.status === 404) return undefined;
-    else return await res.json();
-  };
-
-  const onStoreSet = async (key: string, value: string): Promise<void> => {
-    return (
-      value === undefined
-        ? fetch(makeStoreURL(key), {
-            method: "DELETE",
-          })
-        : fetch(makeStoreURL(key), {
-            method: "PUT",
-            body: JSON.stringify(value),
-          })
-    ).then((_) => undefined);
-  };
 */
 
 /*
@@ -311,13 +274,14 @@ type BlockFrame = {
 };
 
 function useBlockFrameMessages({
+  token,
   owner,
   repo,
   branchName,
   files,
   updatedContents,
-}: //  setUpdatedContents,
-{
+}: {
+  token: string;
   owner: string;
   repo: string;
   branchName: string;
@@ -326,6 +290,7 @@ function useBlockFrameMessages({
 }) {
   const appContext = useContext(AppContext);
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const setProps = makeSetProps({
     queryClient,
@@ -344,38 +309,119 @@ function useBlockFrameMessages({
     const { data, origin, source } = event;
     // TODO(jaked) check origin is blocks-sandbox
 
+    const blockFrame = blockFrames.current.find((bf) => bf.window === source);
+    if (!blockFrame && data.type !== "loaded") return;
+
     switch (data.type) {
       case "loaded":
-        const blockFrame = blockFrames.current.find(
-          (bf) => bf.window === source
-        );
-        const { block, context } = JSON.parse(
-          decodeURIComponent(data.hash.substr(1))
-        );
-        if (blockFrame) {
-          const blockChanged =
-            blockFrame.block.owner !== block.owner ||
-            blockFrame.block.repo !== block.repo ||
-            blockFrame.block.id !== block.id;
-          const contextChanged =
-            blockFrame.context.owner !== context.owner ||
-            blockFrame.context.repo !== context.repo ||
-            blockFrame.context.path !== context.path ||
-            blockFrame.context.sha !== context.sha;
-          if (blockChanged) {
-            setBundle(blockFrame.window, block);
+        {
+          const { block, context } = JSON.parse(
+            decodeURIComponent(data.hash.substring(1))
+          );
+          if (blockFrame) {
+            const blockChanged =
+              blockFrame.block.owner !== block.owner ||
+              blockFrame.block.repo !== block.repo ||
+              blockFrame.block.id !== block.id;
+            const contextChanged =
+              blockFrame.context.owner !== context.owner ||
+              blockFrame.context.repo !== context.repo ||
+              blockFrame.context.path !== context.path ||
+              blockFrame.context.sha !== context.sha;
+            if (blockChanged) {
+              setBundle(blockFrame.window, block);
+            }
+            if (blockChanged || contextChanged) {
+              setProps(blockFrame.window, block, context);
+            }
+            blockFrame.block = block;
+            blockFrame.context = context;
+          } else {
+            const window = source as Window;
+            const blockFrame = { window, block, context };
+            blockFrames.current.push(blockFrame);
+            setBundle(window, block);
+            setProps(window, block, context);
           }
-          if (blockChanged || contextChanged) {
-            setProps(blockFrame.window, block, context);
+        }
+        break;
+
+      case "github-data--request":
+        handleResponse(
+          onRequestGitHubData(data.payload.path, data.payload.params, token),
+          {
+            window: blockFrame.window,
+            requestId: data.requestId,
+            type: "github-data--response",
           }
-          blockFrame.block = block;
-          blockFrame.context = context;
-        } else {
-          const window = source as Window;
-          const blockFrame = { window, block, context };
-          blockFrames.current.push(blockFrame);
-          setBundle(window, block);
-          setProps(window, block, context);
+        );
+        break;
+
+      case "navigate-to-path":
+        router.push(
+          {
+            pathname: router.pathname,
+            query: { ...router.query, path: data.payload.path },
+          },
+          null,
+          { shallow: true }
+        );
+
+      case "blocks-repos--request":
+        handleResponse(
+          queryClient.fetchQuery(
+            QueryKeyMap.blocksRepos.factory({}),
+            getAllBlocksRepos,
+            {
+              staleTime: 5 * 60 * 1000,
+            }
+          ),
+          {
+            window: blockFrame.window,
+            requestId: data.requestId,
+            type: "blocks-repos--response",
+          }
+        );
+        break;
+
+      case "store-get--request":
+      case "store-set--request":
+        {
+          const { key, value } = data.payload;
+          const encodedKey = encodeURIComponent(key);
+          const { id, repoId } = blockFrame.block;
+          const { owner, repo } = blockFrame.context;
+          const storeURL = `/api/store/${repoId}/${id}/${owner}/${repo}/${encodedKey}`;
+
+          if (data.type === "store-get--request") {
+            const res = fetch(storeURL).then((res) => {
+              if (res.status === 404) return undefined;
+              else return res.json();
+            });
+            handleResponse(res, {
+              window: blockFrame.window,
+              requestId: data.requestId,
+              type: "store-get--response",
+            });
+          } else {
+            let res;
+            if (value === undefined) {
+              res = fetch(storeURL, { method: "DELETE" });
+            } else {
+              res = fetch(storeURL, {
+                method: "PUT",
+                body: JSON.stringify(value),
+              });
+            }
+            handleResponse(
+              res.then(() => undefined),
+              {
+                window: blockFrame.window,
+                requestId: data.requestId,
+                type: "store-set--response",
+              }
+            );
+          }
         }
         break;
 
@@ -391,45 +437,6 @@ function useBlockFrameMessages({
 
       case "update-file":
         onUpdateContent(data.payload.content);
-        break;
-
-      case "navigate-to-path":
-        onNavigateToPath(data.payload.path);
-        break;
-
-      case "github-data--request":
-        handleResponse(
-          onRequestGitHubData(data.payload.path, data.payload.params),
-          {
-            window,
-            requestId: data.requestId,
-            type: "github-data--response",
-          }
-        );
-        break;
-
-      case "store-get--request":
-        handleResponse(onStoreGet(data.payload.key), {
-          window,
-          requestId: data.requestId,
-          type: "store-get--response",
-        });
-        break;
-
-      case "store-set--request":
-        handleResponse(onStoreSet(data.payload.key, data.payload.value), {
-          window,
-          requestId: data.requestId,
-          type: "store-set--response",
-        });
-        break;
-
-      case "blocks-repos--request":
-        handleResponse(onRequestBlocksRepos(data.payload.path), {
-          window,
-          requestId: data.requestId,
-          type: "blocks-repos--response",
-        });
         break;
 */
     }

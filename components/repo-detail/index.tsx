@@ -11,7 +11,7 @@ import {
   useRepoTimeline,
 } from "hooks";
 import { useRouter } from "next/router";
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { FullPageLoader } from "../full-page-loader";
 import { UpdateCodeModal } from "../UpdateCodeModal";
 import { CommitCodeDialog } from "../commit-code-dialog";
@@ -133,6 +133,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
     );
 
   useBlockFrameMessages({
+    token,
     owner,
     repo,
     branchName,

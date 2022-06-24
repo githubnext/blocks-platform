@@ -465,14 +465,14 @@ function handleUpdateFile({
   blockFrame.props.content = newContent;
 
   for (const otherBlockFrame of blockFrames) {
-    if (otherBlockFrame === blockFrame) return;
+    if (otherBlockFrame === blockFrame) continue;
     if (
       otherBlockFrame.context.owner !== blockFrame.context.owner ||
       otherBlockFrame.context.repo !== blockFrame.context.repo ||
       otherBlockFrame.context.path !== blockFrame.context.path ||
       otherBlockFrame.context.sha !== blockFrame.context.sha
     )
-      return;
+      continue;
 
     const props = { ...otherBlockFrame.props, content: newContent };
     setProps(otherBlockFrame, props);

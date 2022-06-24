@@ -419,11 +419,13 @@ function handleStoreSetRequest({
 function handleUpdateFile({
   updatedContents,
   setUpdatedContents,
+  blockFrames,
   blockFrame,
   data,
 }: {
   updatedContents: UpdatedContents;
   setUpdatedContents: (_: UpdatedContents) => void;
+  blockFrames: BlockFrame[];
   blockFrame: BlockFrame;
   data: any;
 }) {
@@ -459,6 +461,22 @@ function handleUpdateFile({
       })
     );
   }
+
+  blockFrame.props.content = newContent;
+
+  for (const otherBlockFrame of blockFrames) {
+    if (otherBlockFrame === blockFrame) return;
+    if (
+      otherBlockFrame.context.owner !== blockFrame.context.owner ||
+      otherBlockFrame.context.repo !== blockFrame.context.repo ||
+      otherBlockFrame.context.path !== blockFrame.context.path ||
+      otherBlockFrame.context.sha !== blockFrame.context.sha
+    )
+      return;
+
+    const props = { ...otherBlockFrame.props, content: newContent };
+    setProps(otherBlockFrame, props);
+  }
 }
 
 function useBlockFrameMessages({
@@ -483,24 +501,6 @@ function useBlockFrameMessages({
   const router = useRouter();
 
   const blockFrames = useRef<BlockFrame[]>([]);
-
-  // update blocks with content changes
-  for (const blockFrame of blockFrames.current) {
-    const path = blockFrame.context.path;
-    if (path in updatedContents) {
-      const { content } = updatedContents[path];
-      if (blockFrame.props.content !== content) {
-        const props = { ...blockFrame.props, content };
-        setProps(blockFrame, props);
-      }
-    } else {
-      const { content, originalContent } = blockFrame.props;
-      if (content !== originalContent) {
-        const props = { ...blockFrame.props, content: originalContent };
-        setProps(blockFrame, props);
-      }
-    }
-  }
 
   const onMessage = useRef((event: MessageEvent) => {});
   onMessage.current = (event: MessageEvent) => {
@@ -547,6 +547,7 @@ function useBlockFrameMessages({
         return handleUpdateFile({
           updatedContents,
           setUpdatedContents,
+          blockFrames: blockFrames.current,
           blockFrame,
           data,
         });

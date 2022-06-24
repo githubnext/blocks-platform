@@ -72,7 +72,7 @@ const makeSetInitialProps =
     updatedContents: UpdatedContents;
   }) =>
   (blockFrame: BlockFrame) => {
-    const { window, block, context } = blockFrame;
+    const { block, context } = blockFrame;
     const path = context.path;
 
     // TODO(jaked) handle requests for other repos
@@ -127,6 +127,7 @@ const makeSetInitialProps =
       // TODO(jaked) handle too-largeness
       const isTooLarge = size > fileSizeLimit;
 
+      // TODO(jaked) skip fetch if `updateContents[path]` is set
       const fileData = queryClient.fetchQuery(
         QueryKeyMap.file.factory({
           owner: context.owner,
@@ -254,9 +255,12 @@ function handleLoaded({
     blockFrame.context = context;
 
     if (blockChanged) {
+      // TODO(jaked) update block atomically
       setBundle(blockFrame.window, block);
+      const props = { ...blockFrame.props, block };
+      setProps(blockFrame, props);
     }
-    if (blockChanged || contextChanged) {
+    if (contextChanged) {
       setInitialProps(blockFrame);
     }
   } else {
@@ -425,7 +429,7 @@ function handleUpdateFile({
 }) {
   const context = blockFrame.context;
   const path = context.path;
-  const newContent = data.payload.content;
+  const newContent = data.payload;
 
   if (!blockFrame.props.isEditable) return;
 
@@ -489,6 +493,12 @@ function useBlockFrameMessages({
         const props = { ...blockFrame.props, content };
         setProps(blockFrame, props);
       }
+    } else {
+      const { content, originalContent } = blockFrame.props;
+      if (content !== originalContent) {
+        const props = { ...blockFrame.props, content: originalContent };
+        setProps(blockFrame, props);
+      }
     }
   }
 
@@ -499,6 +509,8 @@ function useBlockFrameMessages({
 
     const blockFrame = blockFrames.current.find((bf) => bf.window === source);
     if (!blockFrame && data.type !== "loaded") return;
+    if (event.data.source !== "react-devtools-bridge")
+      console.log({ blockFrame, event });
 
     switch (data.type) {
       case "loaded":

@@ -509,8 +509,6 @@ function useBlockFrameMessages({
 
     const blockFrame = blockFrames.current.find((bf) => bf.window === source);
     if (!blockFrame && data.type !== "loaded") return;
-    if (event.data.source !== "react-devtools-bridge")
-      console.log({ blockFrame, event });
 
     switch (data.type) {
       case "loaded":

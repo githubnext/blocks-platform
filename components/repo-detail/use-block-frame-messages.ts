@@ -513,6 +513,7 @@ function useBlockFrameMessages({
     const { data, origin, source } = event;
     if (origin !== process.env.NEXT_PUBLIC_SANDBOX_DOMAIN) return;
 
+    blockFrames.current = blockFrames.current.filter((bf) => !bf.window.closed);
     const blockFrame = blockFrames.current.find((bf) => bf.window === source);
     if (!blockFrame && data.type !== "loaded") return;
 
@@ -531,8 +532,6 @@ function useBlockFrameMessages({
           window: source as Window,
           data,
         });
-
-      // TODO(jaked) handle unloading iframes
 
       case "github-data--request":
         return handleGitHubDataRequest({ token, blockFrame, data });

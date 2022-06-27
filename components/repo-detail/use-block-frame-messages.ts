@@ -511,7 +511,7 @@ function useBlockFrameMessages({
   const onMessage = useRef((event: MessageEvent) => {});
   onMessage.current = (event: MessageEvent) => {
     const { data, origin, source } = event;
-    // TODO(jaked) check origin is blocks-sandbox
+    if (origin !== process.env.NEXT_PUBLIC_SANDBOX_DOMAIN) return;
 
     const blockFrame = blockFrames.current.find((bf) => bf.window === source);
     if (!blockFrame && data.type !== "loaded") return;

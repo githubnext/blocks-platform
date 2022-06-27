@@ -72,6 +72,7 @@ const makeSetInitialProps =
   (blockFrame: BlockFrame) => {
     const { block, context } = blockFrame;
     const path = context.path;
+    const name = path.split("/").pop();
 
     // TODO(jaked) handle requests for other repos
     // this is complicated because we rely on `files` for the current repo
@@ -113,7 +114,7 @@ const makeSetInitialProps =
       Promise.all([metadata, treeData]).then(([metadata, treeData]) => {
         const props = {
           block,
-          context, // TODO(jaked) add file / folder name
+          context: { ...context, folder: name },
           metadata,
           tree: treeData.tree,
         };
@@ -162,7 +163,7 @@ const makeSetInitialProps =
 
         const props = {
           block,
-          context, // TODO(jaked) add file / folder name
+          context: { ...context, file: name },
           metadata,
           content,
           originalContent,
@@ -187,17 +188,6 @@ const makeSetInitialProps =
     setRequestedMetadataPath(pathToUpdate);
     setRequestedMetadataPathFull(getMetadataPath(blockToUpdate, pathToUpdate));
   };
-
-  const name = path.split("/").pop();
-
-  const updatedContext = useMemo(
-    () =>
-      ({
-        ...context,
-        [type]: name,
-      } as FileContext | FolderContext),
-    [context, name, type]
-  );
 */
 
 function handleLoaded({

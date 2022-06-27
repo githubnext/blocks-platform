@@ -18,17 +18,12 @@ module.exports = {
               "default-src 'self'",
               "base-uri 'none'",
               "child-src 'none'",
-              "frame-ancestors 'self'",
+              "frame-ancestors 'none'",
               "object-src 'none'",
-              "worker-src 'self'",
+              "worker-src 'none'",
               "style-src 'self' 'unsafe-inline'",
-              `frame-src 'self' ${process.env.NEXT_PUBLIC_SANDBOX_DOMAIN}`,
-              [
-                "script-src",
-                "'self'",
-                isDev && "'unsafe-eval'",
-                // "https://raw.githubusercontent.com/",
-              ]
+              `frame-src ${process.env.NEXT_PUBLIC_SANDBOX_DOMAIN}`,
+              ["script-src", "'self'", isDev && "'unsafe-eval'"]
                 .filter(Boolean)
                 .join(" "),
               [
@@ -47,49 +42,9 @@ module.exports = {
                 "https://api.github.com/",
                 // for Analytics
                 "https://octo-metrics.azurewebsites.net/api/CaptureEvent",
-                // for getting the source code for custom Blocks
-                process.env.NEXT_PUBLIC_MARKETPLACE_URL,
               ]
                 .filter(Boolean)
                 .join(" "),
-            ].join(";"),
-          },
-          {
-            key: "Strict-Transport-Security",
-            value: "max-age=63072000; includeSubDomains; preload",
-          },
-          {
-            key: "X-Frame-Options",
-            value: "SAMEORIGIN",
-          },
-          {
-            key: "X-XSS-Protection",
-            value: "0",
-          },
-          {
-            key: "X-Content-Type-Options",
-            value: "nosniff",
-          },
-        ],
-      },
-      {
-        source: "/block-iframe/:path*",
-        headers: [
-          {
-            key: "Content-Security-Policy",
-            value: [
-              "sandbox allow-scripts",
-              "default-src *",
-              "base-uri 'none'",
-              "child-src 'none'",
-              "frame-ancestors 'self'",
-              "object-src 'none'",
-              "worker-src 'self'",
-              "connect-src * blob:",
-              "style-src 'unsafe-inline' *",
-              "frame-src *",
-              "script-src 'unsafe-eval' 'unsafe-inline' *",
-              "img-src *",
             ].join(";"),
           },
           {

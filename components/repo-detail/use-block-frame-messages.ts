@@ -36,8 +36,7 @@ const setBundle = async (window: Window, block: Block) => {
     const bundle = await res.json();
     window.postMessage(
       { type: "set-bundle", bundle: bundle.content },
-      // TODO(jaked) origin should be blocks-sandbox
-      "*"
+      process.env.NEXT_PUBLIC_SANDBOX_DOMAIN
     );
   } else {
     console.error(res);
@@ -48,8 +47,7 @@ const setProps = (blockFrame: BlockFrame, props: any) => {
   blockFrame.props = props;
   blockFrame.window.postMessage(
     { type: "set-props", props },
-    // TODO(jaked) origin should be blocks-sandbox
-    "*"
+    process.env.NEXT_PUBLIC_SANDBOX_DOMAIN
   );
 };
 
@@ -285,15 +283,19 @@ function handleResponse<T>(
 ) {
   return p.then(
     (response) => {
-      // TODO(jaked) origin should be blocks-sandbox
-      window.postMessage({ type, requestId, response }, "*");
+      window.postMessage(
+        { type, requestId, response },
+        process.env.NEXT_PUBLIC_SANDBOX_DOMAIN
+      );
     },
     (e) => {
       // Error is not always serializable
       // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm#things_that_dont_work_with_structured_clone
       const error = e instanceof Error ? e.message : e;
-      // TODO(jaked) origin should be blocks-sandbox
-      window.postMessage({ type, requestId, error }, "*");
+      window.postMessage(
+        { type, requestId, error },
+        process.env.NEXT_PUBLIC_SANDBOX_DOMAIN
+      );
     }
   );
 }

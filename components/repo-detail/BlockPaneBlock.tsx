@@ -63,7 +63,7 @@ export default function BlockPaneBlock({
           <iframe
             key={block.id}
             className={"w-full h-full"}
-            sandbox={"allow-scripts allow-same-origin"}
+            sandbox={"allow-scripts allow-same-origin allow-forms"}
             src={`${
               process.env.NEXT_PUBLIC_SANDBOX_DOMAIN
             }#${encodeURIComponent(JSON.stringify({ block, context }))}`}

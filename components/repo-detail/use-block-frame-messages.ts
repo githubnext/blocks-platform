@@ -178,22 +178,6 @@ const makeSetInitialProps =
     }
   };
 
-/*
-  const onRequestUpdateMetadata = async (
-    newMetadata: any,
-    pathToUpdate = path,
-    blockToUpdate = block,
-    currentMetadata = metadata
-  ) => {
-    setRequestedMetadata(newMetadata);
-    setRequestedMetadataExisting(
-      JSON.stringify(currentMetadata || "{}", null, 2)
-    );
-    setRequestedMetadataPath(pathToUpdate);
-    setRequestedMetadataPathFull(getMetadataPath(blockToUpdate, pathToUpdate));
-  };
-*/
-
 function handleLoaded({
   queryClient,
   appContext,
@@ -460,6 +444,26 @@ function handleUpdateFile({
   }
 }
 
+function handleUpdateMetadata({
+  setRequestedMetadata,
+  blockFrame,
+  metadata,
+}: {
+  setRequestedMetadata: (_: {
+    path: string;
+    current: string;
+    new: string;
+  }) => void;
+  blockFrame: BlockFrame;
+  metadata: any;
+}) {
+  setRequestedMetadata({
+    path: getMetadataPath(blockFrame.block, blockFrame.context.path),
+    current: JSON.stringify(blockFrame.props.metadata, undefined, 2),
+    new: JSON.stringify(metadata, undefined, 2),
+  });
+}
+
 function useBlockFrameMessages({
   token,
   owner,
@@ -468,6 +472,7 @@ function useBlockFrameMessages({
   files,
   updatedContents,
   setUpdatedContents,
+  setRequestedMetadata,
 }: {
   token: string;
   owner: string;
@@ -476,6 +481,11 @@ function useBlockFrameMessages({
   files: RepoFiles;
   updatedContents: UpdatedContents;
   setUpdatedContents: (_: UpdatedContents) => void;
+  setRequestedMetadata: (_: {
+    path: string;
+    current: string;
+    new: string;
+  }) => void;
 }) {
   const appContext = useContext(AppContext);
   const queryClient = useQueryClient();
@@ -550,16 +560,12 @@ function useBlockFrameMessages({
           data,
         });
 
-      /*
       case "update-metadata":
-        onUpdateMetadata(
-          data.payload.metadata,
-          data.payload.path,
-          data.payload.block,
-          data.payload.currentMetadata
-        );
-        break;
-*/
+        return handleUpdateMetadata({
+          setRequestedMetadata,
+          blockFrame,
+          metadata: data.payload,
+        });
     }
   };
 

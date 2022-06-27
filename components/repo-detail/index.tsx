@@ -65,7 +65,9 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
     fileRef,
     mode,
   } = router.query as Record<string, string>;
-  const [requestedMetadata, setRequestedMetadata] = useState(null);
+  const [requestedBlockMetadata, setRequestedBlockMetadata] = useState(null);
+  const [requestedMetadata, setRequestedMetadata] =
+    useState<{ path: string; current: string; new: string }>(null);
   const isFullscreen = mode === "fullscreen";
   const appContext = useContext(AppContext);
 
@@ -140,6 +142,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
     files,
     updatedContents,
     setUpdatedContents,
+    setRequestedMetadata,
   });
 
   return (
@@ -191,7 +194,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
                 path,
                 token,
                 metadata,
-                setRequestedMetadata,
+                setRequestedBlockMetadata,
                 isFullscreen,
                 context,
                 branchName,
@@ -211,14 +214,28 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
           blockType={blockTypes[fileInfo?.type]}
         />
       </div>
-      {!!requestedMetadata && (
+      {!!requestedBlockMetadata && (
         <UpdateCodeModal
           isLoggedIn={!!token}
           path={`.github/blocks/all.json`}
-          newCode={JSON.stringify(requestedMetadata, null, 2)}
+          newCode={JSON.stringify(requestedBlockMetadata, null, 2)}
           currentCode={JSON.stringify(metadata, null, 2)}
           onSubmit={() => {
-            onUpdateMetadata(requestedMetadata, `.github/blocks/all.json`);
+            onUpdateMetadata(requestedBlockMetadata, `.github/blocks/all.json`);
+          }}
+          onClose={() => setRequestedBlockMetadata(null)}
+        />
+      )}
+      {!!requestedMetadata && (
+        <UpdateCodeModal
+          isLoggedIn={!!token}
+          path={requestedMetadata.path}
+          newCode={requestedMetadata.new}
+          currentCode={requestedMetadata.current}
+          onSubmit={() => {
+            /*
+            onUpdateMetadata(requestedBlockMetadata, `.github/blocks/all.json`);
+            */
           }}
           onClose={() => setRequestedMetadata(null)}
         />

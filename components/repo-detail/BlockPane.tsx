@@ -11,7 +11,7 @@ type BlockPaneProps = {
   path: string;
   token: string;
   metadata: any;
-  setRequestedMetadata: (metadata: any) => void;
+  setRequestedBlockMetadata: (metadata: any) => void;
   isFullscreen: boolean;
   context: Context;
   branchName: string;
@@ -23,10 +23,9 @@ export default function BlockPane({
   path,
   token,
   metadata,
-  setRequestedMetadata,
+  setRequestedBlockMetadata,
   isFullscreen,
   context,
-  branchName,
   onSaveChanges,
 }: BlockPaneProps) {
   const router = useRouter();
@@ -70,21 +69,12 @@ export default function BlockPane({
           isFolder,
           token,
           metadata,
-          setRequestedMetadata,
+          setRequestedMetadata: setRequestedBlockMetadata,
           context,
           onSaveChanges,
         }}
       />
-      {block && (
-        <BlockPaneBlock
-          {...{
-            token,
-            block,
-            context,
-            branchName,
-          }}
-        />
-      )}
+      {block && <BlockPaneBlock block={block} context={context} />}
     </>
   );
 }

@@ -126,27 +126,31 @@ const makeSetInitialProps =
       // TODO(jaked) handle too-largeness
       const isTooLarge = size > fileSizeLimit;
 
-      // TODO(jaked) skip fetch if `updateContents[path]` is set
-      const fileData = queryClient.fetchQuery(
-        QueryKeyMap.file.factory({
-          owner: context.owner,
-          repo: context.repo,
-          path: context.path,
-          fileRef: context.sha,
-        }),
-        getFileContent,
-        {
-          retry: false,
-          // TODO(jaked)
-          // existing code has cacheTime: 0 to force a refresh on commit.
-          // would be better to handle this by invalidating the query.
-        }
-      );
+      const onBranchTip = context.sha === branchName;
+      const showUpdatedContents = onBranchTip && updatedContents[path];
+
+      let fileData: Promise<{ content: string }>;
+      if (showUpdatedContents) {
+        fileData = Promise.resolve(undefined);
+      } else {
+        fileData = queryClient.fetchQuery(
+          QueryKeyMap.file.factory({
+            owner: context.owner,
+            repo: context.repo,
+            path: context.path,
+            fileRef: context.sha,
+          }),
+          getFileContent,
+          {
+            retry: false,
+            // TODO(jaked)
+            // existing code has cacheTime: 0 to force a refresh on commit.
+            // would be better to handle this by invalidating the query.
+          }
+        );
+      }
 
       Promise.all([metadata, fileData]).then(([metadata, fileData]) => {
-        const onBranchTip = context.sha === branchName;
-        const showUpdatedContents = onBranchTip && updatedContents[path];
-
         let content: string;
         let originalContent: string;
         if (showUpdatedContents) {

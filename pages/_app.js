@@ -11,11 +11,6 @@ import { useRouter } from "next/router";
 import { track } from "../lib/analytics";
 
 function App({ Component, pageProps: { session, ...pageProps } }) {
-  if (Component.getLayout) {
-    // allow pages to skip the layout
-    return Component.getLayout(<Component {...pageProps} />);
-  }
-
   const [queryClient] = useState(() => new QueryClient());
 
   const router = useRouter();

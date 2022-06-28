@@ -453,6 +453,7 @@ function handleUpdateMetadata({
     path: string;
     current: string;
     new: string;
+    onSubmit: () => void;
   }) => void;
   blockFrame: BlockFrame;
   metadata: any;
@@ -461,6 +462,9 @@ function handleUpdateMetadata({
     path: getMetadataPath(blockFrame.block, blockFrame.context.path),
     current: JSON.stringify(blockFrame.props.metadata, undefined, 2),
     new: JSON.stringify(metadata, undefined, 2),
+    onSubmit: () => {
+      setProps(blockFrame, { ...blockFrame.props, metadata });
+    },
   });
 }
 
@@ -485,6 +489,7 @@ function useBlockFrameMessages({
     path: string;
     current: string;
     new: string;
+    onSubmit: () => void;
   }) => void;
 }) {
   const appContext = useContext(AppContext);

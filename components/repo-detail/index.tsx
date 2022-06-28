@@ -1,9 +1,12 @@
-import { useContext } from "react";
+import { useContext, useEffect, useState, useMemo } from "react";
 import * as Immer from "immer";
+import { useQueryClient } from "react-query";
 import { Flash, Link, StyledOcticon, useTheme } from "@primer/react";
 import { AlertIcon } from "@primer/octicons-react";
+import { QueryKeyMap } from "lib/query-keys";
 import {
   getBlockKey,
+  updateFileContents,
   useGetBranches,
   useMetadata,
   useRepoFiles,
@@ -11,7 +14,6 @@ import {
   useRepoTimeline,
 } from "hooks";
 import { useRouter } from "next/router";
-import { useEffect, useState, useMemo } from "react";
 import { FullPageLoader } from "../full-page-loader";
 import { UpdateCodeModal } from "../UpdateCodeModal";
 import { CommitCodeDialog } from "../commit-code-dialog";
@@ -54,6 +56,7 @@ const blockTypes = {
 };
 
 export function RepoDetailInner(props: RepoDetailInnerProps) {
+  const queryClient = useQueryClient();
   const { token, repoInfo, branches, branchName, files, timeline } = props;
   const router = useRouter();
   const { setColorMode } = useTheme();
@@ -66,8 +69,12 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
     mode,
   } = router.query as Record<string, string>;
   const [requestedBlockMetadata, setRequestedBlockMetadata] = useState(null);
-  const [requestedMetadata, setRequestedMetadata] =
-    useState<{ path: string; current: string; new: string }>(null);
+  const [requestedMetadata, setRequestedMetadata] = useState<{
+    path: string;
+    current: string;
+    new: string;
+    onSubmit: () => void;
+  }>(null);
   const isFullscreen = mode === "fullscreen";
   const appContext = useContext(AppContext);
 
@@ -233,9 +240,29 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
           newCode={requestedMetadata.new}
           currentCode={requestedMetadata.current}
           onSubmit={() => {
-            /*
-            onUpdateMetadata(requestedBlockMetadata, `.github/blocks/all.json`);
-            */
+            requestedMetadata.onSubmit();
+            queryClient.executeMutation({
+              mutationFn: updateFileContents,
+              variables: {
+                owner,
+                repo,
+                path: requestedMetadata.path,
+                content: requestedMetadata.new,
+                ref: branchName,
+                branch: branchName,
+                token,
+              },
+              onSuccess: () => {
+                queryClient.invalidateQueries(
+                  QueryKeyMap.metadata.factory({
+                    owner,
+                    repo,
+                    path: requestedMetadata.path,
+                    fileRef: branchName,
+                  })
+                );
+              },
+            });
           }}
           onClose={() => setRequestedMetadata(null)}
         />

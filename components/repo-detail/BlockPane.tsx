@@ -4,7 +4,6 @@ import type { RepoFiles } from "@githubnext/blocks";
 import type { Context } from "./index";
 import { getBlockKey, useManageBlock } from "hooks";
 import BlockPaneHeader from "./BlockPaneHeader";
-import BlockPaneBlock from "./BlockPaneBlock";
 
 type BlockPaneProps = {
   fileInfo: RepoFiles[0];
@@ -74,7 +73,18 @@ export default function BlockPane({
           onSaveChanges,
         }}
       />
-      {block && <BlockPaneBlock block={block} context={context} />}
+      {block && (
+        <div className="overflow-y-auto w-full h-full">
+          <iframe
+            key={block.id}
+            className={"w-full h-full"}
+            sandbox={"allow-scripts allow-same-origin allow-forms"}
+            src={`${
+              process.env.NEXT_PUBLIC_SANDBOX_DOMAIN
+            }#${encodeURIComponent(JSON.stringify({ block, context }))}`}
+          />
+        </div>
+      )}
     </>
   );
 }

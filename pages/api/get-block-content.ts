@@ -18,7 +18,9 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  res.setHeader("Cache-Control", "s-maxage=86400, stale-while-revalidate=59");
+  // cache for 30 minutes
+  res.setHeader("Cache-Control", "max-age=1800, immutable");
+
   const session = await getSession({ req });
 
   await new Promise((resolve, reject) => {

@@ -1,3 +1,4 @@
+import path from "path";
 import * as Immer from "immer";
 import { useContext, useEffect, useRef } from "react";
 import { useQueryClient, QueryClient } from "react-query";
@@ -340,7 +341,10 @@ function handleblocksRepoRequest({
 }
 
 function makeStoreURL(block: Block, context: Context, key: string) {
-  const encodedKey = encodeURIComponent(key);
+  // prevent path traversal attacks
+  const safeKey = path.resolve(key).substring(1);
+
+  const encodedKey = encodeURIComponent(safeKey);
   const { id, repoId } = block;
   const { owner, repo } = context;
   return `/api/store/${repoId}/${id}/${owner}/${repo}/${encodedKey}`;

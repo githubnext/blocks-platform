@@ -354,7 +354,7 @@ function handleUpdateFile({
 }) {
   const context = blockFrame.context;
   const path = context.path;
-  const newContent = data.payload;
+  const newContent = data.payload.content;
 
   if (!blockFrame.props.isEditable) return;
 
@@ -559,7 +559,7 @@ function useBlockFrameMessages({
         handleUpdateMetadata({
           setRequestedMetadata,
           blockFrame,
-          metadata: data.payload,
+          metadata: data.payload.metadata,
         });
         sendResponse(responseParams);
 

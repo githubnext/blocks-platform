@@ -49,6 +49,8 @@ jobs:
       - name: yarn build
         run: |
           yarn build
+        env:
+          NEXT_PUBLIC_SANDBOX_DOMAIN: "https://blocks-sandbox.githubnext.com"
 
       - name: package zip
         run: zip -r web.zip package.json .next node_modules/ public/

@@ -414,6 +414,7 @@ function handleUpdateMetadata({
 }
 
 async function handleFetchInternalEndpoint(path, params) {
+  if (!path.startsWith("/api")) return;
   const res = await axios(path, params);
   return {
     data: res.data,
@@ -564,6 +565,7 @@ function useBlockFrameMessages({
         sendResponse(responseParams);
 
       case "private__onFetchInternalEndpoint":
+        if (blockFrame.context.owner !== "githubnext") return;
         return handleResponse(
           handleFetchInternalEndpoint(data.payload.path, data.payload.params),
           responseParams

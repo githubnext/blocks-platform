@@ -50,7 +50,7 @@ jobs:
         run: |
           yarn build
         env:
-          NEXT_PUBLIC_SANDBOX_DOMAIN: "https://blocks-sandbox.githubnext.com"
+          NEXT_PUBLIC_SANDBOX_DOMAIN: "https://gray-dune-04b442b10-main.centralus.1.azurestaticapps.net"
 
       - name: package zip
         run: zip -r web.zip package.json .next node_modules/ public/

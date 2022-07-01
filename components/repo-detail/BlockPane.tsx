@@ -1,23 +1,19 @@
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import type { RepoFiles } from "@githubnext/blocks";
-import type { Context, UpdatedContents } from "./index";
+import type { Context } from "./index";
 import { getBlockKey, useManageBlock } from "hooks";
 import BlockPaneHeader from "./BlockPaneHeader";
-import BlockPaneBlock from "./BlockPaneBlock";
 
 type BlockPaneProps = {
   fileInfo: RepoFiles[0];
   path: string;
   token: string;
   metadata: any;
-  setRequestedMetadata: (metadata: any) => void;
+  setRequestedBlockMetadata: (metadata: any) => void;
   isFullscreen: boolean;
   context: Context;
-  theme: string;
   branchName: string;
-  updatedContents: UpdatedContents;
-  setUpdatedContents: (_: UpdatedContents) => void;
   onSaveChanges: () => void;
 };
 
@@ -26,13 +22,9 @@ export default function BlockPane({
   path,
   token,
   metadata,
-  setRequestedMetadata,
+  setRequestedBlockMetadata,
   isFullscreen,
   context,
-  theme,
-  branchName,
-  updatedContents,
-  setUpdatedContents,
   onSaveChanges,
 }: BlockPaneProps) {
   const router = useRouter();
@@ -76,26 +68,22 @@ export default function BlockPane({
           isFolder,
           token,
           metadata,
-          setRequestedMetadata,
+          setRequestedMetadata: setRequestedBlockMetadata,
           context,
           onSaveChanges,
         }}
       />
       {block && (
-        <BlockPaneBlock
-          {...{
-            token,
-            block,
-            fileInfo,
-            path,
-            context,
-            isFolder,
-            theme,
-            branchName,
-            updatedContents,
-            setUpdatedContents,
-          }}
-        />
+        <div className="overflow-y-auto w-full h-full">
+          <iframe
+            key={block.id}
+            className={"w-full h-full"}
+            sandbox={"allow-scripts allow-same-origin allow-forms"}
+            src={`${
+              process.env.NEXT_PUBLIC_SANDBOX_DOMAIN
+            }#${encodeURIComponent(JSON.stringify({ block, context }))}`}
+          />
+        </div>
       )}
     </>
   );

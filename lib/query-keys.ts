@@ -71,6 +71,7 @@ export const QueryKeyMap = {
   timeline: makeFactory<"timeline", TimelineKeyParams>("timeline"),
   files: makeFactory<"files", FilesKeyParams>("files"),
   file: makeFactory<"file", FileKeyParams>("file"),
+  metadata: makeFactory<"metadata", FileKeyParams>("metadata"),
   blocksRepos: makeFactory<"blocksRepos", {}>("blocksRepos"),
   blocksRepo: makeFactory<"blocksRepo", BlocksKeyParams>("blocksRepo"),
   branches: makeFactory<"branches", BranchesKeyParams>("branches"),

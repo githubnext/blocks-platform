@@ -1,9 +1,12 @@
-import { useContext } from "react";
+import { useContext, useEffect, useState, useMemo } from "react";
 import * as Immer from "immer";
+import { useQueryClient } from "react-query";
 import { Flash, Link, StyledOcticon, useTheme } from "@primer/react";
 import { AlertIcon } from "@primer/octicons-react";
+import { QueryKeyMap } from "lib/query-keys";
 import {
   getBlockKey,
+  updateFileContents,
   useGetBranches,
   useMetadata,
   useRepoFiles,
@@ -11,7 +14,6 @@ import {
   useRepoTimeline,
 } from "hooks";
 import { useRouter } from "next/router";
-import { useEffect, useState, useMemo } from "react";
 import { FullPageLoader } from "../full-page-loader";
 import { UpdateCodeModal } from "../UpdateCodeModal";
 import { CommitCodeDialog } from "../commit-code-dialog";
@@ -23,6 +25,7 @@ import type { RepoFiles } from "@githubnext/blocks";
 import { AppContext } from "context";
 import { CODEX_BLOCKS } from "lib";
 import { useSession } from "next-auth/react";
+import useBlockFrameMessages from "./use-block-frame-messages";
 
 export type Context = {
   repo: string;
@@ -53,6 +56,7 @@ const blockTypes = {
 };
 
 export function RepoDetailInner(props: RepoDetailInnerProps) {
+  const queryClient = useQueryClient();
   const { token, repoInfo, branches, branchName, files, timeline } = props;
   const router = useRouter();
   const { setColorMode } = useTheme();
@@ -64,7 +68,13 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
     fileRef,
     mode,
   } = router.query as Record<string, string>;
-  const [requestedMetadata, setRequestedMetadata] = useState(null);
+  const [requestedBlockMetadata, setRequestedBlockMetadata] = useState(null);
+  const [requestedMetadata, setRequestedMetadata] = useState<{
+    path: string;
+    current: string;
+    new: string;
+    onSubmit: () => void;
+  }>(null);
   const isFullscreen = mode === "fullscreen";
   const appContext = useContext(AppContext);
 
@@ -131,6 +141,17 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
       })
     );
 
+  useBlockFrameMessages({
+    token,
+    owner,
+    repo,
+    branchName,
+    files,
+    updatedContents,
+    setUpdatedContents,
+    setRequestedMetadata,
+  });
+
   return (
     <div className="flex flex-col w-full h-screen overflow-hidden">
       <Header
@@ -180,13 +201,10 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
                 path,
                 token,
                 metadata,
-                setRequestedMetadata,
+                setRequestedBlockMetadata,
                 isFullscreen,
                 context,
-                theme,
                 branchName,
-                updatedContents,
-                setUpdatedContents,
                 onSaveChanges,
               }}
             />
@@ -203,14 +221,48 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
           blockType={blockTypes[fileInfo?.type]}
         />
       </div>
-      {!!requestedMetadata && (
+      {!!requestedBlockMetadata && (
         <UpdateCodeModal
           isLoggedIn={!!token}
           path={`.github/blocks/all.json`}
-          newCode={JSON.stringify(requestedMetadata, null, 2)}
+          newCode={JSON.stringify(requestedBlockMetadata, null, 2)}
           currentCode={JSON.stringify(metadata, null, 2)}
           onSubmit={() => {
-            onUpdateMetadata(requestedMetadata, `.github/blocks/all.json`);
+            onUpdateMetadata(requestedBlockMetadata, `.github/blocks/all.json`);
+          }}
+          onClose={() => setRequestedBlockMetadata(null)}
+        />
+      )}
+      {!!requestedMetadata && (
+        <UpdateCodeModal
+          isLoggedIn={!!token}
+          path={requestedMetadata.path}
+          newCode={requestedMetadata.new}
+          currentCode={requestedMetadata.current}
+          onSubmit={() => {
+            requestedMetadata.onSubmit();
+            queryClient.executeMutation({
+              mutationFn: updateFileContents,
+              variables: {
+                owner,
+                repo,
+                path: requestedMetadata.path,
+                content: requestedMetadata.new,
+                ref: branchName,
+                branch: branchName,
+                token,
+              },
+              onSuccess: () => {
+                queryClient.invalidateQueries(
+                  QueryKeyMap.metadata.factory({
+                    owner,
+                    repo,
+                    path: requestedMetadata.path,
+                    fileRef: branchName,
+                  })
+                );
+              },
+            });
           }}
           onClose={() => setRequestedMetadata(null)}
         />

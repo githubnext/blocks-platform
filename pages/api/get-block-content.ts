@@ -1,6 +1,7 @@
 import tar from "tar-stream";
 import streamifier from "streamifier";
 import { unzipSync } from "zlib";
+import { getSession } from "next-auth/react";
 import type { NextApiRequest, NextApiResponse } from "next";
 import Cors from "cors";
 import sanitizeId from "utils/sanitize-id";
@@ -17,6 +18,11 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  // cache for 30 minutes
+  res.setHeader("Cache-Control", "max-age=1800, immutable");
+
+  const session = await getSession({ req });
+
   await new Promise((resolve, reject) => {
     Cors({
       // Only allow requests with GET
@@ -31,10 +37,6 @@ export default async function handler(
 
   const { owner, repo, id } = req.query as Record<string, string>;
 
-  const authorization: Record<string, string> = req.headers["authorization"]
-    ? { authorization: req.headers["authorization"] }
-    : {};
-
   const apiBaseUrl = `https://api.github.com/repos/${sanitizeId(
     owner
   )}/${sanitizeId(repo)}`;
@@ -42,7 +44,9 @@ export default async function handler(
   // @ts-ignore
   const releaseInfoUrl = `${apiBaseUrl}/releases/latest`;
   const releaseInfo = await fetch(releaseInfoUrl, {
-    headers: authorization,
+    headers: {
+      Authorization: `token ${session.token}`,
+    },
   }).then((r) => r.json());
 
   const assets = releaseInfo.assets || [];
@@ -57,7 +61,7 @@ export default async function handler(
 
   const assetContentRes = await fetch(assetUrl, {
     headers: {
-      ...authorization,
+      Authorization: `token ${session.token}`,
       Accept: "application/octet-stream",
     },
   });

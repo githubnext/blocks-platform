@@ -20,20 +20,10 @@ module.exports = {
               "child-src 'none'",
               "frame-ancestors 'none'",
               "object-src 'none'",
-              "worker-src 'self'",
+              "worker-src 'none'",
               "style-src 'self' 'unsafe-inline'",
-              [
-                "frame-src",
-                // for sandboxed embeds
-                "https://0-10-11-sandpack.codesandbox.io/",
-                "https://0-19-1-sandpack.codesandbox.io/",
-              ].join(" "),
-              [
-                "script-src",
-                "'self'",
-                isDev && "'unsafe-eval'",
-                // "https://raw.githubusercontent.com/",
-              ]
+              `frame-src ${process.env.NEXT_PUBLIC_SANDBOX_DOMAIN}`,
+              ["script-src", "'self'", isDev && "'unsafe-eval'"]
                 .filter(Boolean)
                 .join(" "),
               [
@@ -48,19 +38,10 @@ module.exports = {
                 // for local dev
                 isDev && "webpack://*",
                 isDev && "ws://*",
-                // for fetching file contents from GitHub
-                "https://raw.githubusercontent.com/",
                 // for hitting the GitHub API
                 "https://api.github.com/",
-                // for sandboxes in the MDX Block
-                "https://codesandbox.io/api/v1/sandboxes/",
                 // for Analytics
                 "https://octo-metrics.azurewebsites.net/api/CaptureEvent",
-                // for sentence-encoder-block
-                "https://tfhub.dev/google/tfjs-model/universal-sentence-encoder-qa-ondevice/",
-                "https://storage.googleapis.com/tfhub-tfjs-modules/google/tfjs-model/universal-sentence-encoder-qa-ondevice/",
-                // for 3d-model block
-                "blob:",
               ]
                 .filter(Boolean)
                 .join(" "),

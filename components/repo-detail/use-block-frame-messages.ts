@@ -1,6 +1,6 @@
 import path from "path";
 import * as Immer from "immer";
-import { useContext, useEffect, useRef } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useQueryClient, QueryClient } from "react-query";
 import type { NextRouter } from "next/router";
 import { useRouter } from "next/router";
@@ -17,6 +17,7 @@ import { getBlockKey } from "hooks";
 import type { AppContextValue } from "context";
 import { AppContext } from "context";
 import { Context, UpdatedContents } from "./index";
+import axios from "axios";
 
 type BlockFrame = {
   window: Window;
@@ -36,7 +37,7 @@ const setBundle = async (window: Window, block: Block) => {
   if (res.ok) {
     const bundle = await res.json();
     window.postMessage(
-      { type: "set-bundle", bundle: bundle.content },
+      { type: "setProps", props: { bundle: bundle.content } },
       process.env.NEXT_PUBLIC_SANDBOX_DOMAIN
     );
   } else {
@@ -47,7 +48,7 @@ const setBundle = async (window: Window, block: Block) => {
 const setProps = (blockFrame: BlockFrame, props: any) => {
   blockFrame.props = props;
   blockFrame.window.postMessage(
-    { type: "set-props", props },
+    { type: "setProps", props: { props } },
     process.env.NEXT_PUBLIC_SANDBOX_DOMAIN
   );
 };
@@ -100,7 +101,7 @@ const makeSetInitialProps =
     const fileInfo =
       path === ""
         ? { type: "tree" } // the root path is not included in `files`
-        : files && files.find((d) => d.path === path);
+        : (files && files.find((d) => d.path === path)) || { type: "tree" };
     const isFolder = fileInfo.type !== "blob";
 
     // fetch content for the path
@@ -248,94 +249,45 @@ function handleLoaded({
   }
 }
 
+function sendResponse({
+  response,
+  type,
+  window,
+  requestId,
+  error,
+}: {
+  response?: any;
+  type: string;
+  window: Window;
+  requestId: string;
+  error?: string;
+}) {
+  window.postMessage(
+    { type: `${type}--response`, requestId, response, error },
+    process.env.NEXT_PUBLIC_SANDBOX_DOMAIN
+  );
+}
 function handleResponse<T>(
   p: Promise<T>,
   {
+    type,
     window,
     requestId,
-    type,
   }: {
+    type: string;
     window: Window;
     requestId: string;
-    type: string;
   }
 ) {
   return p.then(
     (response) => {
-      window.postMessage(
-        { type, requestId, response },
-        process.env.NEXT_PUBLIC_SANDBOX_DOMAIN
-      );
+      sendResponse({ type, requestId, window, response });
     },
     (e) => {
       // Error is not always serializable
       // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm#things_that_dont_work_with_structured_clone
       const error = e instanceof Error ? e.message : e;
-      window.postMessage(
-        { type, requestId, error },
-        process.env.NEXT_PUBLIC_SANDBOX_DOMAIN
-      );
-    }
-  );
-}
-
-function handleGitHubDataRequest({
-  token,
-  blockFrame,
-  data,
-}: {
-  token: string;
-  blockFrame: BlockFrame;
-  data: any;
-}) {
-  handleResponse(
-    onRequestGitHubData(data.payload.path, data.payload.params, token),
-    {
-      window: blockFrame.window,
-      requestId: data.requestId,
-      type: "github-data--response",
-    }
-  );
-}
-
-function handleNavigateToPath({
-  router,
-  data,
-}: {
-  router: NextRouter;
-  data: any;
-}) {
-  router.push(
-    {
-      pathname: router.pathname,
-      query: { ...router.query, path: data.payload.path },
-    },
-    null,
-    { shallow: true }
-  );
-}
-
-function handleblocksRepoRequest({
-  queryClient,
-  blockFrame,
-  data,
-}: {
-  queryClient: QueryClient;
-  blockFrame: BlockFrame;
-  data: any;
-}) {
-  handleResponse(
-    queryClient.fetchQuery(
-      QueryKeyMap.blocksRepos.factory({}),
-      getAllBlocksRepos,
-      {
-        staleTime: 5 * 60 * 1000,
-      }
-    ),
-    {
-      window: blockFrame.window,
-      requestId: data.requestId,
-      type: "blocks-repos--response",
+      sendResponse({ type, requestId, window, error });
     }
   );
 }
@@ -364,11 +316,7 @@ function handleStoreGetRequest({
     if (res.status === 404) return undefined;
     else return res.json();
   });
-  handleResponse(res, {
-    window: blockFrame.window,
-    requestId: data.requestId,
-    type: "store-get--response",
-  });
+  return res;
 }
 
 function handleStoreSetRequest({
@@ -390,14 +338,7 @@ function handleStoreSetRequest({
       body: JSON.stringify(value),
     });
   }
-  handleResponse(
-    res.then(() => undefined),
-    {
-      window: blockFrame.window,
-      requestId: data.requestId,
-      type: "store-set--response",
-    }
-  );
+  return res.then(() => undefined);
 }
 
 function handleUpdateFile({
@@ -472,6 +413,14 @@ function handleUpdateMetadata({
   });
 }
 
+async function handleFetchInternalEndpoint(path, params) {
+  const res = await axios(path, params);
+  return {
+    data: res.data,
+    status: res.status,
+  };
+}
+
 function useBlockFrameMessages({
   token,
   owner,
@@ -530,7 +479,14 @@ function useBlockFrameMessages({
     const blockFrame = blockFrames.current.find((bf) => bf.window === source);
     if (!blockFrame && data.type !== "loaded") return;
 
-    switch (data.type) {
+    const baseType = data.type.split("--")[0];
+    const responseParams = {
+      type: baseType,
+      requestId: data.requestId,
+      window: blockFrame?.window,
+    };
+
+    switch (baseType) {
       case "loaded":
         return handleLoaded({
           queryClient,
@@ -546,35 +502,72 @@ function useBlockFrameMessages({
           data,
         });
 
-      case "github-data--request":
-        return handleGitHubDataRequest({ token, blockFrame, data });
+      // handle Block callback functions by name
+      case "onRequestGitHubData":
+        return handleResponse(
+          onRequestGitHubData(data.payload.path, data.payload.params, token),
+          responseParams
+        );
 
-      case "navigate-to-path":
-        return handleNavigateToPath({ router, data });
+      case "onRequestBlocksRepos":
+        return handleResponse(
+          queryClient.fetchQuery(
+            QueryKeyMap.blocksRepos.factory({}),
+            getAllBlocksRepos,
+            {
+              staleTime: 5 * 60 * 1000,
+            }
+          ),
+          responseParams
+        );
 
-      case "blocks-repos--request":
-        return handleblocksRepoRequest({ queryClient, blockFrame, data });
+      case "onStoreGet":
+        return handleResponse(
+          handleStoreGetRequest({ blockFrame, data }),
+          responseParams
+        );
 
-      case "store-get--request":
-        return handleStoreGetRequest({ blockFrame, data });
+      case "onStoreSet":
+        return handleResponse(
+          handleStoreSetRequest({ blockFrame, data }),
+          responseParams
+        );
 
-      case "store-set--request":
-        return handleStoreSetRequest({ blockFrame, data });
+      case "onNavigateToPath":
+        router.push(
+          {
+            pathname: router.pathname,
+            query: { ...router.query, path: data.payload.path },
+          },
+          null,
+          { shallow: true }
+        );
+        sendResponse(responseParams);
+        return;
 
-      case "update-file":
-        return handleUpdateFile({
+      case "onUpdateContent":
+        handleUpdateFile({
           updatedContents,
           setUpdatedContents,
           blockFrame,
           data,
         });
+        sendResponse(responseParams);
+        return;
 
-      case "update-metadata":
-        return handleUpdateMetadata({
+      case "onUpdateMetadata":
+        handleUpdateMetadata({
           setRequestedMetadata,
           blockFrame,
           metadata: data.payload,
         });
+        sendResponse(responseParams);
+
+      case "private__onFetchInternalEndpoint":
+        return handleResponse(
+          handleFetchInternalEndpoint(data.payload.path, data.payload.params),
+          responseParams
+        );
     }
   };
 

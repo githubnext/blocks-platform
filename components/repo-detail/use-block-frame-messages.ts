@@ -413,9 +413,9 @@ function handleUpdateMetadata({
   });
 }
 
-async function handleFetchInternalEndpoint(path, params) {
-  if (!path.startsWith("/api")) return;
-  const res = await axios(path, params);
+async function handleFetchInternalEndpoint(urlPath, params) {
+  const safePath = path.resolve(urlPath).substring(1);
+  const res = await axios(`/${safePath}`, params);
   return {
     data: res.data,
     status: res.status,

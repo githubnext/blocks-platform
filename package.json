@@ -7,7 +7,7 @@
     "**/*": "prettier --write --ignore-unknown"
   },
   "scripts": {
-    "dev": "NEXT_PUBLIC_VERCEL_ENV=development next dev",
+    "dev": "next dev",
     "build": "next build",
     "static": "next build && next export",
     "start": "next start",

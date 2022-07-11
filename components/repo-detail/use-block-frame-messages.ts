@@ -2,7 +2,7 @@ import path from "path";
 import * as Immer from "immer";
 import { useContext, useEffect, useRef, useState } from "react";
 import { useQueryClient, QueryClient } from "react-query";
-import type { NextRouter } from "next/router";
+import getConfig from "next/config";
 import { useRouter } from "next/router";
 import type { Block, RepoFiles } from "@githubnext/blocks";
 import { onRequestGitHubData } from "@githubnext/blocks";
@@ -18,6 +18,8 @@ import type { AppContextValue } from "context";
 import { AppContext } from "context";
 import { Context, UpdatedContents } from "./index";
 import axios from "axios";
+
+const { publicRuntimeConfig } = getConfig();
 
 type BlockFrame = {
   window: Window;
@@ -38,7 +40,7 @@ const setBundle = async (window: Window, block: Block) => {
     const bundle = await res.json();
     window.postMessage(
       { type: "setProps", props: { bundle: bundle.content } },
-      process.env.NEXT_PUBLIC_SANDBOX_DOMAIN
+      publicRuntimeConfig.sandboxDomain
     );
   } else {
     console.error(res);
@@ -49,7 +51,7 @@ const setProps = (blockFrame: BlockFrame, props: any) => {
   blockFrame.props = props;
   blockFrame.window.postMessage(
     { type: "setProps", props: { props } },
-    process.env.NEXT_PUBLIC_SANDBOX_DOMAIN
+    publicRuntimeConfig.sandboxDomain
   );
 };
 
@@ -264,7 +266,7 @@ function sendResponse({
 }) {
   window.postMessage(
     { type: `${type}--response`, requestId, response, error },
-    process.env.NEXT_PUBLIC_SANDBOX_DOMAIN
+    publicRuntimeConfig.sandboxDomain
   );
 }
 function handleResponse<T>(
@@ -474,7 +476,7 @@ function useBlockFrameMessages({
   const onMessage = useRef((event: MessageEvent) => {});
   onMessage.current = (event: MessageEvent) => {
     const { data, origin, source } = event;
-    if (origin !== process.env.NEXT_PUBLIC_SANDBOX_DOMAIN) return;
+    if (origin !== publicRuntimeConfig.sandboxDomain) return;
 
     blockFrames.current = blockFrames.current.filter((bf) => !bf.window.closed);
     const blockFrame = blockFrames.current.find((bf) => bf.window === source);

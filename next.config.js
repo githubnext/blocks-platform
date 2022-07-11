@@ -7,6 +7,9 @@ module.exports = {
     }
     return config;
   },
+  publicRuntimeConfig: {
+    sandboxDomain: process.env.NEXT_PUBLIC_SANDBOX_DOMAIN,
+  },
   async headers() {
     return [
       {

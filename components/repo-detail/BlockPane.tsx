@@ -1,9 +1,12 @@
 import { useEffect } from "react";
+import getConfig from "next/config";
 import { useRouter } from "next/router";
 import type { RepoFiles } from "@githubnext/blocks";
 import type { Context } from "./index";
 import { getBlockKey, useManageBlock } from "hooks";
 import BlockPaneHeader from "./BlockPaneHeader";
+
+const { publicRuntimeConfig } = getConfig();
 
 type BlockPaneProps = {
   fileInfo: RepoFiles[0];
@@ -79,9 +82,9 @@ export default function BlockPane({
             key={block.id}
             className={"w-full h-full"}
             sandbox={"allow-scripts allow-same-origin allow-forms"}
-            src={`${
-              process.env.NEXT_PUBLIC_SANDBOX_DOMAIN
-            }#${encodeURIComponent(JSON.stringify({ block, context }))}`}
+            src={`${publicRuntimeConfig.sandboxDomain}#${encodeURIComponent(
+              JSON.stringify({ block, context })
+            )}`}
           />
         </div>
       )}

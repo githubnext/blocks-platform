@@ -25,7 +25,6 @@ module.exports = {
               "object-src 'none'",
               "worker-src 'none'",
               "style-src 'self' 'unsafe-inline'",
-              `frame-src ${process.env.NEXT_PUBLIC_SANDBOX_DOMAIN}`,
               ["script-src", "'self'", isDev && "'unsafe-eval'"]
                 .filter(Boolean)
                 .join(" "),

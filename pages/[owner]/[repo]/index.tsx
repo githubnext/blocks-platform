@@ -9,12 +9,15 @@ import {
 import { useCheckRepoAccess } from "hooks";
 import { QueryKeyMap } from "lib/query-keys";
 import { GetServerSidePropsContext } from "next";
+import getConfig from "next/config";
 import { getSession, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { getUserInstallationForRepo } from "pages/api/check-access";
 import { useEffect, useState } from "react";
 import { dehydrate, QueryClient, useQueryClient } from "react-query";
+
+const { publicRuntimeConfig } = getConfig();
 
 function RepoDetailContainer(props: {
   hasRepoInstallation: boolean;
@@ -148,6 +151,13 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const installationUrl = `https://github.com/apps/${process.env.GITHUB_APP_SLUG}/installations/new`;
 
   const permissions = repoInfo.permissions;
+
+  context.res.setHeader(
+    "Content-Security-Policy",
+    `${context.res.getHeader("Content-Security-Policy")}; frame-src ${
+      publicRuntimeConfig.sandboxDomain
+    }`
+  );
 
   return {
     props: {

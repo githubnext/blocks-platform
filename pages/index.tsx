@@ -2,10 +2,14 @@ import { FullPageLoader } from "components/full-page-loader";
 import { hsl, range } from "d3";
 import { flatten, sample, sortBy } from "lodash";
 import { AnimatePresence, motion } from "framer-motion";
+import type { GetServerSidePropsContext } from "next";
+import getConfig from "next/config";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ChevronRightIcon } from "@primer/octicons-react";
+
+const { publicRuntimeConfig } = getConfig();
 
 function Home() {
   const { status, data } = useSession({ required: true });
@@ -183,3 +187,13 @@ const Background = ({ isLeaving }) => {
     </svg>
   );
 };
+
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  context.res.setHeader(
+    "Content-Security-Policy",
+    `${context.res.getHeader("Content-Security-Policy")}; frame-src ${
+      publicRuntimeConfig.sandboxDomain
+    }`
+  );
+  return { props: {} };
+}

@@ -28,7 +28,7 @@ module.exports = {
               // unfortunately the following is evaluated at build time
               // but we need it to be different in staging vs. production
               // so we leave it off here (default is 'none')
-              // and add it using `publicRuntimeConfig` in `[repo]/index.tsx`
+              // and add it in `index.tsx` and `[owner]/[repo]/index.tsx`
               // `frame-src ${process.env.NEXT_PUBLIC_SANDBOX_DOMAIN}`,
               ["script-src", "'self'", isDev && "'unsafe-eval'"]
                 .filter(Boolean)

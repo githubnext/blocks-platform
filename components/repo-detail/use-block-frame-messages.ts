@@ -565,7 +565,7 @@ function useBlockFrameMessages({
         sendResponse(responseParams);
 
       case "private__onFetchInternalEndpoint":
-        if (blockFrame.context.owner !== "githubnext") return;
+        if (blockFrame.block.owner !== "githubnext") return;
         return handleResponse(
           handleFetchInternalEndpoint(data.payload.path, data.payload.params),
           responseParams

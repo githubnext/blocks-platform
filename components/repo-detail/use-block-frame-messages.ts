@@ -78,9 +78,7 @@ const makeSetInitialProps =
     const path = context.path;
     const name = path.split("/").pop();
 
-    // TODO(jaked) handle requests for other repos
-    // this is complicated because we rely on `files` for the current repo
-    if (context.owner !== owner || context.repo !== repo) return;
+    const isSameRepo = context.owner === owner && context.repo === repo;
 
     // fetch metadata for the block and path
     const metadataPath = getMetadataPath(block, path);
@@ -91,7 +89,7 @@ const makeSetInitialProps =
         path: metadataPath,
         // TODO(jaked) branchName doesn't make sense for a file in another repo
         // maybe metadata should always be on main?
-        fileRef: branchName,
+        fileRef: isSameRepo ? branchName : context.sha || "HEAD",
       }),
       getMetadata,
       {
@@ -100,11 +98,23 @@ const makeSetInitialProps =
       }
     );
 
-    const fileInfo =
-      path === ""
-        ? { type: "tree" } // the root path is not included in `files`
-        : (files && files.find((d) => d.path === path)) || { type: "tree" };
-    const isFolder = fileInfo.type !== "blob";
+    let isFolder = false;
+    let fileSize = 0;
+    if (isSameRepo) {
+      if (!path) {
+        isFolder = true;
+      } else {
+        const file = files && files.find((d) => d.path === path);
+        if (file) {
+          fileSize = file.size;
+        }
+      }
+    } else {
+      // we'll go off the block type, for now
+      if (block.type === "folder") {
+        isFolder = true;
+      }
+    }
 
     // fetch content for the path
     if (isFolder) {
@@ -125,10 +135,9 @@ const makeSetInitialProps =
         setProps(blockFrame, props);
       });
     } else {
-      const size = fileInfo.size || 0;
       const fileSizeLimit = 1500000; // 1.5Mb
       // TODO(jaked) handle too-largeness
-      const isTooLarge = size > fileSizeLimit;
+      const isTooLarge = fileSize > fileSizeLimit;
 
       const onBranchTip = context.sha === branchName;
       const showUpdatedContents = onBranchTip && updatedContents[path];
@@ -142,7 +151,8 @@ const makeSetInitialProps =
             owner: context.owner,
             repo: context.repo,
             path: context.path,
-            fileRef: context.sha,
+            // TODO we'll probably want something smarter for external repo refs
+            fileRef: isSameRepo ? context.sha : "HEAD",
           }),
           getFileContent,
           {

@@ -38,7 +38,7 @@ const setBundle = async (window: Window, block: Block) => {
   const res = await fetch(url);
   if (res.ok) {
     const bundle = await res.json();
-    window.postMessage(
+    window?.postMessage(
       { type: "setProps", props: { bundle: bundle.content } },
       publicRuntimeConfig.sandboxDomain
     );
@@ -49,7 +49,7 @@ const setBundle = async (window: Window, block: Block) => {
 
 const setProps = (blockFrame: BlockFrame, props: any) => {
   blockFrame.props = props;
-  blockFrame.window.postMessage(
+  blockFrame.window?.postMessage(
     { type: "setProps", props: { props } },
     publicRuntimeConfig.sandboxDomain
   );
@@ -274,7 +274,7 @@ function sendResponse({
   requestId: string;
   error?: string;
 }) {
-  window.postMessage(
+  window?.postMessage(
     { type: `${type}--response`, requestId, response, error },
     publicRuntimeConfig.sandboxDomain
   );

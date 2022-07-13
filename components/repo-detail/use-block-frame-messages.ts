@@ -87,9 +87,9 @@ const makeSetInitialProps =
         owner: context.owner,
         repo: context.repo,
         path: metadataPath,
-        // TODO(jaked) branchName doesn't make sense for a file in another repo
+        // TODO branchName doesn't make sense for a file in another repo
         // maybe metadata should always be on main?
-        fileRef: isSameRepo ? branchName : context.sha || "HEAD",
+        fileRef: isSameRepo ? branchName : "HEAD",
       }),
       getMetadata,
       {
@@ -151,8 +151,7 @@ const makeSetInitialProps =
             owner: context.owner,
             repo: context.repo,
             path: context.path,
-            // TODO we'll probably want something smarter for external repo refs
-            fileRef: isSameRepo ? context.sha : "HEAD",
+            fileRef: context.sha,
           }),
           getFileContent,
           {

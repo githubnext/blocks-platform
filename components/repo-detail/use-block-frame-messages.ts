@@ -488,7 +488,9 @@ function useBlockFrameMessages({
     const { data, origin, source } = event;
     if (origin !== publicRuntimeConfig.sandboxDomain) return;
 
-    blockFrames.current = blockFrames.current.filter((bf) => !bf.window.closed);
+    blockFrames.current = blockFrames.current.filter(
+      (bf) => bf.window && !bf.window.closed
+    );
     const blockFrame = blockFrames.current.find((bf) => bf.window === source);
     if (!blockFrame && data.type !== "loaded") return;
 

@@ -1,14 +1,16 @@
 import path from "path";
 import * as Immer from "immer";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { useQueryClient, QueryClient } from "react-query";
 import getConfig from "next/config";
 import { useRouter } from "next/router";
 import type { Block, RepoFiles } from "@githubnext/blocks";
 import { onRequestGitHubData } from "@githubnext/blocks";
 import { QueryKeyMap } from "lib/query-keys";
+import { Session } from "next-auth";
 import {
   getAllBlocksRepos,
+  getBlocksFromRepo,
   getFileContent,
   getFolderContent,
   getMetadata,
@@ -18,6 +20,7 @@ import type { AppContextValue } from "context";
 import { AppContext } from "context";
 import { Context, UpdatedContents } from "./index";
 import axios from "axios";
+import { useSession } from "next-auth/react";
 
 const { publicRuntimeConfig } = getConfig();
 
@@ -98,21 +101,12 @@ const makeSetInitialProps =
       }
     );
 
-    let isFolder = false;
+    let isFolder = block.type === "folder";
     let fileSize = 0;
-    if (isSameRepo) {
-      if (!path) {
-        isFolder = true;
-      } else {
-        const file = files && files.find((d) => d.path === path);
-        if (file) {
-          fileSize = file.size;
-        }
-      }
-    } else {
-      // we'll go off the block type, for now
-      if (block.type === "folder") {
-        isFolder = true;
+    if (isSameRepo && path) {
+      const file = files && files.find((d) => d.path === path);
+      if (file) {
+        fileSize = file.size;
       }
     }
 
@@ -191,9 +185,38 @@ const makeSetInitialProps =
     }
   };
 
-function handleLoaded({
+async function getBlockFromPartial({
+  queryClient,
+  partialBlock,
+  user,
+}: {
+  queryClient: QueryClient;
+  partialBlock: Partial<Block>;
+  user: Session["user"];
+}): Promise<Block> {
+  // let's save ourselves the effort if we already have enough info
+  if (partialBlock.type) return partialBlock as Block;
+
+  const repoInfo = await queryClient.fetchQuery(
+    QueryKeyMap.blocksRepo.factory({
+      owner: partialBlock.owner,
+      repo: partialBlock.repo,
+      user,
+    }),
+    getBlocksFromRepo,
+    {
+      staleTime: 5 * 60 * 1000,
+    }
+  );
+  if (!repoInfo?.blocks?.length)
+    return { ...partialBlock, type: "folder" } as Block;
+  return repoInfo.blocks.find((b) => b.id === partialBlock.id) as Block;
+}
+
+async function handleLoaded({
   queryClient,
   appContext,
+  user,
   owner,
   repo,
   branchName,
@@ -206,6 +229,7 @@ function handleLoaded({
 }: {
   queryClient: QueryClient;
   appContext: AppContextValue;
+  user: Session["user"];
   owner: string;
   repo: string;
   branchName: string;
@@ -226,9 +250,14 @@ function handleLoaded({
     updatedContents,
   });
 
-  const { block, context } = JSON.parse(
+  const { block: hashBlock, context } = JSON.parse(
     decodeURIComponent(data.hash.substring(1))
   );
+  const block = await getBlockFromPartial({
+    queryClient,
+    user,
+    partialBlock: hashBlock,
+  });
   if (blockFrame) {
     const blockChanged =
       blockFrame.block.owner !== block.owner ||
@@ -460,6 +489,9 @@ function useBlockFrameMessages({
   const appContext = useContext(AppContext);
   const queryClient = useQueryClient();
   const router = useRouter();
+  const {
+    data: { user },
+  } = useSession();
 
   const blockFrames = useRef<BlockFrame[]>([]);
 
@@ -505,6 +537,7 @@ function useBlockFrameMessages({
         return handleLoaded({
           queryClient,
           appContext,
+          user,
           owner,
           repo,
           branchName,
@@ -526,7 +559,9 @@ function useBlockFrameMessages({
       case "onRequestBlocksRepos":
         return handleResponse(
           queryClient.fetchQuery(
-            QueryKeyMap.blocksRepos.factory({}),
+            QueryKeyMap.blocksRepos.factory({
+              user,
+            }),
             getAllBlocksRepos,
             {
               staleTime: 5 * 60 * 1000,

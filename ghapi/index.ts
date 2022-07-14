@@ -5,6 +5,7 @@ import axios, { AxiosInstance } from "axios";
 import { signOut } from "next-auth/react";
 import { Base64 } from "js-base64";
 import {
+  AllBlocksKeyParams,
   BlocksKeyParams,
   BranchesKeyParams,
   CheckAccessParams,
@@ -269,45 +270,75 @@ export const getBlocksFromRepo: QueryFunction<
 > = async (ctx) => {
   let params = ctx.queryKey[1];
   let meta = ctx.meta as unknown as BlocksQueryMeta;
-  const { owner, repo } = params;
+  let octokit = meta.octokit;
+  return await getBlocksFromRepoInner({ octokit, ...params });
+};
+export const getBlocksFromRepoInner = async ({
+  octokit,
+  owner,
+  repo,
+  path,
+  type,
+  user,
+}: BlocksKeyParams & {
+  octokit: Octokit;
+}): Promise<BlocksRepo> => {
   if (!owner || !repo) {
     return undefined;
   }
 
+  let blocks = [];
   try {
-    const repoRes = await meta.ghapi.get(`/repos/${owner}/${repo}`);
-
-    const blocksConfigUrl = `/repos/${owner}/${repo}/contents/blocks.config.json`;
-    const blocksConfigRes = await meta.ghapi(blocksConfigUrl);
-    const encodedContent = blocksConfigRes.data.content;
-    const content = Buffer.from(encodedContent, "base64").toString("utf8");
-    const rawBlocks = JSON.parse(content);
-
-    const filter = filterBlock(params);
-    const blocks = (rawBlocks || []).filter(filter).map((block: Block) => ({
-      ...block,
-      owner: repoRes.data.owner.login,
-      repo: repoRes.data.name,
-      repoId: repoRes.data.id,
-    }));
-
-    return {
+    const blocksConfigRes = await tryToGetContent(octokit, {
       owner,
       repo,
-      blocks,
-      full_name: `${owner}/${repo}`,
-      id: repoRes.data.id,
-      // we don't use any of the below at the moment
-      html_url: "",
-      description: "",
-      stars: 0,
-      watchers: 0,
-      language: "",
-      topics: [""],
-    };
-  } catch (e) {
-    return undefined;
-  }
+      path: "blocks.config.json",
+    });
+    if (blocksConfigRes) {
+      blocks =
+        JSON.parse(
+          Buffer.from(blocksConfigRes.content, "base64").toString("utf8")
+        ) ?? [];
+    }
+
+    if (!blocks.length) {
+      // check package.json for backwards compatibility
+      const packageJsonRes = await tryToGetContent(octokit, {
+        owner,
+        repo,
+        path: "package.json",
+      });
+      if (packageJsonRes) {
+        blocks =
+          JSON.parse(
+            Buffer.from(packageJsonRes.content, "base64").toString("utf8")
+          ).blocks ?? [];
+      }
+    }
+  } catch (e) {}
+
+  const filter = filterBlock({ repo, owner, path, type, user });
+  const filteredBlocks = (blocks || []).filter(filter).map((block: Block) => ({
+    ...block,
+    owner,
+    repo,
+    // repoId: repoRes.data.id,
+  }));
+
+  return {
+    owner,
+    repo,
+    blocks: filteredBlocks,
+    full_name: `${owner}/${repo}`,
+    id: 0,
+    // we don't use any of the below at the moment
+    html_url: "",
+    description: "",
+    stars: 0,
+    watchers: 0,
+    language: "",
+    topics: [""],
+  };
 };
 
 export const getBranches: QueryFunction<
@@ -458,7 +489,10 @@ const tryToGetContent = async (
     return undefined;
   }
 };
-export const getAllBlocksRepos: QueryFunction<BlocksRepo[]> = async (ctx) => {
+export const getAllBlocksRepos: QueryFunction<
+  BlocksRepo[],
+  GenericQueryKey<AllBlocksKeyParams>
+> = async (ctx) => {
   let octokit = (ctx.meta as unknown as BlocksQueryMeta).octokit;
   const repos = await octokit.search.repos({
     q: "topic:github-blocks",
@@ -468,38 +502,13 @@ export const getAllBlocksRepos: QueryFunction<BlocksRepo[]> = async (ctx) => {
   });
   const blocks: Block[][] = await Promise.all(
     repos.data.items.map(async (repo) => {
-      try {
-        const blocksConfigRes = await tryToGetContent(octokit, {
-          owner: repo.owner.login,
-          repo: repo.name,
-          path: "blocks.config.json",
-        });
-        if (blocksConfigRes) {
-          return (
-            JSON.parse(
-              Buffer.from(blocksConfigRes.content, "base64").toString("utf8")
-            ) ?? []
-          );
-        }
-
-        // check package.json for backwards compatibility
-        const packageJsonRes = await tryToGetContent(octokit, {
-          owner: repo.owner.login,
-          repo: repo.name,
-          path: "package.json",
-        });
-        if (packageJsonRes) {
-          return (
-            JSON.parse(
-              Buffer.from(packageJsonRes.content, "base64").toString("utf8")
-            ).blocks ?? []
-          );
-        } else {
-          return [];
-        }
-      } catch (e) {
-        return [];
-      }
+      const repoInfo = await getBlocksFromRepoInner({
+        octokit,
+        owner: repo.owner.login,
+        repo: repo.name,
+        user: ctx.queryKey[1].user,
+      });
+      return repoInfo?.blocks || [];
     })
   );
   return repos.data.items.map<BlocksRepo>((repo, i) => ({

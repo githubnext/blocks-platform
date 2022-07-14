@@ -48,11 +48,15 @@ export interface CheckAccessParams {
   owner: string;
 }
 
+export interface AllBlocksKeyParams {
+  user: Session["user"];
+}
+
 export interface BlocksKeyParams {
   owner: string;
   repo: string;
-  path: string | undefined;
-  type: "file" | "folder";
+  path?: string;
+  type?: "file" | "folder";
   user: Session["user"];
 }
 
@@ -72,7 +76,7 @@ export const QueryKeyMap = {
   files: makeFactory<"files", FilesKeyParams>("files"),
   file: makeFactory<"file", FileKeyParams>("file"),
   metadata: makeFactory<"metadata", FileKeyParams>("metadata"),
-  blocksRepos: makeFactory<"blocksRepos", {}>("blocksRepos"),
+  blocksRepos: makeFactory<"blocksRepos", AllBlocksKeyParams>("blocksRepos"),
   blocksRepo: makeFactory<"blocksRepo", BlocksKeyParams>("blocksRepo"),
   branches: makeFactory<"branches", BranchesKeyParams>("branches"),
   searchRepos: makeFactory<"searchRepos", string>("searchRepos"),

@@ -69,27 +69,3 @@ Our staging site is [HERE](https://githubnext-blocks-staging.azurewebsites.net/g
 1. Navigate to the azure project for [`githubnext-blocks/staging`](https://portal.azure.com/#@githubazure.onmicrosoft.com/resource/subscriptions/b394e68d-7472-42fd-bb1c-d73cb7f4fd3c/resourceGroups/githubnext-blocks-rg/providers/Microsoft.Web/sites/githubnext-blocks/slots/staging/appServices)
 2. Click "Swap" button
 3. Then swap" again on the sidebar
-
-## Syncing with example Blocks
-
-To keep loading snappy, our example blocks are pulled in via a `preinstall` & `postinstall` script. To update the version of the examples that are pulled in:
-
-1. Hop on to the [githubnext/blocks-examples](https://github.com/githubnext/blocks-examples) repo and push a new tag
-
-```
-git tag X.X.X
-git push origin --tags
-```
-
-1. Wait for the action in that repo to end and generate a new release
-2. Come back to this repo and update the version of the `githubnext/blocks-example` libary in `package.json`
-
-```
-yarn add @githubnext/blocks-examples@https://github.com/githubnext/blocks-examples.git#X.X.X
-```
-
-That's it! Upon building, the example blocks are synced to the `/blocks` folder (which is completely auto-generated), along with an `index.js` file that exports the blocks and an `index.css` file that exports the styles.
-
-Note: this is why we have a list of `optionalDependencies`: to separate the example Blocks dependencies in order to refresh the list and not cache old deps.
-
-Note: the `postinstall` script also copies the Excalidraw assets to the `/public/excalidraw` folder to prevent from pulling then in from the unpkg CDN.

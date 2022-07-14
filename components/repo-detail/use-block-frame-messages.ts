@@ -121,7 +121,7 @@ const makeSetInitialProps =
         QueryKeyMap.folder.factory(context),
         getFolderContent,
         {
-          // retry: false,
+          retry: false,
         }
       );
       Promise.all([metadata, treeData]).then(([metadata, treeData]) => {
@@ -210,7 +210,7 @@ async function getBlockFromPartial({
     }
   );
   return (
-    (repoInfo.blocks?.find((b) => b.id === partialBlock.id) as Block) || null
+    (repoInfo?.blocks?.find((b) => b.id === partialBlock.id) as Block) || null
   );
 }
 
@@ -255,13 +255,11 @@ async function handleLoaded({
     decodeURIComponent(data.hash.substring(1))
   );
 
-  let block = partialBlock;
-
   if (blockFrame) {
     const blockChanged =
-      blockFrame.block.owner !== block.owner ||
-      blockFrame.block.repo !== block.repo ||
-      blockFrame.block.id !== block.id;
+      blockFrame.block.owner !== partialBlock.owner ||
+      blockFrame.block.repo !== partialBlock.repo ||
+      blockFrame.block.id !== partialBlock.id;
     const contextChanged =
       blockFrame.context.owner !== context.owner ||
       blockFrame.context.repo !== context.repo ||
@@ -269,24 +267,19 @@ async function handleLoaded({
       blockFrame.context.sha !== context.sha;
 
     if (blockChanged) {
-      block = await getBlockFromPartial({
+      blockFrame.block = await getBlockFromPartial({
         queryClient,
         user,
         partialBlock,
       });
-      if (!block) {
-        if (blockFrame) setBundle(blockFrame.window, null);
-        return;
-      }
     }
 
-    blockFrame.block = block;
     blockFrame.context = context;
 
     if (blockChanged) {
       // TODO(jaked) update block atomically
-      setBundle(blockFrame.window, block);
-      const props = { ...blockFrame.props, block };
+      setBundle(blockFrame.window, blockFrame.block);
+      const props = { ...blockFrame.props, block: blockFrame.block };
       setProps(blockFrame, props);
     }
 
@@ -294,7 +287,7 @@ async function handleLoaded({
       setInitialProps(blockFrame);
     }
   } else {
-    block = await getBlockFromPartial({
+    const block = await getBlockFromPartial({
       queryClient,
       user,
       partialBlock,

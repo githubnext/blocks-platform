@@ -290,6 +290,17 @@ export function useAllBlocksRepos(config?: UseQueryOptions<BlocksRepo[]>) {
   );
 }
 
+const defaultFileBlock = {
+  id: "code-block",
+  owner: "githubnext",
+  repo: "blocks-examples",
+} as Block;
+
+const defaultFolderBlock = {
+  id: "overview-block",
+  owner: "githubnext",
+  repo: "blocks-examples",
+} as Block;
 export const getBlockKey = (block: Block) =>
   [block?.owner, block?.repo, block?.id || ""].join("__");
 
@@ -351,11 +362,17 @@ export function useManageBlock({
     storedDefaultBlockResult.data,
   ].filter(Boolean);
 
+  const exampleBlocks =
+    blocksRepos.find(
+      (b) => b.owner === "githubnext" && b.repo === "blocks-examples"
+    )?.blocks ?? [];
+  const extension = (path as string).split(".").slice(-1)[0];
+
   // find default block
   const tryToGetBlockFromKey = (key = ""): Block | null => {
     let [blockOwner, blockRepo, blockId] = key.split("__");
-    if (!blockOwner) blockOwner = "githubnext";
-    if (!blockRepo) blockRepo = "blocks-examples";
+    if (!blockOwner) blockOwner = defaultFileBlock.owner;
+    if (!blockRepo) blockRepo = defaultFileBlock.repo;
     const blocksRepo = blocksRepos.find(
       (b) => b.owner === blockOwner && b.repo === blockRepo
     );
@@ -364,26 +381,27 @@ export function useManageBlock({
       return null;
     }
     if (isFolder !== (block.type === "folder")) return null;
-    return block;
+    return {
+      ...block,
+      owner: blocksRepo.owner,
+      repo: blocksRepo.repo,
+    };
   };
 
   // first, default to block from url param
   const blockInUrl = tryToGetBlockFromKey(blockKey as string);
   const blockFromMetadata = tryToGetBlockFromKey(storedDefaultBlock);
+  let fallbackDefaultBlock: Block = overrideDefaultBlocks[extension]
+    ? exampleBlocks.find((b) => b.id === overrideDefaultBlocks[extension])
+    : // the first example block is always the code block,
+      // so let's default to the second one, when available
+      exampleBlocks[1] || exampleBlocks[0];
 
-  const exampleBlocks = blocksRepos.find(
-    (b) => b.owner === "githubnext" && b.repo === "blocks-examples"
-  )?.blocks;
-  const codeBlock = exampleBlocks.find((b) => b.id === "code-block");
-  const nonCodeBlock = exampleBlocks.find((b) => b.id !== "code-block");
-  const extension = (path as string).split(".").slice(-1)[0];
-  let fallbackDefaultBlock;
-  if (extension === "ts" || extension === "js") {
-    fallbackDefaultBlock = codeBlock;
-  } else if (nonCodeBlock) {
-    fallbackDefaultBlock = nonCodeBlock;
-  } else {
-    fallbackDefaultBlock = codeBlock;
+  if (
+    !fallbackDefaultBlock ||
+    isFolder !== (fallbackDefaultBlock.type === "folder")
+  ) {
+    fallbackDefaultBlock = isFolder ? defaultFolderBlock : defaultFileBlock;
   }
 
   const defaultBlock = blockFromMetadata || fallbackDefaultBlock;
@@ -409,6 +427,11 @@ export function useManageBlock({
     },
   } as UseManageBlockResult;
 }
+
+const overrideDefaultBlocks = {
+  js: "code-block",
+  ts: "code-block",
+};
 
 export function useCreateBranchAndPR(
   config?: UseMutationOptions<CreateBranchResponse, any, CreateBranchParams>

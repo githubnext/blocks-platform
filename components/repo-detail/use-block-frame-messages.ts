@@ -36,18 +36,21 @@ const getMetadataPath = (block: Block, path: string) =>
     path
   )}.json`;
 
-const setBundle = async (window: Window, block: Block) => {
-  const url = `/api/get-block-content?owner=${block.owner}&repo=${block.repo}&id=${block.id}`;
-  const res = await fetch(url);
-  if (res.ok) {
-    const bundle = await res.json();
-    window?.postMessage(
-      { type: "setProps", props: { bundle: bundle.content } },
-      publicRuntimeConfig.sandboxDomain
-    );
-  } else {
-    console.error(res);
+const setBundle = async (window: Window, block: Block | null) => {
+  let bundle = null;
+  if (block) {
+    const url = `/api/get-block-content?owner=${block.owner}&repo=${block.repo}&id=${block.id}`;
+    const res = await fetch(url);
+    if (res.ok) {
+      bundle = await res.json().then((bundle) => bundle.content);
+    } else {
+      console.error(res);
+    }
   }
+  window?.postMessage(
+    { type: "setProps", props: { bundle } },
+    publicRuntimeConfig.sandboxDomain
+  );
 };
 
 const setProps = (blockFrame: BlockFrame, props: any) => {
@@ -78,6 +81,8 @@ const makeSetInitialProps =
   }) =>
   (blockFrame: BlockFrame) => {
     const { block, context } = blockFrame;
+    if (!block) return;
+
     const path = context.path;
     const name = path.split("/").pop();
 
@@ -116,7 +121,7 @@ const makeSetInitialProps =
         QueryKeyMap.folder.factory(context),
         getFolderContent,
         {
-          retry: false,
+          // retry: false,
         }
       );
       Promise.all([metadata, treeData]).then(([metadata, treeData]) => {
@@ -193,24 +198,20 @@ async function getBlockFromPartial({
   queryClient: QueryClient;
   partialBlock: Partial<Block>;
   user: Session["user"];
-}): Promise<Block> {
-  // let's save ourselves the effort if we already have enough info
-  if (partialBlock.type) return partialBlock as Block;
-
+}): Promise<Block | null> {
   const repoInfo = await queryClient.fetchQuery(
     QueryKeyMap.blocksRepo.factory({
       owner: partialBlock.owner,
       repo: partialBlock.repo,
-      user,
     }),
     getBlocksFromRepo,
     {
       staleTime: 5 * 60 * 1000,
     }
   );
-  if (!repoInfo?.blocks?.length)
-    return { ...partialBlock, type: "folder" } as Block;
-  return repoInfo.blocks.find((b) => b.id === partialBlock.id) as Block;
+  return (
+    (repoInfo.blocks?.find((b) => b.id === partialBlock.id) as Block) || null
+  );
 }
 
 async function handleLoaded({
@@ -250,14 +251,12 @@ async function handleLoaded({
     updatedContents,
   });
 
-  const { block: hashBlock, context } = JSON.parse(
+  const { block: partialBlock, context } = JSON.parse(
     decodeURIComponent(data.hash.substring(1))
   );
-  const block = await getBlockFromPartial({
-    queryClient,
-    user,
-    partialBlock: hashBlock,
-  });
+
+  let block = partialBlock;
+
   if (blockFrame) {
     const blockChanged =
       blockFrame.block.owner !== block.owner ||
@@ -269,6 +268,18 @@ async function handleLoaded({
       blockFrame.context.path !== context.path ||
       blockFrame.context.sha !== context.sha;
 
+    if (blockChanged) {
+      block = await getBlockFromPartial({
+        queryClient,
+        user,
+        partialBlock,
+      });
+      if (!block) {
+        if (blockFrame) setBundle(blockFrame.window, null);
+        return;
+      }
+    }
+
     blockFrame.block = block;
     blockFrame.context = context;
 
@@ -278,10 +289,17 @@ async function handleLoaded({
       const props = { ...blockFrame.props, block };
       setProps(blockFrame, props);
     }
+
     if (contextChanged) {
       setInitialProps(blockFrame);
     }
   } else {
+    block = await getBlockFromPartial({
+      queryClient,
+      user,
+      partialBlock,
+    });
+
     const blockFrame = { window, block, context, props: {} };
     blockFrames.push(blockFrame);
     setBundle(window, block);

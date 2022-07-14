@@ -5,7 +5,6 @@ import axios, { AxiosInstance } from "axios";
 import { signOut } from "next-auth/react";
 import { Base64 } from "js-base64";
 import {
-  AllBlocksKeyParams,
   BlocksKeyParams,
   BranchesKeyParams,
   CheckAccessParams,
@@ -19,6 +18,7 @@ import {
 import { QueryFunction, QueryFunctionContext } from "react-query";
 import { Block, BlocksRepo } from "@githubnext/blocks";
 import { filterBlock } from "../hooks";
+import { Session } from "next-auth";
 export interface RepoContext {
   repo: string;
   owner: string;
@@ -73,6 +73,7 @@ export interface BlocksQueryMeta {
   token: string;
   ghapi: AxiosInstance;
   octokit: Octokit;
+  user: Session["user"];
 }
 
 export const getFileContent: (
@@ -271,23 +272,37 @@ export const getBlocksFromRepo: QueryFunction<
   let params = ctx.queryKey[1];
   let meta = ctx.meta as unknown as BlocksQueryMeta;
   let octokit = meta.octokit;
-  return await getBlocksFromRepoInner({ octokit, ...params });
+  let user = meta.user;
+  return await getBlocksFromRepoInner({ octokit, user, ...params });
 };
 export const getBlocksFromRepoInner = async ({
   octokit,
+  user,
   owner,
   repo,
   path,
   type,
-  user,
 }: BlocksKeyParams & {
   octokit: Octokit;
+  user: Session["user"];
 }): Promise<BlocksRepo> => {
   if (!owner || !repo) {
     return undefined;
   }
 
+  let repoId = 0;
+  try {
+    const repoRes = await octokit.repos.get({
+      owner,
+      repo,
+    });
+    repoId = repoRes.data.id;
+  } catch (e) {
+    return undefined;
+  }
+
   let blocks = [];
+
   try {
     const blocksConfigRes = await tryToGetContent(octokit, {
       owner,
@@ -322,7 +337,7 @@ export const getBlocksFromRepoInner = async ({
     ...block,
     owner,
     repo,
-    // repoId: repoRes.data.id,
+    repoId,
   }));
 
   return {
@@ -330,7 +345,7 @@ export const getBlocksFromRepoInner = async ({
     repo,
     blocks: filteredBlocks,
     full_name: `${owner}/${repo}`,
-    id: 0,
+    id: repoId,
     // we don't use any of the below at the moment
     html_url: "",
     description: "",
@@ -489,11 +504,9 @@ const tryToGetContent = async (
     return undefined;
   }
 };
-export const getAllBlocksRepos: QueryFunction<
-  BlocksRepo[],
-  GenericQueryKey<AllBlocksKeyParams>
-> = async (ctx) => {
+export const getAllBlocksRepos: QueryFunction<BlocksRepo[]> = async (ctx) => {
   let octokit = (ctx.meta as unknown as BlocksQueryMeta).octokit;
+  let user = (ctx.meta as unknown as BlocksQueryMeta).user;
   const repos = await octokit.search.repos({
     q: "topic:github-blocks",
     order: "desc",
@@ -506,7 +519,7 @@ export const getAllBlocksRepos: QueryFunction<
         octokit,
         owner: repo.owner.login,
         repo: repo.name,
-        user: ctx.queryKey[1].user,
+        user,
       });
       return repoInfo?.blocks || [];
     })

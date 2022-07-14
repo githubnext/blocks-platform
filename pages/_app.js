@@ -1,11 +1,9 @@
 import "styles/index.css";
 import "styles/markdown.css";
-import "./../blocks/blocks.css";
 import { useEffect, useState } from "react";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider, BaseStyles } from "@primer/react";
 import { Hydrate, QueryClient, QueryClientProvider } from "react-query";
-import "@codesandbox/sandpack-react/dist/index.css";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { track } from "../lib/analytics";

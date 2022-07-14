@@ -1,7 +1,6 @@
 import { Block, BlocksRepo, RepoFiles } from "@githubnext/blocks";
 import { Octokit } from "@octokit/rest";
 import pm from "picomatch";
-import { defaultBlocksRepo as exampleBlocksRepo } from "blocks/index";
 import {
   BlocksQueryMeta,
   createBranchAndPR,
@@ -365,8 +364,7 @@ export function useManageBlock({
 
   const exampleBlocks =
     blocksRepos.find(
-      (b) =>
-        b.owner === exampleBlocksRepo.owner && b.repo === exampleBlocksRepo.repo
+      (b) => b.owner === "githubnext" && b.repo === "blocks-examples"
     )?.blocks ?? [];
   const extension = (path as string).split(".").slice(-1)[0];
 

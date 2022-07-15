@@ -33,6 +33,7 @@ import {
   InfoKeyParams,
   QueryKeyMap,
   TimelineKeyParams,
+  AllBlocksKeyParams,
 } from "lib/query-keys";
 import { isArray } from "lodash";
 import { useRouter } from "next/router";
@@ -279,9 +280,12 @@ export function useGetBranches(
   );
 }
 
-export function useAllBlocksRepos(config?: UseQueryOptions<BlocksRepo[]>) {
+export function useAllBlocksRepos(
+  params: AllBlocksKeyParams,
+  config?: UseQueryOptions<BlocksRepo[]>
+) {
   return useQuery<BlocksRepo[]>(
-    QueryKeyMap.blocksRepos.factory({}),
+    QueryKeyMap.blocksRepos.factory(params),
     getAllBlocksRepos,
     {
       refetchOnWindowFocus: false,
@@ -459,7 +463,9 @@ export function useFilteredBlocksRepos(
   const {
     data: { user },
   } = useSession();
-  const allBlocksReposResult = useAllBlocksRepos();
+  const allBlocksReposResult = useAllBlocksRepos({
+    user,
+  });
 
   return useMemo(() => {
     if (allBlocksReposResult.status !== "success") return allBlocksReposResult;
@@ -498,7 +504,7 @@ export const filterBlock =
     repo: string;
     owner: string;
     user: Session["user"];
-    type: "file" | "folder";
+    type: "file" | "folder" | undefined;
   }) =>
   (block: Block) => {
     if (
@@ -517,7 +523,7 @@ export const filterBlock =
       return false;
     }
 
-    if (block.type !== type) return false;
+    if (type && block.type !== type) return false;
 
     if (path === undefined) return true;
 

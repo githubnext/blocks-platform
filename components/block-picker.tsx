@@ -56,7 +56,6 @@ export default function BlockPicker(props: BlockPickerProps) {
       repo: searchTermRepo,
       path,
       type,
-      user,
     },
     {
       enabled: isSearchTermUrl,

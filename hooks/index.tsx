@@ -32,7 +32,6 @@ import {
   InfoKeyParams,
   QueryKeyMap,
   TimelineKeyParams,
-  AllBlocksKeyParams,
 } from "lib/query-keys";
 import { isArray } from "lodash";
 import { useRouter } from "next/router";
@@ -279,12 +278,9 @@ export function useGetBranches(
   );
 }
 
-export function useAllBlocksRepos(
-  params: AllBlocksKeyParams,
-  config?: UseQueryOptions<BlocksRepo[]>
-) {
+export function useAllBlocksRepos(config?: UseQueryOptions<BlocksRepo[]>) {
   return useQuery<BlocksRepo[]>(
-    QueryKeyMap.blocksRepos.factory(params),
+    QueryKeyMap.blocksRepos.factory({}),
     getAllBlocksRepos,
     {
       refetchOnWindowFocus: false,
@@ -339,7 +335,6 @@ export function useManageBlock({
   const blockKeyResult = useBlocksFromRepo({
     path,
     type,
-    user,
     owner: blockKeyOwner,
     repo: blockKeyRepo,
   });
@@ -348,7 +343,6 @@ export function useManageBlock({
   const storedDefaultBlockResult = useBlocksFromRepo({
     path,
     type,
-    user,
     owner: storedDefaultBlockOwner,
     repo: storedDefaultBlockRepo,
   });
@@ -461,9 +455,7 @@ export function useFilteredBlocksRepos(
   const {
     data: { user },
   } = useSession();
-  const allBlocksReposResult = useAllBlocksRepos({
-    user,
-  });
+  const allBlocksReposResult = useAllBlocksRepos();
 
   return useMemo(() => {
     if (allBlocksReposResult.status !== "success") return allBlocksReposResult;

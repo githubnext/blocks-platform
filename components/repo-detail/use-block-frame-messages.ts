@@ -1,14 +1,16 @@
 import path from "path";
 import * as Immer from "immer";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { useQueryClient, QueryClient } from "react-query";
 import getConfig from "next/config";
 import { useRouter } from "next/router";
 import type { Block, RepoFiles } from "@githubnext/blocks";
 import { onRequestGitHubData } from "@githubnext/blocks";
 import { QueryKeyMap } from "lib/query-keys";
+import { Session } from "next-auth";
 import {
   getAllBlocksRepos,
+  getBlocksFromRepo,
   getFileContent,
   getFolderContent,
   getMetadata,
@@ -18,6 +20,7 @@ import type { AppContextValue } from "context";
 import { AppContext } from "context";
 import { Context, UpdatedContents } from "./index";
 import axios from "axios";
+import { useSession } from "next-auth/react";
 
 const { publicRuntimeConfig } = getConfig();
 
@@ -33,23 +36,26 @@ const getMetadataPath = (block: Block, path: string) =>
     path
   )}.json`;
 
-const setBundle = async (window: Window, block: Block) => {
-  const url = `/api/get-block-content?owner=${block.owner}&repo=${block.repo}&id=${block.id}`;
-  const res = await fetch(url);
-  if (res.ok) {
-    const bundle = await res.json();
-    window.postMessage(
-      { type: "setProps", props: { bundle: bundle.content } },
-      publicRuntimeConfig.sandboxDomain
-    );
-  } else {
-    console.error(res);
+const setBundle = async (window: Window, block: Block | null) => {
+  let bundle = null;
+  if (block) {
+    const url = `/api/get-block-content?owner=${block.owner}&repo=${block.repo}&id=${block.id}`;
+    const res = await fetch(url);
+    if (res.ok) {
+      bundle = await res.json().then((bundle) => bundle.content);
+    } else {
+      console.error(res);
+    }
   }
+  window?.postMessage(
+    { type: "setProps", props: { bundle } },
+    publicRuntimeConfig.sandboxDomain
+  );
 };
 
 const setProps = (blockFrame: BlockFrame, props: any) => {
   blockFrame.props = props;
-  blockFrame.window.postMessage(
+  blockFrame.window?.postMessage(
     { type: "setProps", props: { props } },
     publicRuntimeConfig.sandboxDomain
   );
@@ -75,12 +81,12 @@ const makeSetInitialProps =
   }) =>
   (blockFrame: BlockFrame) => {
     const { block, context } = blockFrame;
+    if (!block) return;
+
     const path = context.path;
     const name = path.split("/").pop();
 
-    // TODO(jaked) handle requests for other repos
-    // this is complicated because we rely on `files` for the current repo
-    if (context.owner !== owner || context.repo !== repo) return;
+    const isSameRepo = context.owner === owner && context.repo === repo;
 
     // fetch metadata for the block and path
     const metadataPath = getMetadataPath(block, path);
@@ -89,9 +95,9 @@ const makeSetInitialProps =
         owner: context.owner,
         repo: context.repo,
         path: metadataPath,
-        // TODO(jaked) branchName doesn't make sense for a file in another repo
+        // TODO branchName doesn't make sense for a file in another repo
         // maybe metadata should always be on main?
-        fileRef: branchName,
+        fileRef: isSameRepo ? branchName : "HEAD",
       }),
       getMetadata,
       {
@@ -100,11 +106,14 @@ const makeSetInitialProps =
       }
     );
 
-    const fileInfo =
-      path === ""
-        ? { type: "tree" } // the root path is not included in `files`
-        : (files && files.find((d) => d.path === path)) || { type: "tree" };
-    const isFolder = fileInfo.type !== "blob";
+    let isFolder = block.type === "folder";
+    let fileSize = 0;
+    if (isSameRepo && path) {
+      const file = files && files.find((d) => d.path === path);
+      if (file) {
+        fileSize = file.size;
+      }
+    }
 
     // fetch content for the path
     if (isFolder) {
@@ -125,10 +134,9 @@ const makeSetInitialProps =
         setProps(blockFrame, props);
       });
     } else {
-      const size = fileInfo.size || 0;
       const fileSizeLimit = 1500000; // 1.5Mb
       // TODO(jaked) handle too-largeness
-      const isTooLarge = size > fileSizeLimit;
+      const isTooLarge = fileSize > fileSizeLimit;
 
       const onBranchTip = context.sha === branchName;
       const showUpdatedContents = onBranchTip && updatedContents[path];
@@ -182,9 +190,34 @@ const makeSetInitialProps =
     }
   };
 
-function handleLoaded({
+async function getBlockFromPartial({
+  queryClient,
+  partialBlock,
+  user,
+}: {
+  queryClient: QueryClient;
+  partialBlock: Partial<Block>;
+  user: Session["user"];
+}): Promise<Block | null> {
+  const repoInfo = await queryClient.fetchQuery(
+    QueryKeyMap.blocksRepo.factory({
+      owner: partialBlock.owner,
+      repo: partialBlock.repo,
+    }),
+    getBlocksFromRepo,
+    {
+      staleTime: 5 * 60 * 1000,
+    }
+  );
+  return (
+    (repoInfo?.blocks?.find((b) => b.id === partialBlock.id) as Block) || null
+  );
+}
+
+async function handleLoaded({
   queryClient,
   appContext,
+  user,
   owner,
   repo,
   branchName,
@@ -197,6 +230,7 @@ function handleLoaded({
 }: {
   queryClient: QueryClient;
   appContext: AppContextValue;
+  user: Session["user"];
   owner: string;
   repo: string;
   branchName: string;
@@ -217,33 +251,48 @@ function handleLoaded({
     updatedContents,
   });
 
-  const { block, context } = JSON.parse(
+  const { block: partialBlock, context } = JSON.parse(
     decodeURIComponent(data.hash.substring(1))
   );
+
   if (blockFrame) {
     const blockChanged =
-      blockFrame.block.owner !== block.owner ||
-      blockFrame.block.repo !== block.repo ||
-      blockFrame.block.id !== block.id;
+      blockFrame.block.owner !== partialBlock.owner ||
+      blockFrame.block.repo !== partialBlock.repo ||
+      blockFrame.block.id !== partialBlock.id;
     const contextChanged =
       blockFrame.context.owner !== context.owner ||
       blockFrame.context.repo !== context.repo ||
       blockFrame.context.path !== context.path ||
       blockFrame.context.sha !== context.sha;
 
-    blockFrame.block = block;
+    if (blockChanged) {
+      blockFrame.block = await getBlockFromPartial({
+        queryClient,
+        user,
+        partialBlock,
+      });
+    }
+
     blockFrame.context = context;
 
     if (blockChanged) {
       // TODO(jaked) update block atomically
-      setBundle(blockFrame.window, block);
-      const props = { ...blockFrame.props, block };
+      setBundle(blockFrame.window, blockFrame.block);
+      const props = { ...blockFrame.props, block: blockFrame.block };
       setProps(blockFrame, props);
     }
+
     if (contextChanged) {
       setInitialProps(blockFrame);
     }
   } else {
+    const block = await getBlockFromPartial({
+      queryClient,
+      user,
+      partialBlock,
+    });
+
     const blockFrame = { window, block, context, props: {} };
     blockFrames.push(blockFrame);
     setBundle(window, block);
@@ -264,7 +313,7 @@ function sendResponse({
   requestId: string;
   error?: string;
 }) {
-  window.postMessage(
+  window?.postMessage(
     { type: `${type}--response`, requestId, response, error },
     publicRuntimeConfig.sandboxDomain
   );
@@ -451,6 +500,9 @@ function useBlockFrameMessages({
   const appContext = useContext(AppContext);
   const queryClient = useQueryClient();
   const router = useRouter();
+  const {
+    data: { user },
+  } = useSession();
 
   const blockFrames = useRef<BlockFrame[]>([]);
 
@@ -478,7 +530,9 @@ function useBlockFrameMessages({
     const { data, origin, source } = event;
     if (origin !== publicRuntimeConfig.sandboxDomain) return;
 
-    blockFrames.current = blockFrames.current.filter((bf) => !bf.window.closed);
+    blockFrames.current = blockFrames.current.filter(
+      (bf) => bf.window && !bf.window.closed
+    );
     const blockFrame = blockFrames.current.find((bf) => bf.window === source);
     if (!blockFrame && data.type !== "loaded") return;
 
@@ -494,6 +548,7 @@ function useBlockFrameMessages({
         return handleLoaded({
           queryClient,
           appContext,
+          user,
           owner,
           repo,
           branchName,
@@ -515,7 +570,9 @@ function useBlockFrameMessages({
       case "onRequestBlocksRepos":
         return handleResponse(
           queryClient.fetchQuery(
-            QueryKeyMap.blocksRepos.factory({}),
+            QueryKeyMap.blocksRepos.factory({
+              user,
+            }),
             getAllBlocksRepos,
             {
               staleTime: 5 * 60 * 1000,

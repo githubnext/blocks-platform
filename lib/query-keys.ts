@@ -51,9 +51,8 @@ export interface CheckAccessParams {
 export interface BlocksKeyParams {
   owner: string;
   repo: string;
-  path: string | undefined;
-  type: "file" | "folder";
-  user: Session["user"];
+  path?: string;
+  type?: "file" | "folder";
 }
 
 function makeFactory<Key, Params>(

@@ -1,3 +1,4 @@
+import { Block, BlocksRepo } from "@githubnext/blocks";
 import {
   InfoIcon,
   LinkExternalIcon,
@@ -6,22 +7,20 @@ import {
   VerifiedIcon,
 } from "@primer/octicons-react";
 import {
-  Link,
   ActionList,
   ActionMenu,
+  Box,
+  Button,
+  Link,
   Text,
   TextInput,
-  Button,
-  Box,
 } from "@primer/react";
 import { AppContext } from "context";
-import { Block, BlocksRepo } from "@githubnext/blocks";
-import { useFilteredBlocksRepos, useBlocksFromRepo } from "hooks";
+import { useBlocksRepos } from "hooks";
 import { QueryKeyMap } from "lib/query-keys";
 import { useContext, useState } from "react";
 import { useQueryClient } from "react-query";
 import { useDebounce } from "use-debounce";
-import { useSession } from "next-auth/react";
 
 interface BlockPickerProps {
   button?: React.ReactNode;
@@ -39,32 +38,19 @@ export default function BlockPicker(props: BlockPickerProps) {
   let [debouncedSearchTerm] = useDebounce(lowerSearchTerm, 300);
   const queryClient = useQueryClient();
   const appContext = useContext(AppContext);
-  const {
-    data: { user },
-  } = useSession();
-
-  const { data: blockRepos } = useFilteredBlocksRepos(path, type);
 
   // allow user to search for Blocks on a specific repo
   const isSearchTermUrl = debouncedSearchTerm.includes("github.com");
   const [searchTermOwner, searchTermRepo] = (debouncedSearchTerm || "")
     .split("/")
     .slice(3);
-  const { data: blocksUrlBlocks, status: blocksUrlStatus } = useBlocksFromRepo(
-    {
-      owner: searchTermOwner,
-      repo: searchTermRepo,
-      path,
-      type,
-    },
-    {
-      enabled: isSearchTermUrl,
-    }
-  );
 
-  const blocksList = isSearchTermUrl
-    ? [blocksUrlBlocks].filter(Boolean)
-    : blockRepos;
+  const { data: blockRepos, status } = useBlocksRepos({
+    path,
+    type,
+    searchTerm: isSearchTermUrl ? undefined : debouncedSearchTerm,
+    repoUrl: isSearchTermUrl ? debouncedSearchTerm : undefined,
+  });
 
   return (
     <ActionMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -82,84 +68,97 @@ export default function BlockPicker(props: BlockPickerProps) {
             className="!pl-2 w-full"
           />
         </div>
-        {isSearchTermUrl && blocksUrlStatus === "loading" && (
+        {status === "loading" && (
           <div className="px-3 py-6 mb-1 w-full text-center italic">
-            <Text color="fg.muted">
-              Loading Blocks from the{" "}
-              <strong>
-                {searchTermOwner}/{searchTermRepo}
-              </strong>{" "}
-              repository
+            <Text color="fg.muted" pb="1">
+              {isSearchTermUrl ? (
+                <>
+                  Loading Blocks from the{" "}
+                  <strong>
+                    {searchTermOwner}/{searchTermRepo}
+                  </strong>{" "}
+                  repository
+                </>
+              ) : (
+                "Loading Blocks..."
+              )}
             </Text>
           </div>
         )}
-        {isSearchTermUrl && blocksUrlStatus === "error" && (
+        {status === "error" && (
           <div className="py-5 mb-1 w-full text-center flex flex-col items-center">
-            <Text color="fg.muted" className="px-5">
-              We weren't able to find the{" "}
-              <strong>
-                {searchTermOwner}/{searchTermRepo}
-              </strong>{" "}
-              repo. If it's private, make sure our GitHub App has access to it.
-            </Text>
+            {isSearchTermUrl ? (
+              <>
+                <Text color="fg.muted" className="px-5" pb="1">
+                  We weren't able to find the{" "}
+                  <strong>
+                    {searchTermOwner}/{searchTermRepo}
+                  </strong>{" "}
+                  repo. If it's private, make sure our GitHub App has access to
+                  it.
+                </Text>
 
-            <div className="flex mt-4">
-              <a
-                target="_blank"
-                rel="noopener"
-                href={appContext.installationUrl}
-                className="mr-2"
-              >
-                <Button variant="primary">Update App access</Button>
-              </a>
-              <Button
-                onClick={() => {
-                  queryClient.invalidateQueries(QueryKeyMap.blocksRepo.key);
-                }}
-              >
-                Try again
-              </Button>
-            </div>
+                <div className="flex mt-4">
+                  <a
+                    target="_blank"
+                    rel="noopener"
+                    href={appContext.installationUrl}
+                    className="mr-2"
+                  >
+                    <Button variant="primary">Update App access</Button>
+                  </a>
+                  <Button
+                    onClick={() => {
+                      queryClient.invalidateQueries(QueryKeyMap.blocksRepo.key);
+                    }}
+                  >
+                    Try again
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <Text color="fg.muted" className="px-5" pb="1">
+                We weren't able to find any Blocks.
+              </Text>
+            )}
           </div>
         )}
-        {isSearchTermUrl && blocksUrlStatus === "success" && !blocksUrlBlocks && (
+        {status === "success" && !blockRepos?.length && (
           <div className="py-5 mb-1 w-full text-center flex flex-col items-center">
-            <Text color="fg.muted" className="px-5">
-              We weren't able to find any Blocks in{" "}
-              <strong>
-                {searchTermOwner}/{searchTermRepo}
-              </strong>
-              .
+            <Text color="fg.muted" className="px-5" pb="1">
+              {isSearchTermUrl ? (
+                <>
+                  We weren't able to find any relevant Blocks in{" "}
+                  <strong>
+                    {searchTermOwner}/{searchTermRepo}
+                  </strong>
+                  .
+                </>
+              ) : (
+                "No relevant Blocks found."
+              )}
             </Text>
           </div>
         )}
-        {!!blocksList?.length && (
+        {!!blockRepos?.length && (
           <ActionList>
             <ActionList.Group title="Blocks" selectionVariant="single">
               <div className="max-h-[calc(100vh-25em)] overflow-auto">
-                {blocksList.map((repo, index) => {
+                {blockRepos.map((repo, index) => {
                   if (index > 50) return null;
-                  return repo.blocks.map((block) => {
-                    if (
-                      searchTerm &&
-                      !isSearchTermUrl &&
-                      !block.title.toLowerCase().includes(lowerSearchTerm)
-                    )
-                      return null;
-                    return (
-                      <BlockItem
-                        key={block.entry}
-                        block={block}
-                        value={value}
-                        repo={repo}
-                        onChange={(block) => {
-                          onChange(block);
-                          setIsOpen(false);
-                          setSearchTerm("");
-                        }}
-                      />
-                    );
-                  });
+                  return repo.blocks.map((block) => (
+                    <BlockItem
+                      key={block.entry}
+                      block={block}
+                      value={value}
+                      repo={repo}
+                      onChange={(block) => {
+                        onChange(block);
+                        setIsOpen(false);
+                        setSearchTerm("");
+                      }}
+                    />
+                  ));
                 })}
               </div>
             </ActionList.Group>
@@ -215,7 +214,7 @@ const BlockItem = ({
           <Text className="mr-1" color="fg.muted">
             <RepoIcon />
           </Text>
-          <Text color="fg.muted">
+          <Text color="fg.muted" pb="1">
             {repo.owner}/{repo.repo}
             {isExampleBlock && (
               <Text ml={1} color="ansi.blue">

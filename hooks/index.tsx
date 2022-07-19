@@ -6,7 +6,6 @@ import {
   createBranchAndPR,
   CreateBranchParams,
   CreateBranchResponse,
-  getAllBlocksRepos,
   getBranches,
   getFileContent,
   getFolderContent,
@@ -18,6 +17,7 @@ import {
   searchRepos,
   checkAccess,
   getBlocksFromRepo,
+  getBlocksRepos,
 } from "ghapi";
 import { Base64 } from "js-base64";
 import {
@@ -32,6 +32,7 @@ import {
   InfoKeyParams,
   QueryKeyMap,
   TimelineKeyParams,
+  BlocksReposParams,
 } from "lib/query-keys";
 import { isArray } from "lodash";
 import { useRouter } from "next/router";
@@ -44,8 +45,6 @@ import {
 } from "react-query";
 import type { QueryFunction, UseQueryResult } from "react-query";
 import { useSession } from "next-auth/react";
-import { CODEX_BLOCKS } from "../lib";
-import { Session } from "next-auth";
 
 export function useFileContent(
   params: FileKeyParams,
@@ -278,10 +277,13 @@ export function useGetBranches(
   );
 }
 
-export function useAllBlocksRepos(config?: UseQueryOptions<BlocksRepo[]>) {
+export function useBlocksRepos(
+  params: BlocksReposParams,
+  config?: UseQueryOptions<BlocksRepo[]>
+) {
   return useQuery<BlocksRepo[]>(
-    QueryKeyMap.blocksRepos.factory({}),
-    getAllBlocksRepos,
+    QueryKeyMap.blocksRepos.factory(params),
+    getBlocksRepos,
     {
       refetchOnWindowFocus: false,
       retry: false,
@@ -328,7 +330,7 @@ export function useManageBlock({
   } = useSession();
 
   const type = isFolder ? "folder" : "file";
-  const filteredBlocksReposResult = useFilteredBlocksRepos(path, type);
+  const filteredBlocksReposResult = useBlocksRepos({ path, type });
 
   // do we need to load any Blocks from private repos?
   const [blockKeyOwner, blockKeyRepo] = blockKey.split("__");
@@ -447,89 +449,6 @@ export function useSearchRepos(
     config
   );
 }
-
-export function useFilteredBlocksRepos(
-  path: string | undefined = undefined,
-  type: "file" | "folder" = "file"
-): UseQueryResult<BlocksRepo[]> {
-  const {
-    data: { user },
-  } = useSession();
-  const allBlocksReposResult = useAllBlocksRepos();
-
-  return useMemo(() => {
-    if (allBlocksReposResult.status !== "success") return allBlocksReposResult;
-    return {
-      ...allBlocksReposResult,
-      data: allBlocksReposResult.data
-        .map((repo) => {
-          const filteredBlocks = (repo.blocks || []).filter(
-            filterBlock({
-              path,
-              type,
-              user,
-              owner: repo.owner,
-              repo: repo.repo,
-            })
-          );
-          return {
-            ...repo,
-            blocks: filteredBlocks,
-          };
-        })
-        .filter((repo) => repo?.blocks?.length),
-    };
-  }, [allBlocksReposResult.data, path]);
-}
-
-export const filterBlock =
-  ({
-    path,
-    repo,
-    owner,
-    user,
-    type,
-  }: {
-    path: string | undefined;
-    repo: string;
-    owner: string;
-    user: Session["user"];
-    type: "file" | "folder" | undefined;
-  }) =>
-  (block: Block) => {
-    if (
-      !user.isHubber &&
-      CODEX_BLOCKS.some((cb) => {
-        return block.id === cb.id && owner === cb.owner && repo === cb.repo;
-      })
-    ) {
-      return false;
-    }
-    // don't include example Blocks
-    if (
-      block.title === "Example File Block" ||
-      block.title === "Example Folder Block"
-    ) {
-      return false;
-    }
-
-    if (type && block.type !== type) return false;
-
-    if (path === undefined) return true;
-
-    if (Boolean(block.matches)) {
-      return pm(block.matches, { bash: true, dot: true })(path);
-    }
-
-    if (block.extensions) {
-      const extension = path.split(".").pop();
-      return (
-        block.extensions.includes("*") || block.extensions.includes(extension)
-      );
-    }
-
-    return true;
-  };
 
 export interface BlockContent {
   name: string;

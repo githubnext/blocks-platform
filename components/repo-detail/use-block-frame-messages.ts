@@ -9,7 +9,7 @@ import { onRequestGitHubData } from "@githubnext/blocks";
 import { QueryKeyMap } from "lib/query-keys";
 import { Session } from "next-auth";
 import {
-  getAllBlocksRepos,
+  getBlocksRepos,
   getBlocksFromRepo,
   getFileContent,
   getFolderContent,
@@ -571,9 +571,12 @@ function useBlockFrameMessages({
         return handleResponse(
           queryClient.fetchQuery(
             QueryKeyMap.blocksRepos.factory({
-              user,
+              path: data.payload.params.path,
+              searchTerm: data.payload.params.searchTerm,
+              repoUrl: data.payload.params.repoUrl,
+              type: data.payload.params.type,
             }),
-            getAllBlocksRepos,
+            getBlocksRepos,
             {
               staleTime: 5 * 60 * 1000,
             }

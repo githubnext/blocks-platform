@@ -1,3 +1,4 @@
+import { CODEX_BLOCKS } from "../lib";
 import { Octokit } from "@octokit/rest";
 import { Endpoints } from "@octokit/types";
 import { components } from "@octokit/openapi-types";
@@ -6,6 +7,7 @@ import { signOut } from "next-auth/react";
 import { Base64 } from "js-base64";
 import {
   BlocksKeyParams,
+  BlocksReposParams,
   BranchesKeyParams,
   CheckAccessParams,
   FileKeyParams,
@@ -17,8 +19,9 @@ import {
 } from "lib/query-keys";
 import { QueryFunction, QueryFunctionContext } from "react-query";
 import { Block, BlocksRepo } from "@githubnext/blocks";
-import { filterBlock } from "../hooks";
 import { Session } from "next-auth";
+import pm from "picomatch";
+
 export interface RepoContext {
   repo: string;
   owner: string;
@@ -282,6 +285,7 @@ export const getBlocksFromRepoInner = async ({
   repo,
   path,
   type,
+  searchTerm,
 }: BlocksKeyParams & {
   octokit: Octokit;
   user: Session["user"];
@@ -332,7 +336,7 @@ export const getBlocksFromRepoInner = async ({
     }
   } catch (e) {}
 
-  const filter = filterBlock({ repo, owner, path, type, user });
+  const filter = filterBlock({ repo, owner, path, type, user, searchTerm });
   const filteredBlocks = (blocks || []).filter(filter).map((block: Block) => ({
     ...block,
     owner,
@@ -355,6 +359,71 @@ export const getBlocksFromRepoInner = async ({
     topics: [""],
   };
 };
+
+const filterBlock =
+  ({
+    path,
+    repo,
+    owner,
+    user,
+    type,
+    searchTerm,
+  }: {
+    path: string | undefined;
+    repo: string;
+    owner: string;
+    user: Session["user"];
+    type: "file" | "folder" | undefined;
+    searchTerm?: string;
+  }) =>
+  (block: Block) => {
+    if (
+      !user.isHubber &&
+      CODEX_BLOCKS.some((cb) => {
+        return block.id === cb.id && owner === cb.owner && repo === cb.repo;
+      })
+    ) {
+      return false;
+    }
+    // don't include example Blocks
+    if (
+      block.title === "Example File Block" ||
+      block.title === "Example Folder Block"
+    ) {
+      return false;
+    }
+
+    if (type && block.type !== type) return false;
+
+    if (searchTerm) {
+      const lowerSearchTerm = searchTerm.toLowerCase();
+      if (
+        ![block.title, block.description]
+          .join("\n")
+          .toLocaleLowerCase()
+          .includes(lowerSearchTerm)
+      ) {
+        return false;
+      }
+    }
+
+    if (path !== undefined) {
+      if (block.matches) {
+        const doesMatch = pm(block.matches, { bash: true, dot: true })(path);
+        if (!doesMatch) return false;
+      }
+
+      if (block.extensions) {
+        const extension = path.split(".").pop();
+        const doesMatch =
+          block.extensions.includes("*") ||
+          block.extensions.includes(extension || "");
+        if (!doesMatch) return false;
+      }
+    }
+
+    return true;
+  };
 
 export const getBranches: QueryFunction<
   Branch[],
@@ -504,43 +573,56 @@ const tryToGetContent = async (
     return undefined;
   }
 };
-export const getAllBlocksRepos: QueryFunction<BlocksRepo[]> = async (ctx) => {
+export const getBlocksRepos: QueryFunction<
+  BlocksRepo[],
+  GenericQueryKey<BlocksReposParams>
+> = async (ctx) => {
   let octokit = (ctx.meta as unknown as BlocksQueryMeta).octokit;
   let user = (ctx.meta as unknown as BlocksQueryMeta).user;
-  const repos = await octokit.search.repos({
-    q: "topic:github-blocks",
-    order: "desc",
-    sort: "updated",
-    per_page: 100,
-  });
-  const blocks: Block[][] = await Promise.all(
-    repos.data.items.map(async (repo) => {
+  let { queryKey } = ctx;
+  const { path, searchTerm, repoUrl, type } = queryKey[1];
+
+  let repos = [];
+  // allow user to search for Blocks on a specific repo
+  const isSearchTermUrl = !!repoUrl;
+  if (isSearchTermUrl) {
+    const [searchTermOwner, searchTermRepo] = (repoUrl || "")
+      .split("/")
+      .slice(3);
+    const repo = await octokit.repos.get({
+      owner: searchTermOwner,
+      repo: searchTermRepo,
+    });
+    repos = [repo.data];
+  } else {
+    const query = [
+      "topic:github-blocks",
+      // we'll need to filter the search when the list is longer than a page
+      // params.searchTerm ? `${params.searchTerm} in:readme` : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+    const data = await octokit.search.repos({
+      q: query,
+      order: "desc",
+      sort: "updated",
+      per_page: 100,
+    });
+    repos = data.data.items;
+  }
+  const blocksRepos = await Promise.all(
+    repos.map(async (repo) => {
       const repoInfo = await getBlocksFromRepoInner({
         octokit,
         owner: repo.owner.login,
         repo: repo.name,
         user,
+        path,
+        type,
+        searchTerm,
       });
-      return repoInfo?.blocks || [];
+      return repoInfo;
     })
   );
-  return repos.data.items.map<BlocksRepo>((repo, i) => ({
-    owner: repo.owner.login,
-    repo: repo.name,
-    full_name: repo.full_name,
-    id: repo.id,
-    html_url: repo.html_url,
-    description: repo.description,
-    stars: repo.stargazers_count,
-    watchers: repo.watchers_count,
-    language: repo.language,
-    topics: repo.topics,
-
-    blocks: blocks[i].map<Block>((b) => ({
-      ...b,
-      owner: repo.owner.login,
-      repo: repo.name,
-      repoId: repo.id,
-    })),
-  }));
+  return blocksRepos.filter((repo) => repo.blocks?.length);
 };

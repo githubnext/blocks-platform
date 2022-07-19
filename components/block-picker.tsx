@@ -1,3 +1,4 @@
+import { Block, BlocksRepo } from "@githubnext/blocks";
 import {
   InfoIcon,
   LinkExternalIcon,
@@ -6,22 +7,20 @@ import {
   VerifiedIcon,
 } from "@primer/octicons-react";
 import {
-  Link,
   ActionList,
   ActionMenu,
+  Box,
+  Button,
+  Link,
   Text,
   TextInput,
-  Button,
-  Box,
 } from "@primer/react";
 import { AppContext } from "context";
-import { Block, BlocksRepo } from "@githubnext/blocks";
-import { useBlocksRepos, useBlocksFromRepo } from "hooks";
+import { useBlocksRepos } from "hooks";
 import { QueryKeyMap } from "lib/query-keys";
 import { useContext, useState } from "react";
 import { useQueryClient } from "react-query";
 import { useDebounce } from "use-debounce";
-import { useSession } from "next-auth/react";
 
 interface BlockPickerProps {
   button?: React.ReactNode;

@@ -1,4 +1,4 @@
-import { Session } from "next-auth";
+import { CommonBlockProps } from "@githubnext/blocks";
 
 export interface FolderKeyParams {
   repo: string;
@@ -53,7 +53,12 @@ export interface BlocksKeyParams {
   repo: string;
   path?: string;
   type?: "file" | "folder";
+  searchTerm?: string;
 }
+
+export type BlocksReposParams = Parameters<
+  CommonBlockProps["onRequestBlocksRepos"]
+>[0];
 
 function makeFactory<Key, Params>(
   key: Key
@@ -71,7 +76,7 @@ export const QueryKeyMap = {
   files: makeFactory<"files", FilesKeyParams>("files"),
   file: makeFactory<"file", FileKeyParams>("file"),
   metadata: makeFactory<"metadata", FileKeyParams>("metadata"),
-  blocksRepos: makeFactory<"blocksRepos", {}>("blocksRepos"),
+  blocksRepos: makeFactory<"blocksRepos", BlocksReposParams>("blocksRepos"),
   blocksRepo: makeFactory<"blocksRepo", BlocksKeyParams>("blocksRepo"),
   branches: makeFactory<"branches", BranchesKeyParams>("branches"),
   searchRepos: makeFactory<"searchRepos", string>("searchRepos"),

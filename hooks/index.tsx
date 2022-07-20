@@ -1,6 +1,5 @@
 import { Block, BlocksRepo, RepoFiles } from "@githubnext/blocks";
 import { Octokit } from "@octokit/rest";
-import pm from "picomatch";
 import {
   BlocksQueryMeta,
   createBranchAndPR,
@@ -36,7 +35,7 @@ import {
 } from "lib/query-keys";
 import { isArray } from "lodash";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   useMutation,
   UseMutationOptions,
@@ -44,7 +43,6 @@ import {
   UseQueryOptions,
 } from "react-query";
 import type { QueryFunction, UseQueryResult } from "react-query";
-import { useSession } from "next-auth/react";
 
 export function useFileContent(
   params: FileKeyParams,
@@ -324,13 +322,10 @@ export function useManageBlock({
   isFolder,
 }: UseManageBlockParams): UseManageBlockResult {
   const router = useRouter();
-  const { blockKey = "" } = router.query as Record<string, string>;
-  const {
-    data: { user },
-  } = useSession();
+  const { blockKey = "", devServer } = router.query as Record<string, string>;
 
   const type = isFolder ? "folder" : "file";
-  const filteredBlocksReposResult = useBlocksRepos({ path, type });
+  const filteredBlocksReposResult = useBlocksRepos({ path, type, devServer });
 
   // do we need to load any Blocks from private repos?
   const [blockKeyOwner, blockKeyRepo] = blockKey.split("__");
@@ -339,6 +334,7 @@ export function useManageBlock({
     type,
     owner: blockKeyOwner,
     repo: blockKeyRepo,
+    devServer,
   });
   const [storedDefaultBlockOwner, storedDefaultBlockRepo] =
     storedDefaultBlock.split("__");
@@ -347,6 +343,7 @@ export function useManageBlock({
     type,
     owner: storedDefaultBlockOwner,
     repo: storedDefaultBlockRepo,
+    devServer,
   });
 
   const incomplete = [

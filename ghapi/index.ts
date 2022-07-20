@@ -98,8 +98,13 @@ export const getFileContent: (
       throw new Error(`Error fetching file: ${owner}/${repo}: ${path}`);
     }
   }
-  const encodedContent = res.data.content;
-  const content = Buffer.from(encodedContent, "base64").toString("utf8");
+
+  // we sometimes end up with the contents as raw data, only decode if we have JSON.
+  // I think this has to do with caching and content type negotiation
+  const content =
+    res.headers["content-type"] === "application/json"
+      ? Buffer.from(res.data.content, "base64").toString("utf8")
+      : res.data;
 
   const context = {
     download_url: apiUrl,
@@ -279,6 +284,7 @@ export const getBlocksFromRepo: QueryFunction<
   return await getBlocksFromRepoInner({ octokit, user, ...params });
 };
 export const getBlocksFromRepoInner = async ({
+  devServer,
   octokit,
   user,
   owner,
@@ -292,6 +298,21 @@ export const getBlocksFromRepoInner = async ({
 }): Promise<BlocksRepo> => {
   if (!owner || !repo) {
     return undefined;
+  }
+
+  if (devServer) {
+    const { owner: devServerOwner, repo: devServerRepo } =
+      await getOwnerRepoFromDevServer(devServer);
+    if (owner === devServerOwner && repo === devServerRepo) {
+      return getBlocksRepoFromDevServer({
+        octokit,
+        devServer,
+        user,
+        path,
+        type,
+        searchTerm,
+      });
+    }
   }
 
   let repoId = 0;
@@ -573,6 +594,53 @@ const tryToGetContent = async (
     return undefined;
   }
 };
+
+export const getOwnerRepoFromDevServer = async (devServer: string) => {
+  const gitConfig = await (await fetch(`${devServer}git.config.json`)).json();
+  const url = gitConfig['remote "origin"'].url;
+  const [_, owner, repo] = /^[^:]*:([^/]*)\/([^/.]*)/.exec(url);
+  return { owner, repo };
+};
+
+const getBlocksRepoFromDevServer = async ({
+  devServer,
+  octokit,
+  user,
+  path,
+  type,
+  searchTerm,
+}: BlocksReposParams & {
+  octokit: Octokit;
+  user: Session["user"];
+}) => {
+  const blocks = await (await fetch(`${devServer}blocks.config.json`)).json();
+  const { owner, repo } = await getOwnerRepoFromDevServer(devServer);
+  const repoRes = await octokit.repos.get({ owner, repo });
+
+  const filter = filterBlock({ user, repo, owner, path, type, searchTerm });
+  const filteredBlocks = (blocks || []).filter(filter).map((block: Block) => ({
+    ...block,
+    owner,
+    repo,
+    repoId: repoRes.data.id,
+  }));
+
+  return {
+    owner,
+    repo,
+    blocks: filteredBlocks,
+    full_name: `${owner}/${repo}`,
+    id: repoRes.data.id,
+    // we don't use any of the below at the moment
+    html_url: "",
+    description: "",
+    stars: 0,
+    watchers: 0,
+    language: "",
+    topics: [""],
+  };
+};
+
 export const getBlocksRepos: QueryFunction<
   BlocksRepo[],
   GenericQueryKey<BlocksReposParams>
@@ -580,7 +648,8 @@ export const getBlocksRepos: QueryFunction<
   let octokit = (ctx.meta as unknown as BlocksQueryMeta).octokit;
   let user = (ctx.meta as unknown as BlocksQueryMeta).user;
   let { queryKey } = ctx;
-  const { path, searchTerm, repoUrl, type } = queryKey[1];
+  const params = queryKey[1];
+  const { path, searchTerm, repoUrl, type, devServer } = params;
 
   let repos = [];
   // allow user to search for Blocks on a specific repo
@@ -610,9 +679,9 @@ export const getBlocksRepos: QueryFunction<
     });
     repos = data.data.items;
   }
-  const blocksRepos = await Promise.all(
-    repos.map(async (repo) => {
-      const repoInfo = await getBlocksFromRepoInner({
+  const blocksRepos = await Promise.all([
+    ...repos.map((repo) =>
+      getBlocksFromRepoInner({
         octokit,
         owner: repo.owner.login,
         repo: repo.name,
@@ -620,9 +689,11 @@ export const getBlocksRepos: QueryFunction<
         path,
         type,
         searchTerm,
-      });
-      return repoInfo;
-    })
-  );
+      })
+    ),
+    ...(devServer
+      ? [getBlocksRepoFromDevServer({ octokit, user, ...params })]
+      : []),
+  ]);
   return blocksRepos.filter((repo) => repo.blocks?.length);
 };

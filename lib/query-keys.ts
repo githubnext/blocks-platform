@@ -54,11 +54,12 @@ export interface BlocksKeyParams {
   path?: string;
   type?: "file" | "folder";
   searchTerm?: string;
+  devServer?: string;
 }
 
 export type BlocksReposParams = Parameters<
   CommonBlockProps["onRequestBlocksRepos"]
->[0];
+>[0] & { devServer?: string };
 
 function makeFactory<Key, Params>(
   key: Key

@@ -7,25 +7,25 @@ import { useRouter } from "next/router";
 import type { Block, RepoFiles } from "@githubnext/blocks";
 import { onRequestGitHubData } from "@githubnext/blocks";
 import { QueryKeyMap } from "lib/query-keys";
-import { Session } from "next-auth";
 import {
   getBlocksRepos,
   getBlocksFromRepo,
   getFileContent,
   getFolderContent,
   getMetadata,
+  getOwnerRepoFromDevServer,
 } from "ghapi";
 import { getBlockKey } from "hooks";
 import type { AppContextValue } from "context";
 import { AppContext } from "context";
 import { Context, UpdatedContents } from "./index";
 import axios from "axios";
-import { useSession } from "next-auth/react";
 
 const { publicRuntimeConfig } = getConfig();
 
 type BlockFrame = {
   window: Window;
+  origin: string;
   block: Block;
   context: Context;
   props: any;
@@ -36,7 +36,16 @@ const getMetadataPath = (block: Block, path: string) =>
     path
   )}.json`;
 
-const setBundle = async (window: Window, block: Block | null) => {
+const setBundle = async (
+  devServer: string | undefined,
+  blockFrame: BlockFrame,
+  block: Block | null
+) => {
+  if (devServer) {
+    const { owner, repo } = await getOwnerRepoFromDevServer(devServer);
+    if (block.owner === owner && block.repo === repo) return;
+  }
+
   let bundle = null;
   if (block) {
     const url = `/api/get-block-content?owner=${block.owner}&repo=${block.repo}&id=${block.id}`;
@@ -47,9 +56,9 @@ const setBundle = async (window: Window, block: Block | null) => {
       console.error(res);
     }
   }
-  window?.postMessage(
+  blockFrame.window?.postMessage(
     { type: "setProps", props: { bundle } },
-    publicRuntimeConfig.sandboxDomain
+    blockFrame.origin
   );
 };
 
@@ -57,7 +66,7 @@ const setProps = (blockFrame: BlockFrame, props: any) => {
   blockFrame.props = props;
   blockFrame.window?.postMessage(
     { type: "setProps", props: { props } },
-    publicRuntimeConfig.sandboxDomain
+    blockFrame.origin
   );
 };
 
@@ -193,31 +202,31 @@ const makeSetInitialProps =
 async function getBlockFromPartial({
   queryClient,
   partialBlock,
-  user,
+  devServer,
 }: {
   queryClient: QueryClient;
   partialBlock: Partial<Block>;
-  user: Session["user"];
+  devServer?: string;
 }): Promise<Block | null> {
   const repoInfo = await queryClient.fetchQuery(
     QueryKeyMap.blocksRepo.factory({
       owner: partialBlock.owner,
       repo: partialBlock.repo,
+      devServer,
     }),
     getBlocksFromRepo,
     {
       staleTime: 5 * 60 * 1000,
     }
   );
-  return (
-    (repoInfo?.blocks?.find((b) => b.id === partialBlock.id) as Block) || null
-  );
+
+  return repoInfo?.blocks?.find((b) => b.id === partialBlock.id) || null;
 }
 
 async function handleLoaded({
+  devServer,
   queryClient,
   appContext,
-  user,
   owner,
   repo,
   branchName,
@@ -226,11 +235,12 @@ async function handleLoaded({
   blockFrames,
   blockFrame,
   window,
+  origin,
   data,
 }: {
+  devServer?: string;
   queryClient: QueryClient;
   appContext: AppContextValue;
-  user: Session["user"];
   owner: string;
   repo: string;
   branchName: string;
@@ -239,6 +249,7 @@ async function handleLoaded({
   blockFrames: BlockFrame[];
   blockFrame: BlockFrame;
   window: Window;
+  origin: string;
   data: any;
 }) {
   const setInitialProps = makeSetInitialProps({
@@ -269,8 +280,8 @@ async function handleLoaded({
     if (blockChanged) {
       blockFrame.block = await getBlockFromPartial({
         queryClient,
-        user,
         partialBlock,
+        devServer,
       });
     }
 
@@ -278,7 +289,7 @@ async function handleLoaded({
 
     if (blockChanged) {
       // TODO(jaked) update block atomically
-      setBundle(blockFrame.window, blockFrame.block);
+      setBundle(devServer, blockFrame, blockFrame.block);
       const props = { ...blockFrame.props, block: blockFrame.block };
       setProps(blockFrame, props);
     }
@@ -286,16 +297,22 @@ async function handleLoaded({
     if (contextChanged) {
       setInitialProps(blockFrame);
     }
+
+    // hot reload of iframe
+    if (!blockChanged && !contextChanged) {
+      setBundle(devServer, blockFrame, blockFrame.block);
+      setInitialProps(blockFrame);
+    }
   } else {
     const block = await getBlockFromPartial({
       queryClient,
-      user,
       partialBlock,
+      devServer,
     });
 
-    const blockFrame = { window, block, context, props: {} };
+    const blockFrame = { window, origin, block, context, props: {} };
     blockFrames.push(blockFrame);
-    setBundle(window, block);
+    setBundle(devServer, blockFrame, block);
     setInitialProps(blockFrame);
   }
 }
@@ -303,42 +320,42 @@ async function handleLoaded({
 function sendResponse({
   response,
   type,
-  window,
+  blockFrame,
   requestId,
   error,
 }: {
   response?: any;
   type: string;
-  window: Window;
+  blockFrame: BlockFrame;
   requestId: string;
   error?: string;
 }) {
-  window?.postMessage(
+  blockFrame.window?.postMessage(
     { type: `${type}--response`, requestId, response, error },
-    publicRuntimeConfig.sandboxDomain
+    blockFrame.origin
   );
 }
 function handleResponse<T>(
   p: Promise<T>,
   {
     type,
-    window,
+    blockFrame,
     requestId,
   }: {
     type: string;
-    window: Window;
+    blockFrame: BlockFrame;
     requestId: string;
   }
 ) {
   return p.then(
     (response) => {
-      sendResponse({ type, requestId, window, response });
+      sendResponse({ type, requestId, blockFrame, response });
     },
     (e) => {
       // Error is not always serializable
       // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm#things_that_dont_work_with_structured_clone
       const error = e instanceof Error ? e.message : e;
-      sendResponse({ type, requestId, window, error });
+      sendResponse({ type, requestId, blockFrame, error });
     }
   );
 }
@@ -474,6 +491,7 @@ async function handleFetchInternalEndpoint(urlPath, params) {
 }
 
 function useBlockFrameMessages({
+  devServer,
   token,
   owner,
   repo,
@@ -483,6 +501,7 @@ function useBlockFrameMessages({
   setUpdatedContents,
   setRequestedMetadata,
 }: {
+  devServer?: string;
   token: string;
   owner: string;
   repo: string;
@@ -500,9 +519,6 @@ function useBlockFrameMessages({
   const appContext = useContext(AppContext);
   const queryClient = useQueryClient();
   const router = useRouter();
-  const {
-    data: { user },
-  } = useSession();
 
   const blockFrames = useRef<BlockFrame[]>([]);
 
@@ -528,7 +544,11 @@ function useBlockFrameMessages({
   const onMessage = useRef((event: MessageEvent) => {});
   onMessage.current = (event: MessageEvent) => {
     const { data, origin, source } = event;
-    if (origin !== publicRuntimeConfig.sandboxDomain) return;
+    if (
+      !publicRuntimeConfig.sandboxDomain.startsWith(origin) &&
+      !devServer?.startsWith(origin)
+    )
+      return;
 
     blockFrames.current = blockFrames.current.filter(
       (bf) => bf.window && !bf.window.closed
@@ -540,15 +560,15 @@ function useBlockFrameMessages({
     const responseParams = {
       type: baseType,
       requestId: data.requestId,
-      window: blockFrame?.window,
+      blockFrame,
     };
 
     switch (baseType) {
       case "loaded":
         return handleLoaded({
+          devServer,
           queryClient,
           appContext,
-          user,
           owner,
           repo,
           branchName,
@@ -557,6 +577,7 @@ function useBlockFrameMessages({
           blockFrames: blockFrames.current,
           blockFrame,
           window: source as Window,
+          origin,
           data,
         });
 
@@ -575,6 +596,7 @@ function useBlockFrameMessages({
               searchTerm: data.payload.params.searchTerm,
               repoUrl: data.payload.params.repoUrl,
               type: data.payload.params.type,
+              devServer,
             }),
             getBlocksRepos,
             {

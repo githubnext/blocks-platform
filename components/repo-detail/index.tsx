@@ -67,6 +67,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
     theme,
     fileRef,
     mode,
+    devServer,
   } = router.query as Record<string, string>;
   const [requestedBlockMetadata, setRequestedBlockMetadata] = useState(null);
   const [requestedMetadata, setRequestedMetadata] = useState<{
@@ -142,6 +143,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
     );
 
   useBlockFrameMessages({
+    devServer,
     token,
     owner,
     repo,

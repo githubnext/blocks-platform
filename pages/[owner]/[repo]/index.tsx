@@ -153,11 +153,36 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   const permissions = repoInfo.permissions;
 
+  const isDev = process.env.NODE_ENV !== "production";
+
+  const frameSrc = [
+    "frame-src",
+    publicRuntimeConfig.sandboxDomain,
+    context.query.devServer,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const connectSrc = [
+    "connect-src",
+    "'self'",
+    // for local dev
+    isDev && "webpack://*",
+    isDev && "ws://*",
+    // for hitting the GitHub API
+    "https://api.github.com/",
+    // for Analytics
+    "https://octo-metrics.azurewebsites.net/api/CaptureEvent",
+    context.query.devServer,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   context.res.setHeader(
     "Content-Security-Policy",
-    `${context.res.getHeader("Content-Security-Policy")}; frame-src ${
-      publicRuntimeConfig.sandboxDomain
-    }`
+    [context.res.getHeader("Content-Security-Policy"), frameSrc, connectSrc]
+      .filter(Boolean)
+      .join(";")
   );
 
   return {

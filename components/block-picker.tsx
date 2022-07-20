@@ -16,11 +16,12 @@ import {
   TextInput,
 } from "@primer/react";
 import { AppContext } from "context";
-import { useBlocksRepos } from "hooks";
+import { getBlockKey, useBlocksRepos } from "hooks";
 import { QueryKeyMap } from "lib/query-keys";
 import { useContext, useState } from "react";
 import { useQueryClient } from "react-query";
 import { useDebounce } from "use-debounce";
+import { useRouter } from "next/router";
 
 interface BlockPickerProps {
   button?: React.ReactNode;
@@ -38,6 +39,7 @@ export default function BlockPicker(props: BlockPickerProps) {
   let [debouncedSearchTerm] = useDebounce(lowerSearchTerm, 300);
   const queryClient = useQueryClient();
   const appContext = useContext(AppContext);
+  const { devServer } = useRouter().query as Record<string, string>;
 
   // allow user to search for Blocks on a specific repo
   const isSearchTermUrl = debouncedSearchTerm.includes("github.com");
@@ -50,6 +52,7 @@ export default function BlockPicker(props: BlockPickerProps) {
     type,
     searchTerm: isSearchTermUrl ? undefined : debouncedSearchTerm,
     repoUrl: isSearchTermUrl ? debouncedSearchTerm : undefined,
+    devServer,
   });
 
   return (
@@ -148,7 +151,7 @@ export default function BlockPicker(props: BlockPickerProps) {
                   if (index > 50) return null;
                   return repo.blocks.map((block) => (
                     <BlockItem
-                      key={block.entry}
+                      key={getBlockKey(block)}
                       block={block}
                       value={value}
                       repo={repo}
@@ -181,7 +184,7 @@ const BlockItem = ({
   onChange: (newType: Block) => void;
 }) => {
   const isExampleBlock = repo.full_name === `githubnext/blocks-examples`;
-  const isSelected = block.id === value?.id;
+  const isSelected = value && getBlockKey(block) === getBlockKey(value);
   return (
     <ActionList.Item
       selected={isSelected}

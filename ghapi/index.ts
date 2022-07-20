@@ -15,9 +15,11 @@ import {
   FolderKeyParams,
   GenericQueryKey,
   InfoKeyParams,
+  QueryKeyMap,
+  RepoSearchKeyParams,
   TimelineKeyParams,
 } from "lib/query-keys";
-import { QueryFunction, QueryFunctionContext } from "react-query";
+import { QueryClient, QueryFunction, QueryFunctionContext } from "react-query";
 import { Block, BlocksRepo } from "@githubnext/blocks";
 import { Session } from "next-auth";
 import pm from "picomatch";
@@ -77,6 +79,7 @@ export interface BlocksQueryMeta {
   ghapi: AxiosInstance;
   octokit: Octokit;
   user: Session["user"];
+  queryClient: QueryClient;
 }
 
 export const getFileContent: (
@@ -201,6 +204,35 @@ export const getRepoInfoWithContributors: QueryFunction<
   }
 };
 
+export const getRepoInfo: QueryFunction<
+  RepoInfo,
+  GenericQueryKey<InfoKeyParams>
+> = async (ctx) => {
+  let { queryKey } = ctx;
+  let meta = ctx.meta as unknown as BlocksQueryMeta;
+  const { repo, owner } = queryKey[1];
+  const url = `repos/${owner}/${repo}`;
+  const repoInfoRes = await meta.ghapi(url);
+  return repoInfoRes.data;
+};
+export const searchForRepos: QueryFunction<
+  RepoInfo[],
+  GenericQueryKey<RepoSearchKeyParams>
+> = async (ctx) => {
+  let { queryKey } = ctx;
+  let meta = ctx.meta as unknown as BlocksQueryMeta;
+  const { q, order = "desc", sort = "updated", per_page = 100 } = queryKey[1];
+  const url = `search/repositories`;
+  const res = await meta.ghapi(url, {
+    params: {
+      q,
+      order,
+      sort,
+      per_page,
+    },
+  });
+  return res.data.items;
+};
 interface GetRepoInfoSSRParams {
   repo: string;
   owner: string;
@@ -577,10 +609,11 @@ export const getBlocksRepos: QueryFunction<
   BlocksRepo[],
   GenericQueryKey<BlocksReposParams>
 > = async (ctx) => {
-  let octokit = (ctx.meta as unknown as BlocksQueryMeta).octokit;
-  let user = (ctx.meta as unknown as BlocksQueryMeta).user;
+  let meta = ctx.meta as unknown as BlocksQueryMeta;
+  const { octokit, queryClient } = meta;
   let { queryKey } = ctx;
   const { path, searchTerm, repoUrl, type } = queryKey[1];
+  let user = meta.user;
 
   let repos = [];
   // allow user to search for Blocks on a specific repo
@@ -589,11 +622,17 @@ export const getBlocksRepos: QueryFunction<
     const [searchTermOwner, searchTermRepo] = (repoUrl || "")
       .split("/")
       .slice(3);
-    const repo = await octokit.repos.get({
-      owner: searchTermOwner,
-      repo: searchTermRepo,
-    });
-    repos = [repo.data];
+    const repo = await queryClient.fetchQuery(
+      QueryKeyMap.info.factory({
+        owner: searchTermOwner,
+        repo: searchTermRepo,
+      }),
+      getRepoInfo,
+      {
+        staleTime: 5 * 60 * 1000,
+      }
+    );
+    repos = [repo];
   } else {
     const query = [
       "topic:github-blocks",
@@ -602,13 +641,19 @@ export const getBlocksRepos: QueryFunction<
     ]
       .filter(Boolean)
       .join(" ");
-    const data = await octokit.search.repos({
-      q: query,
-      order: "desc",
-      sort: "updated",
-      per_page: 100,
-    });
-    repos = data.data.items;
+    const data = await queryClient.fetchQuery(
+      QueryKeyMap.repoSearch.factory({
+        q: query,
+        order: "desc",
+        sort: "updated",
+        per_page: 100,
+      }),
+      searchForRepos,
+      {
+        staleTime: 5 * 60 * 1000,
+      }
+    );
+    repos = data;
   }
   const blocksRepos = await Promise.all(
     repos.map(async (repo) => {

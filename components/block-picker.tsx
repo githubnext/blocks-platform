@@ -164,7 +164,7 @@ export default function BlockPicker(props: BlockPickerProps) {
                           setIsOpen(false);
                           setSearchTerm("");
                         }}
-                        isDev={!!repo.isDev}
+                        isDev={!!repo["isDev"]}
                       />
                     );
                   });

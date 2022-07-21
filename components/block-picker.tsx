@@ -2,6 +2,8 @@ import { Block, BlocksRepo } from "@githubnext/blocks";
 import {
   InfoIcon,
   LinkExternalIcon,
+  PencilIcon,
+  PlugIcon,
   RepoIcon,
   SearchIcon,
   VerifiedIcon,
@@ -162,6 +164,7 @@ export default function BlockPicker(props: BlockPickerProps) {
                           setIsOpen(false);
                           setSearchTerm("");
                         }}
+                        isDev={!!repo.isDev}
                       />
                     );
                   });
@@ -180,17 +183,26 @@ const BlockItem = ({
   isSelected,
   repo,
   onChange,
+  isDev,
 }: {
   block: Block;
   isSelected: boolean;
   repo: BlocksRepo;
   onChange: (newType: Block) => void;
+  isDev: boolean;
 }) => {
   const isExampleBlock = repo.full_name === `githubnext/blocks-examples`;
   return (
     <ActionList.Item
       selected={isSelected}
-      className="group py-2"
+      className={`group py-2 ${
+        isDev ? "bg-[#ddf4ffaa] border border-dashed border-[#54aeff] mb-2" : ""
+      }`}
+      sx={{
+        ":hover": {
+          backgroundColor: isDev ? "#ddf4ff !important" : "transparent",
+        },
+      }}
       onSelect={() => {
         onChange(block);
       }}
@@ -198,21 +210,28 @@ const BlockItem = ({
       <div className="flex justify-between">
         <div className="font-semibold">{block.title}</div>
 
-        <Link
-          href={`https://github.com/${repo.full_name}`}
-          className="text-xs mt-[2px] opacity-0 focus:opacity-100 group-hover:opacity-100"
-          target="_blank"
-          rel="noopener noreferrer"
-          color="fg.muted"
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
-        >
-          <Text className="flex items-center" color="fg.muted">
-            View code
-            <LinkExternalIcon className="ml-1 opacity-50" />
+        {isDev ? (
+          <Text pb="1" className="text-xs font-mono text-[#0969da]">
+            From dev server
+            <PlugIcon className="ml-1" />
           </Text>
-        </Link>
+        ) : (
+          <Link
+            href={`https://github.com/${repo.full_name}`}
+            className="text-xs mt-[2px] opacity-0 focus:opacity-100 group-hover:opacity-100"
+            target="_blank"
+            rel="noopener noreferrer"
+            color="fg.muted"
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            <Text className="flex items-center" color="fg.muted">
+              View code
+              <LinkExternalIcon className="ml-1 opacity-50" />
+            </Text>
+          </Link>
+        )}
       </div>
       <ActionList.Description variant="block">
         <Box className="flex items-center mt-1">

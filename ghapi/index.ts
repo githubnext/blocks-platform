@@ -729,6 +729,7 @@ export const getBlocksRepos: QueryFunction<
               path,
               type,
               searchTerm,
+              devServerInfo,
             }),
             getBlocksFromRepo,
             { staleTime: 5 * 60 * 1000 }
@@ -757,5 +758,12 @@ export const getBlocksRepos: QueryFunction<
       }
     }),
   ]);
-  return blocksRepos.filter((repo) => repo.blocks?.length);
+  return blocksRepos
+    .filter((repo) => repo.blocks?.length)
+    .map((blockRepo) => ({
+      ...blockRepo,
+      isDev:
+        devServerInfo?.owner === blockRepo.owner &&
+        devServerInfo?.repo === blockRepo.repo,
+    }));
 };

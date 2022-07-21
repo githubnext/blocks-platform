@@ -332,16 +332,18 @@ export const getBlocksFromRepoInner = async ({
     return undefined;
   }
 
-  if (devServerInfo) {
-    if (owner === devServerInfo.owner && repo === devServerInfo.repo) {
-      return getBlocksRepoFromDevServer({
-        devServerInfo,
-        user,
-        path,
-        type,
-        searchTerm,
-      });
-    }
+  if (
+    devServerInfo &&
+    owner === devServerInfo.owner &&
+    repo === devServerInfo.repo
+  ) {
+    return getBlocksRepoFromDevServer({
+      devServerInfo,
+      user,
+      path,
+      type,
+      searchTerm,
+    });
   }
 
   let repoId = 0;
@@ -760,10 +762,18 @@ export const getBlocksRepos: QueryFunction<
   ]);
   return blocksRepos
     .filter((repo) => repo.blocks?.length)
-    .map((blockRepo) => ({
-      ...blockRepo,
-      isDev:
-        devServerInfo?.owner === blockRepo.owner &&
-        devServerInfo?.repo === blockRepo.repo,
-    }));
+    .map((blockRepo) => {
+      const isDev =
+        devServerInfo &&
+        devServerInfo.owner === blockRepo.owner &&
+        devServerInfo.repo === blockRepo.repo;
+      return {
+        ...blockRepo,
+        blocks: blockRepo.blocks.map((block) => ({
+          ...block,
+          isDev,
+        })),
+        isDev,
+      };
+    });
 };

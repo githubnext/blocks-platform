@@ -60,7 +60,15 @@ export default function BlockPicker(props: BlockPickerProps) {
   return (
     <ActionMenu open={isOpen} onOpenChange={setIsOpen}>
       <ActionMenu.Button aria-expanded={isOpen} disabled={!blockRepos}>
-        {button ?? `Block: ${value?.title || "..."}`}
+        {button ??
+          (value ? (
+            <>
+              Block: {value.title}{" "}
+              {value["isDev"] && <PlugIcon className="ml-1 text-[#0969da]" />}
+            </>
+          ) : (
+            "Block: ..."
+          ))}
       </ActionMenu.Button>
 
       <ActionMenu.Overlay width="large">

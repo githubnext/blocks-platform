@@ -105,6 +105,7 @@ export async function updateFileContents(params: UseUpdateFileContentParams) {
     if (Array.isArray(data)) {
       fileSha = data[0].sha;
     } else {
+      // @ts-ignore
       fileSha = data.sha;
     }
   } catch (e) {}

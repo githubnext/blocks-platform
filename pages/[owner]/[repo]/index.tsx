@@ -51,6 +51,7 @@ function RepoDetailContainer({
       ghapi: makeGitHubAPIInstance(session?.token as string),
       octokit: makeOctokitInstance(session?.token as string),
       user: session?.user,
+      queryClient,
     };
 
     queryClient.setDefaultOptions({

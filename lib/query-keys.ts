@@ -11,6 +11,13 @@ export interface InfoKeyParams {
   repo: string;
   owner: string;
 }
+export interface RepoSearchKeyParams {
+  q: string;
+  order?: string;
+  sort?: string;
+  per_page?: number;
+  page?: number;
+}
 
 export interface TimelineKeyParams {
   repo: string;
@@ -87,6 +94,7 @@ export const QueryKeyMap = {
     "blockContent"
   ),
   checkAccess: makeFactory<"checkAccess", CheckAccessParams>("checkAccess"),
+  repoSearch: makeFactory<"repoSearch", RepoSearchKeyParams>("repoSearch"),
 };
 
 type KeyName = keyof typeof QueryKeyMap;

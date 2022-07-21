@@ -593,10 +593,7 @@ function useBlockFrameMessages({
         return handleResponse(
           queryClient.fetchQuery(
             QueryKeyMap.blocksRepos.factory({
-              path: data.payload.params.path,
-              searchTerm: data.payload.params.searchTerm,
-              repoUrl: data.payload.params.repoUrl,
-              type: data.payload.params.type,
+              ...data.payload.params,
               devServerInfo,
             }),
             getBlocksRepos,

@@ -1,6 +1,6 @@
 import { Block, BlocksRepo, RepoFiles } from "@githubnext/blocks";
 import { Octokit } from "@octokit/rest";
-import pm from "picomatch";
+import { AppContext } from "context";
 import {
   BlocksQueryMeta,
   createBranchAndPR,
@@ -34,9 +34,8 @@ import {
   TimelineKeyParams,
   BlocksReposParams,
 } from "lib/query-keys";
-import { isArray } from "lodash";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import {
   useMutation,
   UseMutationOptions,
@@ -44,7 +43,6 @@ import {
   UseQueryOptions,
 } from "react-query";
 import type { QueryFunction, UseQueryResult } from "react-query";
-import { useSession } from "next-auth/react";
 
 export function useFileContent(
   params: FileKeyParams,
@@ -104,7 +102,7 @@ export async function updateFileContents(params: UseUpdateFileContentParams) {
     });
 
     // Octokit is silly here and potentially returns an array of contents.
-    if (isArray(data)) {
+    if (Array.isArray(data)) {
       fileSha = data[0].sha;
     } else {
       // @ts-ignore
@@ -326,12 +324,14 @@ export function useManageBlock({
 }: UseManageBlockParams): UseManageBlockResult {
   const router = useRouter();
   const { blockKey = "" } = router.query as Record<string, string>;
-  const {
-    data: { user },
-  } = useSession();
+  const { devServerInfo } = useContext(AppContext);
 
   const type = isFolder ? "folder" : "file";
-  const filteredBlocksReposResult = useBlocksRepos({ path, type });
+  const filteredBlocksReposResult = useBlocksRepos({
+    path,
+    type,
+    devServerInfo,
+  });
 
   // do we need to load any Blocks from private repos?
   const [blockKeyOwner, blockKeyRepo] = blockKey.split("__");
@@ -340,6 +340,7 @@ export function useManageBlock({
     type,
     owner: blockKeyOwner,
     repo: blockKeyRepo,
+    devServerInfo,
   });
   const [storedDefaultBlockOwner, storedDefaultBlockRepo] =
     storedDefaultBlock.split("__");
@@ -348,6 +349,7 @@ export function useManageBlock({
     type,
     owner: storedDefaultBlockOwner,
     repo: storedDefaultBlockRepo,
+    devServerInfo,
   });
 
   const incomplete = [
@@ -410,13 +412,17 @@ export function useManageBlock({
 
   const setBlock = (block: Block) => {
     if (!block) return;
-    router.push({
-      pathname: router.pathname,
-      query: {
-        ...router.query,
-        blockKey: getBlockKey(block),
+    router.push(
+      {
+        pathname: router.pathname,
+        query: {
+          ...router.query,
+          blockKey: getBlockKey(block),
+        },
       },
-    });
+      undefined,
+      { shallow: true }
+    );
   };
 
   return {

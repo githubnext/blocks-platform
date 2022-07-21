@@ -101,8 +101,13 @@ export const getFileContent: (
       throw new Error(`Error fetching file: ${owner}/${repo}: ${path}`);
     }
   }
-  const encodedContent = res.data.content;
-  const content = Buffer.from(encodedContent, "base64").toString("utf8");
+
+  // we sometimes end up with the contents as raw data, only decode if we have JSON.
+  // I think this has to do with caching and content type negotiation
+  const content =
+    res.headers["content-type"] === "application/json"
+      ? Buffer.from(res.data.content, "base64").toString("utf8")
+      : res.data;
 
   const context = {
     download_url: apiUrl,
@@ -311,6 +316,7 @@ export const getBlocksFromRepo: QueryFunction<
   return await getBlocksFromRepoInner({ octokit, user, ...params });
 };
 export const getBlocksFromRepoInner = async ({
+  devServerInfo,
   octokit,
   user,
   owner,
@@ -324,6 +330,20 @@ export const getBlocksFromRepoInner = async ({
 }): Promise<BlocksRepo> => {
   if (!owner || !repo) {
     return undefined;
+  }
+
+  if (
+    devServerInfo &&
+    owner === devServerInfo.owner &&
+    repo === devServerInfo.repo
+  ) {
+    return getBlocksRepoFromDevServer({
+      devServerInfo,
+      user,
+      path,
+      type,
+      searchTerm,
+    });
   }
 
   let repoId = 0;
@@ -605,15 +625,61 @@ const tryToGetContent = async (
     return undefined;
   }
 };
+
+export const getOwnerRepoFromDevServer = async (devServer: string) => {
+  const gitConfig = await (await fetch(`${devServer}git.config.json`)).json();
+  const url = gitConfig['remote "origin"'].url;
+  const [_, owner, repo] = /^[^:]*:([^/]*)\/([^/.]*)/.exec(url);
+  return { owner, repo };
+};
+
+const getBlocksRepoFromDevServer = async ({
+  devServerInfo,
+  user,
+  path,
+  type,
+  searchTerm,
+}: BlocksReposParams & {
+  user: Session["user"];
+}) => {
+  const blocks = await (
+    await fetch(`${devServerInfo.devServer}blocks.config.json`)
+  ).json();
+  const { owner, repo, repoInfo } = devServerInfo;
+
+  const filter = filterBlock({ user, repo, owner, path, type, searchTerm });
+  const filteredBlocks = (blocks || []).filter(filter).map((block: Block) => ({
+    ...block,
+    owner,
+    repo,
+    repoId: repoInfo.id,
+  }));
+
+  return {
+    owner,
+    repo,
+    blocks: filteredBlocks,
+    full_name: `${owner}/${repo}`,
+    id: repoInfo.id,
+    // we don't use any of the below at the moment
+    html_url: "",
+    description: "",
+    stars: 0,
+    watchers: 0,
+    language: "",
+    topics: [""],
+  };
+};
+
 export const getBlocksRepos: QueryFunction<
   BlocksRepo[],
   GenericQueryKey<BlocksReposParams>
 > = async (ctx) => {
   let meta = ctx.meta as unknown as BlocksQueryMeta;
-  const { octokit, queryClient } = meta;
+  const { queryClient } = meta;
   let { queryKey } = ctx;
-  const { path, searchTerm, repoUrl, type } = queryKey[1];
-  let user = meta.user;
+  const params = queryKey[1];
+  const { path, searchTerm, repoUrl, type, devServerInfo } = params;
 
   let repos = [];
   // allow user to search for Blocks on a specific repo
@@ -655,19 +721,59 @@ export const getBlocksRepos: QueryFunction<
     );
     repos = data;
   }
-  const blocksRepos = await Promise.all(
-    repos.map(async (repo) => {
-      const repoInfo = await getBlocksFromRepoInner({
-        octokit,
-        owner: repo.owner.login,
-        repo: repo.name,
-        user,
-        path,
-        type,
-        searchTerm,
-      });
-      return repoInfo;
-    })
-  );
-  return blocksRepos.filter((repo) => repo.blocks?.length);
+  const blocksRepos = await Promise.all([
+    ...(devServerInfo
+      ? [
+          queryClient.fetchQuery(
+            QueryKeyMap.blocksRepo.factory({
+              owner: devServerInfo.owner,
+              repo: devServerInfo.repo,
+              path,
+              type,
+              searchTerm,
+              devServerInfo,
+            }),
+            getBlocksFromRepo,
+            { staleTime: 5 * 60 * 1000 }
+          ),
+        ]
+      : []),
+    ...repos.map((repo) => {
+      if (
+        devServerInfo &&
+        devServerInfo.owner === repo.owner.login &&
+        devServerInfo.repo === repo.name
+      ) {
+        return Promise.resolve({ blocks: [] } as BlocksRepo);
+      } else {
+        return queryClient.fetchQuery(
+          QueryKeyMap.blocksRepo.factory({
+            owner: repo.owner.login,
+            repo: repo.name,
+            path,
+            type,
+            searchTerm,
+          }),
+          getBlocksFromRepo,
+          { staleTime: 5 * 60 * 1000 }
+        );
+      }
+    }),
+  ]);
+  return blocksRepos
+    .filter((repo) => repo.blocks?.length)
+    .map((blockRepo) => {
+      const isDev =
+        devServerInfo &&
+        devServerInfo.owner === blockRepo.owner &&
+        devServerInfo.repo === blockRepo.repo;
+      return {
+        ...blockRepo,
+        blocks: blockRepo.blocks.map((block) => ({
+          ...block,
+          isDev,
+        })),
+        isDev,
+      };
+    });
 };

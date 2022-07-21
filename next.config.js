@@ -17,6 +17,10 @@ module.exports = {
         headers: [
           {
             key: "Content-Security-Policy",
+            // unfortunately the following is evaluated at build time but we
+            // need `frame-src` and `connect-src` to be different in staging vs.
+            // production, so we leave them off here (default is 'none') and add
+            // them in `index.tsx` and `[owner]/[repo]/index.tsx`
             value: [
               "default-src 'self'",
               "base-uri 'none'",
@@ -25,11 +29,6 @@ module.exports = {
               "object-src 'none'",
               "worker-src 'none'",
               "style-src 'self' 'unsafe-inline'",
-              // unfortunately the following is evaluated at build time
-              // but we need it to be different in staging vs. production
-              // so we leave it off here (default is 'none')
-              // and add it in `index.tsx` and `[owner]/[repo]/index.tsx`
-              // `frame-src ${process.env.NEXT_PUBLIC_SANDBOX_DOMAIN}`,
               ["script-src", "'self'", isDev && "'unsafe-eval'"]
                 .filter(Boolean)
                 .join(" "),
@@ -39,19 +38,6 @@ module.exports = {
                 // for images in an HTML block
                 "https: data:",
               ].join(" "),
-              [
-                "connect-src",
-                "'self'",
-                // for local dev
-                isDev && "webpack://*",
-                isDev && "ws://*",
-                // for hitting the GitHub API
-                "https://api.github.com/",
-                // for Analytics
-                "https://octo-metrics.azurewebsites.net/api/CaptureEvent",
-              ]
-                .filter(Boolean)
-                .join(" "),
             ].join(";"),
           },
           {

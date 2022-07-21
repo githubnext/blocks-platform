@@ -4,14 +4,17 @@ import { flatten, sample, sortBy } from "lodash";
 import { AnimatePresence, motion } from "framer-motion";
 import type { GetServerSidePropsContext } from "next";
 import getConfig from "next/config";
+import { useRouter } from "next/router";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ChevronRightIcon } from "@primer/octicons-react";
+import { getOwnerRepoFromDevServer } from "ghapi";
 
 const { publicRuntimeConfig } = getConfig();
 
 function Home() {
+  const { devServer } = useRouter().query as Record<string, string>;
   const { status, data } = useSession({ required: true });
   const [isLeaving, setIsLeaving] = useState(false);
 
@@ -45,7 +48,12 @@ function Home() {
           </div>
         </div>
         <div className="mt-10 space-x-4 pointer-events-auto">
-          <Link href="/githubnext/blocks-tutorial?path=README.md">
+          <Link
+            href={{
+              pathname: "/githubnext/blocks-tutorial",
+              query: { path: "README.md", ...(devServer ? { devServer } : {}) },
+            }}
+          >
             <a
               className="inline-flex items-center px-8 py-4 text-lg border border-transparent leading-4 font-medium rounded-md shadow-sm text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
               onClick={() => setIsLeaving(true)}
@@ -189,11 +197,47 @@ const Background = ({ isLeaving }) => {
 };
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const devServer = context.query.devServer as string;
+
+  let devServerInfo;
+  if (/^http:\/\/localhost:[0-9]+\//.test(devServer)) {
+    try {
+      const { owner, repo } = await getOwnerRepoFromDevServer(devServer);
+      devServerInfo = { devServer, owner, repo };
+    } catch {}
+  }
+
+  const isDev = process.env.NODE_ENV !== "production";
+
+  const frameSrc = [
+    "frame-src",
+    publicRuntimeConfig.sandboxDomain,
+    devServerInfo?.devServer,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const connectSrc = [
+    "connect-src",
+    "'self'",
+    // for local dev
+    isDev && "webpack://*",
+    isDev && "ws://*",
+    // for hitting the GitHub API
+    "https://api.github.com/",
+    // for Analytics
+    "https://octo-metrics.azurewebsites.net/api/CaptureEvent",
+    devServerInfo?.devServer,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   context.res.setHeader(
     "Content-Security-Policy",
-    `${context.res.getHeader("Content-Security-Policy")}; frame-src ${
-      publicRuntimeConfig.sandboxDomain
-    }`
+    [context.res.getHeader("Content-Security-Policy"), frameSrc, connectSrc]
+      .filter(Boolean)
+      .join(";")
   );
+
   return { props: {} };
 }

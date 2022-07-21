@@ -1,7 +1,8 @@
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import getConfig from "next/config";
 import { useRouter } from "next/router";
 import type { RepoFiles } from "@githubnext/blocks";
+import { AppContext } from "context";
 import type { Context } from "./index";
 import { getBlockKey, useManageBlock } from "hooks";
 import BlockPaneHeader from "./BlockPaneHeader";
@@ -31,6 +32,7 @@ export default function BlockPane({
   onSaveChanges,
 }: BlockPaneProps) {
   const router = useRouter();
+  const { devServerInfo } = useContext(AppContext);
 
   const isFolder = fileInfo.type !== "blob";
 
@@ -61,6 +63,19 @@ export default function BlockPane({
     }
   });
 
+  let srcBase = publicRuntimeConfig.sandboxDomain;
+  if (
+    devServerInfo &&
+    block &&
+    devServerInfo.owner === block.owner &&
+    devServerInfo.repo === block.repo
+  ) {
+    srcBase = devServerInfo.devServer;
+  }
+  const src = `${srcBase}#${encodeURIComponent(
+    JSON.stringify({ block, context })
+  )}`;
+
   return (
     <>
       <BlockPaneHeader
@@ -82,9 +97,7 @@ export default function BlockPane({
             key={block.id}
             className={"w-full h-full"}
             sandbox={"allow-scripts allow-same-origin allow-forms"}
-            src={`${publicRuntimeConfig.sandboxDomain}#${encodeURIComponent(
-              JSON.stringify({ block, context })
-            )}`}
+            src={src}
           />
         </div>
       )}

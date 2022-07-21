@@ -1,7 +1,8 @@
 import { FullPageLoader } from "components/full-page-loader";
 import { RepoDetail } from "components/repo-detail";
-import { AppContext, Permissions } from "context";
+import { AppContextValue, AppContext, Permissions } from "context";
 import {
+  getOwnerRepoFromDevServer,
   getRepoInfoWithContributorsSSR,
   makeGitHubAPIInstance,
   makeOctokitInstance,
@@ -19,12 +20,12 @@ import { dehydrate, QueryClient, useQueryClient } from "react-query";
 
 const { publicRuntimeConfig } = getConfig();
 
-function RepoDetailContainer(props: {
-  hasRepoInstallation: boolean;
-  installationUrl: string;
-  permissions: Permissions;
-}) {
-  const { hasRepoInstallation, permissions, installationUrl } = props;
+function RepoDetailContainer({
+  hasRepoInstallation,
+  permissions,
+  installationUrl,
+  devServerInfo,
+}: AppContextValue) {
   const router = useRouter();
   const [localHasRepoInstallation, setLocalHasRepoInstallation] =
     useState(hasRepoInstallation);
@@ -83,6 +84,7 @@ function RepoDetailContainer(props: {
             hasRepoInstallation: localHasRepoInstallation,
             installationUrl,
             permissions,
+            devServerInfo,
           }}
         >
           {!localHasRepoInstallation && (
@@ -106,41 +108,25 @@ function RepoDetailContainer(props: {
 export default RepoDetailContainer;
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const query = context.query;
-  const { repo, owner } = query as Record<string, string>;
+  const query = context.query as Record<string, string>;
+  const { repo, owner, devServer } = query;
   const queryClient = new QueryClient();
   const session = await getSession({ req: context.req });
-
   const octokit = makeOctokitInstance(session?.token as string);
 
   // get the installation for the repo, if the user has access
-  const repoInstallation = await getUserInstallationForRepo({
+  const repoInstallationPromise = getUserInstallationForRepo({
     token: session?.token as string,
     owner,
     repo,
   });
 
-  let repoInfo;
-  try {
-    // check to see if the user has access to the repo
-    const repoRes = await octokit.repos.get({
-      owner,
-      repo,
-    });
+  const repoInfoPromise = octokit.repos.get({ owner, repo }).then(
+    (repoRes) => repoRes.data,
+    () => undefined
+  );
 
-    repoInfo = repoRes.data;
-  } catch {}
-
-  if (!repoInfo) {
-    return {
-      redirect: {
-        destination: `/no-access?owner=${owner}&repo=${repo}&reason=repo-not-installed`,
-        permanent: false,
-      },
-    };
-  }
-
-  await queryClient.prefetchQuery(
+  const queryClientPrefetchPromise = queryClient.prefetchQuery(
     QueryKeyMap.info.factory({ owner, repo }),
     () =>
       getRepoInfoWithContributorsSSR({
@@ -150,16 +136,70 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       })
   );
 
-  const installationUrl = `https://github.com/apps/${process.env.GITHUB_APP_SLUG}/installations/new`;
+  const devServerInfoPromise = /^http:\/\/localhost:[0-9]+\//.test(devServer)
+    ? getOwnerRepoFromDevServer(devServer)
+        .then(({ owner, repo }) => octokit.repos.get({ owner, repo }))
+        .then((repoRes) => ({
+          devServer,
+          owner,
+          repo,
+          repoInfo: repoRes.data,
+        }))
+        .catch(() => undefined)
+    : Promise.resolve(undefined);
 
-  const permissions = repoInfo.permissions;
+  const [repoInstallation, _queryClientPrefetch, repoInfo, devServerInfo] =
+    await all(
+      repoInstallationPromise,
+      queryClientPrefetchPromise,
+      repoInfoPromise,
+      devServerInfoPromise
+    );
+
+  // check to see if the user has access to the repo
+  if (!repoInfo) {
+    return {
+      redirect: {
+        destination: `/no-access?owner=${owner}&repo=${repo}&reason=repo-not-installed`,
+        permanent: false,
+      },
+    };
+  }
+
+  const isDev = process.env.NODE_ENV !== "production";
+
+  const frameSrc = [
+    "frame-src",
+    publicRuntimeConfig.sandboxDomain,
+    devServerInfo?.devServer,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const connectSrc = [
+    "connect-src",
+    "'self'",
+    // for local dev
+    isDev && "webpack://*",
+    isDev && "ws://*",
+    // for hitting the GitHub API
+    "https://api.github.com/",
+    // for Analytics
+    "https://octo-metrics.azurewebsites.net/api/CaptureEvent",
+    devServerInfo?.devServer,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   context.res.setHeader(
     "Content-Security-Policy",
-    `${context.res.getHeader("Content-Security-Policy")}; frame-src ${
-      publicRuntimeConfig.sandboxDomain
-    }`
+    [context.res.getHeader("Content-Security-Policy"), frameSrc, connectSrc]
+      .filter(Boolean)
+      .join(";")
   );
+
+  const permissions = repoInfo.permissions;
+  const installationUrl = `https://github.com/apps/${process.env.GITHUB_APP_SLUG}/installations/new`;
 
   return {
     props: {
@@ -167,8 +207,18 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       permissions,
       installationUrl,
       dehydratedState: dehydrate(queryClient),
+      ...(devServerInfo ? { devServerInfo } : {}),
     },
   };
+}
+
+function all<A, B, C, D>(
+  a: Promise<A>,
+  b: Promise<B>,
+  c: Promise<C>,
+  d: Promise<D>
+): Promise<[A, B, C, D]> {
+  return Promise.all([a, b, c, d]);
 }
 
 const CheckAccess = ({

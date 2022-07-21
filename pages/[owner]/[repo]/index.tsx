@@ -1,7 +1,8 @@
 import { FullPageLoader } from "components/full-page-loader";
 import { RepoDetail } from "components/repo-detail";
-import { AppContext, Permissions } from "context";
+import { AppContextValue, AppContext, Permissions } from "context";
 import {
+  getOwnerRepoFromDevServer,
   getRepoInfoWithContributorsSSR,
   makeGitHubAPIInstance,
   makeOctokitInstance,
@@ -19,12 +20,12 @@ import { dehydrate, QueryClient, useQueryClient } from "react-query";
 
 const { publicRuntimeConfig } = getConfig();
 
-function RepoDetailContainer(props: {
-  hasRepoInstallation: boolean;
-  installationUrl: string;
-  permissions: Permissions;
-}) {
-  const { hasRepoInstallation, permissions, installationUrl } = props;
+function RepoDetailContainer({
+  hasRepoInstallation,
+  permissions,
+  installationUrl,
+  devServerInfo,
+}: AppContextValue) {
   const router = useRouter();
   const [localHasRepoInstallation, setLocalHasRepoInstallation] =
     useState(hasRepoInstallation);
@@ -82,6 +83,7 @@ function RepoDetailContainer(props: {
             hasRepoInstallation: localHasRepoInstallation,
             installationUrl,
             permissions,
+            devServerInfo,
           }}
         >
           {!localHasRepoInstallation && (
@@ -105,8 +107,8 @@ function RepoDetailContainer(props: {
 export default RepoDetailContainer;
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const query = context.query;
-  const { repo, owner } = query as Record<string, string>;
+  const query = context.query as Record<string, string>;
+  const { repo, owner, devServer } = query;
   const queryClient = new QueryClient();
   const session = await getSession({ req: context.req });
 
@@ -153,12 +155,21 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   const permissions = repoInfo.permissions;
 
+  let devServerInfo: DevServerInfo;
+  if (devServer) {
+    try {
+      const { owner, repo } = await getOwnerRepoFromDevServer(devServer);
+      const repoRes = await octokit.repos.get({ owner, repo });
+      devServerInfo = { devServer, owner, repo, repoInfo: repoRes.data };
+    } catch {}
+  }
+
   const isDev = process.env.NODE_ENV !== "production";
 
   const frameSrc = [
     "frame-src",
     publicRuntimeConfig.sandboxDomain,
-    context.query.devServer,
+    devServerInfo?.devServer,
   ]
     .filter(Boolean)
     .join(" ");
@@ -173,7 +184,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     "https://api.github.com/",
     // for Analytics
     "https://octo-metrics.azurewebsites.net/api/CaptureEvent",
-    context.query.devServer,
+    devServerInfo?.devServer,
   ]
     .filter(Boolean)
     .join(" ");
@@ -191,6 +202,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       permissions,
       installationUrl,
       dehydratedState: dehydrate(queryClient),
+      ...(devServerInfo ? { devServerInfo } : {}),
     },
   };
 }

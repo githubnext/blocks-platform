@@ -1,11 +1,10 @@
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import getConfig from "next/config";
 import { useRouter } from "next/router";
-import { useQuery } from "react-query";
 import type { RepoFiles } from "@githubnext/blocks";
+import { AppContext } from "context";
 import type { Context } from "./index";
 import { getBlockKey, useManageBlock } from "hooks";
-import { getOwnerRepoFromDevServer } from "ghapi";
 import BlockPaneHeader from "./BlockPaneHeader";
 
 const { publicRuntimeConfig } = getConfig();
@@ -33,7 +32,7 @@ export default function BlockPane({
   onSaveChanges,
 }: BlockPaneProps) {
   const router = useRouter();
-  const { devServer } = router.query as Record<string, string>;
+  const { devServerInfo } = useContext(AppContext);
 
   const isFolder = fileInfo.type !== "blob";
 
@@ -64,18 +63,18 @@ export default function BlockPane({
     }
   });
 
-  const { data: devServerOwnerRepo, status: devServerOwnerRepoStatus } =
-    useQuery("devServerOwnerRepo", () => getOwnerRepoFromDevServer(devServer), {
-      enabled: !!devServer,
-    });
-
-  const src = `${
-    devServerOwnerRepoStatus === "success" &&
-    devServerOwnerRepo.owner === block?.owner &&
-    devServerOwnerRepo.repo === block?.repo
-      ? router.query.devServer
-      : publicRuntimeConfig.sandboxDomain
-  }#${encodeURIComponent(JSON.stringify({ block, context }))}`;
+  let srcBase = publicRuntimeConfig.sandboxDomain;
+  if (
+    devServerInfo &&
+    block &&
+    devServerInfo.owner === block.owner &&
+    devServerInfo.repo === block.repo
+  ) {
+    srcBase = devServerInfo.devServer;
+  }
+  const src = `${srcBase}#${encodeURIComponent(
+    JSON.stringify({ block, context })
+  )}`;
 
   return (
     <>
@@ -92,7 +91,7 @@ export default function BlockPane({
           onSaveChanges,
         }}
       />
-      {block && devServerOwnerRepoStatus !== "loading" && (
+      {block && (
         <div className="overflow-y-auto w-full h-full">
           <iframe
             key={block.id}

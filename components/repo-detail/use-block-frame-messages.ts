@@ -13,7 +13,6 @@ import {
   getFileContent,
   getFolderContent,
   getMetadata,
-  getOwnerRepoFromDevServer,
 } from "ghapi";
 import { getBlockKey } from "hooks";
 import type { AppContextValue } from "context";
@@ -37,13 +36,17 @@ const getMetadataPath = (block: Block, path: string) =>
   )}.json`;
 
 const setBundle = async (
-  devServer: string | undefined,
+  devServerInfo: DevServerInfo,
   blockFrame: BlockFrame,
   block: Block | null
 ) => {
-  if (devServer) {
-    const { owner, repo } = await getOwnerRepoFromDevServer(devServer);
-    if (block.owner === owner && block.repo === repo) return;
+  if (
+    devServerInfo &&
+    block &&
+    block.owner === devServerInfo.owner &&
+    block.repo === devServerInfo.repo
+  ) {
+    return;
   }
 
   let bundle = null;
@@ -202,17 +205,17 @@ const makeSetInitialProps =
 async function getBlockFromPartial({
   queryClient,
   partialBlock,
-  devServer,
+  devServerInfo,
 }: {
   queryClient: QueryClient;
   partialBlock: Partial<Block>;
-  devServer?: string;
+  devServerInfo?: DevServerInfo;
 }): Promise<Block | null> {
   const repoInfo = await queryClient.fetchQuery(
     QueryKeyMap.blocksRepo.factory({
       owner: partialBlock.owner,
       repo: partialBlock.repo,
-      devServer,
+      devServerInfo,
     }),
     getBlocksFromRepo,
     {
@@ -224,7 +227,6 @@ async function getBlockFromPartial({
 }
 
 async function handleLoaded({
-  devServer,
   queryClient,
   appContext,
   owner,
@@ -238,7 +240,6 @@ async function handleLoaded({
   origin,
   data,
 }: {
-  devServer?: string;
   queryClient: QueryClient;
   appContext: AppContextValue;
   owner: string;
@@ -252,6 +253,8 @@ async function handleLoaded({
   origin: string;
   data: any;
 }) {
+  const devServerInfo = appContext.devServerInfo;
+
   const setInitialProps = makeSetInitialProps({
     queryClient,
     appContext,
@@ -281,7 +284,7 @@ async function handleLoaded({
       blockFrame.block = await getBlockFromPartial({
         queryClient,
         partialBlock,
-        devServer,
+        devServerInfo,
       });
     }
 
@@ -289,7 +292,7 @@ async function handleLoaded({
 
     if (blockChanged) {
       // TODO(jaked) update block atomically
-      setBundle(devServer, blockFrame, blockFrame.block);
+      setBundle(devServerInfo, blockFrame, blockFrame.block);
       const props = { ...blockFrame.props, block: blockFrame.block };
       setProps(blockFrame, props);
     }
@@ -300,19 +303,19 @@ async function handleLoaded({
 
     // hot reload of iframe
     if (!blockChanged && !contextChanged) {
-      setBundle(devServer, blockFrame, blockFrame.block);
+      setBundle(devServerInfo, blockFrame, blockFrame.block);
       setInitialProps(blockFrame);
     }
   } else {
     const block = await getBlockFromPartial({
       queryClient,
       partialBlock,
-      devServer,
+      devServerInfo,
     });
 
     const blockFrame = { window, origin, block, context, props: {} };
     blockFrames.push(blockFrame);
-    setBundle(devServer, blockFrame, block);
+    setBundle(devServerInfo, blockFrame, block);
     setInitialProps(blockFrame);
   }
 }
@@ -491,7 +494,6 @@ async function handleFetchInternalEndpoint(urlPath, params) {
 }
 
 function useBlockFrameMessages({
-  devServer,
   token,
   owner,
   repo,
@@ -501,7 +503,6 @@ function useBlockFrameMessages({
   setUpdatedContents,
   setRequestedMetadata,
 }: {
-  devServer?: string;
   token: string;
   owner: string;
   repo: string;
@@ -517,6 +518,7 @@ function useBlockFrameMessages({
   }) => void;
 }) {
   const appContext = useContext(AppContext);
+  const { devServerInfo } = appContext;
   const queryClient = useQueryClient();
   const router = useRouter();
 
@@ -546,7 +548,7 @@ function useBlockFrameMessages({
     const { data, origin, source } = event;
     if (
       !publicRuntimeConfig.sandboxDomain.startsWith(origin) &&
-      !devServer?.startsWith(origin)
+      !devServerInfo?.devServer.startsWith(origin)
     )
       return;
 
@@ -566,7 +568,6 @@ function useBlockFrameMessages({
     switch (baseType) {
       case "loaded":
         return handleLoaded({
-          devServer,
           queryClient,
           appContext,
           owner,
@@ -596,7 +597,7 @@ function useBlockFrameMessages({
               searchTerm: data.payload.params.searchTerm,
               repoUrl: data.payload.params.repoUrl,
               type: data.payload.params.type,
-              devServer,
+              devServerInfo,
             }),
             getBlocksRepos,
             {

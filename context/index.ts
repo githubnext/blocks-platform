@@ -5,6 +5,7 @@ export interface AppContextValue {
   hasRepoInstallation: boolean;
   installationUrl: string;
   permissions: Permissions;
+  devServerInfo?: DevServerInfo;
 }
 
 export const AppContext = createContext<AppContextValue>(undefined);

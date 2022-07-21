@@ -284,7 +284,7 @@ export const getBlocksFromRepo: QueryFunction<
   return await getBlocksFromRepoInner({ octokit, user, ...params });
 };
 export const getBlocksFromRepoInner = async ({
-  devServer,
+  devServerInfo,
   octokit,
   user,
   owner,
@@ -300,13 +300,10 @@ export const getBlocksFromRepoInner = async ({
     return undefined;
   }
 
-  if (devServer) {
-    const { owner: devServerOwner, repo: devServerRepo } =
-      await getOwnerRepoFromDevServer(devServer);
-    if (owner === devServerOwner && repo === devServerRepo) {
+  if (devServerInfo) {
+    if (owner === devServerInfo.owner && repo === devServerInfo.repo) {
       return getBlocksRepoFromDevServer({
-        octokit,
-        devServer,
+        devServerInfo,
         user,
         path,
         type,
@@ -603,26 +600,25 @@ export const getOwnerRepoFromDevServer = async (devServer: string) => {
 };
 
 const getBlocksRepoFromDevServer = async ({
-  devServer,
-  octokit,
+  devServerInfo,
   user,
   path,
   type,
   searchTerm,
 }: BlocksReposParams & {
-  octokit: Octokit;
   user: Session["user"];
 }) => {
-  const blocks = await (await fetch(`${devServer}blocks.config.json`)).json();
-  const { owner, repo } = await getOwnerRepoFromDevServer(devServer);
-  const repoRes = await octokit.repos.get({ owner, repo });
+  const blocks = await (
+    await fetch(`${devServerInfo.devServer}blocks.config.json`)
+  ).json();
+  const { owner, repo, repoInfo } = devServerInfo;
 
   const filter = filterBlock({ user, repo, owner, path, type, searchTerm });
   const filteredBlocks = (blocks || []).filter(filter).map((block: Block) => ({
     ...block,
     owner,
     repo,
-    repoId: repoRes.data.id,
+    repoId: repoInfo.id,
   }));
 
   return {
@@ -630,7 +626,7 @@ const getBlocksRepoFromDevServer = async ({
     repo,
     blocks: filteredBlocks,
     full_name: `${owner}/${repo}`,
-    id: repoRes.data.id,
+    id: repoInfo.id,
     // we don't use any of the below at the moment
     html_url: "",
     description: "",
@@ -649,7 +645,7 @@ export const getBlocksRepos: QueryFunction<
   let user = (ctx.meta as unknown as BlocksQueryMeta).user;
   let { queryKey } = ctx;
   const params = queryKey[1];
-  const { path, searchTerm, repoUrl, type, devServer } = params;
+  const { path, searchTerm, repoUrl, type, devServerInfo } = params;
 
   let repos = [];
   // allow user to search for Blocks on a specific repo
@@ -680,29 +676,26 @@ export const getBlocksRepos: QueryFunction<
     repos = data.data.items;
   }
   let blocksRepos = await Promise.all([
-    ...repos.map((repo) =>
-      getBlocksFromRepoInner({
-        octokit,
-        owner: repo.owner.login,
-        repo: repo.name,
-        user,
-        path,
-        type,
-        searchTerm,
-      })
-    ),
+    ...(devServerInfo ? [getBlocksRepoFromDevServer({ user, ...params })] : []),
+    ...repos.map((repo) => {
+      if (
+        devServerInfo &&
+        devServerInfo.owner === repo.owner.login &&
+        devServerInfo.repo === repo.name
+      ) {
+        return Promise.resolve({ blocks: [] } as BlocksRepo);
+      } else {
+        return getBlocksFromRepoInner({
+          octokit,
+          owner: repo.owner.login,
+          repo: repo.name,
+          user,
+          path,
+          type,
+          searchTerm,
+        });
+      }
+    }),
   ]);
-  if (devServer) {
-    const devServerBlocksRepo = await getBlocksRepoFromDevServer({
-      octokit,
-      user,
-      ...params,
-    });
-    const { owner, repo } = devServerBlocksRepo;
-    blocksRepos = blocksRepos.filter(
-      (blockRepo) => blockRepo.owner === owner && blockRepo.repo === repo
-    );
-    blocksRepos = [devServerBlocksRepo, ...blocksRepos];
-  }
   return blocksRepos.filter((repo) => repo.blocks?.length);
 };

@@ -9,6 +9,7 @@ import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ChevronRightIcon } from "@primer/octicons-react";
+import { getOwnerRepoFromDevServer } from "ghapi";
 
 const { publicRuntimeConfig } = getConfig();
 
@@ -196,12 +197,22 @@ const Background = ({ isLeaving }) => {
 };
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const devServer = context.query.devServer as string;
+
+  let devServerInfo;
+  if (devServer) {
+    try {
+      const { owner, repo } = await getOwnerRepoFromDevServer(devServer);
+      devServerInfo = { devServer, owner, repo };
+    } catch {}
+  }
+
   const isDev = process.env.NODE_ENV !== "production";
 
   const frameSrc = [
     "frame-src",
     publicRuntimeConfig.sandboxDomain,
-    context.query.devServer,
+    devServerInfo?.devServer,
   ]
     .filter(Boolean)
     .join(" ");
@@ -216,7 +227,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     "https://api.github.com/",
     // for Analytics
     "https://octo-metrics.azurewebsites.net/api/CaptureEvent",
-    context.query.devServer,
+    devServerInfo?.devServer,
   ]
     .filter(Boolean)
     .join(" ");

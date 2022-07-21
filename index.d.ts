@@ -61,3 +61,10 @@ interface Session {
   user: User;
   expires: string;
 }
+
+type DevServerInfo = {
+  owner: string;
+  repo: string;
+  devServer: string;
+  repoInfo: schemas["repository"];
+};

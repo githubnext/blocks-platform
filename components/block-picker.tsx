@@ -21,7 +21,6 @@ import { QueryKeyMap } from "lib/query-keys";
 import { useContext, useState } from "react";
 import { useQueryClient } from "react-query";
 import { useDebounce } from "use-debounce";
-import { useRouter } from "next/router";
 
 interface BlockPickerProps {
   button?: React.ReactNode;
@@ -39,7 +38,8 @@ export default function BlockPicker(props: BlockPickerProps) {
   let [debouncedSearchTerm] = useDebounce(lowerSearchTerm, 300);
   const queryClient = useQueryClient();
   const appContext = useContext(AppContext);
-  const { devServer } = useRouter().query as Record<string, string>;
+  const { devServerInfo } = appContext;
+  const valueBlockKey = value && getBlockKey(value);
 
   // allow user to search for Blocks on a specific repo
   const isSearchTermUrl = debouncedSearchTerm.includes("github.com");
@@ -52,7 +52,7 @@ export default function BlockPicker(props: BlockPickerProps) {
     type,
     searchTerm: isSearchTermUrl ? undefined : debouncedSearchTerm,
     repoUrl: isSearchTermUrl ? debouncedSearchTerm : undefined,
-    devServer,
+    devServerInfo,
   });
 
   return (
@@ -149,19 +149,22 @@ export default function BlockPicker(props: BlockPickerProps) {
               <div className="max-h-[calc(100vh-25em)] overflow-auto">
                 {blockRepos.map((repo, index) => {
                   if (index > 50) return null;
-                  return repo.blocks.map((block) => (
-                    <BlockItem
-                      key={getBlockKey(block)}
-                      block={block}
-                      value={value}
-                      repo={repo}
-                      onChange={(block) => {
-                        onChange(block);
-                        setIsOpen(false);
-                        setSearchTerm("");
-                      }}
-                    />
-                  ));
+                  return repo.blocks.map((block) => {
+                    const blockKey = getBlockKey(block);
+                    return (
+                      <BlockItem
+                        key={blockKey}
+                        block={block}
+                        isSelected={blockKey === valueBlockKey}
+                        repo={repo}
+                        onChange={(block) => {
+                          onChange(block);
+                          setIsOpen(false);
+                          setSearchTerm("");
+                        }}
+                      />
+                    );
+                  });
                 })}
               </div>
             </ActionList.Group>
@@ -174,17 +177,16 @@ export default function BlockPicker(props: BlockPickerProps) {
 
 const BlockItem = ({
   block,
-  value,
+  isSelected,
   repo,
   onChange,
 }: {
   block: Block;
-  value: Block;
+  isSelected: boolean;
   repo: BlocksRepo;
   onChange: (newType: Block) => void;
 }) => {
   const isExampleBlock = repo.full_name === `githubnext/blocks-examples`;
-  const isSelected = value && getBlockKey(block) === getBlockKey(value);
   return (
     <ActionList.Item
       selected={isSelected}

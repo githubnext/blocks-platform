@@ -412,13 +412,17 @@ export function useManageBlock({
 
   const setBlock = (block: Block) => {
     if (!block) return;
-    router.push({
-      pathname: router.pathname,
-      query: {
-        ...router.query,
-        blockKey: getBlockKey(block),
+    router.push(
+      {
+        pathname: router.pathname,
+        query: {
+          ...router.query,
+          blockKey: getBlockKey(block),
+        },
       },
-    });
+      undefined,
+      { shallow: true }
+    );
   };
 
   return {

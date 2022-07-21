@@ -679,7 +679,7 @@ export const getBlocksRepos: QueryFunction<
     });
     repos = data.data.items;
   }
-  const blocksRepos = await Promise.all([
+  let blocksRepos = await Promise.all([
     ...repos.map((repo) =>
       getBlocksFromRepoInner({
         octokit,
@@ -691,9 +691,18 @@ export const getBlocksRepos: QueryFunction<
         searchTerm,
       })
     ),
-    ...(devServer
-      ? [getBlocksRepoFromDevServer({ octokit, user, ...params })]
-      : []),
   ]);
+  if (devServer) {
+    const devServerBlocksRepo = await getBlocksRepoFromDevServer({
+      octokit,
+      user,
+      ...params,
+    });
+    const { owner, repo } = devServerBlocksRepo;
+    blocksRepos = blocksRepos.filter(
+      (blockRepo) => blockRepo.owner === owner && blockRepo.repo === repo
+    );
+    blocksRepos = [devServerBlocksRepo, ...blocksRepos];
+  }
   return blocksRepos.filter((repo) => repo.blocks?.length);
 };

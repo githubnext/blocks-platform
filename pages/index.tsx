@@ -200,7 +200,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const devServer = context.query.devServer as string;
 
   let devServerInfo;
-  if (devServer) {
+  if (/^http:\/\/localhost:[0-9]+\//.test(devServer)) {
     try {
       const { owner, repo } = await getOwnerRepoFromDevServer(devServer);
       devServerInfo = { devServer, owner, repo };

@@ -136,7 +136,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       })
   );
 
-  const devServerInfoPromise = devServer
+  const devServerInfoPromise = /^http:\/\/localhost:[0-9]+\//.test(devServer)
     ? getOwnerRepoFromDevServer(devServer)
         .then(({ owner, repo }) => octokit.repos.get({ owner, repo }))
         .then((repoRes) => ({

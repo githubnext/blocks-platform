@@ -674,11 +674,10 @@ export const getBlocksRepos: QueryFunction<
   GenericQueryKey<BlocksReposParams>
 > = async (ctx) => {
   let meta = ctx.meta as unknown as BlocksQueryMeta;
-  const { octokit, queryClient } = meta;
+  const { queryClient } = meta;
   let { queryKey } = ctx;
   const params = queryKey[1];
   const { path, searchTerm, repoUrl, type, devServerInfo } = params;
-  let user = meta.user;
 
   let repos = [];
   // allow user to search for Blocks on a specific repo
@@ -720,8 +719,22 @@ export const getBlocksRepos: QueryFunction<
     );
     repos = data;
   }
-  let blocksRepos = await Promise.all([
-    ...(devServerInfo ? [getBlocksRepoFromDevServer({ user, ...params })] : []),
+  const blocksRepos = await Promise.all([
+    ...(devServerInfo
+      ? [
+          queryClient.fetchQuery(
+            QueryKeyMap.blocksRepo.factory({
+              owner: devServerInfo.owner,
+              repo: devServerInfo.repo,
+              path,
+              type,
+              searchTerm,
+            }),
+            getBlocksFromRepo,
+            { staleTime: 5 * 60 * 1000 }
+          ),
+        ]
+      : []),
     ...repos.map((repo) => {
       if (
         devServerInfo &&
@@ -730,15 +743,17 @@ export const getBlocksRepos: QueryFunction<
       ) {
         return Promise.resolve({ blocks: [] } as BlocksRepo);
       } else {
-        return getBlocksFromRepoInner({
-          octokit,
-          owner: repo.owner.login,
-          repo: repo.name,
-          user,
-          path,
-          type,
-          searchTerm,
-        });
+        return queryClient.fetchQuery(
+          QueryKeyMap.blocksRepo.factory({
+            owner: repo.owner.login,
+            repo: repo.name,
+            path,
+            type,
+            searchTerm,
+          }),
+          getBlocksFromRepo,
+          { staleTime: 5 * 60 * 1000 }
+        );
       }
     }),
   ]);

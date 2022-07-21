@@ -112,37 +112,21 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const { repo, owner, devServer } = query;
   const queryClient = new QueryClient();
   const session = await getSession({ req: context.req });
-
   const octokit = makeOctokitInstance(session?.token as string);
 
   // get the installation for the repo, if the user has access
-  const repoInstallation = await getUserInstallationForRepo({
+  const repoInstallationPromise = getUserInstallationForRepo({
     token: session?.token as string,
     owner,
     repo,
   });
 
-  let repoInfo;
-  try {
-    // check to see if the user has access to the repo
-    const repoRes = await octokit.repos.get({
-      owner,
-      repo,
-    });
+  const repoInfoPromise = octokit.repos.get({ owner, repo }).then(
+    (repoRes) => repoRes.data,
+    () => undefined
+  );
 
-    repoInfo = repoRes.data;
-  } catch {}
-
-  if (!repoInfo) {
-    return {
-      redirect: {
-        destination: `/no-access?owner=${owner}&repo=${repo}&reason=repo-not-installed`,
-        permanent: false,
-      },
-    };
-  }
-
-  await queryClient.prefetchQuery(
+  const queryClientPrefetchPromise = queryClient.prefetchQuery(
     QueryKeyMap.info.factory({ owner, repo }),
     () =>
       getRepoInfoWithContributorsSSR({
@@ -152,17 +136,34 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       })
   );
 
-  const installationUrl = `https://github.com/apps/${process.env.GITHUB_APP_SLUG}/installations/new`;
+  const devServerInfoPromise = devServer
+    ? getOwnerRepoFromDevServer(devServer)
+        .then(({ owner, repo }) => octokit.repos.get({ owner, repo }))
+        .then((repoRes) => ({
+          devServer,
+          owner,
+          repo,
+          repoInfo: repoRes.data,
+        }))
+        .catch(() => undefined)
+    : Promise.resolve(undefined);
 
-  const permissions = repoInfo.permissions;
+  const [repoInstallation, _queryClientPrefetch, repoInfo, devServerInfo] =
+    await all(
+      repoInstallationPromise,
+      queryClientPrefetchPromise,
+      repoInfoPromise,
+      devServerInfoPromise
+    );
 
-  let devServerInfo: DevServerInfo;
-  if (devServer) {
-    try {
-      const { owner, repo } = await getOwnerRepoFromDevServer(devServer);
-      const repoRes = await octokit.repos.get({ owner, repo });
-      devServerInfo = { devServer, owner, repo, repoInfo: repoRes.data };
-    } catch {}
+  // check to see if the user has access to the repo
+  if (!repoInfo) {
+    return {
+      redirect: {
+        destination: `/no-access?owner=${owner}&repo=${repo}&reason=repo-not-installed`,
+        permanent: false,
+      },
+    };
   }
 
   const isDev = process.env.NODE_ENV !== "production";
@@ -197,6 +198,9 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       .join(";")
   );
 
+  const permissions = repoInfo.permissions;
+  const installationUrl = `https://github.com/apps/${process.env.GITHUB_APP_SLUG}/installations/new`;
+
   return {
     props: {
       hasRepoInstallation: !!repoInstallation,
@@ -206,6 +210,15 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       ...(devServerInfo ? { devServerInfo } : {}),
     },
   };
+}
+
+function all<A, B, C, D>(
+  a: Promise<A>,
+  b: Promise<B>,
+  c: Promise<C>,
+  d: Promise<D>
+): Promise<[A, B, C, D]> {
+  return Promise.all([a, b, c, d]);
 }
 
 const CheckAccess = ({

@@ -24,13 +24,18 @@ function RepoDetailContainer({
   hasRepoInstallation,
   permissions,
   installationUrl,
-  devServerInfo,
 }: AppContextValue) {
   const router = useRouter();
   const [localHasRepoInstallation, setLocalHasRepoInstallation] =
     useState(hasRepoInstallation);
-  const { repo, owner, branch, path } = router.query as Record<string, string>;
+  const { repo, owner, branch, path, devServer } = router.query as Record<
+    string,
+    string
+  >;
   const [loaded, setLoaded] = useState(false);
+  const [devServerInfo, setDevServerInfo] = useState<undefined | DevServerInfo>(
+    undefined
+  );
 
   const queryClient = useQueryClient();
   const { data: session, status } = useSession({
@@ -46,7 +51,7 @@ function RepoDetailContainer({
   useEffect(() => {
     if (status !== "authenticated" || loaded) return;
 
-    let meta = {
+    const meta = {
       token: session?.token,
       ghapi: makeGitHubAPIInstance(session?.token as string),
       octokit: makeOctokitInstance(session?.token as string),
@@ -60,7 +65,22 @@ function RepoDetailContainer({
       },
     });
 
-    setLoaded(true);
+    const devServerInfoPromise = /^http:\/\/localhost:[0-9]+\//.test(devServer)
+      ? getOwnerRepoFromDevServer(devServer)
+          .then(({ owner, repo }) => meta.octokit.repos.get({ owner, repo }))
+          .then((repoRes) => ({
+            devServer,
+            owner,
+            repo,
+            repoInfo: repoRes.data,
+          }))
+          .catch(() => undefined)
+      : Promise.resolve(undefined);
+
+    devServerInfoPromise.then((devServerInfo) => {
+      setDevServerInfo(devServerInfo);
+      setLoaded(true);
+    });
   }, [status]);
 
   if (status === "loading") {
@@ -136,25 +156,11 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       })
   );
 
-  const devServerInfoPromise = /^http:\/\/localhost:[0-9]+\//.test(devServer)
-    ? getOwnerRepoFromDevServer(devServer)
-        .then(({ owner, repo }) => octokit.repos.get({ owner, repo }))
-        .then((repoRes) => ({
-          devServer,
-          owner,
-          repo,
-          repoInfo: repoRes.data,
-        }))
-        .catch(() => undefined)
-    : Promise.resolve(undefined);
-
-  const [repoInstallation, _queryClientPrefetch, repoInfo, devServerInfo] =
-    await all(
-      repoInstallationPromise,
-      queryClientPrefetchPromise,
-      repoInfoPromise,
-      devServerInfoPromise
-    );
+  const [repoInstallation, _queryClientPrefetch, repoInfo] = await Promise.all([
+    repoInstallationPromise,
+    queryClientPrefetchPromise,
+    repoInfoPromise,
+  ]);
 
   // check to see if the user has access to the repo
   if (!repoInfo) {
@@ -168,11 +174,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   const isDev = process.env.NODE_ENV !== "production";
 
-  const frameSrc = [
-    "frame-src",
-    publicRuntimeConfig.sandboxDomain,
-    devServerInfo?.devServer,
-  ]
+  const frameSrc = ["frame-src", publicRuntimeConfig.sandboxDomain, devServer]
     .filter(Boolean)
     .join(" ");
 
@@ -186,7 +188,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     "https://api.github.com/",
     // for Analytics
     "https://octo-metrics.azurewebsites.net/api/CaptureEvent",
-    devServerInfo?.devServer,
+    devServer,
   ]
     .filter(Boolean)
     .join(" ");
@@ -207,18 +209,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       permissions,
       installationUrl,
       dehydratedState: dehydrate(queryClient),
-      ...(devServerInfo ? { devServerInfo } : {}),
     },
   };
-}
-
-function all<A, B, C, D>(
-  a: Promise<A>,
-  b: Promise<B>,
-  c: Promise<C>,
-  d: Promise<D>
-): Promise<[A, B, C, D]> {
-  return Promise.all([a, b, c, d]);
 }
 
 const CheckAccess = ({

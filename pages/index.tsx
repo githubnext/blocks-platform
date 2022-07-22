@@ -199,21 +199,9 @@ const Background = ({ isLeaving }) => {
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const devServer = context.query.devServer as string;
 
-  let devServerInfo;
-  if (/^http:\/\/localhost:[0-9]+\//.test(devServer)) {
-    try {
-      const { owner, repo } = await getOwnerRepoFromDevServer(devServer);
-      devServerInfo = { devServer, owner, repo };
-    } catch {}
-  }
-
   const isDev = process.env.NODE_ENV !== "production";
 
-  const frameSrc = [
-    "frame-src",
-    publicRuntimeConfig.sandboxDomain,
-    devServerInfo?.devServer,
-  ]
+  const frameSrc = ["frame-src", publicRuntimeConfig.sandboxDomain, devServer]
     .filter(Boolean)
     .join(" ");
 
@@ -227,7 +215,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     "https://api.github.com/",
     // for Analytics
     "https://octo-metrics.azurewebsites.net/api/CaptureEvent",
-    devServerInfo?.devServer,
+    devServer,
   ]
     .filter(Boolean)
     .join(" ");

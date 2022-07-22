@@ -102,12 +102,8 @@ export const getFileContent: (
     }
   }
 
-  // we sometimes end up with the contents as raw data, only decode if we have JSON.
-  // I think this has to do with caching and content type negotiation
-  const content =
-    res.headers["content-type"] === "application/json"
-      ? Buffer.from(res.data.content, "base64").toString("utf8")
-      : res.data;
+  const encodedContent = res.data.content;
+  const content = Buffer.from(encodedContent, "base64").toString("utf8");
 
   const context = {
     download_url: apiUrl,

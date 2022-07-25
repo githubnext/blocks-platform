@@ -63,7 +63,7 @@ export default function BlockPane({
     }
   });
 
-  const srcBase = devServerInfo.devServer ?? publicRuntimeConfig.sandboxDomain;
+  const srcBase = devServerInfo?.devServer ?? publicRuntimeConfig.sandboxDomain;
   const src = `${srcBase}#${encodeURIComponent(
     JSON.stringify({ block, context })
   )}`;

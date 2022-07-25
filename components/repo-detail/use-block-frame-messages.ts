@@ -40,17 +40,16 @@ const setBundle = async (
   blockFrame: BlockFrame,
   block: Block | null
 ) => {
+  let bundle = null;
   if (
     devServerInfo &&
     block &&
     block.owner === devServerInfo.owner &&
     block.repo === devServerInfo.repo
   ) {
-    return;
-  }
-
-  let bundle = null;
-  if (block) {
+    // empty bundle means load code locally
+    bundle = [];
+  } else if (block) {
     const url = `/api/get-block-content?owner=${block.owner}&repo=${block.repo}&id=${block.id}`;
     const res = await fetch(url);
     if (res.ok) {

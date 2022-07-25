@@ -63,15 +63,7 @@ export default function BlockPane({
     }
   });
 
-  let srcBase = publicRuntimeConfig.sandboxDomain;
-  if (
-    devServerInfo &&
-    block &&
-    devServerInfo.owner === block.owner &&
-    devServerInfo.repo === block.repo
-  ) {
-    srcBase = devServerInfo.devServer;
-  }
+  const srcBase = devServerInfo.devServer ?? publicRuntimeConfig.sandboxDomain;
   const src = `${srcBase}#${encodeURIComponent(
     JSON.stringify({ block, context })
   )}`;

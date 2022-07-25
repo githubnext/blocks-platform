@@ -625,8 +625,7 @@ function useBlockFrameMessages({
           null,
           { shallow: true }
         );
-        sendResponse(responseParams);
-        return;
+        return sendResponse(responseParams);
 
       case "onUpdateContent":
         handleUpdateFile({
@@ -635,8 +634,7 @@ function useBlockFrameMessages({
           blockFrame,
           data,
         });
-        sendResponse(responseParams);
-        return;
+        return sendResponse(responseParams);
 
       case "onUpdateMetadata":
         handleUpdateMetadata({
@@ -644,7 +642,18 @@ function useBlockFrameMessages({
           blockFrame,
           metadata: data.payload.metadata,
         });
-        sendResponse(responseParams);
+        return sendResponse(responseParams);
+
+      case "__onFetchBlockComponentUrl": {
+        const { block } = data.payload;
+        const response =
+          devServerInfo &&
+          devServerInfo.owner === block.owner &&
+          devServerInfo.repo === block.repo
+            ? devServerInfo.devServer
+            : publicRuntimeConfig.sandboxDomain;
+        return sendResponse({ ...responseParams, response });
+      }
 
       case "private__onFetchInternalEndpoint":
         if (blockFrame.block.owner !== "githubnext") return;

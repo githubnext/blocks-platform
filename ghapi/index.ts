@@ -1,3 +1,4 @@
+import getConfig from "next/config";
 import { CODEX_BLOCKS } from "../lib";
 import { Octokit } from "@octokit/rest";
 import { Endpoints } from "@octokit/types";
@@ -23,6 +24,8 @@ import { QueryClient, QueryFunction, QueryFunctionContext } from "react-query";
 import { Block, BlocksRepo } from "@githubnext/blocks";
 import { Session } from "next-auth";
 import pm from "picomatch";
+
+const { publicRuntimeConfig } = getConfig();
 
 export interface RepoContext {
   repo: string;
@@ -390,6 +393,7 @@ export const getBlocksFromRepoInner = async ({
     owner,
     repo,
     repoId,
+    __blockComponentUrl: publicRuntimeConfig.sandboxDomain,
   }));
 
   return {
@@ -649,6 +653,8 @@ const getBlocksRepoFromDevServer = async ({
     owner,
     repo,
     repoId: repoInfo.id,
+    isDev: true,
+    __blockComponentUrl: devServerInfo.devServer,
   }));
 
   return {
@@ -664,6 +670,7 @@ const getBlocksRepoFromDevServer = async ({
     watchers: 0,
     language: "",
     topics: [""],
+    isDev: true,
   };
 };
 
@@ -756,20 +763,5 @@ export const getBlocksRepos: QueryFunction<
       }
     }),
   ]);
-  return blocksRepos
-    .filter((repo) => repo.blocks?.length)
-    .map((blockRepo) => {
-      const isDev =
-        devServerInfo &&
-        devServerInfo.owner === blockRepo.owner &&
-        devServerInfo.repo === blockRepo.repo;
-      return {
-        ...blockRepo,
-        blocks: blockRepo.blocks.map((block) => ({
-          ...block,
-          isDev,
-        })),
-        isDev,
-      };
-    });
+  return blocksRepos.filter((repo) => repo.blocks?.length);
 };

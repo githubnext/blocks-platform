@@ -40,17 +40,16 @@ const setBundle = async (
   blockFrame: BlockFrame,
   block: Block | null
 ) => {
+  let bundle = null;
   if (
     devServerInfo &&
     block &&
     block.owner === devServerInfo.owner &&
     block.repo === devServerInfo.repo
   ) {
-    return;
-  }
-
-  let bundle = null;
-  if (block) {
+    // empty bundle means load code locally
+    bundle = [];
+  } else if (block) {
     const url = `/api/get-block-content?owner=${block.owner}&repo=${block.repo}&id=${block.id}`;
     const res = await fetch(url);
     if (res.ok) {
@@ -247,7 +246,7 @@ async function handleLoaded({
   branchName: string;
   files: RepoFiles;
   updatedContents: UpdatedContents;
-  blockFrames: BlockFrame[];
+  blockFrames: React.MutableRefObject<BlockFrame[]>;
   blockFrame: BlockFrame;
   window: Window;
   origin: string;
@@ -314,7 +313,7 @@ async function handleLoaded({
     });
 
     const blockFrame = { window, origin, block, context, props: {} };
-    blockFrames.push(blockFrame);
+    blockFrames.current.push(blockFrame);
     setBundle(devServerInfo, blockFrame, block);
     setInitialProps(blockFrame);
   }
@@ -575,7 +574,7 @@ function useBlockFrameMessages({
           branchName,
           files,
           updatedContents,
-          blockFrames: blockFrames.current,
+          blockFrames,
           blockFrame,
           window: source as Window,
           origin,

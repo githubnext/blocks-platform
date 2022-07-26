@@ -246,7 +246,7 @@ async function handleLoaded({
   branchName: string;
   files: RepoFiles;
   updatedContents: UpdatedContents;
-  blockFrames: BlockFrame[];
+  blockFrames: React.MutableRefObject<BlockFrame[]>;
   blockFrame: BlockFrame;
   window: Window;
   origin: string;
@@ -313,7 +313,7 @@ async function handleLoaded({
     });
 
     const blockFrame = { window, origin, block, context, props: {} };
-    blockFrames.push(blockFrame);
+    blockFrames.current.push(blockFrame);
     setBundle(devServerInfo, blockFrame, block);
     setInitialProps(blockFrame);
   }
@@ -574,7 +574,7 @@ function useBlockFrameMessages({
           branchName,
           files,
           updatedContents,
-          blockFrames: blockFrames.current,
+          blockFrames,
           blockFrame,
           window: source as Window,
           origin,

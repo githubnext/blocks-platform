@@ -3,7 +3,16 @@ import { useState } from "react";
 import { useDebounce } from "use-debounce";
 import { useRouter } from "next/router";
 import { useSearchRepos } from "hooks";
+import { RepoIcon, SearchIcon } from "@primer/octicons-react";
 
+const defaultItems = [
+  "githubnext/blocks-tutorial",
+  "primer/primitives",
+  "d3/d3-geo",
+  "actions/toolkit",
+  "the-pudding/data",
+  "preactjs/preact",
+].map((d) => ({ id: d, text: d }));
 export function RepoSearch() {
   const router = useRouter();
   const [inputValue, setInputValue] = useState("");
@@ -14,25 +23,30 @@ export function RepoSearch() {
     enabled: Boolean(debouncedInputValue),
   });
 
+  const itemsList = (
+    items.length || debouncedInputValue ? items : defaultItems
+  ).map((item) => ({
+    ...item,
+    leadingVisual: RepoIcon,
+  }));
+
   return (
     <FormControl>
       <FormControl.Label visuallyHidden>Repo Search</FormControl.Label>
       <Autocomplete>
         <Autocomplete.Input
-          placeholder="Search by repo name"
+          leadingVisual={SearchIcon}
+          className="w-full !bg-gray-900 !border-gray-600 !shadow-none !text-white"
+          placeholder="Search for a repository..."
           onChange={(e) => {
             setInputValue(e.target.value);
           }}
         />
-        <Autocomplete.Overlay overlayProps={{ width: "medium" }}>
+        <Autocomplete.Overlay overlayProps={{ width: "medium" }} left={70}>
           <Autocomplete.Menu
             loading={status === "loading"}
             emptyStateText={emptyStateText}
-            filterFn={() => {
-              // We let the GitHub API do all of the filtering.
-              return true;
-            }}
-            items={items}
+            items={itemsList}
             selectedItemIds={[]}
             selectionVariant="single"
             onSelectedChange={(items) => {

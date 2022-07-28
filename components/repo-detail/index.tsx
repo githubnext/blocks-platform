@@ -163,24 +163,8 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
         branchName={branchName}
         branches={branches}
         onChangeBranch={setBranchName}
+        canEdit={appContext.hasRepoInstallation}
       />
-
-      {!appContext.hasRepoInstallation && (
-        <Flash className="text-sm" full variant="warning">
-          <StyledOcticon icon={AlertIcon} />
-          The Blocks GitHub app is not installed on this repository. You won't
-          be able to save changes to files or open pull-requests.{" "}
-          <Link
-            underline
-            muted
-            target="_blank"
-            rel="noopener"
-            href={appContext.installationUrl}
-          >
-            Install app
-          </Link>
-        </Flash>
-      )}
 
       <div className="flex flex-1 overflow-hidden">
         <FileTreePane

@@ -7,19 +7,19 @@ export const GitHubHeader = () => {
   const { data } = useSession();
 
   return (
-    <header className="bg-gray-900 text-white px-[30px] py-4 lg:flex items-center">
-      <div className="flex items-center space-x-4">
+    <header className="bg-gray-900 text-white px-[1.3em] py-3 lg:flex items-center">
+      <div className="flex items-center space-x-2">
         <Link href="/">
           <a className="flex-none text-white">
-            <NextOctocat className="h-[1.5em]" />
+            <NextOctocat className="h-[1.8em]" />
           </a>
         </Link>
         <div className="flex-1 min-w-[240px]">
           <RepoSearch />
         </div>
       </div>
-      <p className="text-sm opacity-50 mt-2 lg:mt-0 lg:ml-4">
-        GitHub Blocks is an exploratory prototype.{" "}
+      <p className="mt-2 lg:mt-0 lg:ml-3 text-gray-400 text-sm">
+        <strong>GitHub Blocks</strong> is an exploratory prototype.{" "}
         {data?.user?.isHubber && (
           <span>
             More information about this project{" "}

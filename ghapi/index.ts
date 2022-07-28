@@ -625,7 +625,8 @@ const tryToGetContent = async (
 export const getOwnerRepoFromDevServer = async (devServer: string) => {
   const gitConfig = await (await fetch(`${devServer}git.config.json`)).json();
   const url = gitConfig['remote "origin"'].url;
-  const [_, owner, repo] = /^[^:]*:([^/]*)\/([^/.]*)/.exec(url);
+  const [_1, _2, owner, repo] =
+    /^(git@github.com:|https:\/\/github.com\/)([^/]*)\/([^/.]*)/.exec(url);
   return { owner, repo };
 };
 

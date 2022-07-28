@@ -416,6 +416,7 @@ const filterBlock =
     user,
     type,
     searchTerm,
+    excludeExampleBlocks = true,
   }: {
     path: string | undefined;
     repo: string;
@@ -423,6 +424,7 @@ const filterBlock =
     user: Session["user"];
     type: "file" | "folder" | undefined;
     searchTerm?: string;
+    excludeExampleBlocks?: boolean;
   }) =>
   (block: Block) => {
     if (
@@ -435,8 +437,9 @@ const filterBlock =
     }
     // don't include example Blocks
     if (
-      block.title === "Example File Block" ||
-      block.title === "Example Folder Block"
+      excludeExampleBlocks &&
+      (block.title === "Example File Block" ||
+        block.title === "Example Folder Block")
     ) {
       return false;
     }
@@ -644,7 +647,15 @@ const getBlocksRepoFromDevServer = async ({
   ).json();
   const { owner, repo, repoInfo } = devServerInfo;
 
-  const filter = filterBlock({ user, repo, owner, path, type, searchTerm });
+  const filter = filterBlock({
+    user,
+    repo,
+    owner,
+    path,
+    type,
+    searchTerm,
+    excludeExampleBlocks: false,
+  });
   const filteredBlocks = (blocks || []).filter(filter).map((block: Block) => ({
     ...block,
     owner,

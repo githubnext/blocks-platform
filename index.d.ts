@@ -66,5 +66,4 @@ type DevServerInfo = {
   owner: string;
   repo: string;
   devServer: string;
-  repoInfo: schemas["repository"];
 };

@@ -13,10 +13,8 @@ export default async function handler(
     return;
   }
 
-  const { blockRepoId, blockId, owner, repo, key } = req.query as Record<
-    string,
-    string
-  >;
+  const { blockOwner, blockRepo, blockId, owner, repo, key } =
+    req.query as Record<string, string>;
 
   try {
     const octokit = makeOctokitInstance(session.token as string);
@@ -29,7 +27,8 @@ export default async function handler(
   switch (req.method) {
     case "GET":
       const value = await storeGet({
-        blockRepoId,
+        blockOwner,
+        blockRepo,
         blockId,
         owner,
         repo,
@@ -44,7 +43,8 @@ export default async function handler(
 
     case "PUT":
       await storeSet({
-        blockRepoId,
+        blockOwner,
+        blockRepo,
         blockId,
         owner,
         repo,
@@ -56,7 +56,8 @@ export default async function handler(
 
     case "DELETE":
       await storeDelete({
-        blockRepoId,
+        blockOwner,
+        blockRepo,
         blockId,
         owner,
         repo,

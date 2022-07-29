@@ -5,7 +5,6 @@ import { useQueryClient, QueryClient } from "react-query";
 import getConfig from "next/config";
 import { useRouter } from "next/router";
 import type { Block, RepoFiles } from "@githubnext/blocks";
-import { onRequestGitHubData } from "@githubnext/blocks";
 import { QueryKeyMap } from "lib/query-keys";
 import {
   getBlocksRepos,
@@ -21,6 +20,32 @@ import { Context, UpdatedContents } from "./index";
 import axios from "axios";
 
 const { publicRuntimeConfig } = getConfig();
+
+const onRequestGitHubData = async (
+  path: string,
+  params = {},
+  token?: string
+) => {
+  // handle paths that accidentally include the domain
+  const parsedPath = path.replace("https://api.github.com", "");
+
+  const apiUrl = `https://api.github.com${parsedPath}`;
+  const urlWithParams = `${apiUrl}?${new URLSearchParams(params)}`;
+
+  const res = await fetch(urlWithParams, {
+    headers: token ? { Authorization: `token ${token}` } : {},
+    method: "GET",
+  });
+
+  if (res.status !== 200) {
+    throw new Error(
+      `Error fetching generic GitHub API data: ${apiUrl}\n${await res.text()}`
+    );
+  }
+
+  const resObject = await res.json();
+  return resObject;
+};
 
 type BlockFrame = {
   window: Window;
@@ -367,9 +392,9 @@ function makeStoreURL(block: Block, context: Context, key: string) {
   const safeKey = path.resolve(key).substring(1);
 
   const encodedKey = encodeURIComponent(safeKey);
-  const { id, repoId } = block;
+  const { id, owner: blockOwner, repo: blockRepo } = block;
   const { owner, repo } = context;
-  return `/api/store/${repoId}/${id}/${owner}/${repo}/${encodedKey}`;
+  return `/api/store/${blockOwner}/${blockRepo}/${id}/${owner}/${repo}/${encodedKey}`;
 }
 
 function handleStoreGetRequest({

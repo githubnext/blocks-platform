@@ -18,17 +18,19 @@ const tableServiceUrl = `https://${accountName}.table.cosmos.azure.com:443/`;
 const serviceClient = new TableServiceClient(tableServiceUrl, credential);
 
 const makeTableClient = async ({
-  blockRepoId,
+  blockOwner,
+  blockRepo,
   blockId,
 }: {
-  blockRepoId: string;
+  blockOwner: string;
+  blockRepo: string;
   blockId: string;
 }) => {
   // table names are case-insensitive and must satisfy /^[A-Za-z][A-Za-z0-9]{2,62}$/
   // https://docs.microsoft.com/en-us/rest/api/storageservices/understanding-the-table-service-data-model#table-names
   // but - seems to be allowed
   // TODO(jaked) check allowed characters in blockId
-  const tableName = `repo-${blockRepoId}-${blockId}`;
+  const tableName = `${blockOwner}-${blockRepo}-${blockId}`;
   await serviceClient.createTable(tableName);
 
   return new TableClient(tableServiceUrl, tableName, credential);
@@ -41,20 +43,23 @@ const makePartitionKey = ({ owner, repo }: { owner: string; repo: string }) => {
 };
 
 export const storeGet = async ({
-  blockRepoId,
+  blockOwner,
+  blockRepo,
   blockId,
   owner,
   repo,
   key,
 }: {
-  blockRepoId: string;
+  blockOwner: string;
+  blockRepo: string;
   blockId: string;
   owner: string;
   repo: string;
   key: string;
 }) => {
   const tableClient = await makeTableClient({
-    blockRepoId,
+    blockOwner,
+    blockRepo,
     blockId,
   });
   try {
@@ -74,14 +79,16 @@ export const storeGet = async ({
 };
 
 export const storeSet = async ({
-  blockRepoId,
+  blockOwner,
+  blockRepo,
   blockId,
   owner,
   repo,
   key,
   value,
 }: {
-  blockRepoId: string;
+  blockOwner: string;
+  blockRepo: string;
   blockId: string;
   owner: string;
   repo: string;
@@ -89,7 +96,8 @@ export const storeSet = async ({
   value: string;
 }) => {
   const tableClient = await makeTableClient({
-    blockRepoId,
+    blockOwner,
+    blockRepo,
     blockId,
   });
   const entity = {
@@ -104,20 +112,23 @@ export const storeSet = async ({
 };
 
 export const storeDelete = async ({
-  blockRepoId,
+  blockOwner,
+  blockRepo,
   blockId,
   owner,
   repo,
   key,
 }: {
-  blockRepoId: string;
+  blockOwner: string;
+  blockRepo: string;
   blockId: string;
   owner: string;
   repo: string;
   key: string;
 }) => {
   const tableClient = await makeTableClient({
-    blockRepoId,
+    blockOwner,
+    blockRepo,
     blockId,
   });
   return tableClient.deleteEntity(

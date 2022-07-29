@@ -67,14 +67,7 @@ function RepoDetailContainer({
 
     const devServerInfoPromise = /^http:\/\/localhost:[0-9]+\//.test(devServer)
       ? getOwnerRepoFromDevServer(devServer)
-          .then(({ owner, repo }) =>
-            meta.octokit.repos.get({ owner, repo }).then((repoRes) => ({
-              devServer,
-              owner,
-              repo,
-              repoInfo: repoRes.data,
-            }))
-          )
+          .then(({ owner, repo }) => ({ devServer, owner, repo }))
           .catch(() => undefined)
       : Promise.resolve(undefined);
 

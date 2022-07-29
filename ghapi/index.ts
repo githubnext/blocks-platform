@@ -342,17 +342,6 @@ export const getBlocksFromRepoInner = async ({
     });
   }
 
-  let repoId = 0;
-  try {
-    const repoRes = await octokit.repos.get({
-      owner,
-      repo,
-    });
-    repoId = repoRes.data.id;
-  } catch (e) {
-    return undefined;
-  }
-
   let blocks = [];
 
   try {
@@ -389,7 +378,6 @@ export const getBlocksFromRepoInner = async ({
     ...block,
     owner,
     repo,
-    repoId,
   }));
 
   return {
@@ -397,7 +385,6 @@ export const getBlocksFromRepoInner = async ({
     repo,
     blocks: filteredBlocks,
     full_name: `${owner}/${repo}`,
-    id: repoId,
     // we don't use any of the below at the moment
     html_url: "",
     description: "",
@@ -645,7 +632,7 @@ const getBlocksRepoFromDevServer = async ({
   const blocks = await (
     await fetch(`${devServerInfo.devServer}blocks.config.json`)
   ).json();
-  const { owner, repo, repoInfo } = devServerInfo;
+  const { owner, repo } = devServerInfo;
 
   const filter = filterBlock({
     user,
@@ -660,7 +647,6 @@ const getBlocksRepoFromDevServer = async ({
     ...block,
     owner,
     repo,
-    repoId: repoInfo.id,
   }));
 
   return {
@@ -668,7 +654,6 @@ const getBlocksRepoFromDevServer = async ({
     repo,
     blocks: filteredBlocks,
     full_name: `${owner}/${repo}`,
-    id: repoInfo.id,
     // we don't use any of the below at the moment
     html_url: "",
     description: "",

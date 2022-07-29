@@ -194,6 +194,10 @@ const Folder = ({
             <div className="whitespace-nowrap truncate">{name}</div>
             {/* using a div because ActionList.TrailingVisual messes up name truncation */}
             <div className="ml-auto">
+              {!isExpanded &&
+                Object.keys(updatedContents).some((path2) =>
+                  path2.startsWith(path)
+                ) && <VscCircleOutline />}
               {doShowPills && (
                 <div className="ml-auto flex p-1 border-[1px] border-gray-200 rounded-full">
                   {children.slice(0, 10).map((file) => (

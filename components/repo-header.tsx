@@ -19,7 +19,6 @@ type RepoHeaderProps = {
   contributors: Contributor[];
   branchName: string;
   branches: Branch[];
-  canEdit: boolean;
   onChangeBranch: (branchName: string) => void;
 };
 
@@ -30,7 +29,6 @@ export const RepoHeader = ({
   contributors,
   branchName,
   branches,
-  canEdit,
   onChangeBranch,
 }: RepoHeaderProps) => {
   const appContext = useContext(AppContext);
@@ -103,7 +101,7 @@ export const RepoHeader = ({
         {description ?? "\u00a0"}
       </Box>
 
-      {!canEdit && (
+      {!appContext.hasRepoInstallation && (
         <Text fontSize={1} mt={2} color="fg.muted" display="block">
           <StyledOcticon icon={LockIcon} sx={{ mr: 2, color: "fg.muted" }} />
           The Blocks GitHub app is not installed on this repository. You won't

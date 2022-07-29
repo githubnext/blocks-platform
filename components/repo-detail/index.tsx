@@ -163,7 +163,6 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
         branchName={branchName}
         branches={branches}
         onChangeBranch={setBranchName}
-        canEdit={appContext.hasRepoInstallation}
       />
 
       <div className="flex flex-1 overflow-hidden">

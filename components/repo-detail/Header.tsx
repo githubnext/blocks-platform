@@ -10,7 +10,6 @@ type HeaderProps = {
   contributors: Contributor[];
   branchName: string;
   branches: Branch[];
-  canEdit: boolean;
   onChangeBranch: (branchName: string) => void;
 };
 
@@ -22,7 +21,6 @@ export default function Header({
   contributors,
   branchName,
   branches,
-  canEdit,
   onChangeBranch,
 }: HeaderProps) {
   return (
@@ -67,7 +65,6 @@ export default function Header({
               contributors={contributors}
               branchName={branchName}
               branches={branches}
-              canEdit={canEdit}
               onChangeBranch={onChangeBranch}
             />
           </motion.div>

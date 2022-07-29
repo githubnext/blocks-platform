@@ -204,7 +204,9 @@ const BlockItem = ({
     <ActionList.Item
       selected={isSelected}
       className={`group py-2 ${
-        isDev ? "bg-[#ddf4ffaa] border border-dashed border-[#54aeff] mb-2" : ""
+        isDev
+          ? "bg-[#ddf4ffaa] !border !border-dashed !border-[#54aeff] mb-2"
+          : ""
       }`}
       sx={{
         ":hover": {

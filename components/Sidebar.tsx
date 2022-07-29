@@ -32,19 +32,10 @@ type User = {
   path: string;
 };
 
-type FileChange = {
-  date: number;
-};
-
-type FileChanges = Record<string, FileChange>;
-
-type FileChangesScale = ScaleLinear<string, string>;
-
 type SidebarProps = {
   owner: string;
   repo: string;
   files: RepoFiles;
-  fileChanges?: FileChanges;
   activeFilePath: string;
   updatedContents: Record<string, unknown>;
 };
@@ -53,7 +44,6 @@ const doShowPills = false;
 export const Sidebar = ({
   owner = "",
   repo = "",
-  fileChanges = {},
   files = [],
   activeFilePath = "",
   updatedContents,
@@ -66,16 +56,6 @@ export const Sidebar = ({
     } catch (e) {}
   }, [files]);
 
-  const allUsers = [];
-
-  const fileChangesScale = useMemo(() => {
-    const datesExtent = extent(
-      Object.values(fileChanges),
-      (d: FileChange) => new Date(d.date)
-    );
-    return scaleLinear<string>().domain(datesExtent).range(["#aaa", "#F9FAFB"]);
-  }, [fileChanges]);
-
   return (
     <Box className="sidebar h-full overflow-hidden flex-1">
       <Box className="h-full overflow-auto p-2">
@@ -86,9 +66,6 @@ export const Sidebar = ({
             depth={-1}
             children={nestedFiles}
             activeFilePath={activeFilePath}
-            allUsers={allUsers}
-            fileChangesScale={fileChangesScale}
-            fileChanges={fileChanges}
             canCollapse={false}
             updatedContents={updatedContents}
           />
@@ -103,10 +80,7 @@ type ItemProps = {
   path: string;
   children: NestedFileTree[];
   activeFilePath: string;
-  allUsers: User[];
   depth: number;
-  fileChangesScale: FileChangesScale;
-  fileChanges: FileChanges;
   canCollapse?: boolean;
   updatedContents: Record<string, unknown>;
 };
@@ -120,8 +94,6 @@ const Item = (props: ItemProps) => {
       {...props}
       depth={props.depth + 1}
       isActive={props.activeFilePath === props.path}
-      activeUsers={props.allUsers.filter((user) => user.path === props.path)}
-      date={props.fileChanges[props.path]?.date}
     />
   );
 };
@@ -132,9 +104,6 @@ type FolderProps = {
   depth: number;
   children: NestedFileTree[];
   activeFilePath: string;
-  allUsers: User[];
-  fileChangesScale: FileChangesScale;
-  fileChanges: FileChanges;
   canCollapse?: boolean;
   updatedContents: Record<string, unknown>;
 };
@@ -144,9 +113,6 @@ const Folder = ({
   path,
   children,
   activeFilePath,
-  allUsers,
-  fileChangesScale,
-  fileChanges,
   canCollapse = true,
   updatedContents,
   depth,
@@ -160,19 +126,6 @@ const Folder = ({
       setIsExpanded(true);
     }
   }, [activeFilePath]);
-
-  const mostRecentChangeDate = useMemo(() => {
-    const relatedChangePaths = Object.keys(fileChanges).filter((d) =>
-      d.startsWith(path)
-    );
-
-    const mostRecentChange = relatedChangePaths.sort(
-      (a, b) =>
-        Number(new Date(fileChanges[a].date)) -
-        Number(new Date(fileChanges[b].date))
-    )[0];
-    return mostRecentChange && fileChanges[mostRecentChange].date;
-  }, [path, fileChangesScale]);
 
   const isActive = activeFilePath === path;
 
@@ -191,7 +144,7 @@ const Folder = ({
         shallow
       >
         <ActionList.LinkItem
-          style={{ paddingLeft: depth * 16 }}
+          style={{ paddingLeft: depth * 13 }}
           sx={{
             "::before": {
               content: isActive ? "''" : null,
@@ -206,13 +159,25 @@ const Folder = ({
               bottom: 0,
             },
             position: "relative",
+            width: "100%",
+            fontWeight: 400,
           }}
-          onClick={(e) => {
+          active={isActive}
+          onClick={() => {
             if (!canCollapse) return;
             setIsExpanded(!isExpanded);
           }}
         >
-          <ActionList.LeadingVisual className="ml-1">
+          <ActionList.LeadingVisual
+            className="ml-1"
+            onClick={(e) => {
+              // don't select the folder on toggle
+              e.stopPropagation();
+              e.preventDefault();
+              if (!canCollapse) return;
+              setIsExpanded(!isExpanded);
+            }}
+          >
             <StyledOcticon
               sx={{ mr: 1, color: "fg.muted" }}
               icon={isExpanded ? ChevronDownIcon : ChevronRightIcon}
@@ -224,35 +189,30 @@ const Folder = ({
               }
             />
           </ActionList.LeadingVisual>
-          <div className="ml-2">
-            <Truncate title={name}>{name}</Truncate>
-          </div>
 
-          <ActionList.TrailingVisual className="flex items-center justify-center">
-            <div>
+          <div className="flex items-center ml-2" title={name}>
+            <div className="whitespace-nowrap truncate">{name}</div>
+            {/* using a div because ActionList.TrailingVisual messes up name truncation */}
+            <div className="ml-auto">
               {!isExpanded &&
                 Object.keys(updatedContents).some((path2) =>
                   path2.startsWith(path)
                 ) && <VscCircleOutline />}
+              {doShowPills && (
+                <div className="ml-auto flex p-1 border-[1px] border-gray-200 rounded-full">
+                  {children.slice(0, 10).map((file) => (
+                    <div className="m-[1px]">
+                      <FileDot
+                        name={file.name}
+                        type={file.children?.length ? "folder" : "file"}
+                        key={file.path}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-            {doShowPills && (
-              <div className="ml-auto flex p-1 border-[1px] border-gray-200 rounded-full">
-                {children.slice(0, 10).map((file) => (
-                  <div className="m-[1px]">
-                    <FileDot
-                      name={file.name}
-                      type={file.children?.length ? "folder" : "file"}
-                      key={file.path}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-            <DateChangedIndicator
-              date={mostRecentChangeDate}
-              fileChangesScale={fileChangesScale}
-            />
-          </ActionList.TrailingVisual>
+          </div>
         </ActionList.LinkItem>
       </Link>
 
@@ -265,7 +225,7 @@ const Folder = ({
               content: depth === 0 ? null : "''",
               position: "absolute",
               // Magic number. Seems to achieve the right spacing for optical alignment between the chevron and the vertical line.
-              left: 11 + depth * 16,
+              left: 11 + depth * 13,
               top: 0,
               bottom: 0,
               width: 1,
@@ -281,9 +241,6 @@ const Folder = ({
                 depth={depth}
                 {...file}
                 activeFilePath={activeFilePath}
-                allUsers={allUsers}
-                fileChangesScale={fileChangesScale}
-                fileChanges={fileChanges}
                 updatedContents={updatedContents}
               />
             ))}
@@ -297,23 +254,11 @@ type FileProps = {
   name: string;
   path: string;
   depth: number;
-  activeUsers: User[];
-  fileChangesScale: FileChangesScale;
-  date?: number;
   isActive: boolean;
   updatedContents: Record<string, unknown>;
 };
 
-const File = ({
-  name,
-  path,
-  activeUsers = [],
-  fileChangesScale,
-  date,
-  isActive,
-  updatedContents,
-  depth,
-}: FileProps) => {
+const File = ({ name, path, isActive, updatedContents, depth }: FileProps) => {
   const router = useRouter();
   const query = router.query;
 
@@ -331,7 +276,6 @@ const File = ({
       }}
     >
       <ActionList.LinkItem
-        style={{ paddingLeft: depth * 16 }}
         sx={{
           "::before": {
             content: isActive ? "''" : null,
@@ -346,22 +290,24 @@ const File = ({
             bottom: 0,
           },
           position: "relative",
-          backgroundColor: isActive
-            ? "rgba(208, 215, 222, 0.48)"
-            : "transparent",
+          width: "100%",
+          paddingLeft: depth * 13,
+          fontWeight: 400,
         }}
+        active={isActive}
       >
         <ActionList.LeadingVisual>
           <StyledOcticon icon={FileIcon} />
         </ActionList.LeadingVisual>
-        <Truncate title={name}>{name}</Truncate>
-        <ActionList.TrailingVisual className="flex items-center justify-end">
-          <div>{updatedContents[path] && <VscCircleFilled />}</div>
-          <DateChangedIndicator
-            date={date}
-            fileChangesScale={fileChangesScale}
-          />
-        </ActionList.TrailingVisual>
+        <div className="flex items-center" title={name}>
+          <div title={name} className="whitespace-nowrap truncate">
+            {name}
+          </div>
+          {/* using a div because ActionList.TrailingVisual messes up name truncation */}
+          <div className="ml-auto">
+            {updatedContents[path] && <VscCircleFilled />}
+          </div>
+        </div>
       </ActionList.LinkItem>
     </Link>
   );
@@ -388,45 +334,5 @@ const FileDot = ({ name, type = "file" }: FileDotProps) => {
       }`}
       style={{ background: color }}
     />
-  );
-};
-
-const getOrdinal = (n: number) => {
-  const s = ["th", "st", "nd", "rd"];
-  const v = n % 100;
-  return s[(v - 20) % 10] || s[v] || s[0];
-};
-const formatDate = (d: Date) =>
-  [
-    timeFormat("%B %-d")(d),
-    getOrdinal(+timeFormat("%d")(d)),
-    timeFormat(", %Y")(d),
-  ].join("");
-
-type DateChangedIndicatorProps = {
-  date?: number;
-  fileChangesScale?: FileChangesScale;
-};
-
-const DateChangedIndicator = ({
-  date,
-  fileChangesScale,
-}: DateChangedIndicatorProps) => {
-  if (!date) return null;
-  if (!fileChangesScale) return null;
-
-  const backgroundColor = useMemo(() => {
-    return date && fileChangesScale(new Date(date));
-  }, [fileChangesScale, date]);
-
-  return (
-    <Tooltip side="right" text={`Last updated ${formatDate(new Date(date))}`}>
-      <div
-        className="absolute top-[-1px] bottom-[-1px] right-0 left-auto w-1"
-        style={{
-          backgroundColor,
-        }}
-      ></div>
-    </Tooltip>
   );
 };

@@ -3,7 +3,8 @@ import NextAuth from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import { GITHUB_STARS } from "../../../lib";
 
-const GUEST_LIST = ["Krzysztof-Cieslak", "dsyme"];
+const GUEST_LIST_INTERNAL = ["Krzysztof-Cieslak", "dsyme"];
+const GUEST_LIST_EXTERNAL = ["dmalan", ...GITHUB_STARS.map((d) => d.username)];
 
 async function refreshAccessToken(token) {
   try {
@@ -58,7 +59,8 @@ export default NextAuth({
           name: profile.login,
           email: profile.email,
           image: profile.avatar_url,
-          isHubber: profile.site_admin || GUEST_LIST.includes(profile.login),
+          isHubber:
+            profile.site_admin || GUEST_LIST_INTERNAL.includes(profile.login),
         };
       },
     }),
@@ -72,10 +74,11 @@ export default NextAuth({
     },
     async signIn({ profile }) {
       const isHubber = profile.site_admin;
-      const isGuest = GUEST_LIST.includes(profile.login);
-      const isStar = GITHUB_STARS.some((star) => star.id === profile.id);
+      const isGuest =
+        GUEST_LIST_INTERNAL.includes(profile.login) ||
+        GUEST_LIST_EXTERNAL.includes(profile.login);
 
-      return isHubber || isGuest || isStar;
+      return isHubber || isGuest;
     },
     async jwt({ token, account, user }) {
       if (account && user) {

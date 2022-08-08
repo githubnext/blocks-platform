@@ -154,7 +154,7 @@ const makeSetInitialProps =
     // fetch content for the path
     if (isFolder) {
       const treeData = queryClient.fetchQuery(
-        QueryKeyMap.folder.factory(context),
+        QueryKeyMap.folder.factory({ ...context, fileRef: context.sha }),
         getFolderContent,
         {
           retry: false,

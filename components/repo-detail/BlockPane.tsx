@@ -88,7 +88,15 @@ export default function BlockPane({
           <iframe
             key={block.id}
             className={"w-full h-full"}
-            sandbox={"allow-scripts allow-same-origin allow-forms"}
+            sandbox={[
+              "allow-scripts",
+              "allow-same-origin",
+              "allow-forms",
+              // so blocks can open links
+              "allow-top-navigation-by-user-activation",
+              // so blocks can open links in new windows
+              "allow-popups",
+            ].join(" ")}
             src={src}
           />
         </div>

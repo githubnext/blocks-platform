@@ -61,7 +61,7 @@ export function makeGitHubAPIInstance(token: string) {
     },
     function (error) {
       if (error.response.status === 401) {
-        signOut();
+        if (typeof window !== "undefined") signOut();
       }
       return Promise.reject(error);
     }

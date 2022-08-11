@@ -26,6 +26,7 @@ import { AppContext } from "context";
 import { CODEX_BLOCKS } from "lib";
 import { useSession } from "next-auth/react";
 import useBlockFrameMessages from "./use-block-frame-messages";
+import { RepoCommandMenu } from "components/repo-command-menu";
 
 export type Context = {
   repo: string;
@@ -363,14 +364,17 @@ export function RepoDetail({ token }: RepoDetailProps) {
     );
   } else if (repoInfo.status === "success" && branches.status === "success") {
     return (
-      <RepoDetailInner
-        token={token}
-        repoInfo={repoInfo.data}
-        branches={branches.data}
-        branchName={branchName}
-        files={repoFiles.data}
-        timeline={repoTimeline.data}
-      />
+      <>
+        <RepoDetailInner
+          token={token}
+          repoInfo={repoInfo.data}
+          branches={branches.data}
+          branchName={branchName}
+          files={repoFiles.data}
+          timeline={repoTimeline.data}
+        />
+        <RepoCommandMenu files={repoFiles.data} />
+      </>
     );
   } else {
     return <FullPageLoader />;

@@ -1753,6 +1753,14 @@ cli-truncate@^3.1.0:
     slice-ansi "^5.0.0"
     string-width "^5.0.0"
 
+cmdk@^0.1.18:
+  version "0.1.18"
+  resolved "https://registry.yarnpkg.com/cmdk/-/cmdk-0.1.18.tgz#e9c1bd599b25d7e8b5dfbafdf07e850fa52516b7"
+  integrity sha512-+9RbuAkOTY3yaSDQeL6CzC36KBTelVywHR9M5ap7ZiC6aJ5iePtRqTUZ3IS7W9CMrxZyBWAv9yAYZJBhw9t/oQ==
+  dependencies:
+    "@radix-ui/react-dialog" "0.1.7"
+    command-score "0.1.2"
+
 code-point-at@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
@@ -1819,6 +1827,11 @@ combined-stream@^1.0.8:
   integrity sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==
   dependencies:
     delayed-stream "~1.0.0"
+
+command-score@0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/command-score/-/command-score-0.1.2.tgz#b986ad7e8c0beba17552a56636c44ae38363d381"
+  integrity sha512-VtDvQpIJBvBatnONUsPzXYFVKQQAhuf3XTNOAsdBxCNO/QCtUUd8LSgjn0GVarBkCad6aJCZfXgrjYbl/KRr7w==
 
 commander@7:
   version "7.2.0"

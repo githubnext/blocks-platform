@@ -1,11 +1,26 @@
+const plugin = require("tailwindcss/plugin");
+
+const addAriaAttributes = plugin(({ addVariant }) => {
+  const booleans = ["selected"];
+
+  const addAriaVariant = (name, value) => {
+    addVariant(name, `[${name}="${value}"]&`);
+    addVariant(`peer-${name}`, `:merge(.peer)[${name}="${value}"] ~ &`);
+    addVariant(`group-${name}`, `:merge(.group)[${name}="${value}"] &`);
+  };
+
+  for (const attribute of booleans) {
+    addAriaVariant(`aria-${attribute}`, "true");
+  }
+});
+
+/** @type {import('tailwindcss').Config} */
 module.exports = {
-  mode: "jit",
-  purge: [
+  content: [
     "./pages/**/*.{js,ts,jsx,tsx}",
     "./components/**/*.{js,ts,jsx,tsx}",
     "./blocks/**/*.{ts,tsx,jsx,jsx}",
   ],
-  darkMode: false, // or 'media' or 'class'
   theme: {
     extend: {
       colors: {
@@ -35,5 +50,6 @@ module.exports = {
     require("@tailwindcss/forms")({
       strategy: "class",
     }),
+    addAriaAttributes,
   ],
 };

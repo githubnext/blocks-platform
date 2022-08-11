@@ -292,3 +292,7 @@ div[role="alertdialog"] {
     @apply text-blue-400;
   }
 }
+
+[cmdk-overlay] {
+  @apply fixed inset-0 z-10 bg-black/20 w-full h-full;
+}

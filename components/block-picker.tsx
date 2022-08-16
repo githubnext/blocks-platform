@@ -205,7 +205,7 @@ const BlockItem = ({
       selected={isSelected}
       className={`group py-2 ${
         isDev
-          ? "bg-[#ddf4ffaa] !border !border-dashed !border-[#54aeff] mb-2"
+          ? "bg-[#ddf4ffaa] !border !border-dashed !border-[#54aeff] !mb-2"
           : ""
       }`}
       sx={{

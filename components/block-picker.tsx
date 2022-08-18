@@ -2,10 +2,10 @@ import { Block, BlocksRepo } from "@githubnext/blocks";
 import {
   InfoIcon,
   LinkExternalIcon,
-  PencilIcon,
   PlugIcon,
   RepoIcon,
   SearchIcon,
+  SyncIcon,
   VerifiedIcon,
 } from "@primer/octicons-react";
 import {
@@ -49,13 +49,34 @@ export default function BlockPicker(props: BlockPickerProps) {
     .split("/")
     .slice(3);
 
-  const { data: blockRepos, status } = useBlocksRepos({
+  const blocksReposParams = {
     path,
     type,
     searchTerm: isSearchTermUrl ? undefined : debouncedSearchTerm,
     repoUrl: isSearchTermUrl ? debouncedSearchTerm : undefined,
     devServerInfo,
-  });
+  };
+  const { data: blockRepos, status } = useBlocksRepos(blocksReposParams);
+  const invalidateBlocksReposQuery = () => {
+    // we need to invalidate the `fetchQuery` calls in `getBlocksRepos` as well
+    // as the top-level query. messy!
+    if (isSearchTermUrl) {
+      queryClient.invalidateQueries(
+        QueryKeyMap.info.factory({
+          owner: searchTermOwner,
+          repo: searchTermRepo,
+        })
+      );
+    } else {
+      // there is only one `repoSearch` query currently
+      queryClient.invalidateQueries(QueryKeyMap.repoSearch.key);
+    }
+    // we don't know which repos were returned so must invalidate all of them
+    queryClient.invalidateQueries(QueryKeyMap.blocksRepo.key);
+    queryClient.resetQueries(
+      QueryKeyMap.blocksRepos.factory(blocksReposParams)
+    );
+  };
 
   return (
     <ActionMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -72,14 +93,17 @@ export default function BlockPicker(props: BlockPickerProps) {
       </ActionMenu.Button>
 
       <ActionMenu.Overlay width="large">
-        <div className="px-3 pt-3 w-full">
+        <div className="px-3 pt-3 w-full flex gap-1">
           <TextInput
             value={searchTerm}
             leadingVisual={SearchIcon}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search blocks or paste repo URL"
-            className="!pl-2 w-full"
+            className="!pl-2 flex-1"
           />
+          <Button onClick={invalidateBlocksReposQuery}>
+            <SyncIcon />
+          </Button>
         </div>
         {status === "loading" && (
           <div className="px-3 py-6 mb-1 w-full text-center italic">
@@ -120,11 +144,7 @@ export default function BlockPicker(props: BlockPickerProps) {
                   >
                     <Button variant="primary">Update App access</Button>
                   </a>
-                  <Button
-                    onClick={() => {
-                      queryClient.invalidateQueries(QueryKeyMap.blocksRepo.key);
-                    }}
-                  >
+                  <Button onClick={invalidateBlocksReposQuery}>
                     Try again
                   </Button>
                 </div>

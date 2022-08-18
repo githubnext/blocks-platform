@@ -13,6 +13,7 @@ import {
   ActionMenu,
   Box,
   Button,
+  IconButton,
   Link,
   Text,
   TextInput,
@@ -101,9 +102,12 @@ export default function BlockPicker(props: BlockPickerProps) {
             placeholder="Search blocks or paste repo URL"
             className="!pl-2 flex-1"
           />
-          <Button onClick={invalidateBlocksReposQuery}>
-            <SyncIcon />
-          </Button>
+          <IconButton
+            disabled={status === "loading"}
+            aria-label="Refresh"
+            icon={SyncIcon}
+            onClick={invalidateBlocksReposQuery}
+          />
         </div>
         {status === "loading" && (
           <div className="px-3 py-6 mb-1 w-full text-center italic">

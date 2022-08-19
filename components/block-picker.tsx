@@ -74,9 +74,7 @@ export default function BlockPicker(props: BlockPickerProps) {
     }
     // we don't know which repos were returned so must invalidate all of them
     queryClient.invalidateQueries(QueryKeyMap.blocksRepo.key);
-    queryClient.resetQueries(
-      QueryKeyMap.blocksRepos.factory(blocksReposParams)
-    );
+    queryClient.resetQueries(QueryKeyMap.blocksRepos.key);
   };
 
   return (

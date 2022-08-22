@@ -233,17 +233,15 @@ const Folder = ({
             },
           }}
         >
-          {children
-            .sort((a, b) => b.children.length - a.children.length)
-            .map((file) => (
-              <Item
-                key={file.name}
-                depth={depth}
-                {...file}
-                activeFilePath={activeFilePath}
-                updatedContents={updatedContents}
-              />
-            ))}
+          {children.map((file) => (
+            <Item
+              key={file.name}
+              depth={depth}
+              {...file}
+              activeFilePath={activeFilePath}
+              updatedContents={updatedContents}
+            />
+          ))}
         </ActionList>
       )}
     </>

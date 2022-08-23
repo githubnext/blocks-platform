@@ -1,13 +1,5 @@
-import { ActionList, Box, StyledOcticon, Truncate } from "@primer/react";
-import { extent, scaleLinear, timeFormat } from "d3";
-import type { ScaleLinear } from "d3";
-import Link from "next/link";
-import { useRouter } from "next/router";
-import { useEffect, useMemo, useState } from "react";
-import { getNestedFileTree } from "@githubnext/blocks";
 import type { RepoFiles } from "@githubnext/blocks";
-import languageColors from "../language-colors.json";
-import { Tooltip } from "./Tooltip";
+import { getNestedFileTree } from "@githubnext/blocks";
 import {
   ChevronDownIcon,
   ChevronRightIcon,
@@ -15,7 +7,12 @@ import {
   FileDirectoryOpenFillIcon,
   FileIcon,
 } from "@primer/octicons-react";
+import { ActionList, Box, StyledOcticon } from "@primer/react";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { useEffect, useMemo, useState } from "react";
 import { VscCircleFilled, VscCircleOutline } from "react-icons/vsc";
+import languageColors from "../language-colors.json";
 
 // defined in @githubnext/blocks but not exported
 interface NestedFileTree {
@@ -169,7 +166,6 @@ const Folder = ({
           }}
         >
           <ActionList.LeadingVisual
-            className="ml-1"
             onClick={(e) => {
               // don't select the folder on toggle
               e.stopPropagation();
@@ -178,19 +174,25 @@ const Folder = ({
               setIsExpanded(!isExpanded);
             }}
           >
+            {depth > 0 && (
+              <StyledOcticon
+                sx={{ color: "fg.muted" }}
+                className="mr-[3px] ml-[-4px]"
+                icon={isExpanded ? ChevronDownIcon : ChevronRightIcon}
+              />
+            )}
             <StyledOcticon
-              sx={{ mr: 1, color: "fg.muted" }}
-              icon={isExpanded ? ChevronDownIcon : ChevronRightIcon}
-            />
-            <StyledOcticon
-              sx={{ color: "#54aeff" }}
+              sx={{ color: "#54aeff", ml: depth > 0 ? 0 : 2 }}
               icon={
                 isExpanded ? FileDirectoryOpenFillIcon : FileDirectoryFillIcon
               }
             />
           </ActionList.LeadingVisual>
 
-          <div className="flex items-center ml-2" title={name}>
+          <div
+            className={`flex items-center ${depth > 0 ? "ml-2" : "ml-1"}`}
+            title={name}
+          >
             <div className="whitespace-nowrap truncate">{name}</div>
             {/* using a div because ActionList.TrailingVisual messes up name truncation */}
             <div className="ml-auto">
@@ -221,11 +223,12 @@ const Folder = ({
           data-depth={depth}
           className="!py-0 relative"
           sx={{
+            // pl: depth ? 2 : 0,
             "::before": {
               content: depth === 0 ? null : "''",
               position: "absolute",
               // Magic number. Seems to achieve the right spacing for optical alignment between the chevron and the vertical line.
-              left: 11 + depth * 13,
+              left: 7 + depth * 13,
               top: 0,
               bottom: 0,
               width: 1,
@@ -295,9 +298,9 @@ const File = ({ name, path, isActive, updatedContents, depth }: FileProps) => {
         active={isActive}
       >
         <ActionList.LeadingVisual>
-          <StyledOcticon icon={FileIcon} />
+          <StyledOcticon icon={FileIcon} sx={{ ml: 3 }} />
         </ActionList.LeadingVisual>
-        <div className="flex items-center" title={name}>
+        <div className="flex items-center ml-2" title={name}>
           <div title={name} className="whitespace-nowrap truncate">
             {name}
           </div>

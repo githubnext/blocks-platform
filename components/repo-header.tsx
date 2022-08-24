@@ -97,9 +97,11 @@ export const RepoHeader = ({
         </Box>
       </Box>
 
-      <Box fontSize={1} ml={4} mt={2} color="fg.muted">
-        {description ?? "\u00a0"}
-      </Box>
+      {description && (
+        <Box fontSize={1} ml={4} mt={2} color="fg.muted">
+          {description}
+        </Box>
+      )}
 
       {!appContext.hasRepoInstallation && (
         <Text fontSize={1} mt={2} color="fg.muted" display="block">

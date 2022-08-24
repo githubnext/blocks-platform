@@ -447,8 +447,13 @@ const filterBlock =
 
     if (path !== undefined) {
       if (block.matches) {
-        const doesMatch = pm(block.matches, { bash: true, dot: true })(path);
-        if (!doesMatch) return false;
+        try {
+          if (!path && block.matches.includes("")) return true;
+          const doesMatch = pm(block.matches, { bash: true, dot: true })(path);
+          if (!doesMatch) return false;
+        } catch (e) {
+          return false;
+        }
       }
 
       if (block.extensions) {

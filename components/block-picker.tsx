@@ -100,12 +100,14 @@ export default function BlockPicker(props: BlockPickerProps) {
             placeholder="Search blocks or paste repo URL"
             className="!pl-2 flex-1"
           />
-          <IconButton
+          <Button
+            sx={{ px: 2 }}
             disabled={status === "loading"}
             aria-label="Refresh"
-            icon={SyncIcon}
             onClick={invalidateBlocksReposQuery}
-          />
+          >
+            <SyncIcon className={status === "loading" ? "animate-spin" : ""} />
+          </Button>
         </div>
         {status === "loading" && (
           <div className="px-3 py-6 mb-1 w-full text-center italic">

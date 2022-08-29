@@ -1,6 +1,7 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useMemo } from "react";
 import getConfig from "next/config";
 import { useRouter } from "next/router";
+import pm from "picomatch";
 import type { RepoFiles } from "@githubnext/blocks";
 import { AppContext } from "context";
 import type { Context } from "./index";
@@ -36,9 +37,20 @@ export default function BlockPane({
 
   const isFolder = fileInfo.type !== "blob";
 
+  const metadataForPath = useMemo(() => {
+    if (metadata[path]) return metadata[path];
+    const globs = Object.keys(metadata).filter((key) => {
+      const globs = key.split(",").map((glob) => glob.trim());
+      if (!path && globs.includes("")) return true;
+      const doesMatch = pm(globs, { bash: true, dot: true })(path);
+      return doesMatch;
+    });
+    return metadata[globs[0]] || {};
+  }, [metadata, path]);
+
   const manageBlockResult = useManageBlock({
     path,
-    storedDefaultBlock: metadata[path]?.default,
+    storedDefaultBlock: metadataForPath.default,
     isFolder,
   });
 

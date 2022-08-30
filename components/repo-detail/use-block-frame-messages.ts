@@ -165,6 +165,7 @@ const makeSetInitialProps =
           block,
           context: { ...context, folder: name },
           metadata,
+          files,
           tree: treeData.tree,
         };
         setProps(blockFrame, props);
@@ -217,6 +218,7 @@ const makeSetInitialProps =
           block,
           context: { ...context, file: name },
           metadata,
+          files,
           content,
           originalContent,
           isEditable,

@@ -109,7 +109,10 @@ export default NextAuth({
       // fix in the works: https://github.com/nextauthjs/next-auth/pull/4534
       const origin = baseUrl;
       const urlPath = new URL(url).pathname;
-      const newPath = `${origin}${urlPath}`;
+      const newPath = `${origin}${urlPath}?${new URL(
+        url
+      ).searchParams.toString()}`;
+
       return newPath;
     },
   },

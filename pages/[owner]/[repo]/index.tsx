@@ -9,7 +9,7 @@ import {
 } from "ghapi";
 import { useCheckRepoAccess } from "hooks";
 import { QueryKeyMap } from "lib/query-keys";
-import { GetServerSidePropsContext } from "next";
+import { GetServerSideProps } from "next";
 import getConfig from "next/config";
 import { getSession, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
@@ -121,12 +121,22 @@ function RepoDetailContainer({
 
 export default RepoDetailContainer;
 
-export async function getServerSideProps(context: GetServerSidePropsContext) {
+export const getServerSideProps: GetServerSideProps = async (context) => {
   const query = context.query as Record<string, string>;
   const { repo, owner, devServer } = query;
   const queryClient = new QueryClient();
   const session = await getSession({ req: context.req });
   const octokit = makeOctokitInstance(session?.token as string);
+
+  // If our JWT has this "error" property, we're hosed.
+  // We can safely assume that something went wrong when
+  // refreshing our access token, and we need to bail out.
+  if (session.error) {
+    return {
+      redirect: "/sign-in",
+      props: {},
+    };
+  }
 
   // get the installation for the repo, if the user has access
   const repoInstallationPromise = getUserInstallationForRepo({
@@ -205,7 +215,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       dehydratedState: dehydrate(queryClient),
     },
   };
-}
+};
 
 const CheckAccess = ({
   repo,

@@ -43,6 +43,8 @@ import {
   UseQueryOptions,
 } from "react-query";
 import type { QueryFunction, UseQueryResult } from "react-query";
+import { signOut, SignOutParams } from "next-auth/react";
+import { Session } from "next-auth";
 
 export function useFileContent(
   params: FileKeyParams,
@@ -510,4 +512,17 @@ export function useCheckRepoAccess(
     retry: false,
     ...config,
   });
+}
+
+export function useSignOutOnSessionError(
+  status: "authenticated" | "loading",
+  session: Session,
+  options?: SignOutParams
+) {
+  useEffect(() => {
+    if (status !== "authenticated") return;
+    if (session && session.error) {
+      signOut(options);
+    }
+  }, [status, session]);
 }

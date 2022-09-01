@@ -6,10 +6,6 @@ interface CommonBlockProps {
   onUpdateContent: () => any;
 }
 
-interface Session {
-  token: string;
-}
-
 interface FileData {
   content: string;
   context: FileContext;
@@ -54,12 +50,6 @@ type RepoTimeline = CommitBrief[];
 interface User {
   name: string;
   image: string;
-}
-
-interface Session {
-  token: string;
-  user: User;
-  expires: string;
 }
 
 type DevServerInfo = {

@@ -5,11 +5,11 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { GetServerSidePropsContext } from "next";
 import getConfig from "next/config";
 import { useRouter } from "next/router";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { ChevronRightIcon } from "@primer/octicons-react";
-import { getOwnerRepoFromDevServer } from "ghapi";
+import { useSignOutOnSessionError } from "hooks";
 
 const { publicRuntimeConfig } = getConfig();
 
@@ -18,11 +18,7 @@ function Home() {
   const { status, data } = useSession({ required: true });
   const [isLeaving, setIsLeaving] = useState(false);
 
-  useEffect(() => {
-    if (status === "authenticated" && data.error) {
-      signOut();
-    }
-  }, [data, status]);
+  useSignOutOnSessionError(status, data);
 
   if (status === "loading") {
     return <FullPageLoader />;

@@ -1,4 +1,5 @@
-import { useCheckRepoAccess } from "hooks";
+import { useCheckRepoAccess, useSignOutOnSessionError } from "hooks";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 
 export default function NoAccess({
@@ -8,6 +9,11 @@ export default function NoAccess({
 }) {
   const router = useRouter();
   const { owner, repo, reason } = router.query as Record<string, string>;
+
+  const { status, data } = useSession({ required: true });
+  useSignOutOnSessionError(status, data, {
+    callbackUrl: `/${owner}/${repo}`,
+  });
 
   useCheckRepoAccess(
     { owner, repo },

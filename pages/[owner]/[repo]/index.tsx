@@ -7,7 +7,7 @@ import {
   makeGitHubAPIInstance,
   makeOctokitInstance,
 } from "ghapi";
-import { useCheckRepoAccess } from "hooks";
+import { useCheckRepoAccess, useSignOutOnSessionError } from "hooks";
 import { QueryKeyMap } from "lib/query-keys";
 import { GetServerSidePropsContext } from "next";
 import getConfig from "next/config";
@@ -42,11 +42,7 @@ function RepoDetailContainer({
     required: true,
   });
 
-  useEffect(() => {
-    if (status === "authenticated" && session.error) {
-      signOut();
-    }
-  }, [session, status]);
+  useSignOutOnSessionError(status, session);
 
   useEffect(() => {
     if (status !== "authenticated" || loaded) return;

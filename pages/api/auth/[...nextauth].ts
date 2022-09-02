@@ -97,12 +97,13 @@ const authOptions = {
         };
       }
 
-      // Return previous token if the access token has not expired yet
-      if (Date.now() < token.accessTokenExpiry) {
+      // refresh token if it will expire in the next 15 minutes
+      // `jwt` runs every 5 minutes when the client refreshes the session
+      if (Date.now() > token.accessTokenExpiry - 900) {
+        return await refreshAccessToken(token);
+      } else {
         return token;
       }
-
-      return await refreshAccessToken(token);
     },
     async redirect({ url, baseUrl }) {
       // Allows relative callback URLs

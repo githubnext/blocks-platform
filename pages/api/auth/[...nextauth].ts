@@ -1,4 +1,7 @@
+import { jwtDecrypt } from "jose";
+import type { NextApiRequest } from "next";
 import axios from "axios";
+import hkdf from "@panva/hkdf";
 import NextAuth from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import { GITHUB_STARS } from "../../../lib";
@@ -46,7 +49,7 @@ async function refreshAccessToken(token) {
   }
 }
 
-export default NextAuth({
+export const authOptions = {
   secret: process.env.NEXT_AUTH_SECRET,
   providers: [
     GithubProvider({
@@ -80,7 +83,9 @@ export default NextAuth({
 
       return isHubber || isGuest;
     },
-    async jwt({ token, account, user }) {
+    async jwt(params) {
+      const { token, account, user } = params;
+
       if (account && user) {
         return {
           accessToken: account.access_token,
@@ -99,7 +104,8 @@ export default NextAuth({
         return token;
       }
 
-      return await refreshAccessToken(token);
+      const refreshedToken = await refreshAccessToken(token);
+      return refreshedToken;
     },
     async redirect({ url, baseUrl }) {
       // Allows relative callback URLs
@@ -114,4 +120,33 @@ export default NextAuth({
       return newPath;
     },
   },
-});
+};
+export default NextAuth(authOptions);
+
+// replicating getServer in a way that doesn't run all of the side-effects like `.jwt()`
+export const getSessionOnServer = async (req: NextApiRequest): Promise<any> => {
+  const secret = authOptions.secret;
+  if (!secret) {
+    throw new Error("Secret is not defined");
+  }
+  const cookieValue = req.cookies["next-auth.session-token"];
+  const encryptionSecret = await getDerivedEncryptionKey(secret);
+  const { payload } = await jwtDecrypt(cookieValue, encryptionSecret, {
+    clockTolerance: 15,
+  });
+  const parsedPayload = authOptions.callbacks.session({
+    session: {},
+    token: payload,
+  });
+  return parsedPayload;
+};
+
+async function getDerivedEncryptionKey(secret: string | Buffer) {
+  return await hkdf(
+    "sha256",
+    secret,
+    "",
+    "NextAuth.js Generated Encryption Key",
+    32
+  );
+}

@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getSession } from "next-auth/react";
 import { Configuration, OpenAIApi } from "openai";
+import { getSessionOnServer } from "./auth/[...nextauth]";
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
@@ -13,7 +13,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const session = await getSession({ req });
+  const session = await getSessionOnServer({ req });
 
   if (req.method !== "POST") {
     res.status(405).send("Method not allowed");

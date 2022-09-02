@@ -78,7 +78,7 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
   useCheckRepoAccess(
     { repo, owner },
     {
-      enabled: !hasRepoInstallation,
+      enabled: isAuthenticated && !hasRepoInstallation,
       onSuccess: (hasAccess) => setHasRepoInstallation(hasAccess),
     }
   );

@@ -1,7 +1,7 @@
 import tar from "tar-stream";
 import streamifier from "streamifier";
 import { unzipSync } from "zlib";
-import { getSession } from "next-auth/react";
+import { getSessionOnServer } from "./auth/[...nextauth]";
 import type { NextApiRequest, NextApiResponse } from "next";
 import Cors from "cors";
 import sanitizeId from "utils/sanitize-id";
@@ -21,7 +21,7 @@ export default async function handler(
   // cache for 30 minutes
   res.setHeader("Cache-Control", "max-age=1800, immutable");
 
-  const session = await getSession({ req });
+  const session = await getSessionOnServer(req);
 
   await new Promise((resolve, reject) => {
     Cors({

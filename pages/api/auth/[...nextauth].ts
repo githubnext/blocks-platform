@@ -49,7 +49,7 @@ async function refreshAccessToken(token) {
   }
 }
 
-export const authOptions = {
+const authOptions = {
   secret: process.env.NEXT_AUTH_SECRET,
   providers: [
     GithubProvider({
@@ -83,9 +83,7 @@ export const authOptions = {
 
       return isHubber || isGuest;
     },
-    async jwt(params) {
-      const { token, account, user } = params;
-
+    async jwt({ token, account, user }) {
       if (account && user) {
         return {
           accessToken: account.access_token,
@@ -104,8 +102,7 @@ export const authOptions = {
         return token;
       }
 
-      const refreshedToken = await refreshAccessToken(token);
-      return refreshedToken;
+      return await refreshAccessToken(token);
     },
     async redirect({ url, baseUrl }) {
       // Allows relative callback URLs
@@ -123,17 +120,20 @@ export const authOptions = {
 };
 export default NextAuth(authOptions);
 
-// replicating getServer in a way that doesn't run all of the side-effects like `.jwt()`
+// get session by unpacking the NextAuth cookie without attempting to refresh the GitHub token
 export const getSessionOnServer = async (req: NextApiRequest): Promise<any> => {
   const secret = authOptions.secret;
   if (!secret) {
     throw new Error("Secret is not defined");
   }
   const cookieValue = req.cookies["next-auth.session-token"];
+
+  // see https://github.com/nextauthjs/next-auth/blob/main/packages/next-auth/src/jwt/index.ts#L29
   const encryptionSecret = await getDerivedEncryptionKey(secret);
   const { payload } = await jwtDecrypt(cookieValue, encryptionSecret, {
     clockTolerance: 15,
   });
+
   const parsedPayload = authOptions.callbacks.session({
     session: {},
     token: payload,

@@ -58,7 +58,7 @@ const authOptions = {
       clientSecret: process.env.GITHUB_SECRET,
       profile(profile) {
         return {
-          id: profile.id,
+          id: String(profile.id),
           name: profile.login,
           email: profile.email,
           image: profile.avatar_url,

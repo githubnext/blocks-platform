@@ -50,7 +50,7 @@ async function refreshAccessToken(token) {
 }
 
 const authOptions = {
-  secret: process.env.NEXT_AUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET,
   providers: [
     GithubProvider({
       authorization: "https://github.com/login/oauth/authorize",

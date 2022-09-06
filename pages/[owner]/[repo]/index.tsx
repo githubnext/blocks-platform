@@ -1,55 +1,50 @@
 import { FullPageLoader } from "components/full-page-loader";
 import { RepoDetail } from "components/repo-detail";
-import { AppContextValue, AppContext, Permissions } from "context";
+import { AppContext, AppContextValue } from "context";
 import {
   getOwnerRepoFromDevServer,
-  getRepoInfoWithContributorsSSR,
   makeGitHubAPIInstance,
   makeOctokitInstance,
 } from "ghapi";
-import { useCheckRepoAccess } from "hooks";
-import { QueryKeyMap } from "lib/query-keys";
+import { useCheckRepoAccess, useRepoInfo } from "hooks";
 import { GetServerSidePropsContext } from "next";
+import { signOut, useSession } from "next-auth/react";
 import getConfig from "next/config";
-import { getSession, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { getUserInstallationForRepo } from "pages/api/check-access";
 import { useEffect, useState } from "react";
-import { dehydrate, QueryClient, useQueryClient } from "react-query";
+import { useQueryClient } from "react-query";
 
 const { publicRuntimeConfig } = getConfig();
 
-function RepoDetailContainer({
-  hasRepoInstallation,
-  permissions,
-  installationUrl,
-}: AppContextValue) {
+function RepoDetailContainer({ installationUrl }: AppContextValue) {
   const router = useRouter();
-  const [localHasRepoInstallation, setLocalHasRepoInstallation] =
-    useState(hasRepoInstallation);
+  const [hasRepoInstallation, setHasRepoInstallation] = useState(false);
   const { repo, owner, branch, path, devServer } = router.query as Record<
     string,
     string
   >;
-  const [loaded, setLoaded] = useState(false);
+  const [devServerInfoLoaded, setDevServerInfoLoaded] = useState(false);
   const [devServerInfo, setDevServerInfo] = useState<undefined | DevServerInfo>(
     undefined
   );
+  const [queryClientMetaLoaded, setQueryClientMetaLoaded] = useState(false);
 
   const queryClient = useQueryClient();
-  const { data: session, status } = useSession({
+  const { data: session, status: sessionStatus } = useSession({
     required: true,
   });
 
-  useEffect(() => {
-    if (status === "authenticated" && session.error) {
-      signOut();
-    }
-  }, [session, status]);
+  const isAuthenticated = sessionStatus === "authenticated";
 
   useEffect(() => {
-    if (status !== "authenticated" || loaded) return;
+    if (isAuthenticated && session.error) {
+      signOut();
+    }
+  }, [session, sessionStatus]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
 
     const meta = {
       token: session?.token,
@@ -64,7 +59,10 @@ function RepoDetailContainer({
         meta,
       },
     });
+    setQueryClientMetaLoaded(true);
+  }, [sessionStatus]);
 
+  useEffect(() => {
     const devServerInfoPromise = /^http:\/\/localhost:[0-9]+\//.test(devServer)
       ? getOwnerRepoFromDevServer(devServer)
           .then(({ owner, repo }) => ({ devServer, owner, repo }))
@@ -73,98 +71,84 @@ function RepoDetailContainer({
 
     devServerInfoPromise.then((devServerInfo) => {
       setDevServerInfo(devServerInfo);
-      setLoaded(true);
+      setDevServerInfoLoaded(true);
     });
-  }, [status]);
+  }, [devServer, owner, repo]);
 
-  if (status === "loading") {
-    return <FullPageLoader />;
-  }
+  useCheckRepoAccess(
+    { repo, owner },
+    {
+      enabled: isAuthenticated && !hasRepoInstallation,
+      onSuccess: (hasAccess) => setHasRepoInstallation(hasAccess),
+    }
+  );
 
-  if (status === "authenticated" && session && loaded) {
+  const { data: repoInfo, status: repoInfoStatus } = useRepoInfo(
+    { owner, repo },
+    { enabled: queryClientMetaLoaded }
+  );
+  if (repoInfoStatus === "error") {
     return (
-      <>
-        <Head>
-          <title>
-            {/* mimicking github.com's title */}
-            GitHub Blocks:
-            {path ? ` ${repo}/${path}` : ` ${repo}`}
-            {branch ? ` at ${branch}` : ""}
-            {` · ${owner}/${repo}`}
-          </title>
-        </Head>
-        <AppContext.Provider
-          value={{
-            hasRepoInstallation: localHasRepoInstallation,
-            installationUrl,
-            permissions,
-            devServerInfo,
-          }}
-        >
-          {!localHasRepoInstallation && (
-            <CheckAccess
-              repo={repo}
-              owner={owner}
-              onHasRepoSuccess={() => setLocalHasRepoInstallation(true)}
-            />
-          )}
-          {/* @ts-ignore */}
-          <RepoDetail token={session?.token} />
-        </AppContext.Provider>
-      </>
+      <div className="flex flex-col items-center justify-center h-full text-center">
+        <div className="max-w-2xl mx-auto px-4">
+          <h3 className="font-bold text-lg">
+            Our GitHub App is not installed on {owner}/{repo}.
+          </h3>
+          <div className="mt-4">
+            <a
+              target="_blank"
+              rel="noopener"
+              href={installationUrl}
+              className="inline-block px-3 py-1 text-sm rounded font-medium bg-[#2da44e] text-white"
+            >
+              Install app.
+            </a>
+          </div>
+        </div>
+      </div>
     );
   }
 
-  // TODO: Handle errors here
-  return null;
+  if (
+    sessionStatus === "loading" ||
+    repoInfoStatus !== "success" ||
+    !devServerInfoLoaded ||
+    !queryClientMetaLoaded
+  ) {
+    return <FullPageLoader />;
+  }
+
+  return (
+    <>
+      <Head>
+        <title>
+          {/* mimicking github.com's title */}
+          GitHub Blocks:
+          {path ? ` ${repo}/${path}` : ` ${repo}`}
+          {branch ? ` at ${branch}` : ""}
+          {` · ${owner}/${repo}`}
+        </title>
+      </Head>
+      <AppContext.Provider
+        value={{
+          hasRepoInstallation: hasRepoInstallation,
+          installationUrl,
+          permissions: repoInfo.permissions,
+          devServerInfo,
+        }}
+      >
+        {/* @ts-ignore */}
+        <RepoDetail token={session?.token} />
+      </AppContext.Provider>
+    </>
+  );
 }
 
 export default RepoDetailContainer;
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const query = context.query as Record<string, string>;
-  const { repo, owner, devServer } = query;
-  const queryClient = new QueryClient();
-  const session = await getSession({ req: context.req });
-  const octokit = makeOctokitInstance(session?.token as string);
-
-  // get the installation for the repo, if the user has access
-  const repoInstallationPromise = getUserInstallationForRepo({
-    token: session?.token as string,
-    owner,
-    repo,
-  });
-
-  const repoInfoPromise = octokit.repos.get({ owner, repo }).then(
-    (repoRes) => repoRes.data,
-    () => undefined
-  );
-
-  const queryClientPrefetchPromise = queryClient.prefetchQuery(
-    QueryKeyMap.info.factory({ owner, repo }),
-    () =>
-      getRepoInfoWithContributorsSSR({
-        owner,
-        repo,
-        token: session?.token as string,
-      })
-  );
-
-  const [repoInstallation, _queryClientPrefetch, repoInfo] = await Promise.all([
-    repoInstallationPromise,
-    queryClientPrefetchPromise,
-    repoInfoPromise,
-  ]);
-
-  // check to see if the user has access to the repo
-  if (!repoInfo) {
-    return {
-      redirect: {
-        destination: `/no-access?owner=${owner}&repo=${repo}&reason=repo-not-installed`,
-        permanent: false,
-      },
-    };
-  }
+  const { devServer } = query;
 
   const isDev = process.env.NODE_ENV !== "production";
 
@@ -194,37 +178,11 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       .join(";")
   );
 
-  const permissions = repoInfo.permissions;
   const installationUrl = `https://github.com/apps/${process.env.GITHUB_APP_SLUG}/installations/new`;
 
   return {
     props: {
-      hasRepoInstallation: !!repoInstallation,
-      permissions,
       installationUrl,
-      dehydratedState: dehydrate(queryClient),
     },
   };
 }
-
-const CheckAccess = ({
-  repo,
-  owner,
-  onHasRepoSuccess,
-}: {
-  repo: string;
-  owner: string;
-  onHasRepoSuccess: () => void;
-}) => {
-  useCheckRepoAccess(
-    { repo, owner },
-    {
-      onSuccess: (hasAccess) => {
-        if (hasAccess) {
-          onHasRepoSuccess();
-        }
-      },
-    }
-  );
-  return null;
-};

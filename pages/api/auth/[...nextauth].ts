@@ -1,4 +1,7 @@
+import { jwtDecrypt } from "jose";
+import type { NextApiRequest } from "next";
 import axios from "axios";
+import hkdf from "@panva/hkdf";
 import NextAuth from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import { GITHUB_STARS } from "../../../lib";
@@ -46,7 +49,7 @@ async function refreshAccessToken(token) {
   }
 }
 
-export default NextAuth({
+const authOptions = {
   secret: process.env.NEXT_AUTH_SECRET,
   providers: [
     GithubProvider({
@@ -94,12 +97,13 @@ export default NextAuth({
         };
       }
 
-      // Return previous token if the access token has not expired yet
-      if (Date.now() < token.accessTokenExpiry) {
+      // refresh token if it will expire in the next 15 minutes
+      // `jwt` runs every 5 minutes when the client refreshes the session
+      if (Date.now() > token.accessTokenExpiry - 900) {
+        return await refreshAccessToken(token);
+      } else {
         return token;
       }
-
-      return await refreshAccessToken(token);
     },
     async redirect({ url, baseUrl }) {
       // Allows relative callback URLs
@@ -114,4 +118,36 @@ export default NextAuth({
       return newPath;
     },
   },
-});
+};
+export default NextAuth(authOptions);
+
+// get session by unpacking the NextAuth cookie without attempting to refresh the GitHub token
+export const getSessionOnServer = async (req: NextApiRequest): Promise<any> => {
+  const secret = authOptions.secret;
+  if (!secret) {
+    throw new Error("Secret is not defined");
+  }
+  const cookieValue = req.cookies["next-auth.session-token"];
+
+  // see https://github.com/nextauthjs/next-auth/blob/main/packages/next-auth/src/jwt/index.ts#L29
+  const encryptionSecret = await getDerivedEncryptionKey(secret);
+  const { payload } = await jwtDecrypt(cookieValue, encryptionSecret, {
+    clockTolerance: 15,
+  });
+
+  const parsedPayload = authOptions.callbacks.session({
+    session: {},
+    token: payload,
+  });
+  return parsedPayload;
+};
+
+async function getDerivedEncryptionKey(secret: string | Buffer) {
+  return await hkdf(
+    "sha256",
+    secret,
+    "",
+    "NextAuth.js Generated Encryption Key",
+    32
+  );
+}

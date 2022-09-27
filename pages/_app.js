@@ -7,11 +7,26 @@ import { Hydrate, QueryClient, QueryClientProvider } from "react-query";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { track } from "../lib/analytics";
+import { ApplicationInsights } from "@microsoft/applicationinsights-web";
 
 function App({ Component, pageProps: { session, ...pageProps } }) {
   const [queryClient] = useState(() => new QueryClient());
 
   const router = useRouter();
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "production") return;
+
+    const appInsights = new ApplicationInsights({
+      config: {
+        // this isn't a high-security key, see https://stackoverflow.com/questions/54535275/what-will-happen-if-applicationinsights-instrumentationkey-gets-stolen
+        connectionString:
+          "InstrumentationKey=96006ad9-5042-466e-b5c9-641be3a9e13f;IngestionEndpoint=https://eastus-8.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/",
+        /* ...Other Configuration Options... */
+      },
+    });
+    appInsights.loadAppInsights();
+  }, []);
 
   useEffect(() => {
     const handleRouteChange = (url, { shallow }) => {

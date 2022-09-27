@@ -128,6 +128,8 @@ export const getSessionOnServer = async (req: NextApiRequest): Promise<any> => {
     throw new Error("Secret is not defined");
   }
   const cookieValue = req.cookies["next-auth.session-token"];
+  console.log("typeof cookieValue", typeof cookieValue);
+  console.log("cookieValue", JSON.stringify(cookieValue));
 
   // see https://github.com/nextauthjs/next-auth/blob/main/packages/next-auth/src/jwt/index.ts#L29
   const encryptionSecret = await getDerivedEncryptionKey(secret);

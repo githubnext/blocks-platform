@@ -16,6 +16,7 @@
   "dependencies": {
     "@azure/data-tables": "^13.1.1",
     "@githubnext/blocks": "^2.0.7",
+    "@microsoft/applicationinsights-web": "^2.8.7",
     "@octokit/auth-app": "^3.6.1",
     "@octokit/rest": "^18.12.0",
     "@panva/hkdf": "^1.0.2",
@@ -49,6 +50,7 @@
     "tree-sitter": "^0.20.0",
     "tree-sitter-javascript": "^0.19.0",
     "tree-sitter-typescript": "^0.20.1",
+    "tslib": "^2.4.0",
     "unidiff": "^1.0.2",
     "use-debounce": "^7.0.1",
     "wretch": "^1.7.9"

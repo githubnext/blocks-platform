@@ -166,6 +166,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     "https://api.github.com/",
     // for Analytics
     "https://octo-metrics.azurewebsites.net/api/CaptureEvent",
+    "https://eastus-8.in.applicationinsights.azure.com/",
     devServer,
   ]
     .filter(Boolean)

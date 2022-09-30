@@ -33,20 +33,22 @@ function App({ Component, pageProps: { session, ...pageProps } }) {
       const branch = params.get("branch");
       const [blockOwner, blockRepo, blockId] = params
         .get("blockKey")
-        .split("__");
+        ?.split("__");
       const fileRef = params.get("fileRef");
 
       const event = {
         name: "block-view",
-        owner,
-        repo,
-        branch,
-        path,
-        fileRef,
-        blockOwner,
-        blockRepo,
-        blockId,
-        shallow,
+        properties: {
+          owner,
+          repo,
+          branch,
+          path,
+          fileRef,
+          blockOwner,
+          blockRepo,
+          blockId,
+          shallow,
+        },
       };
       appInsights.trackEvent(event);
     };

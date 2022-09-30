@@ -6,12 +6,10 @@ import { ThemeProvider, BaseStyles } from "@primer/react";
 import { Hydrate, QueryClient, QueryClientProvider } from "react-query";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { track } from "../lib/analytics";
 import { ApplicationInsights } from "@microsoft/applicationinsights-web";
 
 function App({ Component, pageProps: { session, ...pageProps } }) {
   const [queryClient] = useState(() => new QueryClient());
-
   const router = useRouter();
 
   useEffect(() => {
@@ -25,25 +23,34 @@ function App({ Component, pageProps: { session, ...pageProps } }) {
       },
     });
     appInsights.loadAppInsights();
-  }, []);
 
-  useEffect(() => {
     const handleRouteChange = (url, { shallow }) => {
-      if (shallow) return;
-      let queryParams = url.split("?")[1];
-      const parsed = new URLSearchParams(queryParams);
-      const blockKey = parsed.get("blockKey");
-      const path = parsed.get("path");
-      if (path && blockKey) {
-        track({
-          url,
-          event: "block-view",
-          payload: {
-            blockKey,
-            path,
-          },
-        });
-      }
+      const parsedUrl = new URL(url, window.location.origin);
+      const params = parsedUrl.searchParams;
+      const pathname = parsedUrl.pathname;
+      const [_, owner, repo] = pathname.split("/");
+      const path = params.get("path");
+      const branch = params.get("branch");
+      const [blockOwner, blockRepo, blockId] = params
+        .get("blockKey")
+        ?.split("__");
+      const fileRef = params.get("fileRef");
+
+      const event = {
+        name: "block-view",
+        properties: {
+          owner,
+          repo,
+          branch,
+          path,
+          fileRef,
+          blockOwner,
+          blockRepo,
+          blockId,
+          shallow,
+        },
+      };
+      appInsights.trackEvent(event);
     };
 
     router.events.on("routeChangeComplete", handleRouteChange);

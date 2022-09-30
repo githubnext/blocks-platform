@@ -10,26 +10,21 @@ import { ApplicationInsights } from "@microsoft/applicationinsights-web";
 
 function App({ Component, pageProps: { session, ...pageProps } }) {
   const [queryClient] = useState(() => new QueryClient());
-  const appInsightsRef = useRef();
   const router = useRouter();
 
   useEffect(() => {
-    if (process.env.NODE_ENV !== "production") return;
+    // if (process.env.NODE_ENV !== "production") return;
 
-    appInsightsRef.current = new ApplicationInsights({
+    const appInsights = new ApplicationInsights({
       config: {
         // this isn't a high-security key, see https://stackoverflow.com/questions/54535275/what-will-happen-if-applicationinsights-instrumentationkey-gets-stolen
         connectionString:
           "InstrumentationKey=96006ad9-5042-466e-b5c9-641be3a9e13f;IngestionEndpoint=https://eastus-8.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/",
       },
     });
-    appInsightsRef.current.loadAppInsights();
-  }, []);
+    appInsights.loadAppInsights();
 
-  useEffect(() => {
     const handleRouteChange = (url, { shallow }) => {
-      if (!appInsightsRef.current) return;
-
       const parsedUrl = new URL(url, window.location.origin);
       const params = parsedUrl.searchParams;
       const pathname = parsedUrl.pathname;
@@ -53,7 +48,7 @@ function App({ Component, pageProps: { session, ...pageProps } }) {
         blockId,
         shallow,
       };
-      appInsightsRef.current.trackEvent(event);
+      appInsights.trackEvent(event);
     };
 
     router.events.on("routeChangeComplete", handleRouteChange);

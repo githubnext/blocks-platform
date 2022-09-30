@@ -1,6 +1,6 @@
 import "styles/index.css";
 import "styles/markdown.css";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider, BaseStyles } from "@primer/react";
 import { Hydrate, QueryClient, QueryClientProvider } from "react-query";

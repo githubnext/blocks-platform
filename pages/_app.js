@@ -31,9 +31,8 @@ function App({ Component, pageProps: { session, ...pageProps } }) {
       const [_, owner, repo] = pathname.split("/");
       const path = params.get("path");
       const branch = params.get("branch");
-      const [blockOwner, blockRepo, blockId] = params
-        .get("blockKey")
-        ?.split("__");
+      const [blockOwner, blockRepo, blockId] =
+        params.get("blockKey")?.split("__") ?? [];
       const fileRef = params.get("fileRef");
 
       const event = {

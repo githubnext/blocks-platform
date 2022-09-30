@@ -13,7 +13,7 @@ function App({ Component, pageProps: { session, ...pageProps } }) {
   const router = useRouter();
 
   useEffect(() => {
-    // if (process.env.NODE_ENV !== "production") return;
+    if (process.env.NODE_ENV !== "production") return;
 
     const appInsights = new ApplicationInsights({
       config: {

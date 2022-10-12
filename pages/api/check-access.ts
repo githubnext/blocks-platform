@@ -1,4 +1,3 @@
-import { makeOctokitInstance } from "ghapi";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { makeAppOctokit } from "../../lib/auth";
 import { getSessionOnServer } from "./auth/[...nextauth]";

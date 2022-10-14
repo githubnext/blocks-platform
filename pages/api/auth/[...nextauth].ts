@@ -9,6 +9,35 @@ import { GITHUB_STARS } from "../../../lib";
 const GUEST_LIST_INTERNAL = ["Krzysztof-Cieslak", "dsyme"];
 const GUEST_LIST_EXTERNAL = ["dmalan", ...GITHUB_STARS.map((d) => d.username)];
 
+async function fetchPublicToken(accessToken: string) {
+  try {
+    const res = await axios.post(
+      `https://api.github.com/applications/${process.env.GITHUB_ID}/token/scoped`,
+      {
+        access_token: accessToken,
+        // we need to give a target that has the app installed
+        // but we don't give any repos or permissions
+        target: "githubnext",
+        permissions: {
+          metadata: "read",
+        },
+      },
+      {
+        headers: {
+          Accept: "application/json",
+        },
+        auth: {
+          username: process.env.GITHUB_ID,
+          password: process.env.GITHUB_SECRET,
+        },
+      }
+    );
+    return res.data.token;
+  } catch (e) {
+    console.log(e.message);
+  }
+}
+
 async function refreshAccessToken(token) {
   try {
     const res = await axios.post(
@@ -33,6 +62,8 @@ async function refreshAccessToken(token) {
       throw new Error(parsedResponse.error);
     }
 
+    const publicToken = fetchPublicToken(parsedResponse.access_token);
+
     return {
       ...token,
       accessToken: parsedResponse.access_token,
@@ -40,6 +71,7 @@ async function refreshAccessToken(token) {
       refreshToken: parsedResponse.refresh_token,
       refreshTokenExpiry:
         Date.now() + parsedResponse.refresh_token_expires_in * 1000,
+      publicToken,
     };
   } catch (e) {
     return {
@@ -71,6 +103,7 @@ const authOptions = {
   callbacks: {
     async session({ session, token }) {
       session.token = token.accessToken;
+      session.publicToken = token.publicToken;
       session.user = token.user;
       session.error = token.error;
       return session;
@@ -85,6 +118,8 @@ const authOptions = {
     },
     async jwt({ token, account, user }) {
       if (account && user) {
+        const publicToken = await fetchPublicToken(account.access_token);
+
         return {
           accessToken: account.access_token,
           // For some reason the date returned here is in seconds, not milliseconds.
@@ -94,6 +129,7 @@ const authOptions = {
           refreshTokenExpiry:
             Date.now() + account.refresh_token_expires_in * 1000,
           user,
+          publicToken,
         };
       }
 

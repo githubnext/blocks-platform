@@ -1,17 +1,18 @@
 import type { RepoFiles } from "@githubnext/blocks";
 import { getNestedFileTree } from "@githubnext/blocks";
 import {
-  ChevronDownIcon,
   ChevronRightIcon,
   FileDirectoryFillIcon,
   FileDirectoryOpenFillIcon,
   FileIcon,
+  SearchIcon,
 } from "@primer/octicons-react";
-import { ActionList, Box, StyledOcticon } from "@primer/react";
+import { ActionList, Box, StyledOcticon, Text, TextInput } from "@primer/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { VscCircleFilled, VscCircleOutline } from "react-icons/vsc";
+import { FixedSizeTree as Tree } from "react-vtree";
 import languageColors from "../language-colors.json";
 
 // defined in @githubnext/blocks but not exported
@@ -46,6 +47,31 @@ export const Sidebar = ({
   updatedContents,
 }: SidebarProps) => {
   if (!files.map) return null;
+  const [searchTerm, setSearchTerm] = useState("");
+  const wrapperElement = useRef<HTMLDivElement>(null);
+  const tree = useRef<Tree>(null);
+  const [dimensions, setDimensions] = useState<[number, number]>([100, 100]);
+
+  useEffect(() => {
+    const onResize = () => {
+      if (wrapperElement.current) {
+        const { width, height } =
+          wrapperElement.current.getBoundingClientRect();
+        setDimensions([width, height]);
+      }
+    };
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  useEffect(() => {
+    if (tree.current) {
+      setTimeout(() => {
+        tree.current.scrollToItem(activeFilePath, "center");
+      }, 100);
+    }
+  }, []);
 
   const nestedFiles = useMemo(() => {
     try {
@@ -53,74 +79,202 @@ export const Sidebar = ({
     } catch (e) {}
   }, [files]);
 
+  const filteredFiles = useMemo(() => {
+    if (!searchTerm) return nestedFiles;
+    const lowerSearchTerm = searchTerm.toLowerCase();
+    return nestedFiles
+      .map((file) => {
+        const children = file.children.filter((child) =>
+          child.name.toLowerCase().includes(lowerSearchTerm)
+        );
+        const isMatch = file.name.toLowerCase().includes(lowerSearchTerm);
+        if (!children.length && !isMatch) return null;
+        return { ...file, children };
+      })
+      .filter(Boolean) as NestedFileTree[];
+  }, [nestedFiles, searchTerm]);
+
+  const numberOfFiles = useMemo(() => {
+    let runningCount = 0;
+    const countFiles = (file: NestedFileTree) => {
+      runningCount++;
+      file.children.forEach(countFiles);
+    };
+    filteredFiles.forEach(countFiles);
+    return runningCount;
+  }, [filteredFiles]);
+
+  const treeWalker = useMemo(
+    () =>
+      function* treeWalker(refresh) {
+        const stack = [];
+
+        // Remember all the necessary data of the first node in the stack.
+        stack.push({
+          depth: 0,
+          node: {
+            name: `${owner}/${repo}`,
+            path: "",
+            children: filteredFiles,
+          },
+        });
+
+        // Walk through the tree until we have no nodes available.
+        while (stack.length !== 0) {
+          const {
+            node: { children = [], path, name },
+            depth,
+          } = stack.pop();
+          const canCollapse = depth > 0;
+          const id = path || "/";
+
+          // Here we are sending the information about the node to the Tree component
+          // and receive an information about the openness state from it. The
+          // `refresh` parameter tells us if the full update of the tree is requested;
+          // basing on it we decide to return the full node data or only the node
+          // id to update the nodes order.
+          const isOpened = yield refresh
+            ? {
+                id,
+                isLeaf: children.length === 0,
+                isOpenByDefault: numberOfFiles < 20 || depth < 1,
+                name,
+                depth,
+                path,
+                activeFilePath,
+                canCollapse,
+                updatedContents,
+              }
+            : id;
+
+          // Basing on the node openness state we are deciding if we need to render
+          // the child nodes (if they exist).
+          if (children.length !== 0 && isOpened) {
+            // Since it is a stack structure, we need to put nodes we want to render
+            // first to the end of the stack.
+            for (let i = children.length - 1; i >= 0; i--) {
+              stack.push({
+                depth: depth + 1,
+                node: children[i],
+              });
+            }
+          }
+        }
+      },
+    [filteredFiles, updatedContents, numberOfFiles < 20, activeFilePath]
+  );
+
   return (
     <Box className="sidebar h-full overflow-hidden flex-1">
-      <Box className="h-full overflow-auto p-2">
-        <ActionList>
-          <Item
-            name={`${owner}/${repo}`}
-            path={""}
-            depth={-1}
-            children={nestedFiles}
-            activeFilePath={activeFilePath}
-            canCollapse={false}
-            updatedContents={updatedContents}
-          />
-        </ActionList>
+      <Box className="p-2 pb-0">
+        <TextInput
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search files & folders"
+          leadingVisual={SearchIcon}
+          className="w-full"
+        />
+      </Box>
+      <Box className="h-full overflow-auto p-2 pt-0" ref={wrapperElement}>
+        {filteredFiles.length > 0 ? (
+          <ActionList className="">
+            <Tree
+              ref={tree}
+              treeWalker={treeWalker}
+              itemSize={30}
+              height={dimensions[1]}
+              width={dimensions[0]}
+            >
+              {Node}
+            </Tree>
+          </ActionList>
+        ) : (
+          <Text className="block text-sm text-center p-10 text-gray-500">
+            No files found{searchTerm && ` for "${searchTerm}"`}
+          </Text>
+        )}
       </Box>
     </Box>
+  );
+};
+
+const Node = ({
+  data: {
+    isLeaf,
+    name,
+    path,
+    activeFilePath,
+    depth,
+    canCollapse,
+    updatedContents,
+  },
+  isOpen,
+  style,
+  toggle,
+}) => {
+  return (
+    <div style={style}>
+      <Item
+        name={name}
+        path={path}
+        depth={depth}
+        activeFilePath={activeFilePath}
+        canCollapse={canCollapse}
+        updatedContents={updatedContents}
+        toggle={toggle}
+        isOpen={isOpen}
+        isFolder={!isLeaf}
+      />
+    </div>
   );
 };
 
 type ItemProps = {
   name: string;
   path: string;
-  children: NestedFileTree[];
+  isFolder: boolean;
   activeFilePath: string;
   depth: number;
   canCollapse?: boolean;
+  isOpen: boolean;
   updatedContents: Record<string, unknown>;
+  toggle: () => void;
 };
 
 const Item = (props: ItemProps) => {
-  if (props.children.length) {
-    return <Folder {...props} depth={props.depth + 1} />;
+  if (props.isFolder) {
+    return <Folder {...props} />;
   }
-  return (
-    <File
-      {...props}
-      depth={props.depth + 1}
-      isActive={props.activeFilePath === props.path}
-    />
-  );
+  return <File {...props} isActive={props.activeFilePath === props.path} />;
 };
 
 type FolderProps = {
   name: string;
   path: string;
   depth: number;
-  children: NestedFileTree[];
   activeFilePath: string;
   canCollapse?: boolean;
+  isOpen: boolean;
   updatedContents: Record<string, unknown>;
+  toggle: () => void;
 };
 
 const Folder = ({
   name,
   path,
-  children,
   activeFilePath,
   canCollapse = true,
   updatedContents,
+  isOpen,
   depth,
+  toggle,
 }: FolderProps) => {
-  const [isExpanded, setIsExpanded] = useState(!canCollapse);
   const router = useRouter();
   const query = router.query;
 
   useEffect(() => {
-    if (!isExpanded && activeFilePath?.includes(name)) {
-      setIsExpanded(true);
+    if (!isOpen && activeFilePath?.includes(name)) {
+      toggle();
     }
   }, [activeFilePath]);
 
@@ -161,8 +315,7 @@ const Folder = ({
           }}
           active={isActive}
           onClick={() => {
-            if (!canCollapse) return;
-            setIsExpanded(!isExpanded);
+            // toggle();
           }}
         >
           <ActionList.LeadingVisual
@@ -170,22 +323,21 @@ const Folder = ({
               // don't select the folder on toggle
               e.stopPropagation();
               e.preventDefault();
-              if (!canCollapse) return;
-              setIsExpanded(!isExpanded);
+              toggle();
             }}
           >
             {depth > 0 && (
               <StyledOcticon
                 sx={{ color: "fg.muted" }}
-                className="mr-[3px] ml-[-4px]"
-                icon={isExpanded ? ChevronDownIcon : ChevronRightIcon}
+                className={`mr-[3px] ml-[-4px] transform transition-transform ${
+                  isOpen ? "rotate-90" : ""
+                }`}
+                icon={ChevronRightIcon}
               />
             )}
             <StyledOcticon
               sx={{ color: "#54aeff", ml: depth > 0 ? 0 : 2 }}
-              icon={
-                isExpanded ? FileDirectoryOpenFillIcon : FileDirectoryFillIcon
-              }
+              icon={isOpen ? FileDirectoryOpenFillIcon : FileDirectoryFillIcon}
             />
           </ActionList.LeadingVisual>
 
@@ -196,29 +348,16 @@ const Folder = ({
             <div className="whitespace-nowrap truncate">{name}</div>
             {/* using a div because ActionList.TrailingVisual messes up name truncation */}
             <div className="ml-auto">
-              {!isExpanded &&
+              {!isOpen &&
                 Object.keys(updatedContents).some((path2) =>
                   path2.startsWith(path)
                 ) && <VscCircleOutline />}
-              {doShowPills && (
-                <div className="ml-auto flex p-1 border-[1px] border-gray-200 rounded-full">
-                  {children.slice(0, 10).map((file) => (
-                    <div className="m-[1px]">
-                      <FileDot
-                        name={file.name}
-                        type={file.children?.length ? "folder" : "file"}
-                        key={file.path}
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
         </ActionList.LinkItem>
       </Link>
 
-      {isExpanded && (
+      {isOpen && (
         <ActionList
           data-depth={depth}
           className="!py-0 relative"
@@ -235,17 +374,7 @@ const Folder = ({
               background: "rgba(208, 215, 222, 0.48)",
             },
           }}
-        >
-          {children.map((file) => (
-            <Item
-              key={file.name}
-              depth={depth}
-              {...file}
-              activeFilePath={activeFilePath}
-              updatedContents={updatedContents}
-            />
-          ))}
-        </ActionList>
+        ></ActionList>
       )}
     </>
   );

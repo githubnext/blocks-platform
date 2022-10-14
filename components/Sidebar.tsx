@@ -7,13 +7,12 @@ import {
   FileIcon,
   SearchIcon,
 } from "@primer/octicons-react";
-import { ActionList, Box, StyledOcticon, Text, TextInput } from "@primer/react";
+import { Box, StyledOcticon, Text, TextInput } from "@primer/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { VscCircleFilled, VscCircleOutline } from "react-icons/vsc";
+import { VscCircleOutline } from "react-icons/vsc";
 import { FixedSizeTree as Tree } from "react-vtree";
-import languageColors from "../language-colors.json";
 
 // defined in @githubnext/blocks but not exported
 interface NestedFileTree {
@@ -25,11 +24,6 @@ interface NestedFileTree {
   type: string;
 }
 
-type User = {
-  id: string;
-  path: string;
-};
-
 type SidebarProps = {
   owner: string;
   repo: string;
@@ -38,7 +32,6 @@ type SidebarProps = {
   updatedContents: Record<string, unknown>;
 };
 
-const doShowPills = false;
 export const Sidebar = ({
   owner = "",
   repo = "",
@@ -46,11 +39,12 @@ export const Sidebar = ({
   activeFilePath = "",
   updatedContents,
 }: SidebarProps) => {
-  if (!files.map) return null;
   const [searchTerm, setSearchTerm] = useState("");
   const wrapperElement = useRef<HTMLDivElement>(null);
   const tree = useRef<Tree>(null);
   const [dimensions, setDimensions] = useState<[number, number]>([100, 100]);
+  const router = useRouter();
+  const query = router.query;
 
   useEffect(() => {
     const onResize = () => {
@@ -66,12 +60,17 @@ export const Sidebar = ({
   }, []);
 
   useEffect(() => {
-    if (tree.current) {
-      setTimeout(() => {
-        tree.current.scrollToItem(activeFilePath, "center");
-      }, 100);
-    }
+    setTimeout(() => {
+      if (!tree.current) return;
+      tree.current.scrollToItem(activeFilePath, "center");
+    }, 100);
   }, []);
+  useEffect(() => {
+    if (!tree.current) return;
+    tree.current.recomputeTree({
+      useDefaultOpenness: true,
+    });
+  }, [searchTerm]);
 
   const nestedFiles = useMemo(() => {
     try {
@@ -113,6 +112,7 @@ export const Sidebar = ({
         stack.push({
           depth: 0,
           node: {
+            id: "/",
             name: `${owner}/${repo}`,
             path: "",
             children: filteredFiles,
@@ -144,6 +144,8 @@ export const Sidebar = ({
                 activeFilePath,
                 canCollapse,
                 updatedContents,
+                currentPathname: router.pathname,
+                currentQuery: query,
               }
             : id;
 
@@ -163,6 +165,7 @@ export const Sidebar = ({
       },
     [filteredFiles, updatedContents, numberOfFiles < 20, activeFilePath]
   );
+  if (!files.map) return null;
 
   return (
     <Box className="sidebar h-full overflow-hidden flex-1">
@@ -175,24 +178,23 @@ export const Sidebar = ({
           className="w-full"
         />
       </Box>
-      <Box className="h-full overflow-auto p-2 pt-0" ref={wrapperElement}>
-        {filteredFiles.length > 0 ? (
-          <ActionList className="">
+      <Box className="h-full overflow-auto pr-2 pb-2">
+        <div className="h-full w-full file-tree-wrapper" ref={wrapperElement}>
+          {filteredFiles.length > 0 ? (
             <Tree
-              ref={tree}
               treeWalker={treeWalker}
-              itemSize={30}
+              itemSize={32}
               height={dimensions[1]}
               width={dimensions[0]}
             >
               {Node}
             </Tree>
-          </ActionList>
-        ) : (
-          <Text className="block text-sm text-center p-10 text-gray-500">
-            No files found{searchTerm && ` for "${searchTerm}"`}
-          </Text>
-        )}
+          ) : (
+            <Text className="block text-sm text-center p-10 text-gray-500">
+              No files found{searchTerm && ` for "${searchTerm}"`}
+            </Text>
+          )}
+        </div>
       </Box>
     </Box>
   );
@@ -207,13 +209,15 @@ const Node = ({
     depth,
     canCollapse,
     updatedContents,
+    currentPathname,
+    currentQuery,
   },
   isOpen,
   style,
   toggle,
 }) => {
   return (
-    <div style={style}>
+    <div style={style} key={path || "/"}>
       <Item
         name={name}
         path={path}
@@ -221,6 +225,8 @@ const Node = ({
         activeFilePath={activeFilePath}
         canCollapse={canCollapse}
         updatedContents={updatedContents}
+        currentPathname={currentPathname}
+        currentQuery={currentQuery}
         toggle={toggle}
         isOpen={isOpen}
         isFolder={!isLeaf}
@@ -235,90 +241,53 @@ type ItemProps = {
   isFolder: boolean;
   activeFilePath: string;
   depth: number;
+  currentPathname: string;
+  currentQuery: Record<string, any>;
   canCollapse?: boolean;
   isOpen: boolean;
   updatedContents: Record<string, unknown>;
   toggle: () => void;
 };
 
-const Item = (props: ItemProps) => {
-  if (props.isFolder) {
-    return <Folder {...props} />;
-  }
-  return <File {...props} isActive={props.activeFilePath === props.path} />;
-};
-
-type FolderProps = {
-  name: string;
-  path: string;
-  depth: number;
-  activeFilePath: string;
-  canCollapse?: boolean;
-  isOpen: boolean;
-  updatedContents: Record<string, unknown>;
-  toggle: () => void;
-};
-
-const Folder = ({
+const Item = ({
   name,
   path,
+  isFolder,
   activeFilePath,
-  canCollapse = true,
-  updatedContents,
-  isOpen,
   depth,
+  currentPathname,
+  currentQuery,
+  isOpen,
+  updatedContents,
   toggle,
-}: FolderProps) => {
-  const router = useRouter();
-  const query = router.query;
-
-  useEffect(() => {
-    if (!isOpen && activeFilePath?.includes(name)) {
-      toggle();
-    }
-  }, [activeFilePath]);
-
+}: ItemProps) => {
   const isActive = activeFilePath === path;
 
   return (
-    <>
-      <Link
-        href={{
-          pathname: router.pathname,
-          query: {
-            ...query,
-            blockKey: isActive ? query.blockKey : undefined,
-            path,
-            fileRef: null,
-          },
-        }}
-        shallow
+    <Link
+      href={{
+        pathname: currentPathname,
+        query: {
+          ...currentQuery,
+          blockKey: isActive ? currentQuery.blockKey : undefined,
+          path,
+          fileRef: null,
+        },
+      }}
+      shallow
+    >
+      <a
+        style={{ paddingLeft: depth * 13 }}
+        className={`relative ml-3 w-[calc(100%-12px)] flex items-center px-[8px] py-[6px] rounded-md hover:z-10 ${
+          isActive ? "bg-[#F4F5F7]" : "bg-white hover:bg-[#F0F2F4]"
+        }`}
       >
-        <ActionList.LinkItem
-          style={{ paddingLeft: depth * 13 }}
-          sx={{
-            "::before": {
-              content: isActive ? "''" : null,
-              background: "rgb(9, 105, 218)",
-              borderRadius: "6px",
-              width: "4px",
-              height: "24px",
-              position: "absolute",
-              left: "-8px",
-              top: 0,
-              margin: "auto",
-              bottom: 0,
-            },
-            position: "relative",
-            width: "100%",
-            fontWeight: 400,
-          }}
-          active={isActive}
-          onClick={() => {
-            // toggle();
-          }}
-        >
-          <ActionList.LeadingVisual
+        {isActive && (
+          <div className="absolute top-[calc(50%-12px)] left-[-8px] w-[4px] h-[24px] bg-[rgb(9,105,218)] rounded-[6px]" />
+        )}
+        {isFolder ? (
+          <button
+            className="flex-none"
             onClick={(e) => {
               // don't select the folder on toggle
               e.stopPropagation();
@@ -328,141 +297,35 @@ const Folder = ({
           >
             {depth > 0 && (
               <StyledOcticon
-                sx={{ color: "fg.muted" }}
-                className={`mr-[3px] ml-[-4px] transform transition-transform ${
+                color="fg.muted"
+                className={`mr-[6px] ml-[-8px] transform transition-transform ${
                   isOpen ? "rotate-90" : ""
                 }`}
                 icon={ChevronRightIcon}
               />
             )}
             <StyledOcticon
-              sx={{ color: "#54aeff", ml: depth > 0 ? 0 : 2 }}
+              color="#54aeff"
+              sx={{ ml: depth > 0 ? 0 : 2 }}
               icon={isOpen ? FileDirectoryOpenFillIcon : FileDirectoryFillIcon}
             />
-          </ActionList.LeadingVisual>
+          </button>
+        ) : (
+          <StyledOcticon icon={FileIcon} className="ml-4 text-[#57606a]" />
+        )}
 
-          <div
-            className={`flex items-center ${depth > 0 ? "ml-2" : "ml-1"}`}
-            title={name}
-          >
-            <div className="whitespace-nowrap truncate">{name}</div>
-            {/* using a div because ActionList.TrailingVisual messes up name truncation */}
-            <div className="ml-auto">
-              {!isOpen &&
-                Object.keys(updatedContents).some((path2) =>
-                  path2.startsWith(path)
-                ) && <VscCircleOutline />}
-            </div>
-          </div>
-        </ActionList.LinkItem>
-      </Link>
-
-      {isOpen && (
-        <ActionList
-          data-depth={depth}
-          className="!py-0 relative"
-          sx={{
-            // pl: depth ? 2 : 0,
-            "::before": {
-              content: depth === 0 ? null : "''",
-              position: "absolute",
-              // Magic number. Seems to achieve the right spacing for optical alignment between the chevron and the vertical line.
-              left: 7 + depth * 13,
-              top: 0,
-              bottom: 0,
-              width: 1,
-              background: "rgba(208, 215, 222, 0.48)",
-            },
-          }}
-        ></ActionList>
-      )}
-    </>
-  );
-};
-
-type FileProps = {
-  name: string;
-  path: string;
-  depth: number;
-  isActive: boolean;
-  updatedContents: Record<string, unknown>;
-};
-
-const File = ({ name, path, isActive, updatedContents, depth }: FileProps) => {
-  const router = useRouter();
-  const query = router.query;
-
-  return (
-    <Link
-      shallow
-      href={{
-        pathname: router.pathname,
-        query: {
-          ...query,
-          blockKey: isActive ? query.blockKey : undefined,
-          path,
-          fileRef: null,
-        },
-      }}
-    >
-      <ActionList.LinkItem
-        sx={{
-          "::before": {
-            content: isActive ? "''" : null,
-            background: "rgb(9, 105, 218)",
-            borderRadius: "6px",
-            width: "4px",
-            height: "24px",
-            position: "absolute",
-            left: "-8px",
-            top: 0,
-            margin: "auto",
-            bottom: 0,
-          },
-          position: "relative",
-          width: "100%",
-          paddingLeft: depth * 13,
-          fontWeight: 400,
-        }}
-        active={isActive}
-      >
-        <ActionList.LeadingVisual>
-          <StyledOcticon icon={FileIcon} sx={{ ml: 3 }} />
-        </ActionList.LeadingVisual>
-        <div className="flex items-center ml-2" title={name}>
-          <div title={name} className="whitespace-nowrap truncate">
+        <div className={`flex items-center ml-2 overflow-hidden`} title={name}>
+          <div className="whitespace-nowrap truncate text-[#24292f] text-sm">
             {name}
           </div>
-          {/* using a div because ActionList.TrailingVisual messes up name truncation */}
           <div className="ml-auto">
-            {updatedContents[path] && <VscCircleFilled />}
+            {!isOpen &&
+              Object.keys(updatedContents).some((path2) =>
+                path2.startsWith(path)
+              ) && <VscCircleOutline />}
           </div>
         </div>
-      </ActionList.LinkItem>
+      </a>
     </Link>
-  );
-};
-
-type FileDotProps = {
-  name: string;
-  type?: "file" | "folder";
-};
-
-const FileDot = ({ name, type = "file" }: FileDotProps) => {
-  if (!doShowPills) return null;
-
-  const extension = name.split(".").pop();
-  let color = languageColors[extension] || "#dadada";
-  if (type === "folder") {
-    color = "transparent";
-  }
-
-  return (
-    <div
-      className={`h-[0.8em] w-[0.5em] rounded-full border-[1px] ${
-        type === "folder" ? "border-gray-400" : "border-transparent"
-      }`}
-      style={{ background: color }}
-    />
   );
 };

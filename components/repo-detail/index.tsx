@@ -142,7 +142,6 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
     );
 
   useBlockFrameMessages({
-    token,
     owner,
     repo,
     branchName,

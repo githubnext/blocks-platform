@@ -305,25 +305,10 @@ export const getBlocksFromRepo: QueryFunction<
   BlocksRepo,
   GenericQueryKey<BlocksKeyParams>
 > = async (ctx) => {
-  let params = ctx.queryKey[1];
-  let meta = ctx.meta as unknown as BlocksQueryMeta;
-  let octokit = meta.octokit;
-  let user = meta.user;
-  return await getBlocksFromRepoInner({ octokit, user, ...params });
-};
-export const getBlocksFromRepoInner = async ({
-  devServerInfo,
-  octokit,
-  user,
-  owner,
-  repo,
-  path,
-  type,
-  searchTerm,
-}: BlocksKeyParams & {
-  octokit: Octokit;
-  user: Session["user"];
-}): Promise<BlocksRepo> => {
+  const params: BlocksKeyParams = ctx.queryKey[1];
+  const { queryClient, user } = ctx.meta as unknown as BlocksQueryMeta;
+  const { devServerInfo, owner, repo, path, type, searchTerm } = params;
+
   if (!owner || !repo) {
     return undefined;
   }
@@ -345,30 +330,26 @@ export const getBlocksFromRepoInner = async ({
   let blocks = [];
 
   try {
-    const blocksConfigRes = await tryToGetContent(octokit, {
-      owner,
-      repo,
-      path: "blocks.config.json",
-    });
-    if (blocksConfigRes) {
-      blocks =
-        JSON.parse(
-          Buffer.from(blocksConfigRes.content, "base64").toString("utf8")
-        ) ?? [];
-    }
-
-    if (!blocks.length) {
+    const blocksConfig = await queryClient.fetchQuery(
+      QueryKeyMap.metadata.factory({ owner, repo, path: "blocks.config.json" }),
+      getMetadata,
+      {
+        staleTime: 5 * 60 * 1000,
+      }
+    );
+    if (Array.isArray(blocksConfig)) {
+      blocks = blocksConfig;
+    } else {
       // check package.json for backwards compatibility
-      const packageJsonRes = await tryToGetContent(octokit, {
-        owner,
-        repo,
-        path: "package.json",
-      });
-      if (packageJsonRes) {
-        blocks =
-          JSON.parse(
-            Buffer.from(packageJsonRes.content, "base64").toString("utf8")
-          ).blocks ?? [];
+      const packageJson = await queryClient.fetchQuery(
+        QueryKeyMap.metadata.factory({ owner, repo, path: "package.json" }),
+        getMetadata,
+        {
+          staleTime: 5 * 60 * 1000,
+        }
+      );
+      if (Array.isArray(packageJson["blocks"])) {
+        blocks = packageJson["blocks"];
       }
     }
   } catch (e) {}
@@ -600,21 +581,6 @@ export const checkAccess: QueryFunction<
   });
 
   return response.data;
-};
-
-type getContentParams = Parameters<Octokit["repos"]["getContent"]>[0];
-type getContentResult = components["schemas"]["content-file"];
-const tryToGetContent = async (
-  octokit: Octokit,
-  params: getContentParams
-): Promise<getContentResult | undefined> => {
-  try {
-    const res = await octokit.repos.getContent(params);
-    // `getContent` returns different types for different kinds of object, but we only ever request files
-    return res.data as getContentResult;
-  } catch {
-    return undefined;
-  }
 };
 
 export const getOwnerRepoFromDevServer = async (devServer: string) => {

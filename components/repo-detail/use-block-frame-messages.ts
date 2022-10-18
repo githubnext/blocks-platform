@@ -547,7 +547,7 @@ function useBlockFrameMessages({
   const queryClient = useQueryClient();
   const router = useRouter();
   const { token } = queryClient.getDefaultOptions().queries
-    .meta as unknown as BlocksQueryMeta;
+    .meta as BlocksQueryMeta;
 
   const blockFrames = useRef<BlockFrame[]>([]);
 

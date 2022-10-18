@@ -63,7 +63,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { token, userToken } = queryClient.getDefaultOptions().queries
-    .meta as unknown as BlocksQueryMeta;
+    .meta as BlocksQueryMeta;
 
   const {
     mutate: updateContents,

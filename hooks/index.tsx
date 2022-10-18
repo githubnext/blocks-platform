@@ -145,7 +145,7 @@ export function useMetadata({
   branchName: string;
 }) {
   const { token, userToken } = useQueryClient().getDefaultOptions().queries
-    .meta as unknown as BlocksQueryMeta;
+    .meta as BlocksQueryMeta;
   const { data: metadataData } = useFileContent(
     {
       repo,
@@ -474,7 +474,7 @@ export const getBlockContent: QueryFunction<
 > = async (ctx) => {
   let params = ctx.queryKey[1];
   const { owner, repo, id } = params;
-  let meta = ctx.meta as unknown as BlocksQueryMeta;
+  let meta = ctx.meta as BlocksQueryMeta;
 
   const url = `/api/get-block-content?owner=${owner}&repo=${repo}&id=${id}`;
 

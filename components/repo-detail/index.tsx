@@ -217,7 +217,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
           onSubmit={() => {
             requestedMetadata.onSubmit();
             const { token, userToken } = queryClient.getDefaultOptions().queries
-              .meta as unknown as BlocksQueryMeta;
+              .meta as BlocksQueryMeta;
             queryClient.executeMutation({
               mutationFn: updateFileContents,
               variables: {

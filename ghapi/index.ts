@@ -73,19 +73,19 @@ export function makeOctokitInstance(token: string) {
   return new Octokit({ auth: token });
 }
 
-export interface BlocksQueryMeta {
+export type BlocksQueryMeta = {
   token: string;
   userToken: string;
   ghapi: AxiosInstance;
   octokit: Octokit;
   user: Session["user"];
   queryClient: QueryClient;
-}
+};
 
 export const getFileContent: (
   ctx: QueryFunctionContext<GenericQueryKey<FileKeyParams>>
 ) => Promise<FileData> = async (ctx) => {
-  let meta = ctx.meta as unknown as BlocksQueryMeta;
+  let meta = ctx.meta as BlocksQueryMeta;
   let params = ctx.queryKey[1];
   const { path, owner, repo, fileRef = "HEAD" } = params;
   const query = fileRef && fileRef !== "HEAD" ? `?ref=${fileRef}` : "";
@@ -144,7 +144,7 @@ export const getFolderContent: QueryFunction<
   let { queryKey } = ctx;
   const { repo, owner, path, fileRef } = queryKey[1];
   let branch = fileRef || "HEAD";
-  let meta = ctx.meta as unknown as BlocksQueryMeta;
+  let meta = ctx.meta as BlocksQueryMeta;
   const apiUrl = `repos/${owner}/${repo}/git/trees/${branch}?recursive=1`;
 
   const res = await meta.ghapi.get<FolderData>(apiUrl);
@@ -192,7 +192,7 @@ export const getRepoInfoWithContributors: QueryFunction<
 > = async (ctx) => {
   let params = ctx.queryKey[1];
   const { owner, repo } = params;
-  let meta = ctx.meta as unknown as BlocksQueryMeta;
+  let meta = ctx.meta as BlocksQueryMeta;
   const url = `repos/${owner}/${repo}`;
   const repoInfoRes = await meta.ghapi.get(url);
 
@@ -210,7 +210,7 @@ export const getRepoInfo: QueryFunction<
   GenericQueryKey<InfoKeyParams>
 > = async (ctx) => {
   let { queryKey } = ctx;
-  let meta = ctx.meta as unknown as BlocksQueryMeta;
+  let meta = ctx.meta as BlocksQueryMeta;
   const { repo, owner } = queryKey[1];
   const url = `repos/${owner}/${repo}`;
   const repoInfoRes = await meta.ghapi(url);
@@ -221,7 +221,7 @@ export const searchForRepos: QueryFunction<
   GenericQueryKey<RepoSearchKeyParams>
 > = async (ctx) => {
   let { queryKey } = ctx;
-  let meta = ctx.meta as unknown as BlocksQueryMeta;
+  let meta = ctx.meta as BlocksQueryMeta;
   const { q, order = "desc", sort = "updated", per_page = 100 } = queryKey[1];
   const url = `search/repositories`;
   const res = await meta.ghapi(url, {
@@ -261,7 +261,7 @@ export const getRepoTimeline: QueryFunction<
   GenericQueryKey<TimelineKeyParams>
 > = async (ctx) => {
   let params = ctx.queryKey[1];
-  let meta = ctx.meta as unknown as BlocksQueryMeta;
+  let meta = ctx.meta as BlocksQueryMeta;
   const { owner, repo, sha, path } = params;
 
   const randomQueryParamName = `${Math.random()}`;
@@ -287,7 +287,7 @@ export const getRepoFiles: QueryFunction<
   GenericQueryKey<FilesKeyParams>
 > = async (ctx) => {
   let params = ctx.queryKey[1];
-  let meta = ctx.meta as unknown as BlocksQueryMeta;
+  let meta = ctx.meta as BlocksQueryMeta;
   const { owner, repo, sha = "HEAD" } = params;
   if (!owner || !repo) {
     return [];
@@ -306,7 +306,7 @@ export const getBlocksFromRepo: QueryFunction<
   GenericQueryKey<BlocksKeyParams>
 > = async (ctx) => {
   const params: BlocksKeyParams = ctx.queryKey[1];
-  const { queryClient, user } = ctx.meta as unknown as BlocksQueryMeta;
+  const { queryClient, user } = ctx.meta as BlocksQueryMeta;
   const { devServerInfo, owner, repo, path, type, searchTerm } = params;
 
   if (!owner || !repo) {
@@ -455,7 +455,7 @@ export const getBranches: QueryFunction<
 > = async (ctx) => {
   let params = ctx.queryKey[1];
   const { owner, repo } = params;
-  let meta = ctx.meta as unknown as BlocksQueryMeta;
+  let meta = ctx.meta as BlocksQueryMeta;
 
   const url = `repos/${owner}/${repo}/branches`;
 
@@ -554,7 +554,7 @@ export interface RepoSearchResult {
 
 export const searchRepos: QueryFunction<RepoSearchResult[]> = async (ctx) => {
   let query = ctx.queryKey[1];
-  let meta = ctx.meta as unknown as BlocksQueryMeta;
+  let meta = ctx.meta as BlocksQueryMeta;
   const url = `search/repositories?q=${query}+in:name&sort=stars&order=desc&per_page=10`;
 
   const res = await meta.ghapi(url);
@@ -642,7 +642,7 @@ export const getBlocksRepos: QueryFunction<
   BlocksRepo[],
   GenericQueryKey<BlocksReposParams>
 > = async (ctx) => {
-  let meta = ctx.meta as unknown as BlocksQueryMeta;
+  let meta = ctx.meta as BlocksQueryMeta;
   const { queryClient } = meta;
   let { queryKey } = ctx;
   const params = queryKey[1];

@@ -102,8 +102,8 @@ const authOptions = {
   ],
   callbacks: {
     async session({ session, token }) {
-      session.token = token.accessToken;
-      session.publicToken = token.publicToken;
+      session.userToken = token.accessToken;
+      session.token = token.publicToken;
       session.user = token.user;
       session.error = token.error;
       return session;

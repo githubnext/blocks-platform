@@ -1,4 +1,3 @@
-import { FileContext, FolderContext } from "@githubnext/blocks";
 import {
   GitBranchIcon,
   GitCommitIcon,
@@ -24,6 +23,7 @@ import { Diff, Hunk, parseDiff } from "react-diff-view";
 import "react-diff-view/style/index.css";
 import { useQueryClient } from "react-query";
 import { diffAsText } from "unidiff";
+import type { BlocksQueryMeta } from "ghapi";
 
 interface CommitCodeDialogProps {
   onCommit: () => void;
@@ -35,7 +35,6 @@ interface CommitCodeDialogProps {
   repo: string;
   owner: string;
   sha: string;
-  token: string;
   branchingDisabled: boolean;
   branchName: string;
 }
@@ -58,12 +57,13 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
     owner,
     repo,
     sha,
-    token,
     branchingDisabled,
     branchName,
   } = props;
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { token, userToken } = queryClient.getDefaultOptions().queries
+    .meta as BlocksQueryMeta;
 
   const {
     mutate: updateContents,
@@ -115,6 +115,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
           repo,
           ref: newBranchName,
           token,
+          userToken,
           content: newCode,
           path,
           title,
@@ -129,6 +130,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
           branch: branchName,
           ref: sha,
           token,
+          userToken,
           content: newCode,
           path,
         });

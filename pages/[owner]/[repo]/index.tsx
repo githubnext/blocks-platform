@@ -48,6 +48,7 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
 
     const meta = {
       token: session?.token,
+      userToken: session?.userToken,
       ghapi: makeGitHubAPIInstance(session?.token as string),
       octokit: makeOctokitInstance(session?.token as string),
       user: session?.user,
@@ -137,8 +138,7 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
           devServerInfo,
         }}
       >
-        {/* @ts-ignore */}
-        <RepoDetail token={session?.token} />
+        <RepoDetail />
       </AppContext.Provider>
     </>
   );

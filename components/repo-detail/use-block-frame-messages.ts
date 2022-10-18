@@ -4,9 +4,9 @@ import { useContext, useEffect, useRef } from "react";
 import { useQueryClient, QueryClient } from "react-query";
 import getConfig from "next/config";
 import { useRouter } from "next/router";
-import { useSession } from "next-auth/react";
 import type { Block, RepoFiles } from "@githubnext/blocks";
 import { QueryKeyMap } from "lib/query-keys";
+import type { BlocksQueryMeta } from "ghapi";
 import {
   getBlocksRepos,
   getBlocksFromRepo,
@@ -546,7 +546,8 @@ function useBlockFrameMessages({
   const { devServerInfo } = appContext;
   const queryClient = useQueryClient();
   const router = useRouter();
-  const publicToken = useSession().data.publicToken as string;
+  const { token } = queryClient.getDefaultOptions().queries
+    .meta as BlocksQueryMeta;
 
   const blockFrames = useRef<BlockFrame[]>([]);
 
@@ -611,11 +612,7 @@ function useBlockFrameMessages({
       // handle Block callback functions by name
       case "onRequestGitHubData":
         return handleResponse(
-          onRequestGitHubData(
-            data.payload.path,
-            data.payload.params,
-            publicToken
-          ),
+          onRequestGitHubData(data.payload.path, data.payload.params, token),
           responseParams
         );
 

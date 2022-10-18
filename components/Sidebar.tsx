@@ -1,18 +1,18 @@
 import type { RepoFiles } from "@githubnext/blocks";
 import { getNestedFileTree } from "@githubnext/blocks";
 import {
-  ChevronDownIcon,
   ChevronRightIcon,
   FileDirectoryFillIcon,
   FileDirectoryOpenFillIcon,
   FileIcon,
+  SearchIcon,
 } from "@primer/octicons-react";
-import { ActionList, Box, StyledOcticon } from "@primer/react";
+import { Box, StyledOcticon, Text, TextInput } from "@primer/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useState } from "react";
-import { VscCircleFilled, VscCircleOutline } from "react-icons/vsc";
-import languageColors from "../language-colors.json";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { VscCircleOutline } from "react-icons/vsc";
+import { FixedSizeTree as Tree } from "react-vtree";
 
 // defined in @githubnext/blocks but not exported
 interface NestedFileTree {
@@ -24,11 +24,6 @@ interface NestedFileTree {
   type: string;
 }
 
-type User = {
-  id: string;
-  path: string;
-};
-
 type SidebarProps = {
   owner: string;
   repo: string;
@@ -37,7 +32,6 @@ type SidebarProps = {
   updatedContents: Record<string, unknown>;
 };
 
-const doShowPills = false;
 export const Sidebar = ({
   owner = "",
   repo = "",
@@ -45,7 +39,38 @@ export const Sidebar = ({
   activeFilePath = "",
   updatedContents,
 }: SidebarProps) => {
-  if (!files.map) return null;
+  const [searchTerm, setSearchTerm] = useState("");
+  const wrapperElement = useRef<HTMLDivElement>(null);
+  const tree = useRef<Tree>(null);
+  const [dimensions, setDimensions] = useState<[number, number]>([100, 100]);
+  const router = useRouter();
+  const query = router.query;
+
+  useEffect(() => {
+    const onResize = () => {
+      if (wrapperElement.current) {
+        const { width, height } =
+          wrapperElement.current.getBoundingClientRect();
+        setDimensions([width, height]);
+      }
+    };
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (!tree.current) return;
+      tree.current.scrollToItem(activeFilePath, "center");
+    }, 100);
+  }, []);
+  useEffect(() => {
+    if (!tree.current) return;
+    tree.current.recomputeTree({
+      useDefaultOpenness: true,
+    });
+  }, [searchTerm]);
 
   const nestedFiles = useMemo(() => {
     try {
@@ -53,287 +78,254 @@ export const Sidebar = ({
     } catch (e) {}
   }, [files]);
 
+  const filteredFiles = useMemo(() => {
+    if (!searchTerm) return nestedFiles;
+    const lowerSearchTerm = searchTerm.toLowerCase();
+    return nestedFiles
+      .map((file) => {
+        const children = file.children.filter((child) =>
+          child.name.toLowerCase().includes(lowerSearchTerm)
+        );
+        const isMatch = file.name.toLowerCase().includes(lowerSearchTerm);
+        if (!children.length && !isMatch) return null;
+        return { ...file, children };
+      })
+      .filter(Boolean) as NestedFileTree[];
+  }, [nestedFiles, searchTerm]);
+
+  const numberOfFiles = useMemo(() => {
+    let runningCount = 0;
+    const countFiles = (file: NestedFileTree) => {
+      runningCount++;
+      file.children.forEach(countFiles);
+    };
+    filteredFiles.forEach(countFiles);
+    return runningCount;
+  }, [filteredFiles]);
+
+  const treeWalker = useMemo(
+    () =>
+      function* treeWalker(refresh) {
+        const stack = [];
+
+        // Remember all the necessary data of the first node in the stack.
+        stack.push({
+          depth: 0,
+          node: {
+            id: "/",
+            name: `${owner}/${repo}`,
+            path: "",
+            children: filteredFiles,
+          },
+        });
+
+        // Walk through the tree until we have no nodes available.
+        while (stack.length !== 0) {
+          const {
+            node: { children = [], path, name },
+            depth,
+          } = stack.pop();
+          const canCollapse = depth > 0;
+          const id = path || "/";
+
+          // Here we are sending the information about the node to the Tree component
+          // and receive an information about the openness state from it. The
+          // `refresh` parameter tells us if the full update of the tree is requested;
+          // basing on it we decide to return the full node data or only the node
+          // id to update the nodes order.
+          const isOpened = yield refresh
+            ? {
+                id,
+                isLeaf: children.length === 0,
+                isOpenByDefault: numberOfFiles < 20 || depth < 1,
+                name,
+                depth,
+                path,
+                activeFilePath,
+                canCollapse,
+                updatedContents,
+                currentPathname: router.pathname,
+                currentQuery: query,
+              }
+            : id;
+
+          // Basing on the node openness state we are deciding if we need to render
+          // the child nodes (if they exist).
+          if (children.length !== 0 && isOpened) {
+            // Since it is a stack structure, we need to put nodes we want to render
+            // first to the end of the stack.
+            for (let i = children.length - 1; i >= 0; i--) {
+              stack.push({
+                depth: depth + 1,
+                node: children[i],
+              });
+            }
+          }
+        }
+      },
+    [filteredFiles, updatedContents, numberOfFiles < 20, activeFilePath]
+  );
+  if (!files.map) return null;
+
   return (
     <Box className="sidebar h-full overflow-hidden flex-1">
-      <Box className="h-full overflow-auto p-2">
-        <ActionList>
-          <Item
-            name={`${owner}/${repo}`}
-            path={""}
-            depth={-1}
-            children={nestedFiles}
-            activeFilePath={activeFilePath}
-            canCollapse={false}
-            updatedContents={updatedContents}
-          />
-        </ActionList>
+      <Box className="p-2 pb-0">
+        <TextInput
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search files & folders"
+          leadingVisual={SearchIcon}
+          className="w-full"
+        />
+      </Box>
+      <Box className="h-full overflow-auto pr-2 pb-2">
+        <div className="h-full w-full file-tree-wrapper" ref={wrapperElement}>
+          {filteredFiles.length > 0 ? (
+            <Tree
+              treeWalker={treeWalker}
+              itemSize={32}
+              height={dimensions[1]}
+              width={dimensions[0]}
+            >
+              {Node}
+            </Tree>
+          ) : (
+            <Text className="block text-sm text-center p-10 text-gray-500">
+              No files found{searchTerm && ` for "${searchTerm}"`}
+            </Text>
+          )}
+        </div>
       </Box>
     </Box>
+  );
+};
+
+const Node = ({
+  data: {
+    isLeaf,
+    name,
+    path,
+    activeFilePath,
+    depth,
+    canCollapse,
+    updatedContents,
+    currentPathname,
+    currentQuery,
+  },
+  isOpen,
+  style,
+  toggle,
+}) => {
+  return (
+    <div style={style} key={path || "/"}>
+      <Item
+        name={name}
+        path={path}
+        depth={depth}
+        activeFilePath={activeFilePath}
+        canCollapse={canCollapse}
+        updatedContents={updatedContents}
+        currentPathname={currentPathname}
+        currentQuery={currentQuery}
+        toggle={toggle}
+        isOpen={isOpen}
+        isFolder={!isLeaf}
+      />
+    </div>
   );
 };
 
 type ItemProps = {
   name: string;
   path: string;
-  children: NestedFileTree[];
+  isFolder: boolean;
   activeFilePath: string;
   depth: number;
+  currentPathname: string;
+  currentQuery: Record<string, any>;
   canCollapse?: boolean;
+  isOpen: boolean;
   updatedContents: Record<string, unknown>;
+  toggle: () => void;
 };
 
-const Item = (props: ItemProps) => {
-  if (props.children.length) {
-    return <Folder {...props} depth={props.depth + 1} />;
-  }
-  return (
-    <File
-      {...props}
-      depth={props.depth + 1}
-      isActive={props.activeFilePath === props.path}
-    />
-  );
-};
-
-type FolderProps = {
-  name: string;
-  path: string;
-  depth: number;
-  children: NestedFileTree[];
-  activeFilePath: string;
-  canCollapse?: boolean;
-  updatedContents: Record<string, unknown>;
-};
-
-const Folder = ({
+const Item = ({
   name,
   path,
-  children,
+  isFolder,
   activeFilePath,
-  canCollapse = true,
-  updatedContents,
   depth,
-}: FolderProps) => {
-  const [isExpanded, setIsExpanded] = useState(!canCollapse);
-  const router = useRouter();
-  const query = router.query;
-
-  useEffect(() => {
-    if (!isExpanded && activeFilePath?.includes(name)) {
-      setIsExpanded(true);
-    }
-  }, [activeFilePath]);
-
+  currentPathname,
+  currentQuery,
+  isOpen,
+  updatedContents,
+  toggle,
+}: ItemProps) => {
   const isActive = activeFilePath === path;
 
   return (
-    <>
-      <Link
-        href={{
-          pathname: router.pathname,
-          query: {
-            ...query,
-            blockKey: isActive ? query.blockKey : undefined,
-            path,
-            fileRef: null,
-          },
-        }}
-        shallow
-      >
-        <ActionList.LinkItem
-          style={{ paddingLeft: depth * 13 }}
-          sx={{
-            "::before": {
-              content: isActive ? "''" : null,
-              background: "rgb(9, 105, 218)",
-              borderRadius: "6px",
-              width: "4px",
-              height: "24px",
-              position: "absolute",
-              left: "-8px",
-              top: 0,
-              margin: "auto",
-              bottom: 0,
-            },
-            position: "relative",
-            width: "100%",
-            fontWeight: 400,
-          }}
-          active={isActive}
-          onClick={() => {
-            if (!canCollapse) return;
-            setIsExpanded(!isExpanded);
-          }}
-        >
-          <ActionList.LeadingVisual
-            onClick={(e) => {
-              // don't select the folder on toggle
-              e.stopPropagation();
-              e.preventDefault();
-              if (!canCollapse) return;
-              setIsExpanded(!isExpanded);
-            }}
-          >
-            {depth > 0 && (
-              <StyledOcticon
-                sx={{ color: "fg.muted" }}
-                className="mr-[3px] ml-[-4px]"
-                icon={isExpanded ? ChevronDownIcon : ChevronRightIcon}
-              />
-            )}
-            <StyledOcticon
-              sx={{ color: "#54aeff", ml: depth > 0 ? 0 : 2 }}
-              icon={
-                isExpanded ? FileDirectoryOpenFillIcon : FileDirectoryFillIcon
-              }
-            />
-          </ActionList.LeadingVisual>
-
-          <div
-            className={`flex items-center ${depth > 0 ? "ml-2" : "ml-1"}`}
-            title={name}
-          >
-            <div className="whitespace-nowrap truncate">{name}</div>
-            {/* using a div because ActionList.TrailingVisual messes up name truncation */}
-            <div className="ml-auto">
-              {!isExpanded &&
-                Object.keys(updatedContents).some((path2) =>
-                  path2.startsWith(path)
-                ) && <VscCircleOutline />}
-              {doShowPills && (
-                <div className="ml-auto flex p-1 border-[1px] border-gray-200 rounded-full">
-                  {children.slice(0, 10).map((file) => (
-                    <div className="m-[1px]">
-                      <FileDot
-                        name={file.name}
-                        type={file.children?.length ? "folder" : "file"}
-                        key={file.path}
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </ActionList.LinkItem>
-      </Link>
-
-      {isExpanded && (
-        <ActionList
-          data-depth={depth}
-          className="!py-0 relative"
-          sx={{
-            // pl: depth ? 2 : 0,
-            "::before": {
-              content: depth === 0 ? null : "''",
-              position: "absolute",
-              // Magic number. Seems to achieve the right spacing for optical alignment between the chevron and the vertical line.
-              left: 7 + depth * 13,
-              top: 0,
-              bottom: 0,
-              width: 1,
-              background: "rgba(208, 215, 222, 0.48)",
-            },
-          }}
-        >
-          {children.map((file) => (
-            <Item
-              key={file.name}
-              depth={depth}
-              {...file}
-              activeFilePath={activeFilePath}
-              updatedContents={updatedContents}
-            />
-          ))}
-        </ActionList>
-      )}
-    </>
-  );
-};
-
-type FileProps = {
-  name: string;
-  path: string;
-  depth: number;
-  isActive: boolean;
-  updatedContents: Record<string, unknown>;
-};
-
-const File = ({ name, path, isActive, updatedContents, depth }: FileProps) => {
-  const router = useRouter();
-  const query = router.query;
-
-  return (
     <Link
-      shallow
       href={{
-        pathname: router.pathname,
+        pathname: currentPathname,
         query: {
-          ...query,
-          blockKey: isActive ? query.blockKey : undefined,
+          ...currentQuery,
+          blockKey: isActive ? currentQuery.blockKey : undefined,
           path,
           fileRef: null,
         },
       }}
+      shallow
     >
-      <ActionList.LinkItem
-        sx={{
-          "::before": {
-            content: isActive ? "''" : null,
-            background: "rgb(9, 105, 218)",
-            borderRadius: "6px",
-            width: "4px",
-            height: "24px",
-            position: "absolute",
-            left: "-8px",
-            top: 0,
-            margin: "auto",
-            bottom: 0,
-          },
-          position: "relative",
-          width: "100%",
-          paddingLeft: depth * 13,
-          fontWeight: 400,
-        }}
-        active={isActive}
+      <a
+        style={{ paddingLeft: depth * 13 }}
+        className={`relative ml-3 w-[calc(100%-12px)] flex items-center px-[8px] py-[6px] rounded-md hover:z-10 ${
+          isActive ? "bg-[#F4F5F7]" : "bg-white hover:bg-[#F0F2F4]"
+        }`}
       >
-        <ActionList.LeadingVisual>
-          <StyledOcticon icon={FileIcon} sx={{ ml: 3 }} />
-        </ActionList.LeadingVisual>
-        <div className="flex items-center ml-2" title={name}>
-          <div title={name} className="whitespace-nowrap truncate">
+        {isActive && (
+          <div className="absolute top-[calc(50%-12px)] left-[-8px] w-[4px] h-[24px] bg-[rgb(9,105,218)] rounded-[6px]" />
+        )}
+        {isFolder ? (
+          <button
+            className="flex-none"
+            onClick={(e) => {
+              // don't select the folder on toggle
+              e.stopPropagation();
+              e.preventDefault();
+              toggle();
+            }}
+          >
+            {depth > 0 && (
+              <StyledOcticon
+                color="fg.muted"
+                className={`mr-[6px] ml-[-8px] transform transition-transform ${
+                  isOpen ? "rotate-90" : ""
+                }`}
+                icon={ChevronRightIcon}
+              />
+            )}
+            <StyledOcticon
+              color="#54aeff"
+              sx={{ ml: depth > 0 ? 0 : 2 }}
+              icon={isOpen ? FileDirectoryOpenFillIcon : FileDirectoryFillIcon}
+            />
+          </button>
+        ) : (
+          <StyledOcticon icon={FileIcon} className="ml-4 text-[#57606a]" />
+        )}
+
+        <div className={`flex items-center ml-2 overflow-hidden`} title={name}>
+          <div className="whitespace-nowrap truncate text-[#24292f] text-sm">
             {name}
           </div>
-          {/* using a div because ActionList.TrailingVisual messes up name truncation */}
           <div className="ml-auto">
-            {updatedContents[path] && <VscCircleFilled />}
+            {!isOpen &&
+              Object.keys(updatedContents).some((path2) =>
+                path2.startsWith(path)
+              ) && <VscCircleOutline />}
           </div>
         </div>
-      </ActionList.LinkItem>
+      </a>
     </Link>
-  );
-};
-
-type FileDotProps = {
-  name: string;
-  type?: "file" | "folder";
-};
-
-const FileDot = ({ name, type = "file" }: FileDotProps) => {
-  if (!doShowPills) return null;
-
-  const extension = name.split(".").pop();
-  let color = languageColors[extension] || "#dadada";
-  if (type === "folder") {
-    color = "transparent";
-  }
-
-  return (
-    <div
-      className={`h-[0.8em] w-[0.5em] rounded-full border-[1px] ${
-        type === "folder" ? "border-gray-400" : "border-transparent"
-      }`}
-      style={{ background: color }}
-    />
   );
 };

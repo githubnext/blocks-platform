@@ -292,3 +292,18 @@ div[role="alertdialog"] {
     @apply text-blue-400;
   }
 }
+
+.file-tree-wrapper > div > div {
+  background: linear-gradient(
+    to bottom,
+    #fff,
+    #fff 10%,
+    #f0f2f4 10%,
+    #f0f2f4 90%,
+    #fff 90%,
+    #fff
+  );
+  background-size: 90% 32px;
+  background-position: 22px 2px;
+  background-repeat: repeat-y;
+}

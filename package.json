@@ -45,6 +45,8 @@
     "react-dom": "^18.1.0",
     "react-icons": "^4.3.1",
     "react-query": "^3.34.16",
+    "react-vtree": "^2.0.4",
+    "react-window": "^1.8.7",
     "streamifier": "^0.1.1",
     "styled-components": "^5.3.3",
     "tree-sitter": "^0.20.0",

@@ -22,7 +22,6 @@ type BlockPaneHeaderProps = {
   isFullscreen: boolean;
   path: string;
   isFolder: boolean;
-  token: string;
   metadata: any;
   setRequestedMetadata: (metadata: any) => void;
   context: Context;
@@ -34,7 +33,6 @@ export default function BlockPaneHeader({
   isFullscreen,
   path,
   isFolder,
-  token,
   metadata,
   setRequestedMetadata,
   context,
@@ -102,7 +100,7 @@ export default function BlockPaneHeader({
               onChange={setBlock}
               value={block}
             />
-            {!isDefaultBlock && token && (
+            {!isDefaultBlock && (
               <Button
                 disabled={!appContext.hasRepoInstallation}
                 onClick={() => {

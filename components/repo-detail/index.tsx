@@ -1,9 +1,9 @@
-import { useContext, useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import * as Immer from "immer";
 import { useQueryClient } from "react-query";
-import { Flash, Link, StyledOcticon, useTheme } from "@primer/react";
-import { AlertIcon } from "@primer/octicons-react";
+import { useTheme } from "@primer/react";
 import { QueryKeyMap } from "lib/query-keys";
+import type { BlocksQueryMeta } from "ghapi";
 import {
   getBlockKey,
   updateFileContents,
@@ -22,7 +22,6 @@ import FileTreePane from "./FileTreePane";
 import BlockPane from "./BlockPane";
 import CommitsPane from "./CommitsPane";
 import type { RepoFiles } from "@githubnext/blocks";
-import { AppContext } from "context";
 import { CODEX_BLOCKS } from "lib";
 import { useSession } from "next-auth/react";
 import useBlockFrameMessages from "./use-block-frame-messages";
@@ -42,7 +41,6 @@ export type UpdatedContent = {
 export type UpdatedContents = Record<string, UpdatedContent>;
 
 interface RepoDetailInnerProps {
-  token: string;
   repoInfo: RepoInfo;
   branches: Branch[];
   branchName: string;
@@ -57,7 +55,7 @@ const blockTypes = {
 
 export function RepoDetailInner(props: RepoDetailInnerProps) {
   const queryClient = useQueryClient();
-  const { token, repoInfo, branches, branchName, files, timeline } = props;
+  const { repoInfo, branches, branchName, files, timeline } = props;
   const router = useRouter();
   const { setColorMode } = useTheme();
   const {
@@ -76,7 +74,6 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
     onSubmit: () => void;
   }>(null);
   const isFullscreen = mode === "fullscreen";
-  const appContext = useContext(AppContext);
 
   const context = useMemo(
     () => ({
@@ -118,7 +115,6 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
     repo,
     metadataPath: `.github/blocks/all.json`,
     filePath: path,
-    token,
     branchName,
   });
 
@@ -181,7 +177,6 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
               {...{
                 fileInfo,
                 path,
-                token,
                 metadata,
                 setRequestedBlockMetadata,
                 isFullscreen,
@@ -205,7 +200,6 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
       </div>
       {!!requestedBlockMetadata && (
         <UpdateCodeModal
-          isLoggedIn={!!token}
           path={`.github/blocks/all.json`}
           newCode={JSON.stringify(requestedBlockMetadata, null, 2)}
           currentCode={JSON.stringify(metadata, null, 2)}
@@ -217,12 +211,13 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
       )}
       {!!requestedMetadata && (
         <UpdateCodeModal
-          isLoggedIn={!!token}
           path={requestedMetadata.path}
           newCode={requestedMetadata.new}
           currentCode={requestedMetadata.current}
           onSubmit={() => {
             requestedMetadata.onSubmit();
+            const { token, userToken } = queryClient.getDefaultOptions().queries
+              .meta as unknown as BlocksQueryMeta;
             queryClient.executeMutation({
               mutationFn: updateFileContents,
               variables: {
@@ -233,6 +228,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
                 ref: branchName,
                 branch: branchName,
                 token,
+                userToken,
               },
               onSuccess: () => {
                 queryClient.invalidateQueries(
@@ -265,7 +261,6 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
             setShowCommitCodeDialog(false);
           }}
           isOpen
-          token={token}
           branchName={branchName}
           branchingDisabled={!isBranchable}
         />
@@ -274,11 +269,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
   );
 }
 
-interface RepoDetailProps {
-  token: string;
-}
-
-export function RepoDetail({ token }: RepoDetailProps) {
+export function RepoDetail() {
   const router = useRouter();
   const {
     data: { user },
@@ -363,7 +354,6 @@ export function RepoDetail({ token }: RepoDetailProps) {
   } else if (repoInfo.status === "success" && branches.status === "success") {
     return (
       <RepoDetailInner
-        token={token}
         repoInfo={repoInfo.data}
         branches={branches.data}
         branchName={branchName}

@@ -13,7 +13,6 @@ const { publicRuntimeConfig } = getConfig();
 type BlockPaneProps = {
   fileInfo: RepoFiles[0];
   path: string;
-  token: string;
   metadata: any;
   setRequestedBlockMetadata: (metadata: any) => void;
   isFullscreen: boolean;
@@ -25,7 +24,6 @@ type BlockPaneProps = {
 export default function BlockPane({
   fileInfo,
   path,
-  token,
   metadata,
   setRequestedBlockMetadata,
   isFullscreen,
@@ -88,7 +86,6 @@ export default function BlockPane({
           isFullscreen,
           path,
           isFolder,
-          token,
           metadata,
           setRequestedMetadata: setRequestedBlockMetadata,
           context,

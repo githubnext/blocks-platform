@@ -43,6 +43,7 @@ import {
   UseQueryOptions,
 } from "react-query";
 import type { QueryFunction, UseQueryResult } from "react-query";
+import { useQueryClient } from "react-query";
 
 export function useFileContent(
   params: FileKeyParams,
@@ -83,14 +84,14 @@ interface UseUpdateFileContentParams extends RepoContext {
   path: string;
   ref: string; // The name of the commit/branch/tag.
   branch: string; // Required in order to target createOrUpdateFileContents
-  token?: string;
+  token: string;
+  userToken: string;
 }
 
 export async function updateFileContents(params: UseUpdateFileContentParams) {
   const contentEncoded = Base64.encode(params.content);
-  const octokit = new Octokit({
-    auth: params.token,
-  });
+  const octokit = new Octokit({ auth: params.token });
+  const userOctokit = new Octokit({ auth: params.userToken });
 
   let fileSha = params.ref;
   try {
@@ -111,7 +112,7 @@ export async function updateFileContents(params: UseUpdateFileContentParams) {
   } catch (e) {}
 
   try {
-    const res = await octokit.repos.createOrUpdateFileContents({
+    const res = await userOctokit.repos.createOrUpdateFileContents({
       owner: params.owner,
       repo: params.repo,
       path: params.path,
@@ -135,16 +136,16 @@ export function useMetadata({
   repo,
   metadataPath,
   filePath,
-  token,
   branchName,
 }: {
   owner: string;
   repo: string;
   metadataPath: string;
   filePath: string;
-  token: string;
   branchName: string;
 }) {
+  const { token, userToken } = useQueryClient().getDefaultOptions().queries
+    .meta as unknown as BlocksQueryMeta;
   const { data: metadataData } = useFileContent(
     {
       repo,
@@ -175,7 +176,6 @@ export function useMetadata({
   const { mutateAsync } = useUpdateFileContents({});
   const onUpdateMetadata = useCallback(
     async (contents, overridePath = null) => {
-      if (!token) return;
       await mutateAsync({
         content: JSON.stringify(contents, null, 2),
         owner,
@@ -184,6 +184,7 @@ export function useMetadata({
         ref: branchName,
         branch: branchName,
         token,
+        userToken,
       });
       setMetadata(contents);
     },

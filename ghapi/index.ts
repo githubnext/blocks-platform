@@ -1,7 +1,6 @@
 import { CODEX_BLOCKS } from "../lib";
 import { Octokit } from "@octokit/rest";
 import { Endpoints } from "@octokit/types";
-import { components } from "@octokit/openapi-types";
 import axios, { AxiosInstance } from "axios";
 import { signOut } from "next-auth/react";
 import { Base64 } from "js-base64";
@@ -76,6 +75,7 @@ export function makeOctokitInstance(token: string) {
 
 export interface BlocksQueryMeta {
   token: string;
+  userToken: string;
   ghapi: AxiosInstance;
   octokit: Octokit;
   user: Session["user"];
@@ -466,6 +466,7 @@ export const getBranches: QueryFunction<
 export interface CreateBranchParams {
   ref: string;
   token: string;
+  userToken: string;
   owner: string;
   repo: string;
   content: string;
@@ -483,6 +484,7 @@ export async function createBranchAndPR(
   const {
     ref,
     token,
+    userToken,
     owner,
     repo,
     content,
@@ -491,6 +493,7 @@ export async function createBranchAndPR(
     body = "This is a pull request created programmatically by GitHub Blocks.",
   } = params;
   const octokit = new Octokit({ auth: token });
+  const userOctokit = new Octokit({ auth: userToken });
   // "SHAs" abound in this codebase, so let me explain what's going on.
   // In order to create a new branch (a.k.a "ref"), you need the SHA of the branch you're creating it off of.
   // We're naïvely assuming that the branch you're creating off of is the "main" branch.
@@ -513,7 +516,7 @@ export async function createBranchAndPR(
   let blobSha = currentFileData.data.sha;
 
   // Step 1. Create the new branch, using the SHA of the "main" branch as the base.
-  await octokit.git.createRef({
+  await userOctokit.git.createRef({
     owner,
     repo,
     ref: `refs/heads/${ref}`,
@@ -521,7 +524,7 @@ export async function createBranchAndPR(
   });
 
   // Step 2. Commit the new file to the new branch.
-  await octokit.repos.createOrUpdateFileContents({
+  await userOctokit.repos.createOrUpdateFileContents({
     owner,
     repo,
     path,
@@ -533,7 +536,7 @@ export async function createBranchAndPR(
   });
 
   // Step 3. Create the PR using "main" as the base.
-  const res = await octokit.pulls.create({
+  const res = await userOctokit.pulls.create({
     owner,
     repo,
     head: ref,

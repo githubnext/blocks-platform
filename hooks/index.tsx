@@ -286,6 +286,7 @@ export function useBlocksRepos(
     {
       refetchOnWindowFocus: false,
       retry: false,
+      staleTime: 5 * 60 * 1000,
       ...config,
     }
   );
@@ -331,6 +332,10 @@ export function useManageBlock({
     path,
     type,
     devServerInfo,
+    // fill these in to match call in block-picker.tsx
+    // to improve caching
+    searchTerm: "",
+    repoUrl: undefined,
   });
 
   // do we need to load any Blocks from private repos?

@@ -88,23 +88,18 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
     { owner, repo },
     { enabled: queryClientMetaLoaded }
   );
-  if (repoInfoStatus === "error") {
+  if (repoInfoStatus === "error" || repoInfo?.private) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-center">
         <div className="max-w-2xl mx-auto px-4">
           <h3 className="font-bold text-lg">
-            Our GitHub App is not installed on {owner}/{repo}.
+            We weren't able to find the{" "}
+            <strong>
+              {owner}/{repo}
+            </strong>{" "}
+            repo.
           </h3>
-          <div className="mt-4">
-            <a
-              target="_blank"
-              rel="noopener"
-              href={installationUrl}
-              className="inline-block px-3 py-1 text-sm rounded font-medium bg-[#2da44e] text-white"
-            >
-              Install app.
-            </a>
-          </div>
+          <h3>Blocks doesn't work with private repos.</h3>
         </div>
       </div>
     );

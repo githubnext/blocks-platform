@@ -135,23 +135,8 @@ export default function BlockPicker(props: BlockPickerProps) {
                   <strong>
                     {searchTermOwner}/{searchTermRepo}
                   </strong>{" "}
-                  repo. If it's private, make sure our GitHub App has access to
-                  it.
+                  repo. Blocks doesn't work with private repos.
                 </Text>
-
-                <div className="flex mt-4">
-                  <a
-                    target="_blank"
-                    rel="noopener"
-                    href={appContext.installationUrl}
-                    className="mr-2"
-                  >
-                    <Button variant="primary">Update App access</Button>
-                  </a>
-                  <Button onClick={invalidateBlocksReposQuery}>
-                    Try again
-                  </Button>
-                </div>
               </>
             ) : (
               <Text color="fg.muted" className="px-5" pb="1">

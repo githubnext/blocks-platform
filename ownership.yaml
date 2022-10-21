@@ -1,0 +1,17 @@
+# https://thehub.github.com/epd/engineering/products-and-services/internal/service-catalog/service-ownership/
+# https://github.com/github/durable-ownership/blob/master/ownership.schema.json
+version: 1
+ownership:
+  - name: github-blocks
+    long_name: Github Blocks
+    description: GitHub Blocks prototype service
+    kind: logical
+    maintainer: idan
+    team: github/next
+    exec_sponsor: oegerikus
+    product_manager: idan
+    repo: https://github.com/githubnext/blocks
+    sev3:
+      slack: next-devex
+      tta: "1 business day"
+    qos: experimental

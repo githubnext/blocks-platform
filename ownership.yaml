@@ -1,5 +1,7 @@
 # https://thehub.github.com/epd/engineering/products-and-services/internal/service-catalog/service-ownership/
 # https://github.com/github/durable-ownership/blob/master/ownership.schema.json
+# this file need to be in the github repo for the service catalog to use it
+# so it also needs to be committed to github/blocks
 version: 1
 ownership:
   - name: github-blocks

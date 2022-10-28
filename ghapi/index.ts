@@ -429,7 +429,11 @@ const filterBlock =
     if (path !== undefined) {
       if (block.matches) {
         try {
-          if (!path && block.matches.includes("")) return true;
+          if (
+            path === "" && // the root path
+            (block.matches.includes("") || block.matches.includes("*"))
+          )
+            return true;
           const doesMatch = pm(block.matches, { bash: true, dot: true })(path);
           if (!doesMatch) return false;
         } catch (e) {

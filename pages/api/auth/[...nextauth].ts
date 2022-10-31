@@ -32,6 +32,9 @@ async function fetchPublicToken(accessToken: string) {
         },
       }
     );
+    if (typeof res.data.token !== "string") {
+      console.log(`invalid public token ${JSON.stringify(res.data.token)}`);
+    }
     return res.data.token;
   } catch (e) {
     console.log(e.message);

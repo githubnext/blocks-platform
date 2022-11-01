@@ -171,7 +171,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
             updatedContents,
           }}
         />
-        <div className="flex-1 overflow-hidden">
+        <div className="relative flex-1 overflow-hidden z-10">
           {fileInfo && (
             <BlockPane
               {...{

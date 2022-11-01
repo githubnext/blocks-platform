@@ -65,7 +65,7 @@ async function refreshAccessToken(token) {
       throw new Error(parsedResponse.error);
     }
 
-    const publicToken = fetchPublicToken(parsedResponse.access_token);
+    const publicToken = await fetchPublicToken(parsedResponse.access_token);
 
     return {
       ...token,
@@ -138,7 +138,7 @@ const authOptions = {
 
       // refresh token if it will expire in the next 15 minutes
       // `jwt` runs every 5 minutes when the client refreshes the session
-      if (Date.now() > token.accessTokenExpiry - 900) {
+      if (Date.now() > token.accessTokenExpiry - 15 * 60 * 1000) {
         return await refreshAccessToken(token);
       } else {
         return token;

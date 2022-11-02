@@ -168,7 +168,7 @@ export const Sidebar = ({
   if (!files.map) return null;
 
   return (
-    <Box className="sidebar h-full overflow-hidden flex-1">
+    <Box className="sidebar h-full overflow-hidden flex-1 w-[17rem]">
       <Box className="p-2 pb-0">
         <TextInput
           value={searchTerm}

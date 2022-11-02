@@ -528,6 +528,7 @@ function useBlockFrameMessages({
   updatedContents,
   setUpdatedContents,
   setRequestedMetadata,
+  committedContents,
 }: {
   owner: string;
   repo: string;
@@ -541,6 +542,7 @@ function useBlockFrameMessages({
     new: string;
     onSubmit: () => void;
   }) => void;
+  committedContents: Record<string, string>;
 }) {
   const appContext = useContext(AppContext);
   const { devServerInfo } = appContext;
@@ -554,7 +556,12 @@ function useBlockFrameMessages({
   for (const blockFrame of blockFrames.current) {
     if (blockFrame.props.isEditable) {
       const path = blockFrame.context.path;
-      if (path in updatedContents) {
+      if (path in committedContents) {
+        const originalContent = committedContents[path];
+        const content = originalContent;
+        const props = { ...blockFrame.props, content, originalContent };
+        setProps(blockFrame, props);
+      } else if (path in updatedContents) {
         const { content } = updatedContents[path];
         if (blockFrame.props.content !== content) {
           const props = { ...blockFrame.props, content };
@@ -568,6 +575,9 @@ function useBlockFrameMessages({
         }
       }
     }
+  }
+  for (const path of Object.keys(committedContents)) {
+    delete committedContents[path];
   }
 
   const onMessage = useRef((event: MessageEvent) => {});

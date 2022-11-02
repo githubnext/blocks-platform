@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import * as Immer from "immer";
 import { useQueryClient } from "react-query";
 import { useTheme } from "@primer/react";
@@ -136,6 +136,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
         delete updatedContents[path];
       })
     );
+  const committedContents = useRef<Record<string, string>>({});
 
   useBlockFrameMessages({
     owner,
@@ -145,6 +146,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
     updatedContents,
     setUpdatedContents,
     setRequestedMetadata,
+    committedContents: committedContents.current,
   });
 
   return (
@@ -254,8 +256,11 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
           newCode={updatedContents[path].content}
           currentCode={updatedContents[path].original}
           onCommit={() => {
-            setShowCommitCodeDialog(false);
+            committedContents.current = {
+              [path]: updatedContents[path].content,
+            };
             clearUpdatedContent();
+            setShowCommitCodeDialog(false);
           }}
           onCancel={() => {
             setShowCommitCodeDialog(false);

@@ -131,7 +131,7 @@ const makeSetInitialProps =
       QueryKeyMap.file.factory({
         owner: context.owner,
         repo: context.repo,
-        path: metadataPath,
+        path: encodeURIComponent(metadataPath),
         // TODO branchName doesn't make sense for a file in another repo
         // maybe metadata should always be on main?
         fileRef: isSameRepo ? branchName : "HEAD",

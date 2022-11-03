@@ -58,7 +58,7 @@ type BlockFrame = {
 
 const getMetadataPath = (block: Block, path: string) =>
   `.github/blocks/${block.type}/${getBlockKey(block)}/${encodeURIComponent(
-    path
+    encodeURIComponent(path)
   )}.json`;
 
 const setBundle = async (
@@ -127,6 +127,7 @@ const makeSetInitialProps =
 
     // fetch metadata for the block and path
     const metadataPath = getMetadataPath(block, path);
+    console.log(metadataPath);
     const metadata = queryClient.fetchQuery(
       QueryKeyMap.file.factory({
         owner: context.owner,

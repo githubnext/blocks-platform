@@ -58,7 +58,7 @@ type BlockFrame = {
 
 const getMetadataPath = (block: Block, path: string) =>
   `.github/blocks/${block.type}/${getBlockKey(block)}/${encodeURIComponent(
-    encodeURIComponent(path)
+    path
   )}.json`;
 
 const setBundle = async (
@@ -127,12 +127,11 @@ const makeSetInitialProps =
 
     // fetch metadata for the block and path
     const metadataPath = getMetadataPath(block, path);
-    console.log(metadataPath);
     const metadata = queryClient.fetchQuery(
       QueryKeyMap.file.factory({
         owner: context.owner,
         repo: context.repo,
-        path: metadataPath,
+        path: encodeURIComponent(metadataPath),
         // TODO branchName doesn't make sense for a file in another repo
         // maybe metadata should always be on main?
         fileRef: isSameRepo ? branchName : "HEAD",

@@ -93,7 +93,7 @@ export default function BlockPane({
         }}
       />
       {block && (
-        <div className="overflow-y-auto w-full h-full">
+        <div className="overflow-y-auto w-full flex-1">
           <iframe
             key={block.id}
             className={"w-full h-full"}

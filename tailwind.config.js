@@ -22,6 +22,9 @@ module.exports = {
           800: "#2f363d",
           900: "#24292e",
         },
+        gh: {
+          "primer-link": "#0969DA",
+        },
       },
       transitionProperty: {
         width: "width",

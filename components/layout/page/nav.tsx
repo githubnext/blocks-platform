@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 export function Nav() {
   return (
     <div className="relative">
@@ -11,7 +9,7 @@ export function Nav() {
               alt="GitHub Next Logo"
               width={72}
               height={72}
-              src="/assets/images/next-octocat.svg"
+              src="/next-octocat.svg"
             />
           </div>
         </div>

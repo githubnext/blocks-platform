@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { GetServerSidePropsContext } from "next";
+import { NextSeo } from "next-seo";
 import getConfig from "next/config";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
@@ -101,12 +102,14 @@ const Status = ({
 
   return (
     <div className="flex flex-col items-center space-y-6 text-center">
-      <p>
-        Thanks <strong>@{result.login}</strong>, you're{" "}
-        {result.alreadySignedUp ? "already" : "all"} signed up for{" "}
-        {project.title}
-        {result.hasAccess ? "" : " and are on the waitlist"}!
-      </p>
+      <div role="status">
+        <h1>
+          Thanks <strong>@{result.login}</strong>, you're{" "}
+          {result.alreadySignedUp ? "already" : "all"} signed up for{" "}
+          {project.title}
+          {result.hasAccess ? "" : " and are on the waitlist"}!
+        </h1>
+      </div>
       {result.hasAccess ? (
         <p>
           You can access {project.title} at{" "}
@@ -187,8 +190,8 @@ const Signup = ({
           />
           I accept the{" "}
           <a href="https://github.com/githubnext/githubnext/blob/main/TERMS_AND_CONDITIONS.md">
-            <a className="ml-1 inline-block underline text-blue-500">
-              GitHub Next Pre-Release License Terms
+            <a className="ml-1 inline-block underline text-gh-primer-link">
+              GitHub Next Experiment Terms and Conditions
             </a>
           </a>
         </label>
@@ -199,7 +202,7 @@ const Signup = ({
               ? "opacity-30 cursor-not-allowed"
               : "focus:outline-none focus:ring focus:ring-gray-400 cursor-pointer"
           }`}
-          disabled={!hasAccepted}
+          aria-disabled={!hasAccepted}
         >
           Sign up
         </button>
@@ -279,25 +282,30 @@ export default () => {
     return (
       <Page>
         <Page.Nav />
+        <NextSeo title={header} description={header} />
         <Page.Header heading={header}></Page.Header>
-        <div className="px-6 max-w-4xl mx-auto pb-24">{body}</div>
+        <main className="px-6 max-w-4xl mx-auto pb-24">{body}</main>
 
         <Link href={`/`}>
-          <a className="block text-center text-blue-500 hover:text-blue-600">
+          <a className="block text-center text-gh-primer-link">
             Back to reading about {project.title}
           </a>
         </Link>
       </Page>
     );
   } else {
+    const header = project.title;
     return (
       <Page>
         <Page.Nav />
-        <div className="grid">
+        <NextSeo title={header} description={header} />
+        <main className="grid">
           <div className="justify-self-center">
-            <Spinner />
+            <div className="w-8 h-8 text-black" role="status">
+              <Spinner />
+            </div>
           </div>
-        </div>
+        </main>
       </Page>
     );
   }

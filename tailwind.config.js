@@ -22,6 +22,14 @@ module.exports = {
           800: "#2f363d",
           900: "#24292e",
         },
+        gh: {
+          bg: "#E1E4E8",
+          bgDark: "#D0D2D6",
+          text: "#24292E",
+          textLight: "#586069",
+          dark: "#444D56",
+          marketingDark: "#050D21",
+        },
       },
       transitionProperty: {
         width: "width",

@@ -162,6 +162,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     // for local dev
     isDev && "webpack://*",
     isDev && "ws://*",
+    // for access checking
+    process.env.NEXT_PUBLIC_FUNCTIONS_URL,
     // for hitting the GitHub API
     "https://api.github.com/",
     // for Analytics

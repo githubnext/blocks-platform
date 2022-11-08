@@ -5,7 +5,10 @@ export function NextOctocat({ className }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
+      role="img"
+      aria-describedby="github-next-logo"
     >
+      <title id="github-next-logo">GitHub Next</title>
       <path
         fillRule="evenodd"
         clipRule="evenodd"

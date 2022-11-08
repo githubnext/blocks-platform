@@ -2,6 +2,13 @@
 @tailwind utilities;
 @tailwind components;
 
+@font-face {
+  font-family: "Mona Sans";
+  src: url("../public/fonts/MonaSans.woff2") format("woff2"),
+    url("../public/fonts/MonaSans.woff") format("woff");
+  font-weight: 1 999;
+}
+
 .sandbox-wrapper .sp-loading:before {
   content: "Loading...";
   position: absolute;

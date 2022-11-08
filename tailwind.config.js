@@ -26,6 +26,21 @@ module.exports = {
       transitionProperty: {
         width: "width",
       },
+      fontFamily: {
+        mona: [
+          "Mona Sans",
+          "Alliance1",
+          "Alliance1Fallback",
+          "-apple-system,BlinkMacSystemFont",
+          "Segoe UI",
+          "Helvetica",
+          "Arial",
+          "sans-serif",
+          "Apple Color Emoji",
+          "Segoe UI Emoji",
+          "Segoe UI Symbol",
+        ],
+      },
     },
   },
   variants: {

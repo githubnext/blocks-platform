@@ -186,11 +186,11 @@ const Signup = ({
             onChange={(e) => setHasAccepted(e.target.checked)}
           />
           I accept the{" "}
-          <Link href="https://github.com/githubnext/githubnext/blob/main/terms_of_service.md">
+          <a href="https://github.com/githubnext/githubnext/blob/main/TERMS_AND_CONDITIONS.md">
             <a className="ml-1 inline-block underline text-blue-500">
-              GitHub Next Experiment Terms and Conditions
+              GitHub Next Pre-Release License Terms
             </a>
-          </Link>
+          </a>
         </label>
         <button
           type="submit"
@@ -204,6 +204,28 @@ const Signup = ({
           Sign up
         </button>
       </form>
+      <div>
+        <p className="font-bold">
+          We’re very excited that you’re interested in our experiments! A few
+          things we’d like to call out:
+        </p>
+        <p>
+          Once you are accepted into the technical preview, we will contact you
+          to let you know, and to share instructions on how to get started.
+          Expect this email to come from <code>noreply@githubnext.com</code>
+        </p>
+        <p>
+          Your input provides valuable direction for what we create. We may
+          contact you occasionally to ask for your feedback as we work on
+          improvements. By enrolling in this technical preview, you are allowing
+          us to do that.
+        </p>
+        <p>
+          If you change your mind about using the technical preview or being
+          contacted by us, you can return to the signup page and disenroll
+          yourself.
+        </p>
+      </div>
     </div>
   );
 };

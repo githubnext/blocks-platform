@@ -191,7 +191,7 @@ const Signup = ({
           I accept the{" "}
           <a href="https://github.com/githubnext/githubnext/blob/main/TERMS_AND_CONDITIONS.md">
             <a className="ml-1 inline-block underline text-gh-primer-link">
-              GitHub Next Experiment Terms and Conditions
+              GitHub Next Pre-Release License Terms
             </a>
           </a>
         </label>

@@ -10,22 +10,24 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ChevronRightIcon } from "@primer/octicons-react";
 import { getOwnerRepoFromDevServer } from "ghapi";
+import { NextOctocat } from "components/next-octocat";
+import { GradientBadgeDark } from "components/gradient-badge";
 
 const { publicRuntimeConfig } = getConfig();
 
 function Home() {
   const { devServer } = useRouter().query as Record<string, string>;
-  const { status, data } = useSession({ required: true });
+  //const { status, data } = useSession({ required: true });
 
-  useEffect(() => {
-    if (status === "authenticated" && data.error) {
-      signOut();
-    }
-  }, [data, status]);
+  // useEffect(() => {
+  //   if (status === "authenticated" && data.error) {
+  //     signOut();
+  //   }
+  // }, [data, status]);
 
-  if (status === "loading") {
-    return <FullPageLoader />;
-  }
+  // if (status === "loading") {
+  //   return <FullPageLoader />;
+  // }
   const imagePositions = [
     [-48, -13],
     [-45, 4],
@@ -37,9 +39,16 @@ function Home() {
   ];
 
   return (
-    <div className="pb-60">
+    <div className="pb-60  bg-gh-marketingDark">
+      <div className="pt-4 px-8 absolute top-6 z-30">
+        <Link href="/">
+          <a className="w-20 text-white block rounded-full focus:outline-none focus:ring focus:ring-gray-400">
+            <NextOctocat className="" />
+          </a>
+        </Link>
+      </div>
       <div className="relative h-[96vh] overflow-hidden flex items-center justify-center">
-        <div className="absolute inset-0 opacity-60">
+        {/* <div className="absolute inset-0 opacity-60">
           {range(0, 6).map((i) => (
             <motion.img
               key={i}
@@ -51,41 +60,41 @@ function Home() {
               }}
             />
           ))}
-        </div>
-        <div className="w-full px-4 lg:px-0 flex flex-col items-center justify-center z-10 pb-6">
-          <h1 className="text-[9vw] font-bold tracking-tight text-gray-800 leading-[0.8em]">
-            GitHub{" "}
-            <span
-              className="inline-block font-black pr-1 -mr-1"
-              style={{
-                background: "linear-gradient(90deg, #db469f 0%, #2188ff 120%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                WebkitBoxDecorationBreak: "clone",
-                backgroundClip: "text",
-              }}
-            >
-              Blocks
-            </span>
-          </h1>
-          <p className="mt-12 text-2xl tracking-[0.016em] text-gray-600 font-light text-center">
-            We know your code is more than just text, now we're making it easy
-            to show it.
-            <br />
-            Bring your repositories to life with Blocks.
-          </p>
-          <div className="mt-2 text-2xl flex items-center bg-white px-10">
-            <div className="font-light text-xl">an exploration by</div>
-            <img
-              className="w-[1.5em] ml-2"
-              src="/next-octocat.svg"
-              alt="GitHub Next logo"
-            />
-            <div className="font-bold tracking-tight">
-              GitHub
-              <span className="font-normal ml-1">Next</span>
-            </div>
+        </div> */}
+        <div className="w-full px-8 lg:px-32 flex flex-col z-10 pb-6 text-white">
+          <div className="flex items-center justify-start mb-8 ">
+            <h1 className="font-semibold font-mona text-[6vw] sm:text-[4vw] lg:text-[3vw] xl:text-[2vw] opacity-80 flex-none">
+              GitHub Blocks
+            </h1>
+            <GradientBadgeDark className="ml-4 flex-none">
+              Technical Preview
+            </GradientBadgeDark>
           </div>
+          <h1
+            className="text-[12vw] lg:text-[9vw] font-black font-mona tracking-tight leading-none -ml-1"
+            style={{
+              background: "linear-gradient(90deg, #fff 0%, #B88AE1 120%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              WebkitBoxDecorationBreak: "clone",
+              backgroundClip: "text",
+            }}
+          >
+            Reimagine
+            <br />
+            Repositories
+          </h1>
+
+          <div className="mt-8 text-lg sm:text-2xl text-white text-opacity-80">
+            <p className="mb-2">
+              Extend your codebase with custom, interactive blocks.
+            </p>
+            <p>
+              Build rich documentation, enhance your workflows, and bring your
+              repository to life.
+            </p>
+          </div>
+
           <div className="mt-12 space-x-4 pointer-events-auto">
             <Link
               href={{
@@ -96,7 +105,7 @@ function Home() {
                 },
               }}
             >
-              <a className="inline-flex items-center px-8 py-4 text-lg border border-transparent leading-4 font-medium rounded-md shadow-sm text-white bg-gradient-to-b from-gray-700 to-gray-900 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+              <a className="inline-flex items-center px-8 py-4 text-lg border border-transparent leading-4 font-medium rounded-md shadow-sm text-gh-text bg-gh-bg hover:bg-gh-bgDark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                 Let's get started
                 <span className="inline-block ml-1">
                   <ChevronRightIcon size={20} />

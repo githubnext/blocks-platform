@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import * as Immer from "immer";
-import { useQueryClient } from "react-query";
+import { useQuery, useQueryClient } from "react-query";
 import { useTheme } from "@primer/react";
 import { QueryKeyMap } from "lib/query-keys";
 import type { BlocksQueryMeta } from "ghapi";
@@ -274,6 +274,12 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
   );
 }
 
+type VerifyResponse = {
+  login: string;
+  alreadySignedUp: boolean;
+  hasAccess: boolean;
+};
+
 export function RepoDetail() {
   const router = useRouter();
   const {
@@ -298,6 +304,27 @@ export function RepoDetail() {
       branchName = repoInfo.data.default_branch;
     }
   }
+
+  const verifyResponse = useQuery<any, VerifyResponse>(
+    "verifyResponse",
+    (ctx) => {
+      return fetch(
+        process.env.NEXT_PUBLIC_FUNCTIONS_URL +
+          `api/verify?` +
+          new URLSearchParams({
+            token: (ctx.meta as BlocksQueryMeta).token,
+            project: "blocks",
+          })
+      ).then((r) => r.json());
+    }
+  );
+
+  useEffect(() => {
+    if (!verifyResponse.data) return;
+    if (!verifyResponse.data.hasAccess) {
+      router.push("/signup");
+    }
+  }, [verifyResponse.data]);
 
   useEffect(() => {
     if (branchName) {
@@ -342,7 +369,7 @@ export function RepoDetail() {
       // @ts-ignore
       return getBlockKey(cb) === blockKey;
     });
-  const queries = [repoInfo, branches, repoFiles, repoTimeline];
+  const queries = [verifyResponse, repoInfo, branches, repoFiles, repoTimeline];
   const hasQueryErrors = queries.some((res) => res.status === "error");
   const showErrorState = hasQueryErrors || accessProhibited;
 
@@ -356,7 +383,11 @@ export function RepoDetail() {
         </p>
       </div>
     );
-  } else if (repoInfo.status === "success" && branches.status === "success") {
+  } else if (
+    verifyResponse.data?.hasAccess &&
+    repoInfo.status === "success" &&
+    branches.status === "success"
+  ) {
     return (
       <RepoDetailInner
         repoInfo={repoInfo.data}

@@ -6,7 +6,9 @@ import type { GetServerSidePropsContext } from "next";
 import getConfig from "next/config";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { ChevronRightIcon } from "@primer/octicons-react";
 
 const { publicRuntimeConfig } = getConfig();
 
@@ -338,6 +340,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     // for local dev
     isDev && "webpack://*",
     isDev && "ws://*",
+    // for access checking
+    process.env.NEXT_PUBLIC_FUNCTIONS_URL,
     // for hitting the GitHub API
     "https://api.github.com/",
     // for Analytics

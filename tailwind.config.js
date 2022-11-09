@@ -29,6 +29,7 @@ module.exports = {
           textLight: "#586069",
           dark: "#444D56",
           marketingDark: "#050D21",
+          "primer-link": "#0969DA",
         },
       },
       transitionProperty: {

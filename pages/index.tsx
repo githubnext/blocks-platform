@@ -7,7 +7,7 @@ import getConfig from "next/config";
 import { useRouter } from "next/router";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { ChevronRightIcon } from "@primer/octicons-react";
 import { getOwnerRepoFromDevServer } from "ghapi";
 import { NextOctocat } from "components/next-octocat";
@@ -37,6 +37,28 @@ function Home() {
     [51, -8],
     [20, 30],
   ];
+
+  /*
+  "block-sandbox-embed.png",
+          "block-npm-info.png",
+          "block-example.png",
+          "block-reference.png",
+          "block-sandbox.png",
+          // renderers
+          "block-data-1.png",
+          "block-data-2.png",
+          "block-annotations.png",
+          "block-data-1.png",
+          "block-data-2.png",
+          "block-data-3.png",
+          "block-drawing.png",
+          "block-images.png",
+          "block-mermaid.png",
+          "block-minimap.png",
+          "block-style.png",
+          // people
+          "block-community.png",
+          */
 
   return (
     <div className="z-0 relative">
@@ -82,7 +104,7 @@ function Home() {
           >
             Reimagine
             <br />
-            Repositories
+            repositories
           </h1>
 
           <div className="mt-8 font-mona text-lg sm:text-2xl tracking-normal text-[#959DA5]">
@@ -149,7 +171,6 @@ function Home() {
         />
       </svg>
       <Features />
-      <BuildABlock />
       <FooterCTA devServer={devServer} />
     </div>
   );
@@ -160,96 +181,121 @@ const startWaveLine = 2;
 
 export default Home;
 
+const scrollcontent = [
+  {
+    title: "Stronger documentation without the sweat",
+    subtitle:
+      "READMEs don’t have to be static. Create rich, interactive repositories that showcase your project.",
+    sections: [
+      {
+        text: "Embed a live demo block instead of a screenshot",
+        image: "block-sandbox.png",
+      },
+      {
+        text: "Show off live stats about the health of your project",
+        image: "block-npm-info.png",
+      },
+      {
+        text: "Create searchable reference documentation",
+        image: "block-reference.png",
+      },
+      {
+        text: "Turn your repository structure into your table of contents",
+        image: "blocks-nav.png",
+      },
+    ],
+  },
+  {
+    title: "View and interact with your content however you want",
+    subtitle:
+      "Just because the files are textual, doesn't mean you have to see them as text.",
+    sections: [
+      {
+        text: "Not all files are easy to understand in their raw form, like CSV or JSON data",
+        image: "block-data-3.png",
+      },
+      {
+        text: "Pick a different block to see and interact with your data, like a spreadsheet…",
+        image: "block-data-1.png",
+      },
+      {
+        text: "… or custom visualizations",
+        image: "block-data-2.png",
+      },
+      {
+        text: "Create and edit diagrams that can be embedded into your documentation",
+        image: "block-drawing.png",
+      },
+      {
+        text: "Build tailored interfaces for your workflows",
+        image: "block-style.png",
+      },
+    ],
+  },
+  {
+    title: "See the big picture",
+    subtitle: "Blocks work for files, folders, and entire repositories",
+    sections: [
+      {
+        text: "Understand the health of your community and the people who are part of it",
+        image: "block-community.png",
+      },
+      {
+        text: "Understand the structure of your code at a glance",
+        image: "block-minimap.png",
+      },
+    ],
+  },
+];
 const Features = () => {
   const [imageIndex, setImageIndex] = useState(0);
 
   return (
     <div className="z-10 relative grid grid-cols-[1fr,2fr] px-10">
-      <div className="px-10">
+      <div className="">
         <div className="h-screen w-full flex flex-col justify-center">
           <h3 className="text-6xl font-bold mt-16 mb-8">
-            What if github.com could be your repo's homepage?
+            What if repositories could do more?
           </h3>
         </div>
-        <div
-          className={``}
-          style={{
-            height: 105 * 5 + "vh",
-          }}
-        >
-          <div className="h-screen w-full flex flex-col justify-center">
-            <h3 className="text-6xl font-bold mt-16 mb-8">
-              Create rich, interactive documentation
-            </h3>
-            <p className="text-2xl mb-16">
-              Extend your codebase with custom, interactive blocks.
-            </p>
+        {scrollcontent.map((item, i) => (
+          <div className="" key={i}>
+            <div className="sticky top-0">
+              <div className="h-screen sticky top-0 w-full flex flex-col justify-start">
+                <h3 className="text-6xl font-bold mt-20 mb-8">{item.title}</h3>
+                <p className="text-2xl mb-16">{item.subtitle}</p>
+              </div>
+            </div>
+            {item.sections.map((section, j) => (
+              <div
+                className="h-screen sticky top-0 w-full flex flex-col justify-end pb-44"
+                key={j}
+              >
+                <div className="bg-white py-10">
+                  <p className="text-2xl mb-16 font-bold">{section.text}</p>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-        <div
-          className={``}
-          style={{
-            height: 100 * 11 + "vh",
-          }}
-        >
-          <h3 className="text-6xl font-bold mt-16 mb-8">
-            View and interact with your content however you want
-          </h3>
-          <p className="text-2xl mb-16">
-            Create a rich, interactive documentation experience for your
-            repository.
-          </p>
-        </div>
-        <div
-          className={``}
-          style={{
-            height: 101.5 * 1 + "vh",
-          }}
-        >
-          <h3 className="text-6xl font-bold mt-16 mb-8">See the big picture</h3>
-          <p className="text-2xl mb-16">
-            Create a rich, interactive documentation experience for your
-            repository.
-          </p>
-        </div>
+        ))}
       </div>
       <div className="px-10">
-        <div className="sticky top-0 w-full h-screen flex items-center justify-center">
-          <div
-            className="sticky top-0 w-full bg-white shadow-xl border border-slate-200 rounded-xl"
-            style={{
-              aspectRatio: "16/8.5",
-            }}
-          ></div>
-        </div>
-        {[
-          // docs
-          "block-sandbox-embed.png",
-          "block-npm-info.png",
-          "block-example.png",
-          "block-reference.png",
-          "block-sandbox.png",
-          // renderers
-          "block-data-1.png",
-          "block-data-2.png",
-          "block-annotations.png",
-          "block-data-1.png",
-          "block-data-2.png",
-          "block-data-3.png",
-          "block-drawing.png",
-          "block-images.png",
-          "block-mermaid.png",
-          "block-minimap.png",
-          "block-style.png",
-          // people
-          "block-community.png",
-        ].map((img) => (
-          <div className="sticky top-0 w-full h-screen flex items-center justify-center">
-            <img
-              src={`/landing/${img}`}
-              className="block w-[98%] mx-auto rounded-xl"
-            />
-          </div>
+        <div className="h-screen" />
+        {scrollcontent.map((item) => (
+          <Fragment key={item.title}>
+            <div className="h-screen bg-white w-full sticky top-0" />
+            {item.sections.map(({ image }, j) => (
+              <div
+                className="sticky top-0 w-full h-screen flex items-center justify-center"
+                key={j}
+              >
+                <img
+                  src={`/landing/${image}`}
+                  className="block w-[98%] mx-auto rounded-xl"
+                />
+              </div>
+            ))}
+          </Fragment>
         ))}
       </div>
     </div>
@@ -350,7 +396,7 @@ const BuildABlock = () => {
 };
 const FooterCTA = ({ devServer }: { devServer?: string }) => {
   return (
-    <div className="w-full px-32 py-[30vh] mx-20">
+    <div className="p-32 mx-20 mb-20 bg-gh-marketingDark text-white">
       <h2 className="text-6xl font-bold mb-8">Get started</h2>
       <p className="text-2xl mb-16">
         Extend your codebase with custom, interactive blocks.

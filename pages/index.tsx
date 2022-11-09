@@ -139,10 +139,17 @@ function Home() {
         </div>
       </div>
       <svg
-        className="relative block w-full h-[5em] z-50 overflow-visible"
+        className="relative block w-full h-[3vw] z-50 overflow-visible"
         viewBox={`0 0 ${numberOfWaves} 1`}
         preserveAspectRatio="none"
       >
+        <defs>
+          <linearGradient id="line-gradient">
+            <stop stopColor="#fff" />
+            <stop stopColor="#45a" offset="1" />
+            {/* <animateTransform  */}
+          </linearGradient>
+        </defs>
         <path
           d={`M 0 0 ${range(0, numberOfWaves)
             .map(
@@ -155,8 +162,11 @@ function Home() {
           fill="#050D21"
         />
         <path
-          transform="translate(0,-0.5)"
-          d={`M ${startWaveLine} 0.5 ${range(startWaveLine, numberOfWaves)
+          transform="translate(0,-0.8)"
+          d={`M ${numberOfWaves / 2} 0.5 ${range(
+            numberOfWaves / 2,
+            numberOfWaves
+          )
             .map(
               (i) =>
                 `C ${i + offset} 1 ${i + 0.5 - offset} 1 ${i + 0.5} 0.5 C ${
@@ -165,8 +175,8 @@ function Home() {
             )
             .join(" ")}`}
           fill="none"
-          stroke="#fff"
-          strokeWidth={10}
+          stroke="url(#line-gradient)"
+          strokeWidth="1vw"
           vectorEffect="non-scaling-stroke"
         />
       </svg>
@@ -177,7 +187,7 @@ function Home() {
 }
 const offset = 0.2;
 const numberOfWaves = 4;
-const startWaveLine = 2;
+const numberOfWavesSmall = 2;
 
 export default Home;
 
@@ -260,33 +270,37 @@ const Features = () => {
         </div>
         {scrollcontent.map((item, i) => (
           <div className="" key={i}>
-            <div className="sticky top-0">
-              <div className="h-screen sticky top-0 w-full flex flex-col justify-start">
+            <div className="lg:sticky top-0">
+              <div className="lg:h-screen lg:sticky top-0 w-full flex flex-col justify-start">
                 <h3 className="text-6xl font-bold mt-20 mb-8">{item.title}</h3>
                 <p className="text-2xl mb-16">{item.subtitle}</p>
               </div>
             </div>
             {item.sections.map((section, j) => (
               <div
-                className="h-screen sticky top-0 w-full flex flex-col justify-end pb-44"
+                className="lg:h-screen lg:sticky top-0 w-full flex flex-col justify-end pb-44"
                 key={j}
               >
                 <div className="bg-white py-10">
                   <p className="text-2xl mb-16 font-bold">{section.text}</p>
+                  <img
+                    src={`/landing/${section.image}`}
+                    className="block w-[98%] mx-auto rounded-xl"
+                  />
                 </div>
               </div>
             ))}
           </div>
         ))}
       </div>
-      <div className="px-10">
-        <div className="h-screen" />
+      <div className="px-10 hidden lg:block">
+        <div className="lg:h-screen" />
         {scrollcontent.map((item) => (
           <Fragment key={item.title}>
-            <div className="h-screen bg-white w-full sticky top-0" />
+            <div className="lg:h-screen bg-white w-full lg:sticky top-0" />
             {item.sections.map(({ image }, j) => (
               <div
-                className="sticky top-0 w-full h-screen flex items-center justify-center"
+                className="lg:sticky top-0 w-full lg:h-screen flex items-center justify-center"
                 key={j}
               >
                 <img
@@ -396,7 +410,7 @@ const BuildABlock = () => {
 };
 const FooterCTA = ({ devServer }: { devServer?: string }) => {
   return (
-    <div className="p-32 mx-20 mb-20 bg-gh-marketingDark text-white">
+    <div className="px-10 py-20 lg:px-32 lg:py-32 lg:mx-20 mb-20 bg-gh-marketingDark text-white">
       <h2 className="text-6xl font-bold mb-8">Get started</h2>
       <p className="text-2xl mb-16">
         Extend your codebase with custom, interactive blocks.

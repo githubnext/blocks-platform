@@ -6,9 +6,7 @@ import type { GetServerSidePropsContext } from "next";
 import getConfig from "next/config";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { Fragment, useEffect, useMemo, useState } from "react";
-import { useEffect, useMemo, useState } from "react";
-import { ChevronRightIcon } from "@primer/octicons-react";
+import { Fragment } from "react";
 
 const { publicRuntimeConfig } = getConfig();
 

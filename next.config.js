@@ -9,6 +9,7 @@ module.exports = {
   },
   publicRuntimeConfig: {
     sandboxDomain: process.env.NEXT_PUBLIC_SANDBOX_DOMAIN,
+    functionsUrl: process.env.NEXT_PUBLIC_FUNCTIONS_URL,
   },
   async headers() {
     return [

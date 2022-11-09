@@ -13,6 +13,7 @@ import {
   useRepoInfo,
   useRepoTimeline,
 } from "hooks";
+import getConfig from "next/config";
 import { useRouter } from "next/router";
 import { FullPageLoader } from "../full-page-loader";
 import { UpdateCodeModal } from "../UpdateCodeModal";
@@ -25,6 +26,8 @@ import type { RepoFiles } from "@githubnext/blocks";
 import { CODEX_BLOCKS } from "lib";
 import { useSession } from "next-auth/react";
 import useBlockFrameMessages from "./use-block-frame-messages";
+
+const { publicRuntimeConfig } = getConfig();
 
 export type Context = {
   repo: string;
@@ -309,7 +312,7 @@ export function RepoDetail() {
     "verifyResponse",
     (ctx) => {
       return fetch(
-        process.env.NEXT_PUBLIC_FUNCTIONS_URL +
+        publicRuntimeConfig.functionsUrl +
           `api/verify?` +
           new URLSearchParams({
             token: (ctx.meta as BlocksQueryMeta).token,

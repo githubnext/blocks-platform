@@ -48,7 +48,7 @@ const preSignup = async ({
   project: string;
 }) => {
   const res = await fetch(
-    process.env.NEXT_PUBLIC_FUNCTIONS_URL +
+    publicRuntimeConfig.functionsUrl +
       "api/pre_signup?" +
       new URLSearchParams({ token, project })
   );
@@ -62,19 +62,16 @@ const signup = async ({
   token: string;
   project: string;
 }) => {
-  const res = await fetch(
-    process.env.NEXT_PUBLIC_FUNCTIONS_URL + "api/signup",
-    {
-      method: "PUT",
-      body: new URLSearchParams({ token, project }),
-    }
-  );
+  const res = await fetch(publicRuntimeConfig.functionsUrl + "api/signup", {
+    method: "PUT",
+    body: new URLSearchParams({ token, project }),
+  });
   return res.json();
 };
 
 const remove = ({ token, project }: { token: string; project: string }) =>
   fetch(
-    process.env.NEXT_PUBLIC_FUNCTIONS_URL +
+    publicRuntimeConfig.functionsUrl +
       "api/remove?" +
       new URLSearchParams({ token, project }),
     { method: "DELETE" }

@@ -1,3 +1,5 @@
+const defaultTheme = require("tailwindcss/defaultTheme");
+
 module.exports = {
   mode: "jit",
   purge: [
@@ -50,6 +52,10 @@ module.exports = {
           "Segoe UI Symbol",
         ],
       },
+    },
+    screens: {
+      ...defaultTheme.screens,
+      "3xl": "1900px",
     },
   },
   variants: {

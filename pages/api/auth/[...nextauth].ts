@@ -111,14 +111,6 @@ const authOptions = {
       session.error = token.error;
       return session;
     },
-    async signIn({ profile }) {
-      const isHubber = profile.site_admin;
-      const isGuest =
-        GUEST_LIST_INTERNAL.includes(profile.login) ||
-        GUEST_LIST_EXTERNAL.includes(profile.login);
-
-      return isHubber || isGuest;
-    },
     async jwt({ token, account, user }) {
       if (account && user) {
         const publicToken = await fetchPublicToken(account.access_token);

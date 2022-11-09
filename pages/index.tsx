@@ -81,6 +81,7 @@ function Home() {
         </div>
       </div>
       <svg
+        aria-hidden
         className="relative block w-full h-[3vw] z-50 overflow-visible"
         viewBox={`0 0 ${numberOfWaves} 1`}
         preserveAspectRatio="none"
@@ -379,7 +380,7 @@ const FooterCTA = ({ devServer }: { devServer?: string }) => {
       <p className="text-2xl mb-16 text-[#959DA5] font-mona">
         Extend your codebase with custom, interactive blocks.
       </p>
-      <div className="mt-12 space-x-4 pointer-events-auto">
+      <div className="mt-12 space-x-4">
         <Link
           href={{
             pathname: "/githubnext/blocks-tutorial",
@@ -398,7 +399,7 @@ const FooterCTA = ({ devServer }: { devServer?: string }) => {
           </a>
         </Link>
       </div>
-      <div className="absolute inset-0 z-0">
+      <div aria-hidden className="absolute inset-0 z-0 pointer-events-none">
         <svg
           className="absolute left-0 bottom-0 right-0 block w-full h-[3vw] z-50 overflow-visible"
           viewBox={`0 0 ${numberOfWaves} 1`}

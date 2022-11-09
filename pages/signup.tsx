@@ -173,12 +173,33 @@ const Signup = ({
           onSubmit();
         }}
       >
-        {project.hasWaitlist && (
-          <p>
-            We'll send you an email at <strong>{result.email}</strong> to let
-            you know when you get access.
+        <div>
+          <p className="font-bold">
+            We’re very excited that you’re interested in our experiments! A few
+            things we’d like to call out:
           </p>
-        )}
+          <ul className="list-disc list-outside p-4">
+            {project.hasWaitlist && (
+              <li className="m-4">
+                Once you are accepted into the technical preview, we will
+                contact you at <strong>{result.email}</strong> to let you know,
+                and to share instructions on how to get started. Expect this
+                email to come from <strong>noreply@githubnext.com</strong>.
+              </li>
+            )}
+            <li className="m-4">
+              Your input provides valuable direction for what we create. We may
+              contact you occasionally to ask for your feedback as we work on
+              improvements. By enrolling in this technical preview, you are
+              allowing us to do that.
+            </li>
+            <li className="m-4">
+              If you change your mind about using the technical preview or being
+              contacted by us, you can return to the signup page and disenroll
+              yourself.
+            </li>
+          </ul>
+        </div>
         <label htmlFor="terms" className="flex items-center">
           <input
             className="mr-2 mt-[2px]"

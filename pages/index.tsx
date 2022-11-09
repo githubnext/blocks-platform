@@ -82,7 +82,7 @@ function Home() {
       </div>
       <svg
         aria-hidden
-        className="relative block w-full h-[3vw] z-50 overflow-visible"
+        className="relative block w-full h-[3vw] mt-[-1px] z-50 overflow-visible"
         viewBox={`0 0 ${numberOfWaves} 1`}
         preserveAspectRatio="none"
       >

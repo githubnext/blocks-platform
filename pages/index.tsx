@@ -82,7 +82,7 @@ function Home() {
       </div>
       <svg
         aria-hidden
-        className="relative block w-full h-[3vw] z-50 overflow-visible"
+        className="relative block w-full h-[3vw] mt-[-1px] z-50 overflow-visible"
         viewBox={`0 0 ${numberOfWaves} 1`}
         preserveAspectRatio="none"
       >
@@ -207,71 +207,92 @@ const scrollcontent = [
     ],
   },
 ];
+
 const Features = () => {
   return (
-    <div className="z-10 relative grid lg:grid-cols-[1fr,2fr] px-[5vw] max-w-[120em] mx-auto w-full">
-      <div className="min-w-0 z-10">
-        <div className="h-screen w-full flex flex-col justify-center">
-          <h3 className="text-[6vw] lg:text-6xl font-mona font-black mt-16 mb-8">
-            What if repositories could do more?
-          </h3>
-        </div>
-        {scrollcontent.map((item, i) => (
-          <div className="" key={i}>
-            <div className="lg:sticky top-0">
-              <div className="lg:h-screen lg:sticky top-0 w-full flex flex-col justify-start">
-                <div className="lg:absolute lg:w-[min(90vw,90em)]">
-                  <h3 className="text-[6vw] lg:text-6xl font-mona font-black mt-20 mb-8">
-                    {item.title}
-                  </h3>
-                  <p className="text-xl lg:text-2xl mb-16 lg:w-[30vw] text-[#6E7A85] font-mona">
-                    {item.subtitle}
-                  </p>
+    <div className="w-full">
+      <div className="hidden lg:block absolute left-20 top-0 bottom-0 border-l" />
+      <div className="relative py-[15em] w-full flex flex-col justify-center">
+        <div className="hidden lg:block absolute left-20 top-1/2 mt-[-4vw] h-6 w-6 bg-white rounded-full transform -translate-x-1/2 border" />
+        <h3 className="relative z-10 text-[6vw] lg:text-[6vw] font-mona font-black mt-16 mb-8 text-center max-w-[10em] mx-auto leading-tight">
+          What if repositories could{" "}
+          <span
+            style={{
+              background: "linear-gradient(60deg, #2188ff 40%, #B88AE1 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              WebkitBoxDecorationBreak: "clone",
+              backgroundClip: "text",
+            }}
+          >
+            do more
+          </span>
+          ?
+        </h3>
+      </div>
+      <div className="z-10 relative grid lg:grid-cols-[1.1fr,2fr] px-[5vw] max-w-[120em] mx-auto w-full">
+        <div className="min-w-0 z-10">
+          {scrollcontent.map((item, i) => (
+            <div className="lg:pl-10" key={i}>
+              <div className="lg:sticky top-0">
+                <div className="lg:h-screen lg:sticky top-0 w-full flex flex-col justify-start">
+                  <div className="hidden lg:block 3xl:hidden absolute left-10 ml-[-5vw] top-24 h-6 w-6 bg-white rounded-full transform -translate-x-1/2 border" />
+                  <div className="lg:absolute lg:w-[min(90vw,90em)]">
+                    <h3 className="text-[6vw] lg:text-6xl font-mona font-black mt-20 mb-8">
+                      {item.title}
+                    </h3>
+                    <p className="text-xl lg:text-2xl mb-16 lg:w-[30vw] text-[#6E7A85] font-mona">
+                      {item.subtitle}
+                    </p>
+                  </div>
                 </div>
               </div>
+              {item.sections.map((section, j) => (
+                <div
+                  className="lg:h-screen lg:sticky top-0 w-full flex flex-col justify-center"
+                  key={j}
+                >
+                  <div className="bg-white py-10 mt-[35vh]">
+                    <p className="text-2xl mb-16 font-mona">{section.text}</p>
+                    <img
+                      src={`/landing/${section.image}`}
+                      className="lg:hidden block w-[98%] mx-auto rounded-xl"
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
-            {item.sections.map((section, j) => (
-              <div
-                className="lg:h-screen lg:sticky top-0 w-full flex flex-col justify-center"
-                key={j}
-              >
-                <div className="bg-white py-10">
-                  <p className="text-2xl mb-16 font-mona">{section.text}</p>
+          ))}
+        </div>
+        <div className="px-10 hidden lg:block">
+          {/* <div className="lg:h-screen flex items-center justify-center w-full sticky top-0 z-10">
+        </div> */}
+          {scrollcontent.map((item, i) => (
+            <Fragment key={item.title}>
+              <div className="relative lg:h-screen w-full lg:sticky top-0 flex items-center justify-center z-20">
+                {!i && (
+                  <div
+                    className="w-full border border-gray-200 rounded-xl shadow-lg"
+                    style={{
+                      aspectRatio: "16/8.5",
+                    }}
+                  ></div>
+                )}
+              </div>
+              {item.sections.map(({ image }, j) => (
+                <div
+                  className="lg:sticky top-0 w-full lg:h-screen flex items-center justify-center"
+                  key={j}
+                >
                   <img
-                    src={`/landing/${section.image}`}
-                    className="lg:hidden block w-[98%] mx-auto rounded-xl"
+                    src={`/landing/${image}`}
+                    className="block w-[98%] mx-auto rounded-xl"
                   />
                 </div>
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-      <div className="px-10 hidden lg:block">
-        <div className="lg:h-screen flex items-center justify-center w-full sticky top-0 z-10">
-          <div
-            className="w-full border border-gray-200 rounded-xl shadow-lg"
-            style={{
-              aspectRatio: "16/8.5",
-            }}
-          ></div>
+              ))}
+            </Fragment>
+          ))}
         </div>
-        {scrollcontent.map((item) => (
-          <Fragment key={item.title}>
-            <div className="lg:h-screen bg-white w-full lg:sticky top-0" />
-            {item.sections.map(({ image }, j) => (
-              <div
-                className="lg:sticky top-0 w-full lg:h-screen flex items-center justify-center"
-                key={j}
-              >
-                <img
-                  src={`/landing/${image}`}
-                  className="block w-[98%] mx-auto rounded-xl"
-                />
-              </div>
-            ))}
-          </Fragment>
-        ))}
       </div>
     </div>
   );

@@ -235,7 +235,7 @@ const Features = () => {
                 className="lg:h-screen lg:sticky top-0 w-full flex flex-col justify-center"
                 key={j}
               >
-                <div className="bg-white py-10">
+                <div className="bg-white py-10 mt-[35vh]">
                   <p className="text-2xl mb-16 font-mona">{section.text}</p>
                   <img
                     src={`/landing/${section.image}`}

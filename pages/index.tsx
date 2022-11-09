@@ -1,64 +1,17 @@
-import { FullPageLoader } from "components/full-page-loader";
-import { hsl, range } from "d3";
-import { flatten, sample, sortBy } from "lodash";
-import { AnimatePresence, motion } from "framer-motion";
+import { ChevronRightIcon } from "@primer/octicons-react";
+import { GradientBadgeDark } from "components/gradient-badge";
+import { NextOctocat } from "components/next-octocat";
+import { range } from "d3";
 import type { GetServerSidePropsContext } from "next";
 import getConfig from "next/config";
-import { useRouter } from "next/router";
-import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import { Fragment, useEffect, useMemo, useState } from "react";
-import { ChevronRightIcon } from "@primer/octicons-react";
-import { getOwnerRepoFromDevServer } from "ghapi";
-import { NextOctocat } from "components/next-octocat";
-import { GradientBadgeDark } from "components/gradient-badge";
+import { useRouter } from "next/router";
+import { Fragment, useState } from "react";
 
 const { publicRuntimeConfig } = getConfig();
 
 function Home() {
   const { devServer } = useRouter().query as Record<string, string>;
-  //const { status, data } = useSession({ required: true });
-
-  // useEffect(() => {
-  //   if (status === "authenticated" && data.error) {
-  //     signOut();
-  //   }
-  // }, [data, status]);
-
-  // if (status === "loading") {
-  //   return <FullPageLoader />;
-  // }
-  const imagePositions = [
-    [-48, -13],
-    [-45, 4],
-    [-38, 13.6],
-    [36, 15],
-    [46, 6],
-    [51, -8],
-    [20, 30],
-  ];
-
-  /*
-  "block-sandbox-embed.png",
-          "block-npm-info.png",
-          "block-example.png",
-          "block-reference.png",
-          "block-sandbox.png",
-          // renderers
-          "block-data-1.png",
-          "block-data-2.png",
-          "block-annotations.png",
-          "block-data-1.png",
-          "block-data-2.png",
-          "block-data-3.png",
-          "block-drawing.png",
-          "block-images.png",
-          "block-mermaid.png",
-          "block-minimap.png",
-          "block-style.png",
-          // people
-          "block-community.png",
-          */
 
   return (
     <div className="z-0 relative">
@@ -69,43 +22,32 @@ function Home() {
           </a>
         </Link>
       </div>
-      <div className="relative z-30 w-full min-h-[90vh] pt-[13vh] pb-[5vh] flex flex-col items-center justify-center overflow-hidden text-white bg-gradient-to-b from-[#000] to-gh-marketingDark">
-        {/* <div className="absolute inset-0 opacity-60">
-          {range(0, 6).map((i) => (
-            <motion.img
-              key={i}
-              src={`/block-demo-${i + 1}.png`}
-              className="absolute top-[25vw] left-[40vw] w-80 shadow-lg rounded-3xl border"
-              animate={{
-                x: imagePositions[i][0] + "vw",
-                y: imagePositions[i][1] + "vw",
-              }}
-            />
-          ))}
-        </div> */}
+      <div className="relative z-30 w-full min-h-[min(90vh,70em)] max-h-[70em] pt-[13vh] pb-[5vh] flex flex-col items-center justify-center overflow-hidden text-white bg-gradient-to-b from-[#000] to-gh-marketingDark">
         <div className="w-full px-8 lg:px-32 flex flex-col z-10 pb-6 text-white">
-          <div className="flex items-center mb-8">
+          <div className="flex flex-col sm:flex-row items-center mb-8">
             <h1 className="font-semibold font-mona text-[6vw] sm:text-[4vw] lg:text-[3vw] xl:text-[2vw] flex-none">
               GitHub Blocks
             </h1>
-            <GradientBadgeDark className="ml-4 flex-none">
+            <GradientBadgeDark className="m-4 ml-0 sm:ml-4 flex-none">
               Technical Preview
             </GradientBadgeDark>
           </div>
-          <h1
-            className="text-[12vw] lg:text-[9vw] font-black font-mona tracking-tight leading-none -ml-1"
-            style={{
-              background: "linear-gradient(60deg, #fff 40%, #B88AE1 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              WebkitBoxDecorationBreak: "clone",
-              backgroundClip: "text",
-            }}
-          >
-            Reimagine
-            <br />
-            repositories
-          </h1>
+          <div className="flex">
+            <h1
+              className="block w-auto text-[12vw] lg:text-[9vw] font-black font-mona tracking-tight leading-none -ml-1"
+              style={{
+                background: "linear-gradient(60deg, #fff 40%, #B88AE1 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                WebkitBoxDecorationBreak: "clone",
+                backgroundClip: "text",
+              }}
+            >
+              Reimagine
+              <br />
+              repositories
+            </h1>
+          </div>
 
           <div className="mt-8 font-mona text-lg sm:text-2xl tracking-normal text-[#959DA5]">
             <p className="mb-2">
@@ -146,8 +88,15 @@ function Home() {
         <defs>
           <linearGradient id="line-gradient">
             <stop stopColor="#fff" />
-            <stop stopColor="#45a" offset="1" />
-            {/* <animateTransform  */}
+            <stop stopColor="#B88AE1" offset="0.5" />
+            <stop stopColor="#79c0ff" offset="1" />
+            <animateTransform
+              attributeName="gradientTransform"
+              type="translate"
+              values="-0.8;0.6;-0.8"
+              dur="9s"
+              repeatCount="indefinite"
+            />
           </linearGradient>
         </defs>
         <path
@@ -258,13 +207,11 @@ const scrollcontent = [
   },
 ];
 const Features = () => {
-  const [imageIndex, setImageIndex] = useState(0);
-
   return (
-    <div className="z-10 relative grid grid-cols-[1fr,2fr] px-10">
-      <div className="">
+    <div className="z-10 relative grid lg:grid-cols-[1fr,2fr] px-[5vw] max-w-[120em] mx-auto w-full">
+      <div className="min-w-0 z-10">
         <div className="h-screen w-full flex flex-col justify-center">
-          <h3 className="text-6xl font-bold mt-16 mb-8">
+          <h3 className="text-[6vw] lg:text-6xl font-mona font-black mt-16 mb-8">
             What if repositories could do more?
           </h3>
         </div>
@@ -272,20 +219,26 @@ const Features = () => {
           <div className="" key={i}>
             <div className="lg:sticky top-0">
               <div className="lg:h-screen lg:sticky top-0 w-full flex flex-col justify-start">
-                <h3 className="text-6xl font-bold mt-20 mb-8">{item.title}</h3>
-                <p className="text-2xl mb-16">{item.subtitle}</p>
+                <div className="lg:absolute lg:w-[min(90vw,90em)]">
+                  <h3 className="text-[6vw] lg:text-6xl font-mona font-black mt-20 mb-8">
+                    {item.title}
+                  </h3>
+                  <p className="text-xl lg:text-2xl mb-16 lg:w-[30vw] text-[#6E7A85] font-mona">
+                    {item.subtitle}
+                  </p>
+                </div>
               </div>
             </div>
             {item.sections.map((section, j) => (
               <div
-                className="lg:h-screen lg:sticky top-0 w-full flex flex-col justify-end pb-44"
+                className="lg:h-screen lg:sticky top-0 w-full flex flex-col justify-center"
                 key={j}
               >
                 <div className="bg-white py-10">
-                  <p className="text-2xl mb-16 font-bold">{section.text}</p>
+                  <p className="text-2xl mb-16 font-mona">{section.text}</p>
                   <img
                     src={`/landing/${section.image}`}
-                    className="block w-[98%] mx-auto rounded-xl"
+                    className="lg:hidden block w-[98%] mx-auto rounded-xl"
                   />
                 </div>
               </div>
@@ -294,7 +247,14 @@ const Features = () => {
         ))}
       </div>
       <div className="px-10 hidden lg:block">
-        <div className="lg:h-screen" />
+        <div className="lg:h-screen flex items-center justify-center w-full sticky top-0 z-10">
+          <div
+            className="w-full border border-gray-200 rounded-xl shadow-lg"
+            style={{
+              aspectRatio: "16/8.5",
+            }}
+          ></div>
+        </div>
         {scrollcontent.map((item) => (
           <Fragment key={item.title}>
             <div className="lg:h-screen bg-white w-full lg:sticky top-0" />
@@ -410,9 +370,11 @@ const BuildABlock = () => {
 };
 const FooterCTA = ({ devServer }: { devServer?: string }) => {
   return (
-    <div className="px-10 py-20 lg:px-32 lg:py-32 lg:mx-20 mb-20 bg-gh-marketingDark text-white">
-      <h2 className="text-6xl font-bold mb-8">Get started</h2>
-      <p className="text-2xl mb-16">
+    <div className="relative px-10 lg:px-32 py-[30vh] mb-20 bg-gh-marketingDark text-white text-center">
+      <h2 className="text-[5vw] font-black mb-8 font-mona">
+        Start exploring GitHub Blocks
+      </h2>
+      <p className="text-2xl mb-16 text-[#959DA5] font-mona">
         Extend your codebase with custom, interactive blocks.
       </p>
       <div className="mt-12 space-x-4 pointer-events-auto">
@@ -433,6 +395,57 @@ const FooterCTA = ({ devServer }: { devServer?: string }) => {
             />
           </a>
         </Link>
+      </div>
+      <div className="absolute inset-0 z-0">
+        <svg
+          className="absolute left-0 bottom-0 right-0 block w-full h-[3vw] z-50 overflow-visible"
+          viewBox={`0 0 ${numberOfWaves} 1`}
+          preserveAspectRatio="none"
+        >
+          <defs>
+            <linearGradient id="line-gradient">
+              <stop stopColor="#fff" />
+              <stop stopColor="#B88AE1" offset="0.5" />
+              <stop stopColor="#79c0ff" offset="1" />
+              <animateTransform
+                attributeName="gradientTransform"
+                type="translate"
+                values="-0.8;0.6;-0.8"
+                dur="9s"
+                repeatCount="indefinite"
+              />
+            </linearGradient>
+          </defs>
+          <path
+            d={`M 0 1 ${range(0, numberOfWaves)
+              .map(
+                (i) =>
+                  `C ${i + offset} 0 ${i + 0.5 - offset} 0 ${i + 0.5} 0.5 C ${
+                    i + 0.5 + offset
+                  } 1 ${i + 1 - offset} 1 ${i + 1} 0.5`
+              )
+              .join(" ")} L ${numberOfWaves} 1 Z`}
+            fill="#fff"
+          />
+          <path
+            transform="translate(0,-0.8)"
+            d={`M ${numberOfWaves / 2} 0.5 ${range(
+              numberOfWaves / 2,
+              numberOfWaves
+            )
+              .map(
+                (i) =>
+                  `C ${i + offset} 0 ${i + 0.5 - offset} 0 ${i + 0.5} 0.5 C ${
+                    i + 0.5 + offset
+                  } 1 ${i + 1 - offset} 1 ${i + 1} 0.5`
+              )
+              .join(" ")}`}
+            fill="none"
+            stroke="url(#line-gradient)"
+            strokeWidth="1vw"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
       </div>
     </div>
   );

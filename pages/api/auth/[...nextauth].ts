@@ -259,9 +259,9 @@ const authOptions = {
 export default NextAuth(authOptions);
 
 // get session by unpacking the NextAuth cookie without attempting to refresh the GitHub token
-export const getSessionOnServer = async (
-  req: NextApiRequest
-): Promise<Session> => {
+export const getSessionOnServer = async (req: {
+  cookies: NextApiRequest["cookies"];
+}): Promise<Session> => {
   const secret = authOptions.secret;
   if (!secret) {
     throw new Error("Secret is not defined");

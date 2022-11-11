@@ -9,7 +9,64 @@ import { GITHUB_STARS } from "../../../lib";
 const GUEST_LIST_INTERNAL = ["Krzysztof-Cieslak", "dsyme"];
 const GUEST_LIST_EXTERNAL = ["dmalan", ...GITHUB_STARS.map((d) => d.username)];
 
-async function fetchPublicToken(accessToken: string) {
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  image: string;
+  isHubber: boolean;
+};
+
+type Account = {
+  access_token: string;
+  expires_at: number;
+  refresh_token: string;
+  refresh_token_expires_in: number;
+};
+
+type Token = {
+  accessToken: string;
+  accessTokenExpiry: number;
+  refreshToken: string;
+  refreshTokenExpiry: number;
+  user: User;
+  publicToken: string;
+  hasAccess: boolean;
+  hasAccessExpiry: number;
+  error?: string;
+};
+
+type Session = {
+  userToken?: string;
+  token?: string;
+  user?: User;
+  hasAccess?: boolean;
+  error?: string;
+};
+
+async function fetchHasAccess({
+  login,
+  accessToken,
+}: {
+  login: string;
+  accessToken: string;
+}): Promise<boolean> {
+  if (
+    GUEST_LIST_INTERNAL.includes(login) ||
+    GUEST_LIST_EXTERNAL.includes(login)
+  ) {
+    return true;
+  } else {
+    const res = await fetch(
+      process.env.NEXT_PUBLIC_FUNCTIONS_URL +
+        `/api/verify?project=blocks&token=${accessToken}`
+    );
+    const json = await res.json();
+    return json.hasAccess;
+  }
+}
+
+async function fetchPublicToken(accessToken: string): Promise<string> {
   try {
     const res = await axios.post(
       `https://api.github.com/applications/${process.env.GITHUB_ID}/token/scoped`,
@@ -41,7 +98,7 @@ async function fetchPublicToken(accessToken: string) {
   }
 }
 
-async function refreshAccessToken(token) {
+async function refreshAccessToken(token: Token): Promise<Token> {
   try {
     const res = await axios.post(
       `https://github.com/login/oauth/access_token`,
@@ -84,6 +141,22 @@ async function refreshAccessToken(token) {
   }
 }
 
+async function refreshHasAccess(token: Token): Promise<Token> {
+  try {
+    const hasAccess = await fetchHasAccess({
+      login: token.user.name,
+      accessToken: token.accessToken,
+    });
+    return {
+      ...token,
+      hasAccess,
+      hasAccessExpiry: Date.now() + 5 * 60 * 1000,
+    };
+  } catch (e) {
+    return token;
+  }
+}
+
 const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   providers: [
@@ -92,7 +165,7 @@ const authOptions = {
       clientId: process.env.GITHUB_ID,
       clientSecret: process.env.GITHUB_SECRET,
       profile(profile) {
-        return {
+        const user: User = {
           id: String(profile.id),
           name: profile.login,
           email: profile.email,
@@ -100,37 +173,67 @@ const authOptions = {
           isHubber:
             profile.site_admin || GUEST_LIST_INTERNAL.includes(profile.login),
         };
+        return user;
       },
     }),
   ],
   callbacks: {
-    async session({ session, token }) {
+    async session({
+      session,
+      token,
+    }: {
+      session: Session;
+      token: Token;
+    }): Promise<Session> {
       session.userToken = token.accessToken;
       session.token = token.publicToken;
       session.user = token.user;
       session.error = token.error;
+      session.hasAccess = token.hasAccess;
       return session;
     },
-    async jwt({ token, account, user }) {
+    async jwt({
+      token,
+      account,
+      user,
+    }: {
+      token: Token;
+      account?: Account;
+      user?: User;
+    }): Promise<Token> {
+      const now = Date.now();
+
       if (account && user) {
-        const publicToken = await fetchPublicToken(account.access_token);
+        const [publicToken, hasAccess] = await Promise.all([
+          fetchPublicToken(account.access_token),
+          fetchHasAccess({
+            login: user.name,
+            accessToken: account.access_token,
+          }),
+        ]);
 
         return {
           accessToken: account.access_token,
           // For some reason the date returned here is in seconds, not milliseconds.
-          accessTokenExpiry: account.expires_at * 1000,
+          // refresh token if it will expire in the next 15 minutes
+          // `jwt` runs every 5 minutes when the client refreshes the session
+          accessTokenExpiry: (account.expires_at - 15 * 60) * 1000,
           refreshToken: account.refresh_token,
           // Refresh tokens are valid for 6 months.
-          refreshTokenExpiry:
-            Date.now() + account.refresh_token_expires_in * 1000,
+          refreshTokenExpiry: now + account.refresh_token_expires_in * 1000,
           user,
           publicToken,
+          hasAccess,
+          hasAccessExpiry: now + 5 * 60 * 1000,
         };
       }
 
-      // refresh token if it will expire in the next 15 minutes
-      // `jwt` runs every 5 minutes when the client refreshes the session
-      if (Date.now() > token.accessTokenExpiry - 15 * 60 * 1000) {
+      if (
+        !token.hasAccessExpiry || // upgrade old sessions
+        now > token.hasAccessExpiry
+      ) {
+        return await refreshHasAccess(token);
+      } else if (now > token.accessTokenExpiry) {
         return await refreshAccessToken(token);
       } else {
         return token;
@@ -150,10 +253,15 @@ const authOptions = {
     },
   },
 };
+// there's no way to parameterize NextAuth with the types we actually use for
+// Token, Account, User, Session
+// @ts-ignore
 export default NextAuth(authOptions);
 
 // get session by unpacking the NextAuth cookie without attempting to refresh the GitHub token
-export const getSessionOnServer = async (req: NextApiRequest): Promise<any> => {
+export const getSessionOnServer = async (
+  req: NextApiRequest
+): Promise<Session> => {
   const secret = authOptions.secret;
   if (!secret) {
     throw new Error("Secret is not defined");
@@ -172,7 +280,7 @@ export const getSessionOnServer = async (req: NextApiRequest): Promise<any> => {
 
   const parsedPayload = authOptions.callbacks.session({
     session: {},
-    token: payload,
+    token: payload as Token,
   });
   return parsedPayload;
 };

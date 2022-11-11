@@ -22,6 +22,9 @@ export default async function handler(
   res.setHeader("Cache-Control", "max-age=1800, immutable");
 
   const session = await getSessionOnServer(req);
+  if (!session || !session.hasAccess) {
+    return res.status(401).json({ message: "Unauthorized." });
+  }
 
   await new Promise((resolve, reject) => {
     Cors({

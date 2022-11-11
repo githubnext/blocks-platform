@@ -38,13 +38,18 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
   const isAuthenticated = sessionStatus === "authenticated";
 
   useEffect(() => {
+    if (!isAuthenticated) return;
     if (
-      isAuthenticated &&
+      session.error ||
       // somehow some extant sessions have token === {}, sign out if so
-      (session.error || typeof session.token !== "string")
+      typeof session.token !== "string"
     ) {
       console.log(`invalid session ${JSON.stringify(session)}`);
       signOut();
+    }
+
+    if (!session.hasAccess) {
+      router.push("/signup");
     }
   }, [session, sessionStatus]);
 

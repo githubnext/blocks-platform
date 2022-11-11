@@ -6,7 +6,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   const { repo, owner } = req.query as Record<string, string>;
   const session = await getSessionOnServer(req);
 
-  if (!session) {
+  if (!session || !session.hasAccess) {
     res.status(401).send("Unauthorized.");
     return;
   }

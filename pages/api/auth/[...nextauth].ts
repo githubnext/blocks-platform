@@ -201,6 +201,8 @@ const authOptions = {
       account?: Account;
       user?: User;
     }): Promise<Token> {
+      console.log({ token, account, user });
+
       const now = Date.now();
 
       if (account && user) {

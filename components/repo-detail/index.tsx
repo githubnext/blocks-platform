@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import * as Immer from "immer";
-import { useQuery, useQueryClient } from "react-query";
+import { useQueryClient } from "react-query";
 import { useTheme } from "@primer/react";
 import { QueryKeyMap } from "lib/query-keys";
 import type { BlocksQueryMeta } from "ghapi";
@@ -13,7 +13,6 @@ import {
   useRepoInfo,
   useRepoTimeline,
 } from "hooks";
-import getConfig from "next/config";
 import { useRouter } from "next/router";
 import { FullPageLoader } from "../full-page-loader";
 import { UpdateCodeModal } from "../UpdateCodeModal";
@@ -26,8 +25,6 @@ import type { RepoFiles } from "@githubnext/blocks";
 import { CODEX_BLOCKS } from "lib";
 import { useSession } from "next-auth/react";
 import useBlockFrameMessages from "./use-block-frame-messages";
-
-const { publicRuntimeConfig } = getConfig();
 
 export type Context = {
   repo: string;
@@ -277,12 +274,6 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
   );
 }
 
-type VerifyResponse = {
-  login: string;
-  alreadySignedUp: boolean;
-  hasAccess: boolean;
-};
-
 export function RepoDetail() {
   const router = useRouter();
   const {
@@ -307,27 +298,6 @@ export function RepoDetail() {
       branchName = repoInfo.data.default_branch;
     }
   }
-
-  const verifyResponse = useQuery<any, VerifyResponse>(
-    "verifyResponse",
-    (ctx) => {
-      return fetch(
-        publicRuntimeConfig.functionsUrl +
-          `api/verify?` +
-          new URLSearchParams({
-            token: (ctx.meta as BlocksQueryMeta).token,
-            project: "blocks",
-          })
-      ).then((r) => r.json());
-    }
-  );
-
-  useEffect(() => {
-    if (!verifyResponse.data) return;
-    if (!verifyResponse.data.hasAccess) {
-      router.push("/signup");
-    }
-  }, [verifyResponse.data]);
 
   useEffect(() => {
     if (branchName) {
@@ -372,7 +342,7 @@ export function RepoDetail() {
       // @ts-ignore
       return getBlockKey(cb) === blockKey;
     });
-  const queries = [verifyResponse, repoInfo, branches, repoFiles, repoTimeline];
+  const queries = [repoInfo, branches, repoFiles, repoTimeline];
   const hasQueryErrors = queries.some((res) => res.status === "error");
   const showErrorState = hasQueryErrors || accessProhibited;
 
@@ -386,11 +356,7 @@ export function RepoDetail() {
         </p>
       </div>
     );
-  } else if (
-    verifyResponse.data?.hasAccess &&
-    repoInfo.status === "success" &&
-    branches.status === "success"
-  ) {
+  } else if (repoInfo.status === "success" && branches.status === "success") {
     return (
       <RepoDetailInner
         repoInfo={repoInfo.data}

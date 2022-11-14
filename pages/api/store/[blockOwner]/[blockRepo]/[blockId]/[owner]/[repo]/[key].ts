@@ -8,7 +8,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const session = await getSessionOnServer(req);
-  if (!session) {
+  if (!session || !session.hasAccess) {
     res.status(401).send("Unauthorized.");
     return;
   }

@@ -14,6 +14,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "react-query";
+import { getSessionOnServer } from "pages/api/auth/[...nextauth]";
 
 const { publicRuntimeConfig } = getConfig();
 
@@ -147,6 +148,16 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
 export default RepoDetailContainer;
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const session = await getSessionOnServer(context.req);
+  if (!session.hasAccess) {
+    return {
+      redirect: {
+        destination: "/signup",
+        permanent: false,
+      },
+    };
+  }
+
   const query = context.query as Record<string, string>;
   const { devServer } = query;
 

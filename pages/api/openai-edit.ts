@@ -14,18 +14,13 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const session = await getSessionOnServer(req);
-  if (!session || !session.hasAccess) {
+  if (!session || !session.hasAccess || !session?.user.isHubber) {
     res.status(401).send("Unauthorized.");
     return;
   }
 
   if (req.method !== "POST") {
     res.status(405).send("Method not allowed");
-    return;
-  }
-
-  if (!session?.user.isHubber) {
-    res.status(401).send("Unauthorized.");
     return;
   }
 

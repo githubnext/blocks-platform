@@ -201,8 +201,6 @@ const authOptions = {
       account?: Account;
       user?: User;
     }): Promise<Token> {
-      console.log({ token, account, user });
-
       const now = Date.now();
 
       if (account && user) {
@@ -230,16 +228,16 @@ const authOptions = {
         };
       }
 
+      if (now > token.accessTokenExpiry) {
+        token = await refreshAccessToken(token);
+      }
       if (
         !token.hasAccessExpiry || // upgrade old sessions
         now > token.hasAccessExpiry
       ) {
-        return await refreshHasAccess(token);
-      } else if (now > token.accessTokenExpiry) {
-        return await refreshAccessToken(token);
-      } else {
-        return token;
+        token = await refreshHasAccess(token);
       }
+      return token;
     },
     async redirect({ url, baseUrl }) {
       // Allows relative callback URLs

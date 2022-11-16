@@ -37,7 +37,8 @@ async function run() {
     let stars = res.data.data.starsPublicData;
 
     const starsPath = path.join(process.cwd(), "lib", "stars.json");
-    fs.writeFileSync(starsPath, JSON.stringify(stars, null, 2));
+    fs.writeFileSync(starsPath, JSON.stringify(stars, null, 2) + "\n");
+
     console.log("✅ Wrote stars.json");
   } catch (e) {
     console.log("💥 Failed to write stars.json", e);

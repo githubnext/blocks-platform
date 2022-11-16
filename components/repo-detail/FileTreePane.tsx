@@ -30,10 +30,10 @@ export default function FileTreePane({
             transition: { type: "tween", duration: 0.1 },
           }}
           exit={{ width: 0, transition: { type: "tween", duration: 0.1 } }}
-          className="flex-none w-[17rem] border-r border-gray-200"
+          className="flex-none w-[17rem] border-r border-gray-200 overflow-hidden"
         >
           {!files ? (
-            <div className="flex flex-col items-center justify-center h-full w-full">
+            <div className="flex flex-col items-center justify-center w-full">
               <div className="animate-pulse flex space-y-4">
                 <div className="rounded-full bg-gray-200 h-12 w-full"></div>
                 <div className="rounded-full bg-gray-200 h-12 w-full"></div>

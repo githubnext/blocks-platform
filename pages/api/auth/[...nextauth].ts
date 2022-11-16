@@ -4,7 +4,7 @@ import axios from "axios";
 import hkdf from "@panva/hkdf";
 import NextAuth from "next-auth";
 import GithubProvider from "next-auth/providers/github";
-import { GITHUB_STARS } from "../../../lib";
+import GITHUB_STARS from "lib/stars.json";
 
 const GUEST_LIST_INTERNAL = ["Krzysztof-Cieslak", "dsyme"];
 const GUEST_LIST_EXTERNAL = ["dmalan", ...GITHUB_STARS.map((d) => d.username)];

@@ -11,7 +11,8 @@
     "build": "next build",
     "static": "next build && next export",
     "start": "next start",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "stars:update": "npx ts-node --esm scripts/get-stars.mts"
   },
   "dependencies": {
     "@azure/data-tables": "^13.1.1",

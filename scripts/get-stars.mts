@@ -28,16 +28,20 @@ async function run() {
 `,
   };
 
-  const res = await axios.post<StarsResponse>(
-    "https://api-stars.github.com/",
-    payload
-  );
+  try {
+    const res = await axios.post<StarsResponse>(
+      "https://api-stars.github.com/",
+      payload
+    );
 
-  let stars = res.data.data.starsPublicData;
+    let stars = res.data.data.starsPublicData;
 
-  const starsPath = path.join(process.cwd(), "lib", "stars.json");
-  fs.writeFileSync(starsPath, JSON.stringify(stars, null, 2));
-  console.log("✅ Wrote stars.json");
+    const starsPath = path.join(process.cwd(), "lib", "stars.json");
+    fs.writeFileSync(starsPath, JSON.stringify(stars, null, 2));
+    console.log("✅ Wrote stars.json");
+  } catch (e) {
+    console.log("💥 Failed to write stars.json", e);
+  }
 }
 
 run();

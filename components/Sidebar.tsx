@@ -168,7 +168,7 @@ export const Sidebar = ({
   if (!files.map) return null;
 
   return (
-    <Box className="sidebar h-full overflow-hidden flex-1 w-[17rem]">
+    <Box className="sidebar flex flex-col h-full overflow-hidden flex-1 w-[17rem]">
       <Box className="p-2 pb-0">
         <TextInput
           value={searchTerm}
@@ -178,7 +178,7 @@ export const Sidebar = ({
           className="w-full"
         />
       </Box>
-      <Box className="h-full overflow-auto pr-2 pb-2">
+      <Box className="flex-1 overflow-auto">
         <div className="h-full w-full file-tree-wrapper" ref={wrapperElement}>
           {filteredFiles.length > 0 ? (
             <Tree
@@ -186,6 +186,7 @@ export const Sidebar = ({
               itemSize={32}
               height={dimensions[1]}
               width={dimensions[0]}
+              className="pb-10"
             >
               {Node}
             </Tree>

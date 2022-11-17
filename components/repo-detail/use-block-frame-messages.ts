@@ -92,6 +92,7 @@ const setBundle = async (
 
 const setProps = (blockFrame: BlockFrame, props: any) => {
   blockFrame.props = props;
+  console.log("sending message");
   blockFrame.window?.postMessage(
     { type: "setProps", props: { props } },
     blockFrame.origin
@@ -581,19 +582,21 @@ function useBlockFrameMessages({
   }
 
   const onMessage = useRef((event: MessageEvent) => {});
+
   onMessage.current = (event: MessageEvent) => {
     const { data, origin, source } = event;
-    if (
-      !publicRuntimeConfig.sandboxDomain.startsWith(origin) &&
-      !devServerInfo?.devServer.startsWith(origin)
-    )
-      return;
+    // if (
+    //   !publicRuntimeConfig.sandboxDomain.startsWith(origin) &&
+    //   !devServerInfo?.devServer.startsWith(origin)
+    // )
+    //   return;
 
     blockFrames.current = blockFrames.current.filter(
       (bf) => bf.window && !bf.window.closed
     );
     const blockFrame = blockFrames.current.find((bf) => bf.window === source);
-    if (!blockFrame && data.type !== "loaded") return;
+
+    if (data.type !== "loaded") return;
 
     const baseType = data.type.split("--")[0];
     const responseParams = {
@@ -604,6 +607,7 @@ function useBlockFrameMessages({
 
     switch (baseType) {
       case "loaded":
+        console.log("handleLoade");
         return handleLoaded({
           queryClient,
           appContext,
@@ -694,6 +698,7 @@ function useBlockFrameMessages({
 
   useEffect(() => {
     const onMessageInstance = (event: MessageEvent) => {
+      console.log("got message", event);
       onMessage.current(event);
     };
 

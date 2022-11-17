@@ -305,16 +305,13 @@ export const getBlocksFromRepo: QueryFunction<
   BlocksRepo,
   GenericQueryKey<BlocksKeyParams>
 > = async (ctx) => {
-  console.log("in getBlocksFromRepo");
   const params: BlocksKeyParams = ctx.queryKey[1];
   const { queryClient, user } = ctx.meta as BlocksQueryMeta;
   const { devServerInfo, owner, repo, path, type, searchTerm } = params;
 
   if (!owner || !repo) {
-    console.log("no owner or repo", params);
     return undefined;
   }
-  console.log("***** here ************");
 
   if (
     devServerInfo &&
@@ -340,7 +337,6 @@ export const getBlocksFromRepo: QueryFunction<
         staleTime: 5 * 60 * 1000,
       }
     );
-    console.log({ blocksConfig });
     if (Array.isArray(blocksConfig)) {
       blocks = blocksConfig;
     } else {
@@ -672,7 +668,6 @@ export const getBlocksRepos: QueryFunction<
       }
     );
     repos = [repo];
-    console.log(repos);
   } else {
     const query = [
       "topic:github-blocks",

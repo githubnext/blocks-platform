@@ -70,3 +70,7 @@ Our staging site is [HERE](https://githubnext-blocks-staging.azurewebsites.net/g
 1. Navigate to the azure project for [`githubnext-blocks/staging`](https://portal.azure.com/#@githubazure.onmicrosoft.com/resource/subscriptions/b394e68d-7472-42fd-bb1c-d73cb7f4fd3c/resourceGroups/githubnext-blocks-rg/providers/Microsoft.Web/sites/githubnext-blocks/slots/staging/appServices)
 2. Click "Swap" button
 3. Then swap" again on the sidebar
+
+## Updating Stars List
+
+Occasionally we'll need to update the list of GitHub Stars. To make this easier, I've added a script to package.json `stars:update` which fetches the list of stars from `https://api-stars.github.com/` and writes them to a file on disk, `stars.json`.

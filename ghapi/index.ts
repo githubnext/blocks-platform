@@ -592,10 +592,7 @@ export const checkAccess: QueryFunction<
 
 export const getOwnerRepoFromDevServer = async (devServer: string) => {
   const gitConfig = await (await fetch(`${devServer}git.config.json`)).json();
-  const url = gitConfig['remote "origin"'].url;
-  const [_1, _2, owner, repo] =
-    /^(git@github.com:|https:\/\/github.com\/)([^/]*)\/([^/.]*)/.exec(url);
-  return { owner, repo };
+  return gitConfig;
 };
 
 const getBlocksRepoFromDevServer = async ({
@@ -610,6 +607,7 @@ const getBlocksRepoFromDevServer = async ({
   const blocks = await (
     await fetch(`${devServerInfo.devServer}blocks.config.json`)
   ).json();
+
   const { owner, repo } = devServerInfo;
 
   const filter = filterBlock({

@@ -97,6 +97,7 @@ export default function BlockPane({
           <iframe
             key={block.id}
             className={"w-full h-full"}
+            allow="camera;microphone"
             sandbox={[
               "allow-scripts",
               "allow-same-origin",

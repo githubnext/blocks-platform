@@ -62,7 +62,7 @@ function Home() {
           <div className="mt-12 space-x-4 pointer-events-auto">
             <Link
               href={{
-                pathname: "/githubnext/blocks-tutorial",
+                pathname: "/githubnext/blocks",
                 query: {
                   path: "README.md",
                   ...(devServer ? { devServer } : {}),
@@ -404,7 +404,7 @@ const FooterCTA = ({ devServer }: { devServer?: string }) => {
       <div className="mt-12 space-x-4">
         <Link
           href={{
-            pathname: "/githubnext/blocks-tutorial",
+            pathname: "/githubnext/blocks",
             query: {
               path: "README.md",
               ...(devServer ? { devServer } : {}),

@@ -12,7 +12,7 @@ ownership:
     team: github/next
     exec_sponsor: oegerikus
     product_manager: idan
-    repo: https://github.com/githubnext/blocks-platform
+    repo: https://github.com/githubnext/blocks
     sev3:
       slack: next-devex
       tta: "1 business day"

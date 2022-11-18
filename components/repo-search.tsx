@@ -6,7 +6,7 @@ import { useSearchRepos } from "hooks";
 import { RepoIcon, SearchIcon } from "@primer/octicons-react";
 
 const defaultItems = [
-  "githubnext/blocks-tutorial",
+  "githubnext/blocks",
   "primer/primitives",
   "d3/d3-geo",
   "actions/toolkit",

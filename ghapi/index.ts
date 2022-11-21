@@ -731,20 +731,25 @@ export const getBlocksRepos: QueryFunction<
       }
     }),
   ]);
+
   return blocksRepos
-    .filter((repo) => repo.blocks?.length)
-    .map((blockRepo) => {
+    .map((blockRepo, i) => {
       const isDev =
         devServerInfo &&
         devServerInfo.owner === blockRepo.owner &&
         devServerInfo.repo === blockRepo.repo;
+      const repoInfo = repos[i];
       return {
         ...blockRepo,
+        stars: repoInfo?.stargazers_count,
+        watchers: repoInfo?.watchers_count,
+        lastRelease: repoInfo?.updated_at,
         blocks: blockRepo.blocks.map((block) => ({
           ...block,
           isDev,
         })),
         isDev,
       };
-    });
+    })
+    .filter((repo) => repo.blocks?.length);
 };

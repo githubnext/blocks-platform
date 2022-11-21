@@ -5,6 +5,7 @@ import {
   PlugIcon,
   RepoIcon,
   SearchIcon,
+  StarFillIcon,
   SyncIcon,
   VerifiedIcon,
 } from "@primer/octicons-react";
@@ -21,6 +22,7 @@ import {
 import { AppContext } from "context";
 import { getBlockKey, useBlocksRepos } from "hooks";
 import { QueryKeyMap } from "lib/query-keys";
+import Image from "next/image";
 import { useContext, useState } from "react";
 import { useQueryClient } from "react-query";
 import { useDebounce } from "use-debounce";
@@ -91,7 +93,7 @@ export default function BlockPicker(props: BlockPickerProps) {
           ))}
       </ActionMenu.Button>
 
-      <ActionMenu.Overlay width="large">
+      <ActionMenu.Overlay width="xxlarge">
         <div className="px-3 pt-3 w-full flex gap-1">
           <TextInput
             value={searchTerm}
@@ -163,31 +165,29 @@ export default function BlockPicker(props: BlockPickerProps) {
           </div>
         )}
         {!!blockRepos?.length && (
-          <ActionList>
-            <ActionList.Group title="Blocks" selectionVariant="single">
-              <div className="max-h-[calc(100vh-25em)] overflow-auto">
-                {blockRepos.map((repo, index) => {
-                  if (index > 50) return null;
-                  return repo.blocks.map((block) => {
-                    const blockKey = getBlockKey(block);
-                    return (
-                      <BlockItem
-                        key={blockKey}
-                        block={block}
-                        isSelected={blockKey === valueBlockKey}
-                        repo={repo}
-                        onChange={(block) => {
-                          onChange(block);
-                          setIsOpen(false);
-                          setSearchTerm("");
-                        }}
-                        isDev={!!repo["isDev"]}
-                      />
-                    );
-                  });
-                })}
-              </div>
-            </ActionList.Group>
+          <ActionList sx={{ pb: 0 }}>
+            <div className="max-h-[calc(100vh-25em)] grid grid-cols-2 gap-1 px-2 pb-2 overflow-auto">
+              {blockRepos.map((repo, index) => {
+                if (index > 50) return null;
+                return repo.blocks.map((block) => {
+                  const blockKey = getBlockKey(block);
+                  return (
+                    <BlockItem
+                      key={blockKey}
+                      block={block}
+                      isSelected={blockKey === valueBlockKey}
+                      repo={repo}
+                      onChange={(block) => {
+                        onChange(block);
+                        setIsOpen(false);
+                        setSearchTerm("");
+                      }}
+                      isDev={!!repo["isDev"]}
+                    />
+                  );
+                });
+              })}
+            </div>
           </ActionList>
         )}
       </ActionMenu.Overlay>
@@ -210,69 +210,111 @@ const BlockItem = ({
 }) => {
   const isExampleBlock = repo.full_name === `githubnext/blocks-examples`;
   return (
-    <ActionList.Item
-      selected={isSelected}
-      className={`group py-2 ${
+    <button
+      className={`group m-1 flex flex-col rounded-xl text-left ${
         isDev
           ? "bg-[#ddf4ffaa] !border !border-dashed !border-[#54aeff] !mb-2"
-          : ""
+          : "!border border-gray-200"
+      } ${
+        isSelected
+          ? "bg-blue-100 border-blue-500"
+          : `cursor-pointer ${
+              isDev ? "hover:bg-[#ddf4ff]" : "hover:bg-gray-100"
+            }`
       }`}
-      sx={{
-        ":hover": {
-          backgroundColor: isDev ? "#ddf4ff !important" : "transparent",
-        },
-      }}
-      onSelect={() => {
+      onClick={() => {
         onChange(block);
       }}
     >
-      <div className="flex justify-between">
-        <div className="font-semibold">{block.title}</div>
+      <Box className="w-full flex items-start py-3 px-3">
+        <Box className="w-full ml-2 flex-1">
+          <div className="relative w-full flex justify-between">
+            <div className="font-semibold text-sm leading-tight">
+              {block.title}
+            </div>
+            <img
+              src={`https://avatars.githubusercontent.com/${repo.owner}`}
+              width={40}
+              className="absolute right-0 rounded-full shadow-lg ml-auto"
+            />
 
-        {isDev ? (
-          <Text pb="1" className="text-xs font-mono text-[#0969da]">
-            From dev server
-            <PlugIcon className="ml-1" />
-          </Text>
-        ) : (
-          <Link
-            href={`https://github.com/${repo.full_name}`}
-            className="text-xs mt-[2px] opacity-0 focus:opacity-100 group-hover:opacity-100"
-            target="_blank"
-            rel="noopener noreferrer"
-            color="fg.muted"
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-          >
-            <Text className="flex items-center" color="fg.muted">
-              View code
-              <LinkExternalIcon className="ml-1 opacity-50" />
-            </Text>
-          </Link>
-        )}
-      </div>
-      <ActionList.Description variant="block">
-        <Box className="flex items-center mt-1">
-          <Text className="mr-1" color="fg.muted">
-            <RepoIcon />
-          </Text>
-          <Text color="fg.muted" pb="1">
-            {repo.owner}/{repo.repo}
+            {/* {isDev ? (
+              <Text pb="1" className="text-xs font-mono text-[#0969da]">
+                From dev server
+                <PlugIcon className="ml-1" />
+              </Text>
+            ) : (
+              <Link
+                href={`https://github.com/${repo.full_name}`}
+                className="text-xs mt-[2px] opacity-0 focus:opacity-100 group-hover:opacity-100"
+                target="_blank"
+                rel="noopener noreferrer"
+                color="fg.muted"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
+                <Text className="flex items-center" color="fg.muted">
+                  View code
+                  <LinkExternalIcon className="ml-1 opacity-50" />
+                </Text>
+              </Link>
+            )} */}
+          </div>
+
+          <Text color="fg.muted" className="mt-1 text-xs">
+            By {repo.owner}
             {isExampleBlock && (
               <Text ml={1} color="ansi.blue">
                 <VerifiedIcon />
               </Text>
             )}
           </Text>
-        </Box>
-        <div className="flex items-start mt-1">
-          <div className="mr-1">
-            <InfoIcon />
+
+          {/* <Box className="flex items-center mt-1">
+            <Text className="mr-1" color="fg.muted">
+              <RepoIcon />
+            </Text>
+            <Text color="fg.muted" pb="1">
+              {repo.owner}/{repo.repo}
+              {isExampleBlock && (
+                <Text ml={1} color="ansi.blue">
+                  <VerifiedIcon />
+                </Text>
+              )}
+            </Text>
+          </Box> */}
+          <div className="flex items-start mt-1 text-sm text-gray-900 mb-1">
+            {block.description}
           </div>
-          {block.description}
-        </div>
-      </ActionList.Description>
-    </ActionList.Item>
+
+          <div className="flex items-center text-xs">
+            <StarFillIcon className="text-gray-300 mr-1" />
+            <Text color="fg.muted" className="text-sm">
+              {repo.stars} stars
+            </Text>
+          </div>
+        </Box>
+      </Box>
+      <div
+        className={`w-full mt-auto rounded-b-xl px-3 ${
+          isSelected ? "bg-blue-200 text-blue-900" : "bg-gray-300 bg-opacity-20"
+        }`}
+      >
+        {!block?.matches?.length || block.matches.includes("*") ? (
+          <div className="text-xs italic mt-2 pb-2 opacity-60">
+            This block works for all {block.type}s
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center">
+            {block.matches.map((match) => (
+              <div className="flex items-center m-1 text-xs font-mono py-1 px-2 rounded-lg bg-gray-300 bg-opacity-40 border border-gray-800 border-opacity-50">
+                {match || "/"}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </button>
   );
 };

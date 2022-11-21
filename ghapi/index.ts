@@ -751,5 +751,12 @@ export const getBlocksRepos: QueryFunction<
         isDev,
       };
     })
+    .sort((a, b) => {
+      // list example repo first
+      if (a.full_name === "githubnext/blocks") {
+        return -1;
+      }
+      return b.stars - a.stars;
+    })
     .filter((repo) => repo.blocks?.length);
 };

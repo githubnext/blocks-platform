@@ -364,6 +364,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     process.env.NEXT_PUBLIC_FUNCTIONS_URL,
     // for hitting the GitHub API
     "https://api.github.com/",
+    // downloading Actions Artifacts
+    "https://pipelines.actions.githubusercontent.com/",
     // for Analytics
     "https://octo-metrics.azurewebsites.net/api/CaptureEvent",
     "https://eastus-8.in.applicationinsights.azure.com/",

@@ -263,18 +263,24 @@ const Item = ({
   toggle,
 }: ItemProps) => {
   const isActive = activeFilePath === path;
-  const currentRoot = currentPathname.split("/").slice(0, 3).join("/");
+  const { owner: _owner, repo: _repo, path: _path, ...query } = currentQuery;
+  const linkUrlParams = new URLSearchParams(query);
 
   return (
     <Link
       href={{
-        pathname: `${currentRoot}/${path}`,
+        pathname: currentPathname,
         query: {
           ...currentQuery,
+          path,
           blockKey: isActive ? currentQuery.blockKey : undefined,
           fileRef: null,
         },
       }}
+      // some strange nextjs hackery to keep the path unencoded
+      as={`/${currentQuery.owner}/${
+        currentQuery.repo
+      }/${path}?${linkUrlParams.toString()}`}
       shallow
     >
       <a

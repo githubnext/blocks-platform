@@ -26,23 +26,6 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
     string
   >;
   const { path: pathArray } = router.query as Record<string, string | string[]>;
-
-  // we're using the old url structure
-  if (typeof pathArray === "string") {
-    // redirect to the correct path
-    if (typeof window !== "undefined") {
-      const { path, ...queryWithoutPath } = router.query;
-      router.push(
-        {
-          pathname: `/[owner]/[repo]/${pathArray}`,
-          query: queryWithoutPath,
-        },
-        undefined,
-        { shallow: true }
-      );
-    }
-    return null;
-  }
   const path = pathArray ? pathArray.join("/") : "";
 
   const [devServerInfoLoaded, setDevServerInfoLoaded] = useState(false);
@@ -165,7 +148,34 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
   );
 }
 
-export default RepoDetailContainer;
+const RepoDetailContainerWithRedirect = (props: AppContextValue) => {
+  const router = useRouter();
+
+  const { path: pathArray } = router.query as Record<string, string | string[]>;
+
+  if (
+    pathArray && // defaults to string when looking at root folder
+    typeof pathArray === "string" // we're using the old url structure
+  ) {
+    // redirect to the correct path
+    if (typeof window !== "undefined") {
+      const { path, ...queryWithoutPath } = router.query;
+      router.push(
+        {
+          pathname: `/[owner]/[repo]/${pathArray}`,
+          query: queryWithoutPath,
+        },
+        undefined,
+        { shallow: true }
+      );
+    }
+    return null;
+  }
+
+  return <RepoDetailContainer {...props} />;
+};
+
+export default RepoDetailContainerWithRedirect;
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const session = await getSessionOnServer(context.req);

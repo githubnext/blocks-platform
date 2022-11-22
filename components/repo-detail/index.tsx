@@ -281,9 +281,11 @@ export function RepoDetail() {
     repo,
     owner,
     branch: branchParam,
-    path = "",
     blockKey,
   } = router.query as Record<string, string>;
+
+  const { path: pathArray } = router.query as Record<string, string[]>;
+  const path = pathArray ? pathArray.join("/") : "";
 
   const repoInfo = useRepoInfo({ repo, owner });
   const branches = useGetBranches({ repo, owner });

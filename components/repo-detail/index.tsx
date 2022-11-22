@@ -58,14 +58,12 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
   const { repoInfo, branches, branchName, files, timeline } = props;
   const router = useRouter();
   const { setColorMode } = useTheme();
-  const {
-    repo,
-    owner,
-    path = "",
-    theme,
-    fileRef,
-    mode,
-  } = router.query as Record<string, string>;
+  const { repo, owner, theme, fileRef, mode } = router.query as Record<
+    string,
+    string
+  >;
+  const { path: pathArray } = router.query as Record<string, string[]>;
+  const path = pathArray ? pathArray.join("/") : "";
   const [requestedBlockMetadata, setRequestedBlockMetadata] = useState(null);
   const [requestedMetadata, setRequestedMetadata] = useState<{
     path: string;

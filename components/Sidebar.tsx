@@ -263,15 +263,15 @@ const Item = ({
   toggle,
 }: ItemProps) => {
   const isActive = activeFilePath === path;
+  const currentRoot = currentPathname.split("/").slice(0, 3).join("/");
 
   return (
     <Link
       href={{
-        pathname: currentPathname,
+        pathname: `${currentRoot}/${path}`,
         query: {
           ...currentQuery,
           blockKey: isActive ? currentQuery.blockKey : undefined,
-          path,
           fileRef: null,
         },
       }}

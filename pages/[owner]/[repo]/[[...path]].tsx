@@ -21,10 +21,30 @@ const { publicRuntimeConfig } = getConfig();
 function RepoDetailContainer({ installationUrl }: AppContextValue) {
   const router = useRouter();
   const [hasRepoInstallation, setHasRepoInstallation] = useState(false);
-  const { repo, owner, branch, path, devServer } = router.query as Record<
+  const { repo, owner, branch, devServer } = router.query as Record<
     string,
     string
   >;
+  const { path: pathArray } = router.query as Record<string, string | string[]>;
+
+  // we're using the old url structure
+  if (typeof pathArray === "string") {
+    // redirect to the correct path
+    if (typeof window !== "undefined") {
+      const { path, ...queryWithoutPath } = router.query;
+      router.push(
+        {
+          pathname: `/[owner]/[repo]/${pathArray}`,
+          query: queryWithoutPath,
+        },
+        undefined,
+        { shallow: true }
+      );
+    }
+    return null;
+  }
+  const path = pathArray ? pathArray.join("/") : "";
+
   const [devServerInfoLoaded, setDevServerInfoLoaded] = useState(false);
   const [devServerInfo, setDevServerInfo] = useState<undefined | DevServerInfo>(
     undefined

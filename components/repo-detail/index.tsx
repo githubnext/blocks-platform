@@ -245,6 +245,13 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
                       fileRef: branchName,
                     })
                   );
+                  queryClient.invalidateQueries(
+                    QueryKeyMap.files.factory({
+                      owner,
+                      repo,
+                      sha: branchName,
+                    })
+                  );
                 },
               });
             }}

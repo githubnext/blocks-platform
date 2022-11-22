@@ -100,23 +100,55 @@ export default function BlockPaneHeader({
               onChange={setBlock}
               value={block}
             />
-            {!isDefaultBlock && (
-              <Button
-                disabled={!appContext.hasRepoInstallation}
-                onClick={() => {
-                  const newMetadata = {
-                    ...metadata,
-                    [path]: {
-                      ...metadata[path],
-                      default: getBlockKey(block),
-                    },
-                  };
-                  setRequestedMetadata(newMetadata);
-                }}
-              >
-                Make default
-              </Button>
-            )}
+            {!isDefaultBlock &&
+              (!canSave || !appContext.hasRepoInstallation ? (
+                <Tooltip
+                  side="top"
+                  text={
+                    !canSave
+                      ? "You don't have permission to update this repo"
+                      : !appContext.hasRepoInstallation
+                      ? "The Blocks GitHub app is not installed on this repository"
+                      : null
+                  }
+                >
+                  {/* wrapper div needed to steal pointer events, */}
+                  {/* to prevent collision between disabled button and tooltip attributes */}
+                  <div>
+                    <Button
+                      disabled={!appContext.hasRepoInstallation}
+                      onClick={() => {
+                        const newMetadata = {
+                          ...metadata,
+                          [path]: {
+                            ...metadata[path],
+                            default: getBlockKey(block),
+                          },
+                        };
+                        setRequestedMetadata(newMetadata);
+                      }}
+                    >
+                      Make default
+                    </Button>
+                  </div>
+                </Tooltip>
+              ) : (
+                <Button
+                  disabled={!appContext.hasRepoInstallation}
+                  onClick={() => {
+                    const newMetadata = {
+                      ...metadata,
+                      [path]: {
+                        ...metadata[path],
+                        default: getBlockKey(block),
+                      },
+                    };
+                    setRequestedMetadata(newMetadata);
+                  }}
+                >
+                  Make default
+                </Button>
+              ))}
           </Box>
           <AnimatePresence initial={false}>
             {isFullscreen && (

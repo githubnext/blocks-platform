@@ -477,6 +477,7 @@ export interface CreateBranchParams {
   path: string;
   title?: string;
   body?: string;
+  commitMessage?: string;
 }
 
 type PullsResponse = Endpoints["POST /repos/{owner}/{repo}/pulls"]["response"];
@@ -486,7 +487,6 @@ export async function createBranchAndPR(
   params: CreateBranchParams
 ): Promise<CreateBranchResponse> {
   const {
-    ref,
     token,
     userToken,
     owner,
@@ -495,18 +495,23 @@ export async function createBranchAndPR(
     path,
     title = `GitHub Blocks: Update ${path}`,
     body = "This is a pull request created programmatically by GitHub Blocks.",
+    commitMessage,
   } = params;
+  let { ref } = params;
   const octokit = new Octokit({ auth: token });
   const userOctokit = new Octokit({ auth: userToken });
   // "SHAs" abound in this codebase, so let me explain what's going on.
   // In order to create a new branch (a.k.a "ref"), you need the SHA of the branch you're creating it off of.
   // We're naïvely assuming that the branch you're creating off of is the "main" branch.
 
+  const defaultBranch = await octokit.repos.get({ owner, repo });
+  const defaultBranchSHA = defaultBranch.data.default_branch;
+
   // So let's get the SHA of the "main" branch.
   const currentBranchData = await octokit.git.getRef({
     owner,
     repo,
-    ref: "heads/main",
+    ref: `heads/${defaultBranchSHA}`,
   });
 
   // Let's also get the SHA of the *file* we're going to use when we commit on the new branch.
@@ -520,6 +525,30 @@ export async function createBranchAndPR(
   let blobSha = currentFileData.data.sha;
 
   // Step 1. Create the new branch, using the SHA of the "main" branch as the base.
+
+  const updateBranchNameIfAlreadyExists = async () => {
+    try {
+      await octokit.git.getRef({
+        owner,
+        repo,
+        ref: `heads/${ref}`,
+      });
+      // if we get here, the branch already exists
+      // check for -X where X is a number
+      const refNumber = ref.match(/-(\d+)$/);
+      if (refNumber) {
+        ref = ref.replace(/-(\d+)$/, `-${parseInt(refNumber[1]) + 1}`);
+      } else {
+        ref = `${ref}-1`;
+      }
+      await updateBranchNameIfAlreadyExists();
+    } catch (e) {
+      // if we get here, the branch doesn't exist
+    }
+  };
+
+  await updateBranchNameIfAlreadyExists();
+
   await userOctokit.git.createRef({
     owner,
     repo,
@@ -532,7 +561,7 @@ export async function createBranchAndPR(
     owner,
     repo,
     path,
-    message: `feat: updated ${params.path} programatically`,
+    message: commitMessage || `feat: updated ${params.path} programatically`,
     content: Base64.encode(content),
     branch: ref,
     // @ts-ignore
@@ -544,7 +573,7 @@ export async function createBranchAndPR(
     owner,
     repo,
     head: ref,
-    base: "main",
+    base: defaultBranchSHA,
     title,
     body,
   });

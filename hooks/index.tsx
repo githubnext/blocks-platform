@@ -86,6 +86,7 @@ interface UseUpdateFileContentParams extends RepoContext {
   branch: string; // Required in order to target createOrUpdateFileContents
   token: string;
   userToken: string;
+  message?: string;
 }
 
 export async function updateFileContents(params: UseUpdateFileContentParams) {
@@ -116,7 +117,7 @@ export async function updateFileContents(params: UseUpdateFileContentParams) {
       owner: params.owner,
       repo: params.repo,
       path: params.path,
-      message: `feat: updated ${params.path} programatically`,
+      message: params.message || `feat: updated ${params.path} programatically`,
       content: contentEncoded,
       branch: params.branch,
       sha: fileSha,

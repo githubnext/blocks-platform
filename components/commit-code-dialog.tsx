@@ -119,6 +119,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
         createBranch({
           owner,
           repo,
+          sourceBranch: sha,
           ref: newBranchName,
           token,
           userToken,
@@ -165,7 +166,6 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
       isOpen={isOpen}
       title="Commit changes"
       wide
-      // sx={{ width: "96%", maxWidth: "70em" }}
       onDismiss={onCancel}
     >
       <Dialog.Header>
@@ -216,6 +216,9 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
             />
           </FormControl>
           <FormControl>
+            <FormControl.Label visuallyHidden>
+              Commit Description
+            </FormControl.Label>
             <Textarea
               placeholder="Add an optional extended description..."
               sx={{ width: "100%" }}

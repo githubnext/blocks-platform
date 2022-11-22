@@ -478,6 +478,7 @@ export interface CreateBranchParams {
   title?: string;
   body?: string;
   commitMessage?: string;
+  sourceBranch: string;
 }
 
 type PullsResponse = Endpoints["POST /repos/{owner}/{repo}/pulls"]["response"];
@@ -496,29 +497,28 @@ export async function createBranchAndPR(
     title = `GitHub Blocks: Update ${path}`,
     body = "This is a pull request created programmatically by GitHub Blocks.",
     commitMessage,
+    sourceBranch,
   } = params;
   let { ref } = params;
   const octokit = new Octokit({ auth: token });
   const userOctokit = new Octokit({ auth: userToken });
   // "SHAs" abound in this codebase, so let me explain what's going on.
   // In order to create a new branch (a.k.a "ref"), you need the SHA of the branch you're creating it off of.
-  // We're naïvely assuming that the branch you're creating off of is the "main" branch.
 
-  const defaultBranch = await octokit.repos.get({ owner, repo });
-  const defaultBranchSHA = defaultBranch.data.default_branch;
-
-  // So let's get the SHA of the "main" branch.
+  // So let's get the SHA of the source branch.
   const currentBranchData = await octokit.git.getRef({
     owner,
     repo,
-    ref: `heads/${defaultBranchSHA}`,
+    ref: `heads/${sourceBranch}`,
   });
+  const sourceSha = currentBranchData.data.object.sha;
 
   // Let's also get the SHA of the *file* we're going to use when we commit on the new branch.
   const currentFileData = await octokit.repos.getContent({
     owner,
     repo,
     path,
+    ref: sourceBranch,
   });
 
   // @ts-ignore
@@ -553,7 +553,7 @@ export async function createBranchAndPR(
     owner,
     repo,
     ref: `refs/heads/${ref}`,
-    sha: currentBranchData.data.object.sha,
+    sha: sourceSha,
   });
 
   // Step 2. Commit the new file to the new branch.
@@ -568,12 +568,12 @@ export async function createBranchAndPR(
     sha: blobSha,
   });
 
-  // Step 3. Create the PR using "main" as the base.
+  // Step 3. Create the PR using our source branch as the base.
   const res = await userOctokit.pulls.create({
     owner,
     repo,
     head: ref,
-    base: defaultBranchSHA,
+    base: sourceBranch,
     title,
     body,
   });

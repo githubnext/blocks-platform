@@ -25,7 +25,7 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
     string,
     string
   >;
-  const { path: pathArray } = router.query as Record<string, string | string[]>;
+  const { path: pathArray } = router.query as { path: string[] };
   const path = pathArray ? pathArray.join("/") : "";
 
   const [devServerInfoLoaded, setDevServerInfoLoaded] = useState(false);
@@ -162,6 +162,7 @@ const RepoDetailContainerWithRedirect = (props: AppContextValue) => {
       const { path, ...queryWithoutPath } = router.query;
       router.push(
         {
+          // we need to pass pathArray as part of the pathname to prevent it from being encoded
           pathname: `/[owner]/[repo]/${pathArray}`,
           query: queryWithoutPath,
         },

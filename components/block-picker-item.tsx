@@ -25,7 +25,7 @@ export const BlockPickerItem = ({
     <button
       className={`group m-1 flex flex-col rounded-xl text-left ${
         isDev
-          ? "bg-[#ddf4ffaa] !border !border-dashed !border-[#54aeff] !mb-2"
+          ? "bg-[#ddf4ffaa] !border !border-dashed !border-[#54aeff]"
           : "!border border-gray-200"
       } ${
         isSelected

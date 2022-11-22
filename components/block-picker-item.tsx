@@ -51,8 +51,12 @@ export const BlockPickerItem = ({
                 <Text className="opacity-70">{repo.stars}</Text>
               </div>
               {isDev ? (
-                <Text pb="1" className="text-xs font-mono text-[#0969da]">
-                  From dev server
+                <Text
+                  className={`text-xs font-mono ${
+                    isSelected ? "text-white" : "text-[#0969da]"
+                  }`}
+                  title="from dev server"
+                >
                   <PlugIcon className="ml-1" />
                 </Text>
               ) : (
@@ -80,7 +84,7 @@ export const BlockPickerItem = ({
           <div className="relative flex items-center mt-[0.3em]">
             {isExampleBlock && (
               <Text
-                color={isSelected ? "#0550ae" : "ansi.blue"}
+                color={isSelected ? "white" : "ansi.blue"}
                 className="mr-1 mt-[-0.2em]"
                 title="Verified block from the GitHub Next team"
               >
@@ -127,7 +131,7 @@ export const BlockPickerItem = ({
         }`}
       >
         {!block?.matches?.length || block.matches.includes("*") ? (
-          <div className="text-xs italic pl-2 pb-[0.8em] pt-[0.6em] opacity-60">
+          <div className="text-xs italic pl-2 pb-[0.8em] pt-[0.6em] opacity-80">
             Works for all {block.type}s
           </div>
         ) : (

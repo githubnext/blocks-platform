@@ -60,7 +60,6 @@ export default function BlockPicker(props: BlockPickerProps) {
     queryClient.invalidateQueries(QueryKeyMap.blocksRepo.key);
     queryClient.resetQueries(QueryKeyMap.blocksRepos.key);
   };
-  console.log(blockRepos);
 
   return (
     <ActionMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -82,7 +81,7 @@ export default function BlockPicker(props: BlockPickerProps) {
             value={searchTerm}
             leadingVisual={SearchIcon}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search blocks or paste repo URL like //github.com/githubnext/blocks-examples"
+            placeholder="Search blocks or paste repo URL like https://github.com/githubnext/blocks-examples"
             className="!pl-2 flex-1"
           />
           <Button

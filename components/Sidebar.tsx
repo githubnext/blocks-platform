@@ -137,10 +137,7 @@ export const Sidebar = ({
             ? {
                 id,
                 isLeaf: children.length === 0,
-                isOpenByDefault:
-                  activeFilePath.includes(id) ||
-                  numberOfFiles < 20 ||
-                  depth < 1,
+                isOpenByDefault: numberOfFiles < 20 || depth < 1,
                 name,
                 depth,
                 path,

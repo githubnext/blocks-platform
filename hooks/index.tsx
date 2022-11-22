@@ -100,6 +100,12 @@ export async function updateFileContents(params: UseUpdateFileContentParams) {
       repo: params.repo,
       path: params.path,
       ref: params.ref,
+      headers: {
+        // this request gets cached for 60s,
+        // which leaves us behind in some cases and we get a 409
+        // adding this header to bypass the cache
+        "If-None-Match": new Date().getTime().toString(),
+      },
     });
 
     // Octokit is silly here and potentially returns an array of contents.

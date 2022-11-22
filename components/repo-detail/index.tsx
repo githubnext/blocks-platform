@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, useContext } from "react";
 import * as Immer from "immer";
 import { useQueryClient } from "react-query";
-import { useTheme } from "@primer/react";
+import { Link, useTheme } from "@primer/react";
 import { QueryKeyMap } from "lib/query-keys";
 import type { BlocksQueryMeta } from "ghapi";
+import { AppContext } from "context";
 import {
   getBlockKey,
   updateFileContents,
@@ -25,6 +26,7 @@ import type { RepoFiles } from "@githubnext/blocks";
 import { CODEX_BLOCKS } from "lib";
 import { useSession } from "next-auth/react";
 import useBlockFrameMessages from "./use-block-frame-messages";
+import { WarningModal } from "components/WarningModal";
 
 export type Context = {
   repo: string;
@@ -55,6 +57,7 @@ const blockTypes = {
 
 export function RepoDetailInner(props: RepoDetailInnerProps) {
   const queryClient = useQueryClient();
+  const appContext = useContext(AppContext);
   const { repoInfo, branches, branchName, files, timeline } = props;
   const router = useRouter();
   const { setColorMode } = useTheme();
@@ -211,42 +214,67 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
           onClose={() => setRequestedBlockMetadata(null)}
         />
       )}
-      {!!requestedMetadata && (
-        <UpdateCodeModal
-          path={requestedMetadata.path}
-          newCode={requestedMetadata.new}
-          currentCode={requestedMetadata.current}
-          onSubmit={() => {
-            requestedMetadata.onSubmit();
-            const { token, userToken } = queryClient.getDefaultOptions().queries
-              .meta as BlocksQueryMeta;
-            queryClient.executeMutation({
-              mutationFn: updateFileContents,
-              variables: {
-                owner,
-                repo,
-                path: requestedMetadata.path,
-                content: requestedMetadata.new,
-                ref: branchName,
-                branch: branchName,
-                token,
-                userToken,
-              },
-              onSuccess: () => {
-                queryClient.invalidateQueries(
-                  QueryKeyMap.metadata.factory({
-                    owner,
-                    repo,
-                    path: requestedMetadata.path,
-                    fileRef: branchName,
-                  })
-                );
-              },
-            });
-          }}
-          onClose={() => setRequestedMetadata(null)}
-        />
-      )}
+      {!!requestedMetadata &&
+        (repoInfo.permissions?.push && appContext.hasRepoInstallation ? (
+          <UpdateCodeModal
+            path={requestedMetadata.path}
+            newCode={requestedMetadata.new}
+            currentCode={requestedMetadata.current}
+            onSubmit={() => {
+              requestedMetadata.onSubmit();
+              const { token, userToken } = queryClient.getDefaultOptions()
+                .queries.meta as BlocksQueryMeta;
+              queryClient.executeMutation({
+                mutationFn: updateFileContents,
+                variables: {
+                  owner,
+                  repo,
+                  path: requestedMetadata.path,
+                  content: requestedMetadata.new,
+                  ref: branchName,
+                  branch: branchName,
+                  token,
+                  userToken,
+                },
+                onSuccess: () => {
+                  queryClient.invalidateQueries(
+                    QueryKeyMap.metadata.factory({
+                      owner,
+                      repo,
+                      path: requestedMetadata.path,
+                      fileRef: branchName,
+                    })
+                  );
+                },
+              });
+            }}
+            onClose={() => setRequestedMetadata(null)}
+          />
+        ) : (
+          <WarningModal
+            title="Permission needed"
+            message={
+              !appContext.hasRepoInstallation ? (
+                <>
+                  The Blocks GitHub app is not installed on this repository.{" "}
+                  <Link
+                    underline
+                    muted
+                    target="_blank"
+                    rel="noopener"
+                    href={appContext.installationUrl}
+                  >
+                    Install the app
+                  </Link>{" "}
+                  to save changes to files or open pull-requests.
+                </>
+              ) : (
+                "You do not have permission to edit this file"
+              )
+            }
+            onClose={() => setRequestedMetadata(null)}
+          />
+        ))}
       {!!showCommitCodeDialog && updatedContents[path] && (
         <CommitCodeDialog
           repo={repo}

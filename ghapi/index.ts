@@ -295,7 +295,13 @@ export const getRepoFiles: QueryFunction<
 
   const url = `repos/${owner}/${repo}/git/trees/${sha}?recursive=1`;
 
-  const fileTreeRes = await meta.ghapi(url);
+  const fileTreeRes = await meta.ghapi(url, {
+    headers: {
+      // this response is cached for 60s
+      // we need to bypass this eg. when a metadata update creates a new file
+      "If-None-Match": new Date().getTime().toString(),
+    },
+  });
 
   const files = fileTreeRes.data.tree;
   return files;

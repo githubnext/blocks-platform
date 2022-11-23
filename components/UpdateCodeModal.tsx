@@ -24,6 +24,7 @@ export const UpdateCodeModal = ({
     <div className="relative z-50">
       <ConfirmationDialog
         title={"Let's make that change"}
+        confirmButtonType="primary"
         cancelButtonContent={"Cancel"}
         confirmButtonContent={"Commit changes"}
         onClose={async (gesture) => {
@@ -74,10 +75,6 @@ export const UpdateCodeModal = ({
               </Diff>
             ))}
           </div>
-          <Flash variant="warning">
-            <Text fontWeight="bold">Warning:</Text> this will only work if you
-            have write access to the current repo.
-          </Flash>
         </div>
       </ConfirmationDialog>
     </div>

@@ -45,6 +45,12 @@ export default function BlockPaneHeader({
   const isDefaultBlock = getBlockKey(block) === getBlockKey(defaultBlock);
 
   const canSave = appContext.permissions?.push;
+  const hasEditPermission = canSave && appContext.hasRepoInstallation;
+  const noEditPermissionReason = !canSave
+    ? "You don't have permission to update this repo"
+    : !appContext.hasRepoInstallation
+    ? "The Blocks GitHub app is not installed on this repository"
+    : "";
 
   return (
     <div className="flex-none top-0 z-10">
@@ -59,82 +65,32 @@ export default function BlockPaneHeader({
           justifyContent="space-between"
         >
           <Box display="flex" alignItems="center" className="space-x-2">
-            {!canSave || !appContext.hasRepoInstallation ? (
-              <Tooltip
-                side="top"
-                text={
-                  !canSave
-                    ? "You don't have permission to update this repo"
-                    : !appContext.hasRepoInstallation
-                    ? "The Blocks GitHub app is not installed on this repository"
-                    : null
-                }
-              >
-                {/* wrapper div needed to steal pointer events, */}
-                {/* to prevent collision between disabled button and tooltip attributes */}
-                <div>
-                  <Button
-                    variant="primary"
-                    leadingIcon={RepoPushIcon}
-                    disabled
-                    className="pointer-events-none"
-                  >
-                    Save
-                  </Button>
-                </div>
-              </Tooltip>
-            ) : (
+            <TooltipButtonWrapper
+              hasTooltip={!hasEditPermission || !onSaveChanges}
+              tooltipText={noEditPermissionReason || "No changes to save"}
+            >
               <Button
-                key={"Save"}
-                variant={"primary"}
+                disabled={!hasEditPermission || !onSaveChanges}
+                variant="primary"
                 leadingIcon={RepoPushIcon}
-                disabled={!onSaveChanges}
-                onClick={onSaveChanges}
+                className="pointer-events-none"
               >
                 Save
               </Button>
-            )}
+            </TooltipButtonWrapper>
             <BlockPicker
               path={path}
               type={isFolder ? "folder" : "file"}
               onChange={setBlock}
               value={block}
             />
-            {!isDefaultBlock &&
-              (!canSave || !appContext.hasRepoInstallation ? (
-                <Tooltip
-                  side="top"
-                  text={
-                    !canSave
-                      ? "You don't have permission to update this repo"
-                      : !appContext.hasRepoInstallation
-                      ? "The Blocks GitHub app is not installed on this repository"
-                      : null
-                  }
-                >
-                  {/* wrapper div needed to steal pointer events, */}
-                  {/* to prevent collision between disabled button and tooltip attributes */}
-                  <div>
-                    <Button
-                      disabled={!appContext.hasRepoInstallation}
-                      onClick={() => {
-                        const newMetadata = {
-                          ...metadata,
-                          [path]: {
-                            ...metadata[path],
-                            default: getBlockKey(block),
-                          },
-                        };
-                        setRequestedMetadata(newMetadata);
-                      }}
-                    >
-                      Make default
-                    </Button>
-                  </div>
-                </Tooltip>
-              ) : (
+            {!isDefaultBlock && (
+              <TooltipButtonWrapper
+                hasTooltip={!hasEditPermission}
+                tooltipText={noEditPermissionReason}
+              >
                 <Button
-                  disabled={!appContext.hasRepoInstallation}
+                  disabled={!hasEditPermission}
                   onClick={() => {
                     const newMetadata = {
                       ...metadata,
@@ -148,7 +104,8 @@ export default function BlockPaneHeader({
                 >
                   Make default
                 </Button>
-              ))}
+              </TooltipButtonWrapper>
+            )}
           </Box>
           <AnimatePresence initial={false}>
             {isFullscreen && (
@@ -211,3 +168,23 @@ export default function BlockPaneHeader({
     </div>
   );
 }
+
+const TooltipButtonWrapper = ({
+  hasTooltip,
+  tooltipText,
+  children,
+}: {
+  hasTooltip: boolean;
+  tooltipText: string;
+  children: React.ReactNode;
+}) => {
+  if (hasTooltip)
+    return (
+      <Tooltip side="top" text={tooltipText}>
+        {/* wrapper div needed to steal pointer events, */}
+        {/* to prevent collision between disabled button and tooltip attributes */}
+        <div>{children}</div>
+      </Tooltip>
+    );
+  return <>{children}</>;
+};

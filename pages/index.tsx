@@ -62,11 +62,8 @@ function Home() {
           <div className="mt-12 space-x-4 pointer-events-auto">
             <Link
               href={{
-                pathname: "/githubnext/blocks",
-                query: {
-                  path: "README.md",
-                  ...(devServer ? { devServer } : {}),
-                },
+                pathname: "/githubnext/blocks/README.md",
+                query: devServer ? { devServer } : {},
               }}
             >
               <a className="group inline-flex items-center px-8 py-4 text-lg border border-transparent leading-4 font-medium rounded-md shadow-sm text-gh-text bg-gh-bg hover:bg-gh-bgDark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">

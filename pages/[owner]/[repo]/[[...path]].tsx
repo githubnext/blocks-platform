@@ -21,10 +21,13 @@ const { publicRuntimeConfig } = getConfig();
 function RepoDetailContainer({ installationUrl }: AppContextValue) {
   const router = useRouter();
   const [hasRepoInstallation, setHasRepoInstallation] = useState(false);
-  const { repo, owner, branch, path, devServer } = router.query as Record<
+  const { repo, owner, branch, devServer } = router.query as Record<
     string,
     string
   >;
+  const { path: pathArray } = router.query as { path: string[] };
+  const path = pathArray ? pathArray.join("/") : "";
+
   const [devServerInfoLoaded, setDevServerInfoLoaded] = useState(false);
   const [devServerInfo, setDevServerInfo] = useState<undefined | DevServerInfo>(
     undefined
@@ -145,7 +148,35 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
   );
 }
 
-export default RepoDetailContainer;
+const RepoDetailContainerWithRedirect = (props: AppContextValue) => {
+  const router = useRouter();
+
+  const { path: pathArray } = router.query as Record<string, string | string[]>;
+
+  if (
+    pathArray && // defaults to string when looking at root folder
+    typeof pathArray === "string" // we're using the old url structure
+  ) {
+    // redirect to the correct path
+    if (typeof window !== "undefined") {
+      const { path, ...queryWithoutPath } = router.query;
+      router.push(
+        {
+          // we need to pass pathArray as part of the pathname to prevent it from being encoded
+          pathname: `/[owner]/[repo]/${pathArray}`,
+          query: queryWithoutPath,
+        },
+        undefined,
+        { shallow: true }
+      );
+    }
+    return null;
+  }
+
+  return <RepoDetailContainer {...props} />;
+};
+
+export default RepoDetailContainerWithRedirect;
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const session = await getSessionOnServer(context.req);

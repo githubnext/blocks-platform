@@ -119,7 +119,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
         createBranch({
           owner,
           repo,
-          sourceBranch: sha,
+          sourceBranch: branchName,
           ref: newBranchName,
           token,
           userToken,

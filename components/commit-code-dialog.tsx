@@ -9,6 +9,7 @@ import {
   Dialog,
   Flash,
   FormControl,
+  Link,
   Radio,
   RadioGroup,
   Text,
@@ -34,7 +35,6 @@ interface CommitCodeDialogProps {
   path: string;
   repo: string;
   owner: string;
-  sha: string;
   branchingDisabled: boolean;
   branchName: string;
 }
@@ -43,10 +43,12 @@ type CommitType = "currentBranch" | "newBranch";
 
 export function CommitCodeDialog(props: CommitCodeDialogProps) {
   const textInputRef = useRef(null);
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
+  const [commitTitle, setCommitTitle] = useState(`Update ${props.path}`);
+  const [commitDescription, setCommitDescription] = useState("");
+  const [prTitle, setPrTitle] = useState("");
+  const [prDescription, setPrDescription] = useState("");
   const [commitType, setCommitType] = useState<CommitType>("currentBranch");
-  const [newBranchName, setNewBranchName] = useState("");
+  const [newBranchName, setNewBranchName] = useState(`patch`);
   const {
     onCommit,
     onCancel,
@@ -56,7 +58,6 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
     path,
     owner,
     repo,
-    sha,
     branchingDisabled,
     branchName,
   } = props;
@@ -85,8 +86,11 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
     onSuccess: async (res) => {
       window.open(res.html_url, "_blank");
       onCommit();
-      setTitle("");
-      setBody("");
+      setPrTitle("");
+      setPrDescription("");
+      setCommitTitle("");
+      setCommitDescription("");
+      setNewBranchName("");
       setCommitType("currentBranch");
       await queryClient.refetchQueries([
         QueryKeyMap.branches.key,
@@ -97,7 +101,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
           pathname: router.pathname,
           query: {
             ...router.query,
-            branch: newBranchName,
+            branch: res.head.ref,
             fileRef: res.head.sha,
           },
         },
@@ -113,13 +117,15 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
         createBranch({
           owner,
           repo,
+          sourceBranch: branchName,
           ref: newBranchName,
           token,
           userToken,
           content: newCode,
           path,
-          title,
-          body,
+          title: prTitle,
+          body: prDescription,
+          commitMessage: `${commitTitle}\n\n${commitDescription}`,
         });
       } catch (e) {}
     } else {
@@ -128,11 +134,12 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
           owner,
           repo,
           branch: branchName,
-          ref: sha,
+          ref: branchName,
           token,
           userToken,
           content: newCode,
           path,
+          message: `${commitTitle}\n\n${commitDescription}`,
         });
       } catch (e) {}
     }
@@ -159,7 +166,10 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
       wide
       onDismiss={onCancel}
     >
-      <Dialog.Header>Editing {path}</Dialog.Header>
+      <Dialog.Header>
+        {commitType === "currentBranch" ? "Commit" : "Propose"} changes to{" "}
+        {path}
+      </Dialog.Header>
 
       <div className="p-4">
         {(createBranchError || updateContentsError) && (
@@ -191,26 +201,46 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
             </Diff>
           ))}
         </div>
-        <div className="mt-4">
+        <div className="mt-4 space-y-3">
+          <FormControl>
+            <FormControl.Label visuallyHidden>Commit Title</FormControl.Label>
+            <TextInput
+              placeholder="Commit Title"
+              value={commitTitle}
+              className="w-full"
+              onChange={(e) => {
+                setCommitTitle(e.target.value);
+              }}
+            />
+          </FormControl>
+          <FormControl>
+            <FormControl.Label visuallyHidden>
+              Commit Description
+            </FormControl.Label>
+            <Textarea
+              placeholder="Add an optional extended description..."
+              sx={{ width: "100%" }}
+              rows={4}
+              value={commitDescription}
+              onChange={(e) => {
+                setCommitDescription(e.target.value);
+              }}
+            />
+          </FormControl>
           <RadioGroup
+            sx={{ mt: 3 }}
             disabled={isLoading}
             name="choiceGroup"
             onChange={(value) => {
               setCommitType(value as CommitType);
             }}
           >
-            <RadioGroup.Label>Commit changes</RadioGroup.Label>
-            <Text className="text-xs -mt-1 mb-1">
-              <Text fontWeight="bold">Warning:</Text> this will only work if you
-              have write access to the current repo.
-            </Text>
             <FormControl>
               <Radio
                 checked={commitType === "currentBranch"}
                 value="currentBranch"
               />
-
-              <FormControl.Label>
+              <FormControl.Label sx={{ fontWeight: 400 }}>
                 <GitCommitIcon />
                 <span className="ml-1">
                   Commit directly to the{" "}
@@ -220,11 +250,19 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
               </FormControl.Label>
             </FormControl>
             <FormControl disabled={branchingDisabled}>
+              <RadioGroup.Label visuallyHidden>Commit changes</RadioGroup.Label>
               <Radio checked={commitType === "newBranch"} value="newBranch" />
-              <FormControl.Label>
+              <FormControl.Label sx={{ fontWeight: 400 }}>
                 <GitPullRequestIcon />
                 <span className="ml-1">
-                  Create a new branch for this commit and start a pull request.
+                  Create a <strong>new branch</strong> for this commit and start
+                  a pull request.{" "}
+                  <Link
+                    href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests"
+                    target="_blank"
+                  >
+                    Learn more about branches.
+                  </Link>
                 </span>
               </FormControl.Label>
               {branchingDisabled && (
@@ -236,7 +274,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
             </FormControl>
           </RadioGroup>
           {commitType === "newBranch" && (
-            <div className="mt-1">
+            <div className="mt-1 pl-5">
               <div className="flex flex-col gap-2">
                 <FormControl>
                   <FormControl.Label visuallyHidden>
@@ -245,6 +283,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
                   <TextInput
                     ref={textInputRef}
                     className="font-mono"
+                    sx={{ width: "100%" }}
                     leadingVisual={GitBranchIcon}
                     placeholder="New branch name"
                     value={newBranchName}
@@ -256,21 +295,25 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
                 <FormControl>
                   <FormControl.Label visuallyHidden>PR Title</FormControl.Label>
                   <TextInput
-                    placeholder="PR Title"
-                    value={title}
+                    className="w-full"
+                    placeholder="Pull request title"
+                    value={prTitle}
                     onChange={(e) => {
-                      setTitle(e.target.value);
+                      setPrTitle(e.target.value);
                     }}
                   />
                 </FormControl>
                 <FormControl>
-                  <FormControl.Label visuallyHidden>PR Title</FormControl.Label>
+                  <FormControl.Label visuallyHidden>
+                    PR Description
+                  </FormControl.Label>
                   <Textarea
-                    placeholder="PR Body"
+                    placeholder="Pull request description"
+                    sx={{ width: "100%" }}
                     rows={4}
-                    value={body}
+                    value={prDescription}
                     onChange={(e) => {
-                      setBody(e.target.value);
+                      setPrDescription(e.target.value);
                     }}
                   />
                 </FormControl>
@@ -284,7 +327,10 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
           Cancel
         </Button>
         <Button
-          disabled={isLoading || (!newBranchName && commitType === "newBranch")}
+          disabled={
+            isLoading ||
+            (commitType === "newBranch" && (!newBranchName || !prTitle))
+          }
           async
           type="button"
           variant="primary"

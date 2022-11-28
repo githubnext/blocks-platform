@@ -73,7 +73,7 @@ export default function BlockPaneHeader({
                 disabled={!hasEditPermission || !onSaveChanges}
                 variant="primary"
                 leadingIcon={RepoPushIcon}
-                className="pointer-events-none"
+                onClick={onSaveChanges}
               >
                 Save
               </Button>

@@ -35,7 +35,6 @@ interface CommitCodeDialogProps {
   path: string;
   repo: string;
   owner: string;
-  sha: string;
   branchingDisabled: boolean;
   branchName: string;
 }
@@ -59,7 +58,6 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
     path,
     owner,
     repo,
-    sha,
     branchingDisabled,
     branchName,
   } = props;
@@ -136,7 +134,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
           owner,
           repo,
           branch: branchName,
-          ref: sha,
+          ref: branchName,
           token,
           userToken,
           content: newCode,

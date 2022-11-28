@@ -698,32 +698,44 @@ export const getBlocksRepos: QueryFunction<
     );
     repos = data;
   }
-  const blocksRepos = await Promise.all([
-    ...(devServerInfo
-      ? [
-          queryClient.fetchQuery(
-            QueryKeyMap.blocksRepo.factory({
-              owner: devServerInfo.owner,
-              repo: devServerInfo.repo,
-              path,
-              type,
-              searchTerm,
-              devServerInfo,
-            }),
-            getBlocksFromRepo,
-            { staleTime: 5 * 60 * 1000 }
-          ),
-        ]
-      : []),
-    ...repos.map((repo) => {
-      if (
-        devServerInfo &&
-        devServerInfo.owner === repo.owner.login &&
-        devServerInfo.repo === repo.name
-      ) {
-        return Promise.resolve({ blocks: [] } as BlocksRepo);
-      } else {
-        return queryClient.fetchQuery(
+
+  let devServerBlocksRepo = null;
+  if (devServerInfo) {
+    const devServerBlocksRepoRes = await queryClient.fetchQuery(
+      QueryKeyMap.blocksRepo.factory({
+        owner: devServerInfo.owner,
+        repo: devServerInfo.repo,
+        path,
+        type,
+        searchTerm,
+        devServerInfo,
+      }),
+      getBlocksFromRepo,
+      { staleTime: 5 * 60 * 1000 }
+    );
+    devServerBlocksRepo = {
+      ...devServerBlocksRepoRes,
+      isDev: true,
+      stars: 0,
+      watchers: 0,
+      lastRelease: null,
+    };
+  }
+  const nonDevBlocksRepos = (
+    await Promise.all(
+      repos.map(async (repo, i) => {
+        if (
+          devServerInfo &&
+          devServerInfo.owner === repo.owner.login &&
+          devServerInfo.repo === repo.name
+        ) {
+          // don't include dev server blocks
+          return {
+            blocks: [],
+          } as BlocksRepo;
+        }
+
+        const blockRepo = await queryClient.fetchQuery(
           QueryKeyMap.blocksRepo.factory({
             owner: repo.owner.login,
             repo: repo.name,
@@ -734,23 +746,28 @@ export const getBlocksRepos: QueryFunction<
           getBlocksFromRepo,
           { staleTime: 5 * 60 * 1000 }
         );
-      }
-    }),
-  ]);
-  return blocksRepos
-    .filter((repo) => repo.blocks?.length)
-    .map((blockRepo) => {
-      const isDev =
-        devServerInfo &&
-        devServerInfo.owner === blockRepo.owner &&
-        devServerInfo.repo === blockRepo.repo;
-      return {
-        ...blockRepo,
-        blocks: blockRepo.blocks.map((block) => ({
-          ...block,
-          isDev,
-        })),
-        isDev,
-      };
-    });
+        const repoInfo = repos[i];
+        return {
+          ...blockRepo,
+          stars: repoInfo?.stargazers_count,
+          watchers: repoInfo?.watchers_count,
+          lastRelease: repoInfo?.updated_at,
+          isDev: false,
+        };
+      })
+    )
+  ).sort((a, b) => {
+    // list example repo first
+    if (a.full_name === "githubnext/blocks") {
+      return -1;
+    }
+    return b.stars - a.stars;
+  });
+
+  const blocksRepos = [
+    ...(devServerBlocksRepo ? [devServerBlocksRepo] : []),
+    ...nonDevBlocksRepos,
+  ];
+
+  return blocksRepos.filter((repo) => repo.blocks?.length);
 };

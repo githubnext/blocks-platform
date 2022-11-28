@@ -285,7 +285,6 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
           repo={repo}
           owner={owner}
           path={path}
-          sha={context.sha}
           newCode={updatedContents[path].content}
           currentCode={updatedContents[path].original}
           onCommit={() => {

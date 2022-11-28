@@ -137,7 +137,11 @@ export const Sidebar = ({
             ? {
                 id,
                 isLeaf: children.length === 0,
-                isOpenByDefault: numberOfFiles < 20 || depth < 1,
+                isOpenByDefault:
+                  activeFilePath === id ||
+                  activeFilePath.startsWith(`${id}/`) ||
+                  numberOfFiles < 20 ||
+                  depth < 1,
                 name,
                 depth,
                 path,

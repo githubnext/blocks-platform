@@ -63,7 +63,7 @@ path   # the path to the file
 
 Handled automatically by our GitHub action.
 
-Our staging site is [HERE](https://githubnext-blocks-staging.azurewebsites.net/githubnext/blocks?path=README.md).
+Our staging site is [HERE](https://githubnext-blocks-staging.azurewebsites.net/githubnext/blocks/blob/main/README.md).
 
 ## Deploy to production
 

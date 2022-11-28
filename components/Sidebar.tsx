@@ -282,8 +282,8 @@ const Item = ({
         },
       }}
       // some strange nextjs hackery to keep the path unencoded
-      as={`/${currentQuery.owner}/${
-        currentQuery.repo
+      as={`/${currentQuery.owner}/${currentQuery.repo}/blob/${
+        currentQuery.branch
       }/${path}?${linkUrlParams.toString()}`}
       shallow
     >

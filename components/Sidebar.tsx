@@ -276,15 +276,11 @@ const Item = ({
         pathname: currentPathname,
         query: {
           ...currentQuery,
-          path,
+          path: path.split("/"),
           blockKey: isActive ? currentQuery.blockKey : undefined,
           fileRef: null,
         },
       }}
-      // some strange nextjs hackery to keep the path unencoded
-      as={`/${currentQuery.owner}/${currentQuery.repo}/blob/${
-        currentQuery.branch
-      }/${path}?${linkUrlParams.toString()}`}
       shallow
     >
       <a

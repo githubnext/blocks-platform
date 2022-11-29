@@ -40,7 +40,10 @@ export default function BlockPane({
     const globs = Object.keys(metadata).filter((key) => {
       const globs = key.split(",").map((glob) => glob.trim());
       if (!path && globs.includes("")) return true;
-      const doesMatch = pm(globs, { bash: true, dot: true })(path);
+      const doesMatch = pm(
+        globs.filter((g) => g !== ""),
+        { bash: true, dot: true }
+      )(path);
       return doesMatch;
     });
     return metadata[globs[0]] || {};

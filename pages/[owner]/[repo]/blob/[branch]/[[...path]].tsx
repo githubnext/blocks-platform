@@ -25,7 +25,7 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
     string,
     string
   >;
-  console.log({ branch });
+  console.log("RepoDetailContainer", { query: router.query });
   const { path: pathArray } = router.query as { path: string[] };
   const path = pathArray ? pathArray.join("/") : "";
 
@@ -151,6 +151,7 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
 
 const RepoDetailContainerWithRedirect = (props: AppContextValue) => {
   const router = useRouter();
+  console.log("RepoDetailContainerWithRedirect", { query: router.query });
 
   const { path: pathArray } = router.query as Record<string, string | string[]>;
 

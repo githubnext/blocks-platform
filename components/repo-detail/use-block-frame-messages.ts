@@ -19,6 +19,7 @@ import type { AppContextValue } from "context";
 import { AppContext } from "context";
 import { Context, UpdatedContents } from "./index";
 import axios from "axios";
+import makeBranchPath from "utils/makeBranchPath";
 
 const { publicRuntimeConfig } = getConfig();
 
@@ -657,7 +658,10 @@ function useBlockFrameMessages({
         router.push(
           {
             pathname: router.pathname,
-            query: { ...router.query, path: data.payload.path },
+            query: {
+              ...router.query,
+              branchPath: makeBranchPath(branchName, data.payload.path),
+            },
           },
           null,
           { shallow: true }

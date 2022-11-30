@@ -1,24 +1,26 @@
-import { AppContextValue } from "context";
 import { GetServerSidePropsContext } from "next";
 import getConfig from "next/config";
 import { useRouter } from "next/router";
 import { getSessionOnServer } from "pages/api/auth/[...nextauth]";
+import makeBranchPath from "utils/makeBranchPath";
 
 const { publicRuntimeConfig } = getConfig();
 
 const RedirectPage = (props: { defaultBranch: string }) => {
   const { defaultBranch } = props;
   const router = useRouter();
-
-  const { path: pathArray } = router.query as Record<string, string | string[]>;
+  const query = router.query;
+  const { path, ...queryWithoutPath } = query as { path: string };
 
   // redirect to default branch
   if (typeof window !== "undefined") {
     router.push(
       {
-        // we need to pass pathArray as part of the pathname to prevent it from being encoded
-        pathname: `/[owner]/[repo]/blob/${defaultBranch}/${pathArray || ""}`,
-        query: router.query,
+        pathname: "/[owner]/[repo]/blob/[...branchPath]",
+        query: {
+          ...queryWithoutPath,
+          branchPath: makeBranchPath(defaultBranch, path),
+        },
       },
       undefined,
       { shallow: true }

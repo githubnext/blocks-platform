@@ -25,6 +25,7 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
     string,
     string
   >;
+  console.log({ branch });
   const { path: pathArray } = router.query as { path: string[] };
   const path = pathArray ? pathArray.join("/") : "";
 

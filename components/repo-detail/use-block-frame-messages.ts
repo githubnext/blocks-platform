@@ -26,7 +26,8 @@ const { publicRuntimeConfig } = getConfig();
 const onRequestGitHubData = async (
   path: string,
   params = {},
-  token?: string
+  token?: string,
+  rawData = false
 ) => {
   // handle paths that accidentally include the domain
   const parsedPath = path.replace("https://api.github.com", "");
@@ -45,7 +46,7 @@ const onRequestGitHubData = async (
     );
   }
 
-  const resObject = await res.json();
+  const resObject = await (rawData ? res.blob() : res.json());
   return resObject;
 };
 
@@ -623,7 +624,12 @@ function useBlockFrameMessages({
       // handle Block callback functions by name
       case "onRequestGitHubData":
         return handleResponse(
-          onRequestGitHubData(data.payload.path, data.payload.params, token),
+          onRequestGitHubData(
+            data.payload.path,
+            data.payload.params,
+            token,
+            data.payload.rawData
+          ),
           responseParams
         );
 

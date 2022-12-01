@@ -10,7 +10,7 @@ const RedirectPage = (props: { defaultBranch: string }) => {
   const { defaultBranch } = props;
   const router = useRouter();
   const query = router.query;
-  const { path, ...queryWithoutPath } = query as { path: string };
+  const { path, branch, ...queryRest } = query as Record<string, string>;
 
   // redirect to default branch
   if (typeof window !== "undefined") {
@@ -18,8 +18,8 @@ const RedirectPage = (props: { defaultBranch: string }) => {
       {
         pathname: "/[owner]/[repo]/blob/[...branchPath]",
         query: {
-          ...queryWithoutPath,
-          branchPath: makeBranchPath(defaultBranch, path),
+          ...queryRest,
+          branchPath: makeBranchPath(branch ?? defaultBranch, path),
         },
       },
       undefined,

@@ -13,6 +13,7 @@ import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { VscCircleOutline } from "react-icons/vsc";
 import { FixedSizeTree as Tree } from "react-vtree";
+import makeBranchPath from "utils/makeBranchPath";
 
 // defined in @githubnext/blocks but not exported
 interface NestedFileTree {
@@ -27,6 +28,7 @@ interface NestedFileTree {
 type SidebarProps = {
   owner: string;
   repo: string;
+  branchName: string;
   files: RepoFiles;
   activeFilePath: string;
   updatedContents: Record<string, unknown>;
@@ -35,6 +37,7 @@ type SidebarProps = {
 export const Sidebar = ({
   owner = "",
   repo = "",
+  branchName,
   files = [],
   activeFilePath = "",
   updatedContents,
@@ -150,6 +153,7 @@ export const Sidebar = ({
                 updatedContents,
                 currentPathname: router.pathname,
                 currentQuery: query,
+                currentBranch: branchName,
               }
             : id;
 
@@ -167,7 +171,14 @@ export const Sidebar = ({
           }
         }
       },
-    [filteredFiles, updatedContents, numberOfFiles < 20, activeFilePath]
+    [
+      filteredFiles,
+      updatedContents,
+      numberOfFiles < 20,
+      activeFilePath,
+      query,
+      branchName,
+    ]
   );
   if (!files.map) return null;
 
@@ -216,6 +227,7 @@ const Node = ({
     updatedContents,
     currentPathname,
     currentQuery,
+    currentBranch,
   },
   isOpen,
   style,
@@ -232,6 +244,7 @@ const Node = ({
         updatedContents={updatedContents}
         currentPathname={currentPathname}
         currentQuery={currentQuery}
+        currentBranch={currentBranch}
         toggle={toggle}
         isOpen={isOpen}
         isFolder={!isLeaf}
@@ -248,6 +261,7 @@ type ItemProps = {
   depth: number;
   currentPathname: string;
   currentQuery: Record<string, any>;
+  currentBranch: string;
   canCollapse?: boolean;
   isOpen: boolean;
   updatedContents: Record<string, unknown>;
@@ -262,13 +276,12 @@ const Item = ({
   depth,
   currentPathname,
   currentQuery,
+  currentBranch,
   isOpen,
   updatedContents,
   toggle,
 }: ItemProps) => {
   const isActive = activeFilePath === path;
-  const { owner: _owner, repo: _repo, path: _path, ...query } = currentQuery;
-  const linkUrlParams = new URLSearchParams(query);
 
   return (
     <Link
@@ -276,7 +289,7 @@ const Item = ({
         pathname: currentPathname,
         query: {
           ...currentQuery,
-          path: path.split("/"),
+          branchPath: makeBranchPath(currentBranch, path),
           blockKey: isActive ? currentQuery.blockKey : undefined,
           fileRef: null,
         },

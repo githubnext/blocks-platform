@@ -14,6 +14,7 @@ import {
   useRepoInfo,
   useRepoTimeline,
 } from "hooks";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import { FullPageLoader } from "../full-page-loader";
 import { UpdateCodeModal } from "../UpdateCodeModal";
@@ -27,6 +28,7 @@ import { CODEX_BLOCKS } from "lib";
 import { useSession } from "next-auth/react";
 import useBlockFrameMessages from "./use-block-frame-messages";
 import { WarningModal } from "components/WarningModal";
+import makeBranchPath from "utils/makeBranchPath";
 
 export type Context = {
   repo: string;
@@ -46,6 +48,7 @@ interface RepoDetailInnerProps {
   repoInfo: RepoInfo;
   branches: Branch[];
   branchName: string;
+  path: string;
   files: undefined | RepoFiles;
   timeline: undefined | RepoTimeline;
 }
@@ -58,15 +61,13 @@ const blockTypes = {
 export function RepoDetailInner(props: RepoDetailInnerProps) {
   const queryClient = useQueryClient();
   const appContext = useContext(AppContext);
-  const { repoInfo, branches, branchName, files, timeline } = props;
+  const { repoInfo, branches, branchName, path, files, timeline } = props;
   const router = useRouter();
   const { setColorMode } = useTheme();
   const { repo, owner, theme, fileRef, mode } = router.query as Record<
     string,
     string
   >;
-  const { path: pathArray } = router.query as Record<string, string[]>;
-  const path = pathArray ? pathArray.join("/") : "";
   const [requestedBlockMetadata, setRequestedBlockMetadata] = useState(null);
   const [requestedMetadata, setRequestedMetadata] = useState<{
     path: string;
@@ -92,7 +93,10 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
       : files && files.find((d) => d.path === path);
 
   const setBranchName = (branchName: string) => {
-    const query = { ...router.query, branch: branchName };
+    const query = {
+      ...router.query,
+      branchPath: makeBranchPath(branchName, path),
+    };
     // clear cached sha and default to latest on branch
     delete query["fileRef"];
     router.push(
@@ -152,6 +156,15 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
 
   return (
     <div className="flex flex-col w-full h-screen overflow-hidden">
+      <Head>
+        <title>
+          {/* mimicking github.com's title */}
+          GitHub Blocks:
+          {path ? ` ${repo}/${path}` : ` ${repo}`}
+          {branchName ? ` at ${branchName}` : ""}
+          {` · ${owner}/${repo}`}
+        </title>
+      </Head>
       <Header
         isFullscreen={isFullscreen}
         owner={owner}
@@ -169,6 +182,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
             isFullscreen,
             owner,
             repo,
+            branchName,
             files,
             path,
             updatedContents,
@@ -311,32 +325,37 @@ export function RepoDetail() {
   const {
     data: { user },
   } = useSession();
-  const {
-    repo,
-    owner,
-    branch: branchParam,
-    blockKey,
-  } = router.query as Record<string, string>;
-
-  const { path: pathArray } = router.query as Record<string, string[]>;
-  const path = pathArray ? pathArray.join("/") : "";
+  const { repo, owner, blockKey } = router.query as Record<string, string>;
+  const { branchPath } = router.query as { branchPath: string[] };
 
   const repoInfo = useRepoInfo({ repo, owner });
   const branches = useGetBranches({ repo, owner });
 
   let branchName: string | undefined = undefined;
+  let path: string | undefined;
   if (branches.data) {
-    if (branchParam && branches.data.some((b) => b.name === branchParam)) {
-      branchName = branchParam;
+    const branchPathString = branchPath.join("/");
+    const branch = branches.data.find(
+      (b) =>
+        branchPathString === b.name || branchPathString.startsWith(b.name + "/")
+    );
+    if (branch) {
+      branchName = branch.name;
+      path = branchPathString.slice(branch.name.length + 1);
     } else {
       branchName = repoInfo.data.default_branch;
+      path = "";
     }
   }
 
   useEffect(() => {
-    if (branchName) {
-      if (branchParam !== branchName) {
-        const query = { ...router.query, branch: branchName };
+    if (branches.data) {
+      const currentBranchPath = makeBranchPath(branchName, path);
+      if (branchPath.join("/") !== currentBranchPath.join("/")) {
+        const query = {
+          ...router.query,
+          branchPath: currentBranchPath,
+        };
         // clear cached sha and default to latest on branch
         delete query["fileRef"];
         router.push(
@@ -349,7 +368,7 @@ export function RepoDetail() {
         );
       }
     }
-  }, [branchName]);
+  }, [branches.data]);
 
   const repoFiles = useRepoFiles(
     {
@@ -396,6 +415,7 @@ export function RepoDetail() {
         repoInfo={repoInfo.data}
         branches={branches.data}
         branchName={branchName}
+        path={path}
         files={repoFiles.data}
         timeline={repoTimeline.data}
       />

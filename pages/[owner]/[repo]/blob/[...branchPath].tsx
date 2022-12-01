@@ -10,7 +10,6 @@ import { useCheckRepoAccess, useRepoInfo } from "hooks";
 import { GetServerSidePropsContext } from "next";
 import { signOut, useSession } from "next-auth/react";
 import getConfig from "next/config";
-import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "react-query";
@@ -21,14 +20,7 @@ const { publicRuntimeConfig } = getConfig();
 function RepoDetailContainer({ installationUrl }: AppContextValue) {
   const router = useRouter();
   const [hasRepoInstallation, setHasRepoInstallation] = useState(false);
-  const { repo, owner, branch, devServer } = router.query as Record<
-    string,
-    string
-  >;
-  console.log("RepoDetailContainer", { query: router.query });
-  const { path: pathArray } = router.query as { path: string[] };
-  const path = pathArray ? pathArray.join("/") : "";
-
+  const { repo, owner, devServer } = router.query as Record<string, string>;
   const [devServerInfoLoaded, setDevServerInfoLoaded] = useState(false);
   const [devServerInfo, setDevServerInfo] = useState<undefined | DevServerInfo>(
     undefined
@@ -126,15 +118,6 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
 
   return (
     <>
-      <Head>
-        <title>
-          {/* mimicking github.com's title */}
-          GitHub Blocks:
-          {path ? ` ${repo}/${path}` : ` ${repo}`}
-          {branch ? ` at ${branch}` : ""}
-          {` · ${owner}/${repo}`}
-        </title>
-      </Head>
       <AppContext.Provider
         value={{
           hasRepoInstallation: hasRepoInstallation,
@@ -149,36 +132,7 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
   );
 }
 
-const RepoDetailContainerWithRedirect = (props: AppContextValue) => {
-  const router = useRouter();
-  console.log("RepoDetailContainerWithRedirect", { query: router.query });
-
-  const { path: pathArray } = router.query as Record<string, string | string[]>;
-
-  if (
-    pathArray && // defaults to string when looking at root folder
-    typeof pathArray === "string" // we're using the old url structure
-  ) {
-    // redirect to the correct path
-    if (typeof window !== "undefined") {
-      const { path, ...queryWithoutPath } = router.query;
-      router.push(
-        {
-          // we need to pass pathArray as part of the pathname to prevent it from being encoded
-          pathname: `/[owner]/[repo]/${pathArray}`,
-          query: queryWithoutPath,
-        },
-        undefined,
-        { shallow: true }
-      );
-    }
-    return null;
-  }
-
-  return <RepoDetailContainer {...props} />;
-};
-
-export default RepoDetailContainerWithRedirect;
+export default RepoDetailContainer;
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const session = await getSessionOnServer(context.req);

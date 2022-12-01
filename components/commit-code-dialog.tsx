@@ -25,6 +25,7 @@ import "react-diff-view/style/index.css";
 import { useQueryClient } from "react-query";
 import { diffAsText } from "unidiff";
 import type { BlocksQueryMeta } from "ghapi";
+import makeBranchPath from "utils/makeBranchPath";
 
 interface CommitCodeDialogProps {
   onCommit: () => void;
@@ -101,7 +102,7 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
           pathname: router.pathname,
           query: {
             ...router.query,
-            branch: res.head.ref,
+            branchPath: makeBranchPath(res.head.ref, path),
             fileRef: res.head.sha,
           },
         },

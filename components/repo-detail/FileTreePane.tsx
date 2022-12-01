@@ -7,6 +7,7 @@ type FileTreePaneProps = {
   isFullscreen: boolean;
   owner: string;
   repo: string;
+  branchName: string;
   files: undefined | RepoFiles;
   path: string;
   updatedContents: UpdatedContents;
@@ -16,6 +17,7 @@ export default function FileTreePane({
   isFullscreen,
   owner,
   repo,
+  branchName,
   files,
   path,
   updatedContents,
@@ -44,6 +46,7 @@ export default function FileTreePane({
             <Sidebar
               owner={owner}
               repo={repo}
+              branchName={branchName}
               files={files}
               updatedContents={updatedContents}
               activeFilePath={path}

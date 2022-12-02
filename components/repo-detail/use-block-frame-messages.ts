@@ -28,7 +28,15 @@ const onRequestGitHubData = async (path: string, token?: string) => {
   const octokit = new Octokit({
     auth: token,
   });
-  const res = await octokit.request(path);
+
+  const parsed = new URL(path);
+
+  const res = await octokit.request(
+    // Construct the URL by hand to satisfy CodeQL alert
+    // https://github.com/githubnext/blocks-platform/security/code-scanning/25
+    `https://api.github.com` + parsed.pathname + parsed.search
+  );
+
   return res.data;
 };
 

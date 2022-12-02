@@ -20,34 +20,16 @@ import { AppContext } from "context";
 import { Context, UpdatedContents } from "./index";
 import axios from "axios";
 import makeBranchPath from "utils/makeBranchPath";
+import { Octokit } from "@octokit/rest";
 
 const { publicRuntimeConfig } = getConfig();
 
-const onRequestGitHubData = async (
-  path: string,
-  params = {},
-  token?: string,
-  rawData = false
-) => {
-  // handle paths that accidentally include the domain
-  const parsedPath = path.replace("https://api.github.com", "");
-
-  const apiUrl = `https://api.github.com${parsedPath}`;
-  const urlWithParams = `${apiUrl}?${new URLSearchParams(params)}`;
-
-  const res = await fetch(urlWithParams, {
-    headers: token ? { Authorization: `token ${token}` } : {},
-    method: "GET",
+const onRequestGitHubData = async (path: string, token?: string) => {
+  const octokit = new Octokit({
+    auth: token,
   });
-
-  if (res.status !== 200) {
-    throw new Error(
-      `Error fetching generic GitHub API data: ${apiUrl}\n${await res.text()}`
-    );
-  }
-
-  const resObject = await (rawData ? res.blob() : res.json());
-  return resObject;
+  const res = await octokit.request(path);
+  return res.data;
 };
 
 type BlockFrame = {
@@ -624,12 +606,7 @@ function useBlockFrameMessages({
       // handle Block callback functions by name
       case "onRequestGitHubData":
         return handleResponse(
-          onRequestGitHubData(
-            data.payload.path,
-            data.payload.params,
-            token,
-            data.payload.rawData
-          ),
+          onRequestGitHubData(data.payload.path, token),
           responseParams
         );
 

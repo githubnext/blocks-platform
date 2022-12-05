@@ -24,19 +24,42 @@ import { Octokit } from "@octokit/rest";
 
 const { publicRuntimeConfig } = getConfig();
 
-const onRequestGitHubData = async (path: string, token?: string) => {
-  const octokit = new Octokit({
-    auth: token,
+const onRequestGitHubData = async (
+  path: string,
+  params = {},
+  token?: string,
+  rawData = false
+) => {
+  // handle paths that accidentally include the domain
+  const parsedPath = path.replace("https://api.github.com", "");
+
+  const apiUrl = `https://api.github.com${parsedPath}`;
+  const urlWithParams = `${apiUrl}?${new URLSearchParams(params)}`;
+
+  const res = await fetch(urlWithParams, {
+    headers: token ? { Authorization: `token ${token}` } : {},
+    method: "GET",
   });
 
-  const parsed = new URL(path);
+  if (res.status !== 200) {
+    throw new Error(
+      `Error fetching generic GitHub API data: ${apiUrl}\n${await res.text()}`
+    );
+  }
 
-  const res = await octokit.request(
-    // Construct the URL by hand to satisfy CodeQL alert
-    // https://github.com/githubnext/blocks-platform/security/code-scanning/25
-    `https://api.github.com` + parsed.pathname + parsed.search
-  );
+  const resObject = await (rawData ? res.blob() : res.json());
+  return resObject;
+};
 
+const onRequestGitHubEndpoint = async (
+  params: { method: string; path: string },
+  octokit: Octokit
+) => {
+  if (params.method !== "GET") {
+    throw new Error("Only GET requests are supported");
+  }
+
+  const res = await octokit.request(params.path);
   return res.data;
 };
 
@@ -540,7 +563,7 @@ function useBlockFrameMessages({
   const { devServerInfo } = appContext;
   const queryClient = useQueryClient();
   const router = useRouter();
-  const { token } = queryClient.getDefaultOptions().queries
+  const { token, octokit } = queryClient.getDefaultOptions().queries
     .meta as BlocksQueryMeta;
 
   const blockFrames = useRef<BlockFrame[]>([]);
@@ -612,12 +635,18 @@ function useBlockFrameMessages({
         });
 
       // handle Block callback functions by name
+      case "onRequestGitHubEndpoint":
+        return onRequestGitHubEndpoint(data.payload.params, octokit);
       case "onRequestGitHubData":
         return handleResponse(
-          onRequestGitHubData(data.payload.path, token),
+          onRequestGitHubData(
+            data.payload.path,
+            data.payload.params,
+            token,
+            data.payload.rawData
+          ),
           responseParams
         );
-
       case "onRequestBlocksRepos":
         return handleResponse(
           queryClient.fetchQuery(

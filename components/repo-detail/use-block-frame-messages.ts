@@ -52,14 +52,14 @@ const onRequestGitHubData = async (
 };
 
 const onRequestGitHubEndpoint = async (
-  params: { method: string; path: string },
+  params: { method: string; url: string },
   octokit: Octokit
 ) => {
   if (params.method !== "GET") {
     throw new Error("Only GET requests are supported");
   }
 
-  const res = await octokit.request(params.path);
+  const res = await octokit.request(params.url);
   return res.data;
 };
 
@@ -636,7 +636,10 @@ function useBlockFrameMessages({
 
       // handle Block callback functions by name
       case "onRequestGitHubEndpoint":
-        return onRequestGitHubEndpoint(data.payload.params, octokit);
+        return handleResponse(
+          onRequestGitHubEndpoint(data.payload, octokit),
+          responseParams
+        );
       case "onRequestGitHubData":
         return handleResponse(
           onRequestGitHubData(

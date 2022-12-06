@@ -3,9 +3,12 @@ import { Octokit } from "@octokit/rest";
 import { AppContext } from "context";
 import {
   BlocksQueryMeta,
+  checkAccess,
   createBranchAndPR,
   CreateBranchParams,
   CreateBranchResponse,
+  getBlocksFromRepo,
+  getBlocksRepos,
   getBranches,
   getFileContent,
   getFolderContent,
@@ -15,14 +18,12 @@ import {
   RepoContext,
   RepoSearchResult,
   searchRepos,
-  checkAccess,
-  getBlocksFromRepo,
-  getBlocksRepos,
 } from "ghapi";
 import { Base64 } from "js-base64";
 import {
-  BlocksKeyParams,
   BlockContentKeyParams,
+  BlocksKeyParams,
+  BlocksReposParams,
   BranchesKeyParams,
   CheckAccessParams,
   FileKeyParams,
@@ -32,18 +33,18 @@ import {
   InfoKeyParams,
   QueryKeyMap,
   TimelineKeyParams,
-  BlocksReposParams,
 } from "lib/query-keys";
 import { useRouter } from "next/router";
+import pm from "picomatch";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import type { QueryFunction, UseQueryResult } from "react-query";
 import {
   useMutation,
   UseMutationOptions,
   useQuery,
+  useQueryClient,
   UseQueryOptions,
 } from "react-query";
-import type { QueryFunction, UseQueryResult } from "react-query";
-import { useQueryClient } from "react-query";
 
 export function useFileContent(
   params: FileKeyParams,
@@ -379,9 +380,10 @@ export function useManageBlock({
   ].filter(Boolean);
 
   const exampleBlocks =
-    blocksRepos.find(
-      (b) => b.owner === "githubnext" && b.repo === "blocks-examples"
-    )?.blocks ?? [];
+    blocksRepos
+      .find((b) => b.owner === "githubnext" && b.repo === "blocks-examples")
+      // TODO(jaked) remove when use-case-block is removed from blocks-examples
+      ?.blocks.filter((b) => b.id !== "use-case-block") ?? [];
   const extension = (path as string).split(".").slice(-1)[0];
 
   // find default block
@@ -409,8 +411,15 @@ export function useManageBlock({
   const blockFromMetadata = tryToGetBlockFromKey(storedDefaultBlock);
   let fallbackDefaultBlock: Block = overrideDefaultBlocks[extension]
     ? exampleBlocks.find((b) => b.id === overrideDefaultBlocks[extension])
-    : // if there's a block that doesn't match * use it; otherwise use the first block (the code block)
+    : // if there's a block that doesn't match * use it;
       exampleBlocks.find((b) => b.matches?.every((g) => g !== "*")) ||
+      // if there's a block that matches the current file without * use it;
+      exampleBlocks.find((b) => {
+        if (!b.matches) return false;
+        const matches = b.matches.filter((g) => g !== "*");
+        return pm(matches, { bash: true, dot: true })(path);
+      }) ||
+      // otherwise use the first block (the code block)
       exampleBlocks[0];
 
   if (

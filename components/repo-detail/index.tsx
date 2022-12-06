@@ -343,17 +343,10 @@ export function RepoDetail() {
       branchName = branch.name;
       path = branchPathString.slice(branch.name.length + 1);
     } else {
-      // branch not found, let's switch to the default branch
+      // let's switch to the default branch and clear the path,
+      // since we don't know how to parse the path segments
       branchName = repoInfo.data.default_branch;
-      // let's assume the unfound branch name doesn't contain `/`
-      path = branchPath.slice(1).join("/");
-      router.push({
-        pathname: router.pathname,
-        query: {
-          ...router.query,
-          branchPath: makeBranchPath(branchName, path),
-        },
-      });
+      path = "";
     }
   }
 

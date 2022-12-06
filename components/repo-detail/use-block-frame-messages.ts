@@ -20,6 +20,9 @@ import { AppContext } from "context";
 import { Context, UpdatedContents } from "./index";
 import axios from "axios";
 import makeBranchPath from "utils/makeBranchPath";
+import { Octokit } from "@octokit/rest";
+import { Endpoints, OctokitResponse, RequestParameters } from "@octokit/types";
+import { endpoint } from "@octokit/endpoint";
 
 const { publicRuntimeConfig } = getConfig();
 
@@ -49,6 +52,22 @@ const onRequestGitHubData = async (
   const resObject = await (rawData ? res.blob() : res.json());
   return resObject;
 };
+
+export async function onRequestGitHubEndpoint<
+  Endpoint extends keyof Endpoints,
+  EndpointParameters extends Endpoints[Endpoint]["parameters"]
+>(
+  route: Endpoint,
+  parameters: EndpointParameters & RequestParameters,
+  octokit: Octokit
+) {
+  const requestOptions = endpoint(route, parameters);
+  if (requestOptions.method !== "GET") {
+    throw new Error("Only GET requests are supported");
+  }
+  const res = await octokit.request(requestOptions);
+  return res.data;
+}
 
 type BlockFrame = {
   window: Window;
@@ -550,7 +569,7 @@ function useBlockFrameMessages({
   const { devServerInfo } = appContext;
   const queryClient = useQueryClient();
   const router = useRouter();
-  const { token } = queryClient.getDefaultOptions().queries
+  const { token, octokit } = queryClient.getDefaultOptions().queries
     .meta as BlocksQueryMeta;
 
   const blockFrames = useRef<BlockFrame[]>([]);
@@ -622,6 +641,15 @@ function useBlockFrameMessages({
         });
 
       // handle Block callback functions by name
+      case "onRequestGitHubEndpoint":
+        return handleResponse(
+          onRequestGitHubEndpoint(
+            data.payload.route,
+            data.payload.parameters,
+            octokit
+          ),
+          responseParams
+        );
       case "onRequestGitHubData":
         return handleResponse(
           onRequestGitHubData(
@@ -632,7 +660,6 @@ function useBlockFrameMessages({
           ),
           responseParams
         );
-
       case "onRequestBlocksRepos":
         return handleResponse(
           queryClient.fetchQuery(

@@ -465,20 +465,16 @@ export const getBranches: QueryFunction<
 > = async (ctx) => {
   let params = ctx.queryKey[1];
   const { owner, repo } = params;
-  let meta = ctx.meta as BlocksQueryMeta;
-  const getBranchesPage = async (page: number) => {
-    const url = `repos/${owner}/${repo}/branches?page=${page}`;
-    const branchesRes = await meta.ghapi(url);
-    let branches = branchesRes.data;
-    const link = branchesRes.headers.link || "";
-    const nextPage = link.match(/page=(\d+)>; rel="next"/)?.[1];
-    if (nextPage) {
-      const nextBranches = await getBranchesPage(parseInt(nextPage));
-      branches = [...branches, ...nextBranches];
+  let octokit = ctx.meta.octokit as Octokit;
+  const branchesRes = await octokit.paginate(
+    "GET /repos/{owner}/{repo}/branches",
+    {
+      owner,
+      repo,
+      per_page: 100,
     }
-    return branches;
-  };
-  return getBranchesPage(1);
+  );
+  return branchesRes;
 };
 
 export interface CreateBranchParams {

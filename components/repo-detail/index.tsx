@@ -359,7 +359,6 @@ export function RepoDetail() {
 
   useEffect(() => {
     if (branches.data) {
-      console.log(branchName);
       const currentBranchPath = makeBranchPath(branchName, path);
       if (branchPath.join("/") !== currentBranchPath.join("/")) {
         const query = {

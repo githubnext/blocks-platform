@@ -21,6 +21,8 @@ import { Context, UpdatedContents } from "./index";
 import axios from "axios";
 import makeBranchPath from "utils/makeBranchPath";
 import { Octokit } from "@octokit/rest";
+import { Endpoints, OctokitResponse, RequestParameters } from "@octokit/types";
+import { endpoint } from "@octokit/endpoint";
 
 const { publicRuntimeConfig } = getConfig();
 
@@ -51,17 +53,21 @@ const onRequestGitHubData = async (
   return resObject;
 };
 
-const onRequestGitHubEndpoint = async (
-  params: { method: string; url: string },
+export async function onRequestGitHubEndpoint<
+  Endpoint extends keyof Endpoints,
+  EndpointParameters extends Endpoints[Endpoint]["parameters"]
+>(
+  route: Endpoint,
+  parameters: EndpointParameters & RequestParameters,
   octokit: Octokit
-) => {
-  if (params.method !== "GET") {
+) {
+  const requestOptions = endpoint(route, parameters);
+  if (requestOptions.method !== "GET") {
     throw new Error("Only GET requests are supported");
   }
-
-  const res = await octokit.request(params.url);
+  const res = await octokit.request(requestOptions);
   return res.data;
-};
+}
 
 type BlockFrame = {
   window: Window;
@@ -637,7 +643,11 @@ function useBlockFrameMessages({
       // handle Block callback functions by name
       case "onRequestGitHubEndpoint":
         return handleResponse(
-          onRequestGitHubEndpoint(data.payload, octokit),
+          onRequestGitHubEndpoint(
+            data.payload.route,
+            data.payload.parameters,
+            octokit
+          ),
           responseParams
         );
       case "onRequestGitHubData":

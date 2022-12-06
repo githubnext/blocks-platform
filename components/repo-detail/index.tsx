@@ -344,7 +344,8 @@ export function RepoDetail() {
       path = branchPathString.slice(branch.name.length + 1);
     } else {
       branchName = repoInfo.data.default_branch;
-      path = "";
+      // something's funky here, let's assume the first part of the path is a branch
+      path = branchPathString.slice(branchName.length + 1);
     }
   }
 

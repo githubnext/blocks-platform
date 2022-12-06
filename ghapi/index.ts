@@ -466,11 +466,19 @@ export const getBranches: QueryFunction<
   let params = ctx.queryKey[1];
   const { owner, repo } = params;
   let meta = ctx.meta as BlocksQueryMeta;
-
-  const url = `repos/${owner}/${repo}/branches`;
-
-  const res = await meta.ghapi(url);
-  return res.data;
+  const getBranchesPage = async (page: number) => {
+    const url = `repos/${owner}/${repo}/branches?page=${page}`;
+    const branchesRes = await meta.ghapi(url);
+    let branches = branchesRes.data;
+    const link = branchesRes.headers.link || "";
+    const nextPage = link.match(/page=(\d+)>; rel="next"/)?.[1];
+    if (nextPage) {
+      const nextBranches = await getBranchesPage(parseInt(nextPage));
+      branches = [...branches, ...nextBranches];
+    }
+    return branches;
+  };
+  return getBranchesPage(1);
 };
 
 export interface CreateBranchParams {

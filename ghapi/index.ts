@@ -494,9 +494,7 @@ export interface CreateBranchParams {
 type PullsResponse = Endpoints["POST /repos/{owner}/{repo}/pulls"]["response"];
 export type CreateBranchResponse = PullsResponse["data"];
 
-export async function createBranchAndPR(
-  params: CreateBranchParams
-): Promise<CreateBranchResponse> {
+export async function createBranchAndPR(params: CreateBranchParams) {
   const {
     token,
     userToken,
@@ -587,6 +585,7 @@ export async function createBranchAndPR(
     title,
     body,
   });
+
   return res.data;
 }
 

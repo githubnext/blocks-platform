@@ -343,14 +343,23 @@ export function RepoDetail() {
       branchName = branch.name;
       path = branchPathString.slice(branch.name.length + 1);
     } else {
+      // branch not found, let's switch to the default branch
       branchName = repoInfo.data.default_branch;
-      // something's funky here, let's assume the first part of the path is a branch
-      path = branchPathString.slice(branchName.length + 1);
+      // let's assume the unfound branch name doesn't contain `/`
+      path = branchPath.slice(1).join("/");
+      router.push({
+        pathname: router.pathname,
+        query: {
+          ...router.query,
+          branchPath: makeBranchPath(branchName, path),
+        },
+      });
     }
   }
 
   useEffect(() => {
     if (branches.data) {
+      console.log(branchName);
       const currentBranchPath = makeBranchPath(branchName, path);
       if (branchPath.join("/") !== currentBranchPath.join("/")) {
         const query = {

@@ -380,10 +380,9 @@ export function useManageBlock({
   ].filter(Boolean);
 
   const exampleBlocks =
-    blocksRepos
-      .find((b) => b.owner === "githubnext" && b.repo === "blocks-examples")
-      // TODO(jaked) remove when use-case-block is removed from blocks-examples
-      ?.blocks.filter((b) => b.id !== "use-case-block") ?? [];
+    blocksRepos.find(
+      (b) => b.owner === "githubnext" && b.repo === "blocks-examples"
+    )?.blocks ?? [];
   const extension = (path as string).split(".").slice(-1)[0];
 
   // find default block

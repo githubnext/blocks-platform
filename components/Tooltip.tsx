@@ -17,7 +17,7 @@ import { mergeRefs } from "react-merge-refs";
 interface Props {
   label: string;
   placement?: Placement;
-  children: JSX.Element;
+  children: React.ReactElement;
 }
 
 export const Tooltip = ({ children, label, placement = "top" }: Props) => {

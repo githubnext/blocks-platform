@@ -176,11 +176,15 @@ const TooltipButtonWrapper = ({
 }: {
   hasTooltip: boolean;
   tooltipText: string;
-  children: JSX.Element;
+  children: React.ReactNode;
 }) => {
   if (hasTooltip)
     return (
       <Tooltip label={tooltipText}>
+        {/* Please don't delete this div!!!
+          From an a11y perspective, the underlying button shouldn't actually be disabled (but rather use something like aria-disabled),
+          since disabled elements don't emit events. But because we don't have the API from @primer/react, we have to stick
+          an interim div in there for the events to bubble properly. */}
         <div>{children}</div>
       </Tooltip>
     );

@@ -67,13 +67,7 @@ export const Sidebar = ({
       if (!tree.current) return;
       tree.current.scrollToItem(activeFilePath, "center");
     }, 100);
-  }, []);
-  useEffect(() => {
-    if (!tree.current) return;
-    tree.current.recomputeTree({
-      useDefaultOpenness: true,
-    });
-  }, [searchTerm]);
+  }, [activeFilePath]);
 
   const nestedFiles = useMemo(() => {
     try {
@@ -82,18 +76,27 @@ export const Sidebar = ({
   }, [files]);
 
   const filteredFiles = useMemo(() => {
-    if (!searchTerm) return nestedFiles;
     const lowerSearchTerm = searchTerm.toLowerCase();
-    return nestedFiles
-      .map((file) => {
-        const children = file.children.filter((child) =>
-          child.name.toLowerCase().includes(lowerSearchTerm)
-        );
-        const isMatch = file.name.toLowerCase().includes(lowerSearchTerm);
-        if (!children.length && !isMatch) return null;
-        return { ...file, children };
-      })
-      .filter(Boolean) as NestedFileTree[];
+    return [
+      {
+        name: `${owner}/${repo}`,
+        path: "",
+        children: !searchTerm
+          ? nestedFiles
+          : (nestedFiles
+              .map((file) => {
+                const children = file.children.filter((child) =>
+                  child.name.toLowerCase().includes(lowerSearchTerm)
+                );
+                const isMatch = file.name
+                  .toLowerCase()
+                  .includes(lowerSearchTerm);
+                if (!children.length && !isMatch) return null;
+                return { ...file, children };
+              })
+              .filter(Boolean) as NestedFileTree[]),
+      },
+    ];
   }, [nestedFiles, searchTerm]);
 
   const numberOfFiles = useMemo(() => {
@@ -106,68 +109,55 @@ export const Sidebar = ({
     return runningCount;
   }, [filteredFiles]);
 
+  // This function prepares an object for yielding. We can yield an object
+  // that has `data` object with `id` and `isOpenByDefault` fields.
+  // We can also add any other data here.
+  const getNodeData = (node, nestingLevel) => {
+    const id = node.path || "/";
+    // don't close open folders
+    const existingIsOpen = tree.current?.state.records.get(id)?.public.isOpen;
+    return {
+      data: {
+        id,
+        isLeaf: node.children?.length === 0,
+        isOpenByDefault:
+          existingIsOpen ||
+          activeFilePath === id ||
+          activeFilePath.startsWith(`${id}/`) ||
+          numberOfFiles < 20 ||
+          nestingLevel < 1,
+        name: node.name,
+        depth: nestingLevel,
+        path: node.path,
+        activeFilePath,
+        canCollapse: nestingLevel > 0,
+        updatedContents,
+        currentPathname: router.pathname,
+        currentQuery: query,
+        currentBranch: branchName,
+      },
+      nestingLevel,
+      node,
+    };
+  };
   const treeWalker = useMemo(
     () =>
-      function* treeWalker(refresh) {
-        const stack = [];
+      function* treeWalker() {
+        // Step [1]: Define the root node of our tree. There can be one or
+        // multiple nodes.
+        for (let i = 0; i < filteredFiles.length; i++) {
+          yield getNodeData(filteredFiles[i], 0);
+        }
 
-        // Remember all the necessary data of the first node in the stack.
-        stack.push({
-          depth: 0,
-          node: {
-            id: "/",
-            name: `${owner}/${repo}`,
-            path: "",
-            children: filteredFiles,
-          },
-        });
+        while (true) {
+          // Step [2]: Get the parent component back. It will be the object
+          // the `getNodeData` function constructed, so you can read any data from it.
+          const parent = yield;
 
-        // Walk through the tree until we have no nodes available.
-        while (stack.length !== 0) {
-          const {
-            node: { children = [], path, name },
-            depth,
-          } = stack.pop();
-          const canCollapse = depth > 0;
-          const id = path || "/";
-
-          // Here we are sending the information about the node to the Tree component
-          // and receive an information about the openness state from it. The
-          // `refresh` parameter tells us if the full update of the tree is requested;
-          // basing on it we decide to return the full node data or only the node
-          // id to update the nodes order.
-          const isOpened = yield refresh
-            ? {
-                id,
-                isLeaf: children.length === 0,
-                isOpenByDefault:
-                  activeFilePath === id ||
-                  activeFilePath.startsWith(`${id}/`) ||
-                  numberOfFiles < 20 ||
-                  depth < 1,
-                name,
-                depth,
-                path,
-                activeFilePath,
-                canCollapse,
-                updatedContents,
-                currentPathname: router.pathname,
-                currentQuery: query,
-                currentBranch: branchName,
-              }
-            : id;
-
-          // Basing on the node openness state we are deciding if we need to render
-          // the child nodes (if they exist).
-          if (children.length !== 0 && isOpened) {
-            // Since it is a stack structure, we need to put nodes we want to render
-            // first to the end of the stack.
-            for (let i = children.length - 1; i >= 0; i--) {
-              stack.push({
-                depth: depth + 1,
-                node: children[i],
-              });
-            }
+          for (let i = 0; i < parent.node.children.length; i++) {
+            // Step [3]: Yielding all the children of the provided component. Then we
+            // will return for the step [2] with the first children.
+            yield getNodeData(parent.node.children[i], parent.nestingLevel + 1);
           }
         }
       },
@@ -175,11 +165,11 @@ export const Sidebar = ({
       filteredFiles,
       updatedContents,
       numberOfFiles < 20,
-      activeFilePath,
-      query,
+      query.branchPath.join("/"),
       branchName,
     ]
   );
+
   if (!files.map) return null;
 
   return (
@@ -202,6 +192,7 @@ export const Sidebar = ({
               height={dimensions[1]}
               width={dimensions[0]}
               className="pb-10"
+              ref={tree}
             >
               {Node}
             </Tree>
@@ -218,7 +209,6 @@ export const Sidebar = ({
 
 const Node = ({
   data: {
-    isLeaf,
     name,
     path,
     activeFilePath,
@@ -228,10 +218,11 @@ const Node = ({
     currentPathname,
     currentQuery,
     currentBranch,
+    isLeaf,
   },
   isOpen,
   style,
-  toggle,
+  setOpen,
 }) => {
   return (
     <div style={style} key={path || "/"}>
@@ -245,7 +236,7 @@ const Node = ({
         currentPathname={currentPathname}
         currentQuery={currentQuery}
         currentBranch={currentBranch}
-        toggle={toggle}
+        setOpen={setOpen}
         isOpen={isOpen}
         isFolder={!isLeaf}
       />
@@ -265,7 +256,7 @@ type ItemProps = {
   canCollapse?: boolean;
   isOpen: boolean;
   updatedContents: Record<string, unknown>;
-  toggle: () => void;
+  setOpen: (newState: boolean) => void;
 };
 
 const Item = ({
@@ -279,7 +270,7 @@ const Item = ({
   currentBranch,
   isOpen,
   updatedContents,
-  toggle,
+  setOpen,
 }: ItemProps) => {
   const isActive = activeFilePath === path;
 
@@ -312,7 +303,7 @@ const Item = ({
               // don't select the folder on toggle
               e.stopPropagation();
               e.preventDefault();
-              toggle();
+              setOpen(!isOpen);
             }}
           >
             {depth > 0 && (

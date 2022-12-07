@@ -176,13 +176,11 @@ const TooltipButtonWrapper = ({
 }: {
   hasTooltip: boolean;
   tooltipText: string;
-  children: React.ReactNode;
+  children: JSX.Element;
 }) => {
   if (hasTooltip)
     return (
-      <Tooltip side="top" text={tooltipText}>
-        {/* wrapper div needed to steal pointer events, */}
-        {/* to prevent collision between disabled button and tooltip attributes */}
+      <Tooltip label={tooltipText}>
         <div>{children}</div>
       </Tooltip>
     );

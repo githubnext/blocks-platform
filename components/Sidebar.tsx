@@ -140,35 +140,26 @@ export const Sidebar = ({
       node,
     };
   };
-  const treeWalker = useMemo(
-    () =>
-      function* treeWalker() {
-        // Step [1]: Define the root node of our tree. There can be one or
-        // multiple nodes.
-        for (let i = 0; i < filteredFiles.length; i++) {
-          yield getNodeData(filteredFiles[i], 0);
-        }
+  
+  function* treeWalker() {
+    // Step [1]: Define the root node of our tree. There can be one or
+    // multiple nodes.
+    for (let i = 0; i < filteredFiles.length; i++) {
+      yield getNodeData(filteredFiles[i], 0);
+    }
 
-        while (true) {
-          // Step [2]: Get the parent component back. It will be the object
-          // the `getNodeData` function constructed, so you can read any data from it.
-          const parent = yield;
+    while (true) {
+      // Step [2]: Get the parent component back. It will be the object
+      // the `getNodeData` function constructed, so you can read any data from it.
+      const parent = yield;
 
-          for (let i = 0; i < parent.node.children.length; i++) {
-            // Step [3]: Yielding all the children of the provided component. Then we
-            // will return for the step [2] with the first children.
-            yield getNodeData(parent.node.children[i], parent.nestingLevel + 1);
-          }
-        }
-      },
-    [
-      filteredFiles,
-      updatedContents,
-      numberOfFiles < 20,
-      query.branchPath.join("/"),
-      branchName,
-    ]
-  );
+      for (let i = 0; i < parent.node.children.length; i++) {
+        // Step [3]: Yielding all the children of the provided component. Then we
+        // will return for the step [2] with the first children.
+        yield getNodeData(parent.node.children[i], parent.nestingLevel + 1);
+      }
+    }
+  }
 
   if (!files.map) return null;
 

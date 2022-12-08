@@ -9,6 +9,7 @@ import {
   getBlockKey,
   updateFileContents,
   useGetBranches,
+  useIsFullscreen,
   useMetadata,
   useRepoFiles,
   useRepoInfo,
@@ -65,7 +66,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
   const { repoInfo, branches, branchName, path, files, timeline } = props;
   const router = useRouter();
   const { setColorMode } = useTheme();
-  const { repo, owner, theme, fileRef, mode } = router.query as Record<
+  const { repo, owner, theme, fileRef } = router.query as Record<
     string,
     string
   >;
@@ -76,7 +77,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
     new: string;
     onSubmit: () => void;
   }>(null);
-  const isFullscreen = mode === "fullscreen";
+  const isFullscreen = useIsFullscreen();
 
   const context = useMemo(
     () => ({
@@ -202,7 +203,6 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
                 path,
                 metadata,
                 setRequestedBlockMetadata,
-                isFullscreen,
                 context,
                 branchName,
                 onSaveChanges,

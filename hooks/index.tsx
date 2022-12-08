@@ -532,3 +532,8 @@ export function useCheckRepoAccess(
     ...config,
   });
 }
+
+export function useIsFullscreen() {
+  const router = useRouter();
+  return router.query["mode"] === "fullscreen";
+}

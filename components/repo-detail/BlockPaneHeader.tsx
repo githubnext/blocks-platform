@@ -11,7 +11,7 @@ import {
   SidebarExpandIcon,
 } from "@primer/octicons-react";
 import { AnimatePresence, motion } from "framer-motion";
-import { getBlockKey } from "hooks";
+import { getBlockKey, useIsFullscreen } from "hooks";
 import type { UseManageBlockResult } from "hooks";
 import type { Context } from "./index";
 import { AppContext } from "context";
@@ -22,7 +22,6 @@ const BlockPicker = dynamic(() => import("../block-picker"), { ssr: false });
 
 type BlockPaneHeaderProps = {
   manageBlockResult: UseManageBlockResult;
-  isFullscreen: boolean;
   path: string;
   isFolder: boolean;
   metadata: any;
@@ -33,7 +32,6 @@ type BlockPaneHeaderProps = {
 
 export default function BlockPaneHeader({
   manageBlockResult,
-  isFullscreen,
   path,
   isFolder,
   metadata,
@@ -58,6 +56,8 @@ export default function BlockPaneHeader({
   const { fileTree, commitsPane } = useVisibility();
   const { toggleFileTree, toggleCommitsPane } = useActions();
 
+  const isFullscreen = useIsFullscreen();
+
   return (
     <div className="flex-none top-0 z-10">
       <div>
@@ -71,13 +71,16 @@ export default function BlockPaneHeader({
           justifyContent="space-between"
         >
           {!fileTree && (
-            <Tooltip placement="top-end" label="Open File Tree">
-              <IconButton
-                icon={SidebarCollapseIcon}
-                onClick={toggleFileTree}
-                sx={{ mr: 2 }}
-                title={"Open File Tree"}
-              />
+            <Tooltip placement="top" label="Open File Tree">
+              <div>
+                <IconButton
+                  disabled={isFullscreen}
+                  icon={SidebarCollapseIcon}
+                  onClick={toggleFileTree}
+                  sx={{ mr: 2 }}
+                  title={"Open File Tree"}
+                />
+              </div>
             </Tooltip>
           )}
           <Box display="flex" alignItems="center" className="space-x-2">
@@ -181,12 +184,15 @@ export default function BlockPaneHeader({
           </NextLink>
           {!commitsPane && (
             <Tooltip placement="top-end" label="Open Commits Pane">
-              <IconButton
-                icon={SidebarExpandIcon}
-                onClick={toggleCommitsPane}
-                sx={{ ml: 2 }}
-                title={"Open Commits Pane"}
-              />
+              <div>
+                <IconButton
+                  disabled={isFullscreen}
+                  icon={SidebarExpandIcon}
+                  onClick={toggleCommitsPane}
+                  sx={{ ml: 2 }}
+                  title={"Open Commits Pane"}
+                />
+              </div>
             </Tooltip>
           )}
         </Box>
@@ -206,7 +212,7 @@ const TooltipButtonWrapper = ({
 }) => {
   if (hasTooltip)
     return (
-      <Tooltip label={tooltipText}>
+      <Tooltip placement="top" label={tooltipText}>
         {/* Please don't delete this div!!!
           From an a11y perspective, the underlying button shouldn't actually be disabled (but rather use something like aria-disabled),
           since disabled elements don't emit events. But because we don't have the API from @primer/react, we have to stick

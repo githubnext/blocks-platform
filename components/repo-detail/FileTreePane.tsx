@@ -43,14 +43,16 @@ export default function FileTreePane({
               </div>
             </div>
           ) : (
-            <Sidebar
-              owner={owner}
-              repo={repo}
-              branchName={branchName}
-              files={files}
-              updatedContents={updatedContents}
-              activeFilePath={path}
-            />
+            <div>
+              <Sidebar
+                owner={owner}
+                repo={repo}
+                branchName={branchName}
+                files={files}
+                updatedContents={updatedContents}
+                activeFilePath={path}
+              />
+            </div>
           )}
         </motion.div>
       )}

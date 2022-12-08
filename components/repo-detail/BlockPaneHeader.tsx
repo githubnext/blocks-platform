@@ -2,11 +2,12 @@ import { useContext } from "react";
 import { useRouter } from "next/router";
 import { default as NextLink } from "next/link";
 import dynamic from "next/dynamic";
-import { Box, Button, Link } from "@primer/react";
+import { Box, Button, IconButton, Link } from "@primer/react";
 import {
   RepoPushIcon,
   ScreenFullIcon,
   ScreenNormalIcon,
+  SidebarCollapseIcon,
 } from "@primer/octicons-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { getBlockKey } from "hooks";
@@ -14,6 +15,7 @@ import type { UseManageBlockResult } from "hooks";
 import type { Context } from "./index";
 import { AppContext } from "context";
 import { Tooltip } from "components/Tooltip";
+import { useActions, useVisibility } from "state";
 
 const BlockPicker = dynamic(() => import("../block-picker"), { ssr: false });
 
@@ -52,6 +54,9 @@ export default function BlockPaneHeader({
     ? "The Blocks GitHub app is not installed on this repository"
     : "";
 
+  const { fileTree } = useVisibility();
+  const { toggleFileTree } = useActions();
+
   return (
     <div className="flex-none top-0 z-10">
       <div>
@@ -64,6 +69,16 @@ export default function BlockPaneHeader({
           alignItems="center"
           justifyContent="space-between"
         >
+          {!fileTree && (
+            <Tooltip placement="top-end" label="Open File Tree">
+              <IconButton
+                icon={SidebarCollapseIcon}
+                onClick={toggleFileTree}
+                sx={{ mr: 2 }}
+                title={"Close sidebar"}
+              />
+            </Tooltip>
+          )}
           <Box display="flex" alignItems="center" className="space-x-2">
             <TooltipButtonWrapper
               hasTooltip={!hasEditPermission || !onSaveChanges}

@@ -29,6 +29,7 @@ import { useSession } from "next-auth/react";
 import useBlockFrameMessages from "./use-block-frame-messages";
 import { WarningModal } from "components/WarningModal";
 import makeBranchPath from "utils/makeBranchPath";
+import { useVisibility } from "state";
 
 export type Context = {
   repo: string;
@@ -154,6 +155,8 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
     committedContents: committedContents.current,
   });
 
+  const { fileTree } = useVisibility();
+
   return (
     <div className="flex flex-col w-full h-screen overflow-hidden">
       <Head>
@@ -177,17 +180,19 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
       />
 
       <div className="flex flex-1 overflow-hidden">
-        <FileTreePane
-          {...{
-            isFullscreen,
-            owner,
-            repo,
-            branchName,
-            files,
-            path,
-            updatedContents,
-          }}
-        />
+        {fileTree && (
+          <FileTreePane
+            {...{
+              isFullscreen,
+              owner,
+              repo,
+              branchName,
+              files,
+              path,
+              updatedContents,
+            }}
+          />
+        )}
         <div className="relative flex flex-col flex-1 overflow-hidden z-10">
           {fileInfo && (
             <BlockPane

@@ -6,14 +6,17 @@ import {
   FileDirectoryOpenFillIcon,
   FileIcon,
   SearchIcon,
+  SidebarExpandIcon,
 } from "@primer/octicons-react";
-import { Box, StyledOcticon, Text, TextInput } from "@primer/react";
+import { Box, IconButton, StyledOcticon, Text, TextInput } from "@primer/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 import { VscCircleOutline } from "react-icons/vsc";
 import type { FixedSizeNodeData, FixedSizeNodePublicState } from "react-vtree";
 import { FixedSizeTree as Tree } from "react-vtree";
+import { useActions } from "state";
+import { Tooltip } from "./Tooltip";
 import makeBranchPath from "utils/makeBranchPath";
 
 type TreeData = {
@@ -70,6 +73,7 @@ export const Sidebar = ({
   const [dimensions, setDimensions] = useState<[number, number]>([100, 100]);
   const router = useRouter();
   const query = router.query;
+  const { toggleFileTree } = useActions();
 
   useEffect(() => {
     const onResize = () => {
@@ -187,7 +191,26 @@ export const Sidebar = ({
 
   return (
     <Box className="sidebar flex flex-col h-full overflow-hidden flex-1 w-[17rem]">
-      <Box className="p-2 pb-0">
+      <Box
+        bg="canvas.subtle"
+        p={2}
+        sx={{
+          height: 49,
+        }}
+        borderBottom="1px solid"
+        borderColor="border.muted"
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+      >
+        <Tooltip placement="top-end" label="Close File Tree">
+          <IconButton
+            icon={SidebarExpandIcon}
+            onClick={toggleFileTree}
+            sx={{ mr: 2 }}
+            title={"Close sidebar"}
+          />
+        </Tooltip>
         <TextInput
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -196,6 +219,7 @@ export const Sidebar = ({
           className="w-full"
         />
       </Box>
+
       <Box className="flex-1 overflow-auto">
         <div className="h-full w-full file-tree-wrapper" ref={wrapperElement}>
           {filteredFiles.length > 0 ? (

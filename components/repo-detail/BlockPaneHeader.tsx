@@ -180,9 +180,11 @@ const TooltipButtonWrapper = ({
 }) => {
   if (hasTooltip)
     return (
-      <Tooltip side="top" text={tooltipText}>
-        {/* wrapper div needed to steal pointer events, */}
-        {/* to prevent collision between disabled button and tooltip attributes */}
+      <Tooltip label={tooltipText}>
+        {/* Please don't delete this div!!!
+          From an a11y perspective, the underlying button shouldn't actually be disabled (but rather use something like aria-disabled),
+          since disabled elements don't emit events. But because we don't have the API from @primer/react, we have to stick
+          an interim div in there for the events to bubble properly. */}
         <div>{children}</div>
       </Tooltip>
     );

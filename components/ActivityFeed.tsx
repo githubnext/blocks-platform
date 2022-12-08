@@ -2,7 +2,6 @@ import { FileContext } from "@githubnext/blocks";
 import {
   GitCommitIcon,
   SidebarCollapseIcon,
-  SidebarExpandIcon,
   XCircleIcon,
 } from "@primer/octicons-react";
 import { Avatar, Box, IconButton, Text, Timeline } from "@primer/react";
@@ -11,7 +10,8 @@ import { getRelativeTime } from "lib/date-utils";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useActions } from "state";
+import { Tooltip } from "./Tooltip";
 
 type ActivityFeedProps = {
   context: Omit<FileContext, "file">;
@@ -31,15 +31,10 @@ export const ActivityFeed = ({
   blockType,
 }: ActivityFeedProps) => {
   const session = useSession();
-
-  const [open, setOpen] = useState(true);
+  const { toggleCommitsPane } = useActions();
 
   return (
-    <div
-      className={`h-full transition-width overflow-hidden ${
-        open ? "w-80" : "w-12"
-      }`}
-    >
+    <div className={"h-full overflow-hidden"}>
       <div className={`h-full overflow-y-auto w-80 duration-200`}>
         <div className="flex flex-col h-full">
           <Box
@@ -51,12 +46,14 @@ export const ActivityFeed = ({
             borderColor="border.muted"
             flex="none"
           >
-            <IconButton
-              icon={open ? SidebarCollapseIcon : SidebarExpandIcon}
-              onClick={() => setOpen(!open)}
-              sx={{ mr: 2 }}
-              title={open ? "Hide history" : "Show history"}
-            />
+            <Tooltip placement="top" label="Close Commits Pane">
+              <IconButton
+                icon={SidebarCollapseIcon}
+                onClick={toggleCommitsPane}
+                sx={{ mr: 2 }}
+                title={"Close Commits Pane"}
+              />
+            </Tooltip>
             <Box
               sx={{ fontWeight: "bold", display: "flex", alignItems: "center" }}
             >

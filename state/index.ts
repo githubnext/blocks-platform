@@ -4,11 +4,11 @@ import { immer } from "zustand/middleware/immer";
 type BlocksStore = {
   visibility: {
     fileTree: boolean;
-    history: boolean;
+    commitsPane: boolean;
   };
   actions: {
     toggleFileTree: () => void;
-    toggleHistory: () => void;
+    toggleCommitsPane: () => void;
   };
 };
 
@@ -16,7 +16,7 @@ export const useCliStore = create(
   immer<BlocksStore>((set, get) => ({
     visibility: {
       fileTree: true,
-      history: true,
+      commitsPane: true,
     },
     actions: {
       toggleFileTree: () => {
@@ -24,9 +24,9 @@ export const useCliStore = create(
           state.visibility.fileTree = !state.visibility.fileTree;
         });
       },
-      toggleHistory: () => {
+      toggleCommitsPane: () => {
         set((state) => {
-          state.visibility.history = !state.visibility.history;
+          state.visibility.commitsPane = !state.visibility.commitsPane;
         });
       },
     },

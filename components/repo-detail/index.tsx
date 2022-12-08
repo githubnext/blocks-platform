@@ -155,7 +155,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
     committedContents: committedContents.current,
   });
 
-  const { fileTree } = useVisibility();
+  const { fileTree, commitsPane } = useVisibility();
 
   return (
     <div className="flex flex-col w-full h-screen overflow-hidden">
@@ -210,15 +210,19 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
           )}
         </div>
 
-        <CommitsPane
-          isFullscreen={isFullscreen}
-          context={context}
-          branchName={branchName}
-          timeline={timeline}
-          updatedContent={updatedContent}
-          clearUpdatedContent={clearUpdatedContent}
-          blockType={blockTypes[fileInfo?.type]}
-        />
+        {}
+
+        {commitsPane && (
+          <CommitsPane
+            isFullscreen={isFullscreen}
+            context={context}
+            branchName={branchName}
+            timeline={timeline}
+            updatedContent={updatedContent}
+            clearUpdatedContent={clearUpdatedContent}
+            blockType={blockTypes[fileInfo?.type]}
+          />
+        )}
       </div>
       {!!requestedBlockMetadata && (
         <UpdateCodeModal

@@ -8,6 +8,7 @@ import {
   ScreenFullIcon,
   ScreenNormalIcon,
   SidebarCollapseIcon,
+  SidebarExpandIcon,
 } from "@primer/octicons-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { getBlockKey } from "hooks";
@@ -54,8 +55,8 @@ export default function BlockPaneHeader({
     ? "The Blocks GitHub app is not installed on this repository"
     : "";
 
-  const { fileTree } = useVisibility();
-  const { toggleFileTree } = useActions();
+  const { fileTree, commitsPane } = useVisibility();
+  const { toggleFileTree, toggleCommitsPane } = useActions();
 
   return (
     <div className="flex-none top-0 z-10">
@@ -75,7 +76,7 @@ export default function BlockPaneHeader({
                 icon={SidebarCollapseIcon}
                 onClick={toggleFileTree}
                 sx={{ mr: 2 }}
-                title={"Close sidebar"}
+                title={"Open File Tree"}
               />
             </Tooltip>
           )}
@@ -178,6 +179,16 @@ export default function BlockPaneHeader({
               {isFullscreen ? <ScreenNormalIcon /> : <ScreenFullIcon />}
             </span>
           </NextLink>
+          {!commitsPane && (
+            <Tooltip placement="top-end" label="Open Commits Pane">
+              <IconButton
+                icon={SidebarExpandIcon}
+                onClick={toggleCommitsPane}
+                sx={{ ml: 2 }}
+                title={"Open Commits Pane"}
+              />
+            </Tooltip>
+          )}
         </Box>
       </div>
     </div>

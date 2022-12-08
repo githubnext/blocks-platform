@@ -1,9 +1,7 @@
-import { AnimatePresence, motion } from "framer-motion";
 import type { Context, UpdatedContent } from "./index";
 import { ActivityFeed } from "../ActivityFeed";
 
 type CommitsPaneProps = {
-  isFullscreen: boolean;
   context: Context;
   branchName: string;
   timeline: undefined | RepoTimeline;
@@ -13,7 +11,6 @@ type CommitsPaneProps = {
 };
 
 export default function CommitsPane({
-  isFullscreen,
   context,
   branchName,
   timeline,
@@ -22,17 +19,15 @@ export default function CommitsPane({
   blockType,
 }: CommitsPaneProps) {
   return (
-    !isFullscreen && (
-      <div className="flex-none hidden lg:block h-full border-l border-gray-200">
-        <ActivityFeed
-          context={context}
-          branchName={branchName}
-          timeline={timeline}
-          updatedContent={updatedContent}
-          clearUpdatedContent={clearUpdatedContent}
-          blockType={blockType}
-        />
-      </div>
-    )
+    <div className="flex-none hidden lg:block h-full border-l border-gray-200">
+      <ActivityFeed
+        context={context}
+        branchName={branchName}
+        timeline={timeline}
+        updatedContent={updatedContent}
+        clearUpdatedContent={clearUpdatedContent}
+        blockType={blockType}
+      />
+    </div>
   );
 }

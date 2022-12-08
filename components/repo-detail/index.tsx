@@ -179,19 +179,20 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
         onChangeBranch={setBranchName}
       />
 
-      <div className="flex flex-1 overflow-hidden">
-        {fileTree && (
-          <FileTreePane
-            {...{
-              isFullscreen,
-              owner,
-              repo,
-              branchName,
-              files,
-              path,
-              updatedContents,
-            }}
-          />
+      <div className="flex flex-1 overflow-hidden divide-x">
+        {fileTree && !isFullscreen && (
+          <div className="w-[17rem]">
+            <FileTreePane
+              {...{
+                owner,
+                repo,
+                branchName,
+                files,
+                path,
+                updatedContents,
+              }}
+            />
+          </div>
         )}
         <div className="relative flex flex-col flex-1 overflow-hidden z-10">
           {fileInfo && (
@@ -210,11 +211,8 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
           )}
         </div>
 
-        {}
-
-        {commitsPane && (
+        {commitsPane && !isFullscreen && (
           <CommitsPane
-            isFullscreen={isFullscreen}
             context={context}
             branchName={branchName}
             timeline={timeline}

@@ -10,10 +10,32 @@ import {
 import { Box, StyledOcticon, Text, TextInput } from "@primer/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 import { VscCircleOutline } from "react-icons/vsc";
+import type { FixedSizeNodeData, FixedSizeNodePublicState } from "react-vtree";
 import { FixedSizeTree as Tree } from "react-vtree";
 import makeBranchPath from "utils/makeBranchPath";
+
+type TreeData = {
+  id: string;
+  isLeaf: boolean;
+  isOpenByDefault: boolean;
+  name: string;
+  depth: number;
+  path: string;
+  activeFilePath: string;
+  canCollapse: boolean;
+  updatedContents: Record<string, unknown>;
+  currentPathname: string;
+  currentQuery: Record<string, string | string[]>;
+  currentBranch: string;
+} & FixedSizeNodeData;
+
+type NodeData = {
+  nestingLevel: number;
+  node: NestedFileTree;
+  data: TreeData;
+};
 
 // defined in @githubnext/blocks but not exported
 interface NestedFileTree {
@@ -112,7 +134,7 @@ export const Sidebar = ({
   // This function prepares an object for yielding. We can yield an object
   // that has `data` object with `id` and `isOpenByDefault` fields.
   // We can also add any other data here.
-  const getNodeData = (node, nestingLevel) => {
+  const getNodeData = (node, nestingLevel): NodeData => {
     const id = node.path || "/";
     // don't close open folders
     const existingIsOpen = tree.current?.state.records.get(id)?.public.isOpen;
@@ -140,8 +162,8 @@ export const Sidebar = ({
       node,
     };
   };
-  
-  function* treeWalker() {
+
+  function* treeWalker(): Generator<NodeData, undefined, NodeData> {
     // Step [1]: Define the root node of our tree. There can be one or
     // multiple nodes.
     for (let i = 0; i < filteredFiles.length; i++) {
@@ -214,7 +236,7 @@ const Node = ({
   isOpen,
   style,
   setOpen,
-}) => {
+}: FixedSizeNodePublicState<TreeData> & { style: CSSProperties }) => {
   return (
     <div style={style} key={path || "/"}>
       <Item

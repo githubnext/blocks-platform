@@ -1,5 +1,6 @@
 const defaultTheme = require("tailwindcss/defaultTheme");
 
+/** @type {import('tailwindcss').Config} */
 module.exports = {
   mode: "jit",
   purge: [
@@ -10,6 +11,9 @@ module.exports = {
   darkMode: false, // or 'media' or 'class'
   theme: {
     extend: {
+      spacing: {
+        panelHeader: "3em",
+      },
       colors: {
         gray: {
           0: "#fafbfc",

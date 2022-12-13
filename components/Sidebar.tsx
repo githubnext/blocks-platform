@@ -190,27 +190,17 @@ export const Sidebar = ({
   if (!files.map) return null;
 
   return (
-    <Box className="sidebar flex flex-col h-full overflow-hidden flex-1 w-[17rem]">
+    <Box className="sidebar flex flex-col h-full overflow-hidden flex-1">
       <Box
         bg="canvas.subtle"
         p={2}
-        sx={{
-          height: 49,
-        }}
+        className="h-panelHeader"
         borderBottom="1px solid"
         borderColor="border.muted"
         display="flex"
         alignItems="center"
         justifyContent="space-between"
       >
-        <Tooltip placement="top-end" label="Close File Tree">
-          <IconButton
-            icon={SidebarExpandIcon}
-            onClick={toggleFileTree}
-            sx={{ mr: 2 }}
-            title={"Close sidebar"}
-          />
-        </Tooltip>
         <TextInput
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -218,6 +208,14 @@ export const Sidebar = ({
           leadingVisual={SearchIcon}
           className="w-full"
         />
+        <Tooltip placement="top-end" label="Close File Tree">
+          <IconButton
+            icon={SidebarExpandIcon}
+            onClick={toggleFileTree}
+            sx={{ ml: 2 }}
+            title={"Close sidebar"}
+          />
+        </Tooltip>
       </Box>
 
       <Box className="flex-1 overflow-auto">

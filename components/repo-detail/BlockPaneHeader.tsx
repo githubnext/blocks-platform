@@ -60,6 +60,7 @@ export default function BlockPaneHeader({
       <div>
         <Box
           bg="canvas.subtle"
+          className="h-panelHeader"
           p={2}
           borderBottom="1px solid"
           borderColor="border.muted"

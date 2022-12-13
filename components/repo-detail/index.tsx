@@ -160,7 +160,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
   const { visible: commitsPane } = useCommitsPane();
 
   return (
-    <div className="flex flex-col w-full h-screen overflow-hidden">
+    <div className="flex flex-col h-screen overflow-hidden">
       <Head>
         <title>
           {/* mimicking github.com's title */}
@@ -181,87 +181,83 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
         onChangeBranch={setBranchName}
       />
 
-      <LayoutGroup>
-        <div className="flex flex-1 overflow-hidden divide-x">
-          <AnimatePresence mode="popLayout" key="file-tree">
-            {fileTree && !isFullscreen && (
-              <motion.div
-                key="file-tree"
-                className="overflow-hidden w-64"
-                layout="position"
-                exit={{ x: "-100%" }}
-                animate={{ x: 0 }}
-                transition={{
-                  type: "tween",
-                  ease: "easeOut",
-                }}
-                initial={{ x: "-100%" }}
-              >
-                <FileTreePane
-                  {...{
-                    owner,
-                    repo,
-                    branchName,
-                    files,
-                    path,
-                    updatedContents,
-                  }}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <motion.div
-            key="block-content"
-            layout="position"
-            transition={{
-              type: "tween",
-              ease: "easeOut",
-            }}
-            className="relative flex flex-col flex-1 overflow-hidden z-10"
-          >
-            {fileInfo && (
-              <BlockPane
+      <div className="flex flex-1 overflow-hidden w-full">
+        <AnimatePresence mode="popLayout" key="file-tree">
+          {fileTree && !isFullscreen && (
+            <motion.div
+              key="file-tree"
+              className="overflow-hidden w-72 border-r hidden lg:block"
+              exit={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              transition={{
+                type: "tween",
+                ease: "easeOut",
+              }}
+              initial={{ x: "-100%" }}
+            >
+              <FileTreePane
                 {...{
-                  fileInfo,
-                  path,
-                  metadata,
-                  setRequestedBlockMetadata,
-                  context,
+                  owner,
+                  repo,
                   branchName,
-                  onSaveChanges,
+                  files,
+                  path,
+                  updatedContents,
                 }}
               />
-            )}
-          </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-          <AnimatePresence mode="popLayout">
-            {commitsPane && !isFullscreen && (
-              <motion.div
-                key="commits-pane"
-                className="w-80 overflow-hidden"
-                exit={{ x: "100%" }}
-                animate={{ x: 0 }}
-                initial={{ x: "100%" }}
-                transition={{
-                  type: "tween",
-                  ease: "easeOut",
-                }}
-                layout="position"
-              >
-                <CommitsPane
-                  context={context}
-                  branchName={branchName}
-                  timeline={timeline}
-                  updatedContent={updatedContent}
-                  clearUpdatedContent={clearUpdatedContent}
-                  blockType={blockTypes[fileInfo?.type]}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </LayoutGroup>
+        <motion.div
+          key="block-content"
+          layout="size"
+          transition={{
+            type: "tween",
+            ease: "easeOut",
+          }}
+          className="relative flex flex-col flex-1 overflow-hidden z-10"
+        >
+          {fileInfo && (
+            <BlockPane
+              {...{
+                fileInfo,
+                path,
+                metadata,
+                setRequestedBlockMetadata,
+                context,
+                branchName,
+                onSaveChanges,
+              }}
+            />
+          )}
+        </motion.div>
+
+        <AnimatePresence mode="popLayout">
+          {commitsPane && !isFullscreen && (
+            <motion.div
+              key="commits-pane"
+              className="w-80 overflow-hidden hidden lg:block"
+              exit={{ x: "100%" }}
+              animate={{ x: 0 }}
+              initial={{ x: "100%" }}
+              transition={{
+                type: "tween",
+                ease: "easeOut",
+              }}
+            >
+              <CommitsPane
+                context={context}
+                branchName={branchName}
+                timeline={timeline}
+                updatedContent={updatedContent}
+                clearUpdatedContent={clearUpdatedContent}
+                blockType={blockTypes[fileInfo?.type]}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {!!requestedBlockMetadata && (
         <UpdateCodeModal

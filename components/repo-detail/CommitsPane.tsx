@@ -19,7 +19,7 @@ export default function CommitsPane({
   blockType,
 }: CommitsPaneProps) {
   return (
-    <div className="flex-none hidden lg:block h-full border-l border-gray-200">
+    <div className="flex-none h-full border-l border-gray-200">
       <ActivityFeed
         context={context}
         branchName={branchName}

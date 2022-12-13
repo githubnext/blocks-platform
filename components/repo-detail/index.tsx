@@ -182,81 +182,93 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
       />
 
       <div className="flex flex-1 overflow-hidden w-full">
-        <AnimatePresence mode="popLayout" key="file-tree">
-          {fileTree && !isFullscreen && (
-            <motion.div
-              key="file-tree"
-              className="overflow-hidden w-72 border-r hidden lg:block"
-              exit={{ x: "-100%" }}
-              animate={{ x: 0 }}
-              transition={{
-                type: "tween",
-                ease: "easeOut",
-              }}
-              initial={{ x: "-100%" }}
-            >
-              <FileTreePane
+        <LayoutGroup>
+          <motion.div
+            animate={{ width: fileTree && !isFullscreen ? "18rem" : 0 }}
+            transition={layoutTransition}
+          >
+            <AnimatePresence>
+              {fileTree && !isFullscreen && (
+                <motion.div
+                  key="file-tree"
+                  className="overflow-hidden w-72 h-full border-r hidden lg:block bg-white"
+                  initial={{ x: "-100%" }}
+                  animate={{ x: 0 }}
+                  exit={{ x: "-100%" }}
+                  transition={layoutTransition}
+                >
+                  <FileTreePane
+                    {...{
+                      owner,
+                      repo,
+                      branchName,
+                      files,
+                      path,
+                      updatedContents,
+                    }}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+
+          <motion.div
+            key="block-content"
+            className="relative flex flex-col flex-1 overflow-hidden z-10"
+            transition={layoutTransition}
+          >
+            {fileInfo && (
+              <BlockPane
                 {...{
-                  owner,
-                  repo,
-                  branchName,
-                  files,
+                  fileInfo,
                   path,
-                  updatedContents,
+                  metadata,
+                  setRequestedBlockMetadata,
+                  context,
+                  branchName,
+                  onSaveChanges,
                 }}
               />
-            </motion.div>
-          )}
-        </AnimatePresence>
+            )}
+          </motion.div>
 
-        <motion.div
-          key="block-content"
-          layout="size"
-          transition={{
-            type: "tween",
-            ease: "easeOut",
-          }}
-          className="relative flex flex-col flex-1 overflow-hidden z-10"
-        >
-          {fileInfo && (
-            <BlockPane
-              {...{
-                fileInfo,
-                path,
-                metadata,
-                setRequestedBlockMetadata,
-                context,
-                branchName,
-                onSaveChanges,
-              }}
-            />
-          )}
-        </motion.div>
-
-        <AnimatePresence mode="popLayout">
-          {commitsPane && !isFullscreen && (
-            <motion.div
-              key="commits-pane"
-              className="w-80 overflow-hidden hidden lg:block"
-              exit={{ x: "100%" }}
-              animate={{ x: 0 }}
-              initial={{ x: "100%" }}
-              transition={{
-                type: "tween",
-                ease: "easeOut",
-              }}
-            >
-              <CommitsPane
-                context={context}
-                branchName={branchName}
-                timeline={timeline}
-                updatedContent={updatedContent}
-                clearUpdatedContent={clearUpdatedContent}
-                blockType={blockTypes[fileInfo?.type]}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+          <motion.div
+            animate={{ width: commitsPane && !isFullscreen ? "20rem" : 0 }}
+            transition={layoutTransition}
+          >
+            <AnimatePresence>
+              {commitsPane && !isFullscreen && (
+                <motion.div
+                  key="commits-pane"
+                  className="w-80 overflow-hidden hidden lg:block"
+                  initial={{ opacity: 0 }}
+                  animate={{
+                    opacity: 1,
+                    transition: {
+                      type: "tween",
+                      ease: "easeOut",
+                      duration: 0.2,
+                      delay: 0,
+                    },
+                  }}
+                  exit={{
+                    opacity: 0,
+                    transition: { type: "tween", duration: 0, delay: 0.3 },
+                  }}
+                >
+                  <CommitsPane
+                    context={context}
+                    branchName={branchName}
+                    timeline={timeline}
+                    updatedContent={updatedContent}
+                    clearUpdatedContent={clearUpdatedContent}
+                    blockType={blockTypes[fileInfo?.type]}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        </LayoutGroup>
       </div>
 
       {!!requestedBlockMetadata && (
@@ -470,3 +482,8 @@ export function RepoDetail() {
     return <FullPageLoader />;
   }
 }
+
+const layoutTransition = {
+  type: "tween",
+  ease: "easeOut",
+};

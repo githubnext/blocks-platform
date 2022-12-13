@@ -32,13 +32,13 @@ export default function Header({
             height: "auto",
             transition: {
               type: "tween",
-              duration: 0.1,
-              delay: 0,
+              duration: 0.2,
+              delay: 0.4,
             },
           }}
           exit={{
             height: 0,
-            transition: { type: "tween", duration: 0.1, delay: 0 },
+            transition: { type: "tween", duration: 0.2, delay: 0.4 },
           }}
         >
           {/* to prevent the search bar from showing on top of other content while animating */}
@@ -54,7 +54,7 @@ export default function Header({
             }}
             exit={{
               opacity: 0,
-              transition: { type: "tween", duration: 0, delay: 0.1 },
+              transition: { type: "tween", duration: 0, delay: 0.6 },
             }}
           >
             <GitHubHeader />

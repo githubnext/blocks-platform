@@ -42,6 +42,11 @@ NEXTAUTH_URL="http://localhost:3000"
 NEXT_PUBLIC_FUNCTIONS_URL=https://next-waitlist.azurewebsites.net/
 # if you're running the sandbox app locally
 NEXT_PUBLIC_SANDBOX_DOMAIN=http://localhost:3001
+
+# Azure AppInsights Instrumentation
+NEXT_PUBLIC_APPINSIGHTS_KEY="..."
+APPINSIGHTS_INGEST_URL="..."
+APPINSIGHTS_LIVE_URL="..."
 ```
 
 To start working:

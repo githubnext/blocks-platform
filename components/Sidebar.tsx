@@ -15,9 +15,9 @@ import { CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 import { VscCircleOutline } from "react-icons/vsc";
 import type { FixedSizeNodeData, FixedSizeNodePublicState } from "react-vtree";
 import { FixedSizeTree as Tree } from "react-vtree";
-import { useActions } from "state";
 import { Tooltip } from "./Tooltip";
 import makeBranchPath from "utils/makeBranchPath";
+import { useFileTree } from "state";
 
 type TreeData = {
   id: string;
@@ -73,7 +73,7 @@ export const Sidebar = ({
   const [dimensions, setDimensions] = useState<[number, number]>([100, 100]);
   const router = useRouter();
   const query = router.query;
-  const { toggleFileTree } = useActions();
+  const { toggle: toggleFileTree } = useFileTree();
 
   useEffect(() => {
     const onResize = () => {

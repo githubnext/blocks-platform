@@ -1,37 +1,53 @@
-import create from "zustand";
-import { immer } from "zustand/middleware/immer";
+import { useCallback } from "react";
+import { useQueryParam, BooleanParam, withDefault } from "use-query-params";
 
-type BlocksStore = {
-  visibility: {
-    fileTree: boolean;
-    commitsPane: boolean;
-  };
-  actions: {
-    toggleFileTree: () => void;
-    toggleCommitsPane: () => void;
+export const useCommitsPane = () => {
+  const [visible, setVisibility] = useQueryParam(
+    "commitsPane",
+    withDefault(BooleanParam, false)
+  );
+
+  const toggle = useCallback(() => {
+    setVisibility(!visible);
+  }, [visible]);
+
+  return {
+    visible,
+    setVisibility,
+    toggle,
   };
 };
 
-export const useCliStore = create(
-  immer<BlocksStore>((set, get) => ({
-    visibility: {
-      fileTree: true,
-      commitsPane: true,
-    },
-    actions: {
-      toggleFileTree: () => {
-        set((state) => {
-          state.visibility.fileTree = !state.visibility.fileTree;
-        });
-      },
-      toggleCommitsPane: () => {
-        set((state) => {
-          state.visibility.commitsPane = !state.visibility.commitsPane;
-        });
-      },
-    },
-  }))
-);
+export const useFileTree = () => {
+  const [visible, setVisibility] = useQueryParam(
+    "fileTree",
+    withDefault(BooleanParam, false)
+  );
 
-export const useActions = () => useCliStore((state) => state.actions);
-export const useVisibility = () => useCliStore((state) => state.visibility);
+  const toggle = useCallback(() => {
+    setVisibility(!visible);
+  }, [visible]);
+
+  return {
+    visible,
+    setVisibility,
+    toggle,
+  };
+};
+
+export const useFullscreen = () => {
+  const [visible, setVisibility] = useQueryParam(
+    "fullscreen",
+    withDefault(BooleanParam, false)
+  );
+
+  const toggle = useCallback(() => {
+    setVisibility(!visible);
+  }, [visible]);
+
+  return {
+    visible,
+    setVisibility,
+    toggle,
+  };
+};

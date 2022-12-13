@@ -7,6 +7,8 @@ import { Hydrate, QueryClient, QueryClientProvider } from "react-query";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { ApplicationInsights } from "@microsoft/applicationinsights-web";
+import { NextAdapter } from "next-query-params";
+import { QueryParamProvider } from "use-query-params";
 
 function App({ Component, pageProps: { session, ...pageProps } }) {
   const [queryClient] = useState(() => new QueryClient());
@@ -60,27 +62,29 @@ function App({ Component, pageProps: { session, ...pageProps } }) {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient} contextSharing={true}>
-      <Head>
-        <meta name="robots" content="noindex,nofollow" />
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <title>GitHub Blocks</title>
-      </Head>
-      <Hydrate state={pageProps.dehydratedState}>
-        <ThemeProvider>
-          <BaseStyles>
-            <SessionProvider
-              refetchOnWindowFocus={false}
-              session={session}
-              refetchInterval={5 * 60}
-            >
-              <Component {...pageProps} />
-            </SessionProvider>
-          </BaseStyles>
-        </ThemeProvider>
-      </Hydrate>
-    </QueryClientProvider>
+    <QueryParamProvider adapter={NextAdapter}>
+      <QueryClientProvider client={queryClient} contextSharing={true}>
+        <Head>
+          <meta name="robots" content="noindex,nofollow" />
+          <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+          <link rel="icon" href="/favicon.ico" sizes="any" />
+          <title>GitHub Blocks</title>
+        </Head>
+        <Hydrate state={pageProps.dehydratedState}>
+          <ThemeProvider>
+            <BaseStyles>
+              <SessionProvider
+                refetchOnWindowFocus={false}
+                session={session}
+                refetchInterval={5 * 60}
+              >
+                <Component {...pageProps} />
+              </SessionProvider>
+            </BaseStyles>
+          </ThemeProvider>
+        </Hydrate>
+      </QueryClientProvider>
+    </QueryParamProvider>
   );
 }
 

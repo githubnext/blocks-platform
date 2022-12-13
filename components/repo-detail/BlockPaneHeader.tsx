@@ -1,6 +1,4 @@
 import { useContext } from "react";
-import { useRouter } from "next/router";
-import { default as NextLink } from "next/link";
 import dynamic from "next/dynamic";
 import { Box, Button, IconButton, Link } from "@primer/react";
 import {
@@ -11,12 +9,12 @@ import {
   SidebarExpandIcon,
 } from "@primer/octicons-react";
 import { AnimatePresence, motion } from "framer-motion";
-import { getBlockKey, useIsFullscreen } from "hooks";
+import { getBlockKey } from "hooks";
 import type { UseManageBlockResult } from "hooks";
 import type { Context } from "./index";
 import { AppContext } from "context";
 import { Tooltip } from "components/Tooltip";
-import { useActions, useVisibility } from "state";
+import { useCommitsPane, useFileTree, useFullscreen } from "state";
 import { FloatingDelayGroup } from "@floating-ui/react-dom-interactions";
 
 const BlockPicker = dynamic(() => import("../block-picker"), { ssr: false });
@@ -40,7 +38,6 @@ export default function BlockPaneHeader({
   context,
   onSaveChanges,
 }: BlockPaneHeaderProps) {
-  const router = useRouter();
   const appContext = useContext(AppContext);
 
   const { block, setBlock, defaultBlock } = manageBlockResult.data ?? {};
@@ -54,10 +51,9 @@ export default function BlockPaneHeader({
     ? "The Blocks GitHub app is not installed on this repository"
     : "";
 
-  const { fileTree, commitsPane } = useVisibility();
-  const { toggleFileTree, toggleCommitsPane } = useActions();
-
-  const isFullscreen = useIsFullscreen();
+  const { visible: fileTree, toggle: toggleFileTree } = useFileTree();
+  const { visible: commitsPane, toggle: toggleCommitsPane } = useCommitsPane();
+  const { visible: isFullscreen, toggle: toggleFullscreen } = useFullscreen();
 
   return (
     <div className="flex-none top-0 z-10">
@@ -171,23 +167,14 @@ export default function BlockPaneHeader({
           >
             View on GitHub
           </Link>
-          <NextLink
-            shallow
-            href={{
-              pathname: router.pathname,
-              query: {
-                ...router.query,
-                mode: isFullscreen ? undefined : "fullscreen",
-              },
-            }}
-          >
-            <span
-              className="text-gray-500 text-xs ml-2 mr-3 cursor-pointer"
-              title={isFullscreen ? "Exit fullscreen" : "Make fullscreen"}
-            >
-              {isFullscreen ? <ScreenNormalIcon /> : <ScreenFullIcon />}
-            </span>
-          </NextLink>
+
+          <IconButton
+            onClick={toggleFullscreen}
+            size="small"
+            aria-label={isFullscreen ? "Exit fullscreen" : "Make fullscreen"}
+            icon={isFullscreen ? ScreenNormalIcon : ScreenFullIcon}
+          />
+
           {!commitsPane && !isFullscreen && (
             <FloatingDelayGroup delay={200}>
               <Tooltip placement="top-end" label="Open Commits Pane">

@@ -9,7 +9,6 @@ import {
   getBlockKey,
   updateFileContents,
   useGetBranches,
-  useIsFullscreen,
   useMetadata,
   useRepoFiles,
   useRepoInfo,
@@ -30,7 +29,7 @@ import { useSession } from "next-auth/react";
 import useBlockFrameMessages from "./use-block-frame-messages";
 import { WarningModal } from "components/WarningModal";
 import makeBranchPath from "utils/makeBranchPath";
-import { useVisibility } from "state";
+import { useCommitsPane, useFileTree, useFullscreen } from "state";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 
 export type Context = {
@@ -78,7 +77,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
     new: string;
     onSubmit: () => void;
   }>(null);
-  const isFullscreen = useIsFullscreen();
+  const { visible: isFullscreen, toggle } = useFullscreen();
 
   const context = useMemo(
     () => ({
@@ -157,7 +156,8 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
     committedContents: committedContents.current,
   });
 
-  const { fileTree, commitsPane } = useVisibility();
+  const { visible: fileTree } = useFileTree();
+  const { visible: commitsPane } = useCommitsPane();
 
   return (
     <div className="flex flex-col w-full h-screen overflow-hidden">

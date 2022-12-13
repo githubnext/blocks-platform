@@ -70,11 +70,10 @@ export default function BlockPaneHeader({
           alignItems="center"
           justifyContent="space-between"
         >
-          {!fileTree && (
+          {!fileTree && !isFullscreen && (
             <Tooltip placement="top" label="Open File Tree">
               <div>
                 <IconButton
-                  disabled={isFullscreen}
                   icon={SidebarCollapseIcon}
                   onClick={toggleFileTree}
                   sx={{ mr: 2 }}
@@ -182,11 +181,10 @@ export default function BlockPaneHeader({
               {isFullscreen ? <ScreenNormalIcon /> : <ScreenFullIcon />}
             </span>
           </NextLink>
-          {!commitsPane && (
+          {!commitsPane && !isFullscreen && (
             <Tooltip placement="top-end" label="Open Commits Pane">
               <div>
                 <IconButton
-                  disabled={isFullscreen}
                   icon={SidebarExpandIcon}
                   onClick={toggleCommitsPane}
                   sx={{ ml: 2 }}

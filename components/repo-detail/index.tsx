@@ -183,15 +183,18 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
 
       <LayoutGroup>
         <div className="flex flex-1 overflow-hidden divide-x">
-          <AnimatePresence mode="popLayout">
+          <AnimatePresence mode="popLayout" key="file-tree">
             {fileTree && !isFullscreen && (
               <motion.div
                 key="file-tree"
-                className="w-[17rem]"
-                layout
-                exit={{ x: "-100%" }}
-                animate={{ x: 0 }}
-                initial={{ x: fileTree ? 0 : "-100%" }}
+                style={{
+                  width: "17rem",
+                }}
+                className="overflow-hidden"
+                layout="position"
+                exit={{ x: "-100%", opacity: 1 }}
+                animate={{ x: 0, opacity: 1 }}
+                initial={{ x: fileTree ? 0 : "-100%", opacity: 1 }}
               >
                 <FileTreePane
                   {...{
@@ -209,7 +212,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
 
           <motion.div
             key="block-content"
-            layout
+            layout="position"
             className="relative flex flex-col flex-1 overflow-hidden z-10"
           >
             {fileInfo && (
@@ -231,10 +234,10 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
             {commitsPane && !isFullscreen && (
               <motion.div
                 key="commits-pane"
-                layout
-                exit={{ x: "100%" }}
-                animate={{ x: 0 }}
-                initial={{ x: commitsPane ? 0 : "100%" }}
+                exit={{ x: "100%", opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                initial={{ x: commitsPane ? 0 : "200%", opacity: 0 }}
+                layout="position"
               >
                 <CommitsPane
                   context={context}
@@ -249,6 +252,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
           </AnimatePresence>
         </div>
       </LayoutGroup>
+
       {!!requestedBlockMetadata && (
         <UpdateCodeModal
           path={`.github/blocks/all.json`}

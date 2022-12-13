@@ -17,6 +17,7 @@ import type { Context } from "./index";
 import { AppContext } from "context";
 import { Tooltip } from "components/Tooltip";
 import { useActions, useVisibility } from "state";
+import { FloatingDelayGroup } from "@floating-ui/react-dom-interactions";
 
 const BlockPicker = dynamic(() => import("../block-picker"), { ssr: false });
 
@@ -71,31 +72,35 @@ export default function BlockPaneHeader({
           justifyContent="space-between"
         >
           {!fileTree && !isFullscreen && (
-            <Tooltip placement="top" label="Open File Tree">
-              <div>
-                <IconButton
-                  icon={SidebarCollapseIcon}
-                  onClick={toggleFileTree}
-                  sx={{ mr: 2 }}
-                  title={"Open File Tree"}
-                />
-              </div>
-            </Tooltip>
+            <FloatingDelayGroup delay={200}>
+              <Tooltip placement="top" label="Open File Tree">
+                <div>
+                  <IconButton
+                    icon={SidebarCollapseIcon}
+                    onClick={toggleFileTree}
+                    sx={{ mr: 2 }}
+                    title={"Open File Tree"}
+                  />
+                </div>
+              </Tooltip>
+            </FloatingDelayGroup>
           )}
           <Box display="flex" alignItems="center" className="space-x-2">
-            <TooltipButtonWrapper
-              hasTooltip={!hasEditPermission || !onSaveChanges}
-              tooltipText={noEditPermissionReason || "No changes to save"}
-            >
-              <Button
-                disabled={!hasEditPermission || !onSaveChanges}
-                variant="primary"
-                leadingIcon={RepoPushIcon}
-                onClick={onSaveChanges}
+            <FloatingDelayGroup delay={200}>
+              <TooltipButtonWrapper
+                hasTooltip={!hasEditPermission || !onSaveChanges}
+                tooltipText={noEditPermissionReason || "No changes to save"}
               >
-                Save
-              </Button>
-            </TooltipButtonWrapper>
+                <Button
+                  disabled={!hasEditPermission || !onSaveChanges}
+                  variant="primary"
+                  leadingIcon={RepoPushIcon}
+                  onClick={onSaveChanges}
+                >
+                  Save
+                </Button>
+              </TooltipButtonWrapper>
+            </FloatingDelayGroup>
             <BlockPicker
               path={path}
               type={isFolder ? "folder" : "file"}
@@ -103,26 +108,28 @@ export default function BlockPaneHeader({
               value={block}
             />
             {!isDefaultBlock && (
-              <TooltipButtonWrapper
-                hasTooltip={!hasEditPermission}
-                tooltipText={noEditPermissionReason}
-              >
-                <Button
-                  disabled={!hasEditPermission}
-                  onClick={() => {
-                    const newMetadata = {
-                      ...metadata,
-                      [path]: {
-                        ...metadata[path],
-                        default: getBlockKey(block),
-                      },
-                    };
-                    setRequestedMetadata(newMetadata);
-                  }}
+              <FloatingDelayGroup delay={200}>
+                <TooltipButtonWrapper
+                  hasTooltip={!hasEditPermission}
+                  tooltipText={noEditPermissionReason}
                 >
-                  Make default
-                </Button>
-              </TooltipButtonWrapper>
+                  <Button
+                    disabled={!hasEditPermission}
+                    onClick={() => {
+                      const newMetadata = {
+                        ...metadata,
+                        [path]: {
+                          ...metadata[path],
+                          default: getBlockKey(block),
+                        },
+                      };
+                      setRequestedMetadata(newMetadata);
+                    }}
+                  >
+                    Make default
+                  </Button>
+                </TooltipButtonWrapper>
+              </FloatingDelayGroup>
             )}
           </Box>
           <AnimatePresence initial={false}>
@@ -182,16 +189,18 @@ export default function BlockPaneHeader({
             </span>
           </NextLink>
           {!commitsPane && !isFullscreen && (
-            <Tooltip placement="top-end" label="Open Commits Pane">
-              <div>
-                <IconButton
-                  icon={SidebarExpandIcon}
-                  onClick={toggleCommitsPane}
-                  sx={{ ml: 2 }}
-                  title={"Open Commits Pane"}
-                />
-              </div>
-            </Tooltip>
+            <FloatingDelayGroup delay={200}>
+              <Tooltip placement="top-end" label="Open Commits Pane">
+                <div>
+                  <IconButton
+                    icon={SidebarExpandIcon}
+                    onClick={toggleCommitsPane}
+                    sx={{ ml: 2 }}
+                    title={"Open Commits Pane"}
+                  />
+                </div>
+              </Tooltip>
+            </FloatingDelayGroup>
           )}
         </Box>
       </div>

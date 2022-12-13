@@ -31,6 +31,7 @@ import useBlockFrameMessages from "./use-block-frame-messages";
 import { WarningModal } from "components/WarningModal";
 import makeBranchPath from "utils/makeBranchPath";
 import { useVisibility } from "state";
+import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 
 export type Context = {
   repo: string;
@@ -180,48 +181,74 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
         onChangeBranch={setBranchName}
       />
 
-      <div className="flex flex-1 overflow-hidden divide-x">
-        {fileTree && !isFullscreen && (
-          <div className="w-[17rem]">
-            <FileTreePane
-              {...{
-                owner,
-                repo,
-                branchName,
-                files,
-                path,
-                updatedContents,
-              }}
-            />
-          </div>
-        )}
-        <div className="relative flex flex-col flex-1 overflow-hidden z-10">
-          {fileInfo && (
-            <BlockPane
-              {...{
-                fileInfo,
-                path,
-                metadata,
-                setRequestedBlockMetadata,
-                context,
-                branchName,
-                onSaveChanges,
-              }}
-            />
-          )}
-        </div>
+      <LayoutGroup>
+        <div className="flex flex-1 overflow-hidden divide-x">
+          <AnimatePresence mode="popLayout">
+            {fileTree && !isFullscreen && (
+              <motion.div
+                key="file-tree"
+                className="w-[17rem]"
+                layout
+                exit={{ x: "-100%" }}
+                animate={{ x: 0 }}
+                initial={{ x: fileTree ? 0 : "-100%" }}
+              >
+                <FileTreePane
+                  {...{
+                    owner,
+                    repo,
+                    branchName,
+                    files,
+                    path,
+                    updatedContents,
+                  }}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-        {commitsPane && !isFullscreen && (
-          <CommitsPane
-            context={context}
-            branchName={branchName}
-            timeline={timeline}
-            updatedContent={updatedContent}
-            clearUpdatedContent={clearUpdatedContent}
-            blockType={blockTypes[fileInfo?.type]}
-          />
-        )}
-      </div>
+          <motion.div
+            key="block-content"
+            layout
+            className="relative flex flex-col flex-1 overflow-hidden z-10"
+          >
+            {fileInfo && (
+              <BlockPane
+                {...{
+                  fileInfo,
+                  path,
+                  metadata,
+                  setRequestedBlockMetadata,
+                  context,
+                  branchName,
+                  onSaveChanges,
+                }}
+              />
+            )}
+          </motion.div>
+
+          <AnimatePresence mode="popLayout">
+            {commitsPane && !isFullscreen && (
+              <motion.div
+                key="commits-pane"
+                layout
+                exit={{ x: "100%" }}
+                animate={{ x: 0 }}
+                initial={{ x: commitsPane ? 0 : "100%" }}
+              >
+                <CommitsPane
+                  context={context}
+                  branchName={branchName}
+                  timeline={timeline}
+                  updatedContent={updatedContent}
+                  clearUpdatedContent={clearUpdatedContent}
+                  blockType={blockTypes[fileInfo?.type]}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </LayoutGroup>
       {!!requestedBlockMetadata && (
         <UpdateCodeModal
           path={`.github/blocks/all.json`}

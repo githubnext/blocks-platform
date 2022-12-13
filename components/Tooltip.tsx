@@ -4,6 +4,7 @@ import {
   flip,
   offset,
   Placement,
+  shift,
   useDismiss,
   useFloating,
   useFocus,
@@ -20,19 +21,31 @@ interface Props {
   children: React.ReactElement;
 }
 
-export const Tooltip = ({ children, label, placement = "top" }: Props) => {
+export const Tooltip = ({
+  children,
+  label,
+  placement: initialPlacement,
+}: Props) => {
   const [open, setOpen] = useState(false);
   const arrowRef = useRef<HTMLDivElement>(null);
 
-  const { x, y, reference, floating, strategy, context, middlewareData } =
-    useFloating({
-      placement,
-      open,
-      onOpenChange: setOpen,
-      strategy: "fixed",
-      middleware: [offset(8), flip(), arrow({ element: arrowRef })],
-      whileElementsMounted: autoUpdate,
-    });
+  const {
+    x,
+    y,
+    reference,
+    floating,
+    strategy,
+    context,
+    middlewareData,
+    placement,
+  } = useFloating({
+    placement: initialPlacement,
+    open,
+    onOpenChange: setOpen,
+    strategy: "fixed",
+    middleware: [offset(8), shift(), flip(), arrow({ element: arrowRef })],
+    whileElementsMounted: autoUpdate,
+  });
 
   const { getReferenceProps, getFloatingProps } = useInteractions([
     useHover(context),

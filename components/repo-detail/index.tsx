@@ -187,14 +187,15 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
             {fileTree && !isFullscreen && (
               <motion.div
                 key="file-tree"
-                style={{
-                  width: "17rem",
-                }}
-                className="overflow-hidden"
+                className="overflow-hidden w-64"
                 layout="position"
-                exit={{ x: "-100%", opacity: 1 }}
-                animate={{ x: 0, opacity: 1 }}
-                initial={{ x: fileTree ? 0 : "-100%", opacity: 1 }}
+                exit={{ x: "-100%" }}
+                animate={{ x: 0 }}
+                transition={{
+                  type: "tween",
+                  ease: "easeOut",
+                }}
+                initial={{ x: "-100%" }}
               >
                 <FileTreePane
                   {...{
@@ -213,6 +214,10 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
           <motion.div
             key="block-content"
             layout="position"
+            transition={{
+              type: "tween",
+              ease: "easeOut",
+            }}
             className="relative flex flex-col flex-1 overflow-hidden z-10"
           >
             {fileInfo && (
@@ -234,9 +239,14 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
             {commitsPane && !isFullscreen && (
               <motion.div
                 key="commits-pane"
-                exit={{ x: "100%", opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                initial={{ x: commitsPane ? 0 : "200%", opacity: 0 }}
+                className="w-80 overflow-hidden"
+                exit={{ x: "100%" }}
+                animate={{ x: 0 }}
+                initial={{ x: "100%" }}
+                transition={{
+                  type: "tween",
+                  ease: "easeOut",
+                }}
                 layout="position"
               >
                 <CommitsPane

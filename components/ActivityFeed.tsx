@@ -35,7 +35,7 @@ export const ActivityFeed = ({
 
   return (
     <div className={"h-full overflow-hidden"}>
-      <div className={`h-full overflow-y-auto w-80 duration-200`}>
+      <div className={`h-full overflow-y-auto`}>
         <div className="flex flex-col h-full">
           <Box
             bg="canvas.subtle"

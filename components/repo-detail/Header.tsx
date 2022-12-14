@@ -32,13 +32,13 @@ export default function Header({
             height: "auto",
             transition: {
               type: "tween",
-              duration: 0.2,
-              delay: 0.4,
+              duration: 0.13,
+              delay: 0.1,
             },
           }}
           exit={{
             height: 0,
-            transition: { type: "tween", duration: 0.2, delay: 0.4 },
+            transition: { type: "tween", duration: 0.13, delay: 0.1 },
           }}
         >
           {/* to prevent the search bar from showing on top of other content while animating */}

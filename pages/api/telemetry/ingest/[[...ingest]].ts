@@ -3,7 +3,7 @@ import axios from "axios";
 import type { Method } from "axios";
 
 const appinsightsIngest = axios.create({
-  baseURL: process.env.APPINSIGHTS_INGEST_URL,
+  baseURL: "https://eastus-8.in.applicationinsights.azure.com/",
 })
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
@@ -13,11 +13,11 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     return;
   }
   
-  await appinsightsIngest.request({
+  const airesponse = await appinsightsIngest.request({
     method: req.method as Method,
     url: `/${req.query.ingest.join('/')}`,
     data: req.body,
   })
 
-  res.status(200);
+  res.status(airesponse.status);
 };

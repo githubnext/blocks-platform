@@ -3,7 +3,7 @@ import axios from "axios";
 import type { Method } from "axios";
 
 const appinsightsLive = axios.create({
-  baseURL: process.env.APPINSIGHTS_LIVE_URL,
+  baseURL: "https://eastus.livediagnostics.monitor.azure.com/",
 })
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
@@ -13,11 +13,11 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     return;
   }
   
-  await appinsightsLive.request({
+  const airesponse = await appinsightsLive.request({
     method: req.method as Method,
     url: `/${req.query.live.join('/')}`,
     data: req.body,
   })
 
-  res.status(200);
+  res.status(airesponse.status);
 };

@@ -19,7 +19,7 @@ function App({ Component, pageProps: { session, ...pageProps } }) {
 
         // this isn't a high-security key, see https://stackoverflow.com/questions/54535275/what-will-happen-if-applicationinsights-instrumentationkey-gets-stolen
         connectionString:
-          `InstrumentationKey=${process.env.NEXT_PUBLIC_APPINSIGHTS_KEY};IngestionEndpoint=/api/telemetry/ingest;LiveEndpoint=/api/telemetry/live`,
+          `InstrumentationKey=96006ad9-5042-466e-b5c9-641be3a9e13f;IngestionEndpoint=/api/telemetry/ingest;LiveEndpoint=/api/telemetry/live`,
       },
     });
     appInsights.loadAppInsights();

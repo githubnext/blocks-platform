@@ -4,20 +4,20 @@ import type { Method } from "axios";
 
 const appinsightsLive = axios.create({
   baseURL: "https://eastus.livediagnostics.monitor.azure.com/",
-})
+});
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (!Array.isArray(req.query.live)) {
     res.status(500);
-    res.send('Live path is not an array');
+    res.send("Live path is not an array");
     return;
   }
-  
+
   const airesponse = await appinsightsLive.request({
     method: req.method as Method,
-    url: `/${req.query.live.join('/')}`,
+    url: `/${req.query.live.join("/")}`,
     data: req.body,
-  })
+  });
 
-  res.status(airesponse.status);
+  res.status(airesponse.status).send(airesponse.data);
 };

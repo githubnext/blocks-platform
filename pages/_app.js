@@ -14,12 +14,12 @@ function App({ Component, pageProps: { session, ...pageProps } }) {
 
   useEffect(() => {
     if (process.env.NODE_ENV !== "production") return;
-
     const appInsights = new ApplicationInsights({
       config: {
+
         // this isn't a high-security key, see https://stackoverflow.com/questions/54535275/what-will-happen-if-applicationinsights-instrumentationkey-gets-stolen
         connectionString:
-          "InstrumentationKey=96006ad9-5042-466e-b5c9-641be3a9e13f;IngestionEndpoint=https://eastus-8.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/",
+          `InstrumentationKey=96006ad9-5042-466e-b5c9-641be3a9e13f;IngestionEndpoint=/api/telemetry/ingest;LiveEndpoint=/api/telemetry/live`,
       },
     });
     appInsights.loadAppInsights();

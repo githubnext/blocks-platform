@@ -22,14 +22,14 @@ import { CommitCodeDialog } from "../commit-code-dialog";
 import Header from "./Header";
 import FileTreePane from "./FileTreePane";
 import BlockPane from "./BlockPane";
-import CommitsPane from "./CommitsPane";
+import { HistoryPane } from "./HistoryPane";
 import type { RepoFiles } from "@githubnext/blocks";
 import { CODEX_BLOCKS } from "lib";
 import { useSession } from "next-auth/react";
 import useBlockFrameMessages from "./use-block-frame-messages";
 import { WarningModal } from "components/WarningModal";
 import makeBranchPath from "utils/makeBranchPath";
-import { useCommitsPane, useFileTree, useFullscreen } from "state";
+import { useHistoryPane, useFileTreePane, useFullscreen } from "state";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 
 export type Context = {
@@ -156,8 +156,8 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
     committedContents: committedContents.current,
   });
 
-  const { visible: fileTree } = useFileTree();
-  const { visible: commitsPane } = useCommitsPane();
+  const { visible: fileTree } = useFileTreePane();
+  const { visible: historyPane } = useHistoryPane();
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
@@ -233,13 +233,13 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
           </motion.div>
 
           <motion.div
-            animate={{ width: commitsPane && !isFullscreen ? "20rem" : 0 }}
+            animate={{ width: historyPane && !isFullscreen ? "20rem" : 0 }}
             transition={layoutTransition}
           >
             <AnimatePresence>
-              {commitsPane && !isFullscreen && (
+              {historyPane && !isFullscreen && (
                 <motion.div
-                  key="commits-pane"
+                  key="history-pane"
                   className="w-80 overflow-hidden hidden lg:block"
                   initial={{ opacity: 0 }}
                   animate={{
@@ -256,7 +256,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
                     transition: { type: "tween", duration: 0, delay: 0.3 },
                   }}
                 >
-                  <CommitsPane
+                  <HistoryPane
                     context={context}
                     branchName={branchName}
                     timeline={timeline}

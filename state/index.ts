@@ -24,9 +24,9 @@ export const useVisibilityQueryParm = ({
   };
 };
 
-export const useCommitsPane = () =>
-  useVisibilityQueryParm({ key: "commitsPane", initialValue: true });
-export const useFileTree = () =>
+export const useHistoryPane = () =>
+  useVisibilityQueryParm({ key: "history", initialValue: true });
+export const useFileTreePane = () =>
   useVisibilityQueryParm({ key: "fileTree", initialValue: true });
 export const useFullscreen = () =>
   useVisibilityQueryParm({ key: "fullscreen", initialValue: false });

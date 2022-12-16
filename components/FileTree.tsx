@@ -17,7 +17,7 @@ import type { FixedSizeNodeData, FixedSizeNodePublicState } from "react-vtree";
 import { FixedSizeTree as Tree } from "react-vtree";
 import { Tooltip } from "./Tooltip";
 import makeBranchPath from "utils/makeBranchPath";
-import { useFileTree } from "state";
+import { useFileTreePane } from "state";
 
 type TreeData = {
   id: string;
@@ -50,7 +50,7 @@ interface NestedFileTree {
   type: string;
 }
 
-type SidebarProps = {
+type FileTreeProps = {
   owner: string;
   repo: string;
   branchName: string;
@@ -59,21 +59,21 @@ type SidebarProps = {
   updatedContents: Record<string, unknown>;
 };
 
-export const Sidebar = ({
+export const FileTree = ({
   owner = "",
   repo = "",
   branchName,
   files = [],
   activeFilePath = "",
   updatedContents,
-}: SidebarProps) => {
+}: FileTreeProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const wrapperElement = useRef<HTMLDivElement>(null);
   const tree = useRef<Tree>(null);
   const [dimensions, setDimensions] = useState<[number, number]>([100, 100]);
   const router = useRouter();
   const query = router.query;
-  const { toggle: toggleFileTree } = useFileTree();
+  const { toggle: toggleFileTree } = useFileTreePane();
 
   useEffect(() => {
     const onResize = () => {

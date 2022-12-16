@@ -1,6 +1,6 @@
 import type { RepoFiles } from "@githubnext/blocks";
 import type { UpdatedContents } from "./index";
-import { Sidebar } from "../Sidebar";
+import { FileTree } from "../FileTree";
 
 type FileTreePaneProps = {
   owner: string;
@@ -30,7 +30,7 @@ export default function FileTreePane({
           </div>
         </div>
       ) : (
-        <Sidebar
+        <FileTree
           owner={owner}
           repo={repo}
           branchName={branchName}

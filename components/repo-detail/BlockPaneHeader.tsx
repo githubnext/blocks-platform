@@ -14,7 +14,7 @@ import type { UseManageBlockResult } from "hooks";
 import type { Context } from "./index";
 import { AppContext } from "context";
 import { Tooltip } from "components/Tooltip";
-import { useCommitsPane, useFileTree, useFullscreen } from "state";
+import { useHistoryPane, useFileTreePane, useFullscreen } from "state";
 import { FloatingDelayGroup } from "@floating-ui/react-dom-interactions";
 
 const BlockPicker = dynamic(() => import("../block-picker"), { ssr: false });
@@ -51,8 +51,8 @@ export default function BlockPaneHeader({
     ? "The Blocks GitHub app is not installed on this repository"
     : "";
 
-  const { visible: fileTree, toggle: toggleFileTree } = useFileTree();
-  const { visible: commitsPane, toggle: toggleCommitsPane } = useCommitsPane();
+  const fileTreePane = useFileTreePane();
+  const historyPane = useHistoryPane();
   const { visible: isFullscreen, toggle: toggleFullscreen } = useFullscreen();
 
   return (
@@ -68,13 +68,13 @@ export default function BlockPaneHeader({
           alignItems="center"
           justifyContent="space-between"
         >
-          {!fileTree && !isFullscreen && (
+          {!fileTreePane.visible && !isFullscreen && (
             <FloatingDelayGroup delay={200}>
               <Tooltip placement="top" label="Open File Tree">
                 <div>
                   <IconButton
                     icon={SidebarCollapseIcon}
-                    onClick={toggleFileTree}
+                    onClick={fileTreePane.toggle}
                     sx={{ mr: 2 }}
                     title={"Open File Tree"}
                   />
@@ -176,13 +176,13 @@ export default function BlockPaneHeader({
             icon={isFullscreen ? ScreenNormalIcon : ScreenFullIcon}
           />
 
-          {!commitsPane && !isFullscreen && (
+          {!historyPane.visible && !isFullscreen && (
             <FloatingDelayGroup delay={200}>
               <Tooltip placement="top-end" label="Open Commits Pane">
                 <div>
                   <IconButton
                     icon={SidebarExpandIcon}
-                    onClick={toggleCommitsPane}
+                    onClick={historyPane.toggle}
                     sx={{ ml: 2 }}
                     title={"Open Commits Pane"}
                   />

@@ -10,7 +10,7 @@ import { getRelativeTime } from "lib/date-utils";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useCommitsPane } from "state";
+import { useHistoryPane } from "state";
 import { Tooltip } from "./Tooltip";
 
 type ActivityFeedProps = {
@@ -31,7 +31,7 @@ export const ActivityFeed = ({
   blockType,
 }: ActivityFeedProps) => {
   const session = useSession();
-  const { toggle } = useCommitsPane();
+  const { toggle } = useHistoryPane();
 
   return (
     <div className={`h-full overflow-hidden`}>

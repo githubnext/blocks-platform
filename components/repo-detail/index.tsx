@@ -22,13 +22,15 @@ import { CommitCodeDialog } from "../commit-code-dialog";
 import Header from "./Header";
 import FileTreePane from "./FileTreePane";
 import BlockPane from "./BlockPane";
-import CommitsPane from "./CommitsPane";
+import { HistoryPane } from "./HistoryPane";
 import type { RepoFiles } from "@githubnext/blocks";
 import { CODEX_BLOCKS } from "lib";
 import { useSession } from "next-auth/react";
 import useBlockFrameMessages from "./use-block-frame-messages";
 import { WarningModal } from "components/WarningModal";
 import makeBranchPath from "utils/makeBranchPath";
+import { useHistoryPane, useFileTreePane, useFullscreen } from "state";
+import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 
 export type Context = {
   repo: string;
@@ -64,7 +66,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
   const { repoInfo, branches, branchName, path, files, timeline } = props;
   const router = useRouter();
   const { setColorMode } = useTheme();
-  const { repo, owner, theme, fileRef, mode } = router.query as Record<
+  const { repo, owner, theme, fileRef } = router.query as Record<
     string,
     string
   >;
@@ -75,7 +77,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
     new: string;
     onSubmit: () => void;
   }>(null);
-  const isFullscreen = mode === "fullscreen";
+  const { visible: isFullscreen, toggle } = useFullscreen();
 
   const context = useMemo(
     () => ({
@@ -154,8 +156,11 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
     committedContents: committedContents.current,
   });
 
+  const { visible: fileTree } = useFileTreePane();
+  const { visible: historyPane } = useHistoryPane();
+
   return (
-    <div className="flex flex-col w-full h-screen overflow-hidden">
+    <div className="flex flex-col h-screen overflow-hidden">
       <Head>
         <title>
           {/* mimicking github.com's title */}
@@ -176,45 +181,96 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
         onChangeBranch={setBranchName}
       />
 
-      <div className="flex flex-1 overflow-hidden">
-        <FileTreePane
-          {...{
-            isFullscreen,
-            owner,
-            repo,
-            branchName,
-            files,
-            path,
-            updatedContents,
-          }}
-        />
-        <div className="relative flex flex-col flex-1 overflow-hidden z-10">
-          {fileInfo && (
-            <BlockPane
-              {...{
-                fileInfo,
-                path,
-                metadata,
-                setRequestedBlockMetadata,
-                isFullscreen,
-                context,
-                branchName,
-                onSaveChanges,
-              }}
-            />
-          )}
-        </div>
+      <div className="flex flex-1 overflow-hidden w-full">
+        <LayoutGroup>
+          <motion.div
+            animate={{ width: fileTree && !isFullscreen ? "18rem" : 0 }}
+            transition={layoutTransition}
+          >
+            <AnimatePresence>
+              {fileTree && !isFullscreen && (
+                <motion.div
+                  key="file-tree"
+                  className="overflow-hidden w-72 h-full border-r hidden lg:block bg-white"
+                  initial={{ x: "-100%" }}
+                  animate={{ x: 0 }}
+                  exit={{ x: "-100%" }}
+                  transition={layoutTransition}
+                >
+                  <FileTreePane
+                    {...{
+                      owner,
+                      repo,
+                      branchName,
+                      files,
+                      path,
+                      updatedContents,
+                    }}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
 
-        <CommitsPane
-          isFullscreen={isFullscreen}
-          context={context}
-          branchName={branchName}
-          timeline={timeline}
-          updatedContent={updatedContent}
-          clearUpdatedContent={clearUpdatedContent}
-          blockType={blockTypes[fileInfo?.type]}
-        />
+          <motion.div
+            key="block-content"
+            className="relative flex flex-col flex-1 overflow-hidden z-10"
+            transition={layoutTransition}
+          >
+            {fileInfo && (
+              <BlockPane
+                {...{
+                  fileInfo,
+                  path,
+                  metadata,
+                  setRequestedBlockMetadata,
+                  context,
+                  branchName,
+                  onSaveChanges,
+                }}
+              />
+            )}
+          </motion.div>
+
+          <motion.div
+            animate={{ width: historyPane && !isFullscreen ? "20rem" : 0 }}
+            transition={layoutTransition}
+          >
+            <AnimatePresence>
+              {historyPane && !isFullscreen && (
+                <motion.div
+                  key="history-pane"
+                  className="w-80 overflow-hidden hidden lg:block"
+                  initial={{ opacity: 0 }}
+                  animate={{
+                    opacity: 1,
+                    transition: {
+                      type: "tween",
+                      ease: "easeOut",
+                      duration: 0.2,
+                      delay: 0,
+                    },
+                  }}
+                  exit={{
+                    opacity: 0,
+                    transition: { type: "tween", duration: 0, delay: 0.3 },
+                  }}
+                >
+                  <HistoryPane
+                    context={context}
+                    branchName={branchName}
+                    timeline={timeline}
+                    updatedContent={updatedContent}
+                    clearUpdatedContent={clearUpdatedContent}
+                    blockType={blockTypes[fileInfo?.type]}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        </LayoutGroup>
       </div>
+
       {!!requestedBlockMetadata && (
         <UpdateCodeModal
           path={`.github/blocks/all.json`}
@@ -426,3 +482,8 @@ export function RepoDetail() {
     return <FullPageLoader />;
   }
 }
+
+const layoutTransition = {
+  type: "tween",
+  ease: "easeOut",
+};

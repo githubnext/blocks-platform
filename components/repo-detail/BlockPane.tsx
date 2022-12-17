@@ -15,7 +15,6 @@ type BlockPaneProps = {
   path: string;
   metadata: any;
   setRequestedBlockMetadata: (metadata: any) => void;
-  isFullscreen: boolean;
   context: Context;
   branchName: string;
   onSaveChanges: () => void;
@@ -26,7 +25,6 @@ export default function BlockPane({
   path,
   metadata,
   setRequestedBlockMetadata,
-  isFullscreen,
   context,
   onSaveChanges,
 }: BlockPaneProps) {
@@ -86,7 +84,6 @@ export default function BlockPane({
       <BlockPaneHeader
         {...{
           manageBlockResult,
-          isFullscreen,
           path,
           isFolder,
           metadata,

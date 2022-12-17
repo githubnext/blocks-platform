@@ -29,6 +29,10 @@
   height: 100%;
 }
 
+body {
+  overflow-x: hidden;
+}
+
 body,
 html,
 #__next {

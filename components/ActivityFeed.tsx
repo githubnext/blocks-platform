@@ -2,7 +2,6 @@ import { FileContext } from "@githubnext/blocks";
 import {
   GitCommitIcon,
   SidebarCollapseIcon,
-  SidebarExpandIcon,
   XCircleIcon,
 } from "@primer/octicons-react";
 import { Avatar, Box, IconButton, Text, Timeline } from "@primer/react";
@@ -11,7 +10,8 @@ import { getRelativeTime } from "lib/date-utils";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useHistoryPane } from "state";
+import { Tooltip } from "./Tooltip";
 
 type ActivityFeedProps = {
   context: Omit<FileContext, "file">;
@@ -31,100 +31,100 @@ export const ActivityFeed = ({
   blockType,
 }: ActivityFeedProps) => {
   const session = useSession();
-
-  const [open, setOpen] = useState(true);
+  const { toggle } = useHistoryPane();
 
   return (
-    <div
-      className={`h-full transition-width overflow-hidden ${
-        open ? "w-80" : "w-12"
-      }`}
-    >
-      <div className={`h-full overflow-y-auto w-80 duration-200`}>
-        <div className="flex flex-col h-full">
-          <Box
-            bg="canvas.subtle"
-            borderBottom="1px solid"
-            display="flex"
-            alignItems="center"
-            p={2}
-            borderColor="border.muted"
-            flex="none"
-          >
+    <div className={`h-full overflow-hidden`}>
+      <div className="flex flex-col h-full">
+        <Box
+          bg="canvas.subtle"
+          borderBottom="1px solid"
+          display="flex"
+          alignItems="center"
+          p={2}
+          borderColor="border.muted"
+          flex="none"
+          className="h-panelHeader flex-shrink-0"
+        >
+          <Tooltip placement="top" label="Close Commits Pane">
             <IconButton
-              icon={open ? SidebarCollapseIcon : SidebarExpandIcon}
-              onClick={() => setOpen(!open)}
+              icon={SidebarCollapseIcon}
+              onClick={toggle}
               sx={{ mr: 2 }}
-              title={open ? "Hide history" : "Show history"}
+              title={"Close Commits Pane"}
             />
-            <Box
-              sx={{ fontWeight: "bold", display: "flex", alignItems: "center" }}
-            >
-              <div className="flex-none">
-                Commits {blockType ? `for this ${blockType}` : ""}
-              </div>
-            </Box>
+          </Tooltip>
+          <Box
+            sx={{
+              fontWeight: "bold",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <div className="flex-none">
+              Commits {blockType ? `for this ${blockType}` : ""}
+            </div>
           </Box>
+        </Box>
 
-          <Box className="relative">
-            {!open && <div className="absolute inset-0 bg-white z-10"></div>}
-            {timeline && (
-              <LayoutGroup>
-                <Timeline>
-                  <AnimatePresence initial={false}>
-                    {updatedContent && (
-                      <motion.div
-                        layoutId="ghost-commit"
-                        key="ghost-commit"
-                        className="z-10"
-                      >
-                        <Commit
-                          username={session.data.user?.name}
-                          message={"Working changes"}
-                          isSelected={context.sha === branchName}
-                          onClickRef={branchName}
-                          onRemove={clearUpdatedContent}
-                        />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                  {timeline.map((item, index) => {
-                    // When `context.sha === branchName` (i.e. `fileRef` is empty or
-                    // set to `branchName`) we show the current version of the file.
-                    // If there is updated content for the file, the current version
-                    // is the ghost commit; otherwise it is the tip of the selected
-                    // branch.
-                    //
-                    // To make it easier to compare an older version of a file against
-                    // the current version, clicking the selected version takes you to
-                    // the current version (so you can swap between them with repeated
-                    // clicks).
+        <Box className="relative flex-1 overflow-auto">
+          {!open && <div className="absolute inset-0 bg-white z-10"></div>}
+          {timeline && (
+            <LayoutGroup>
+              <Timeline>
+                <AnimatePresence initial={false}>
+                  {updatedContent && (
+                    <motion.div
+                      layoutId="ghost-commit"
+                      key="ghost-commit"
+                      className="z-10"
+                    >
+                      <Commit
+                        username={session.data.user?.name}
+                        message={"Working changes"}
+                        isSelected={context.sha === branchName}
+                        onClickRef={branchName}
+                        onRemove={clearUpdatedContent}
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                {timeline.map((item, index) => {
+                  // When `context.sha === branchName` (i.e. `fileRef` is empty or
+                  // set to `branchName`) we show the current version of the file.
+                  // If there is updated content for the file, the current version
+                  // is the ghost commit; otherwise it is the tip of the selected
+                  // branch.
+                  //
+                  // To make it easier to compare an older version of a file against
+                  // the current version, clicking the selected version takes you to
+                  // the current version (so you can swap between them with repeated
+                  // clicks).
 
-                    const isCurrent = index === 0 && !updatedContent;
+                  const isCurrent = index === 0 && !updatedContent;
 
-                    const isSelected =
-                      item.sha === context.sha ||
-                      (isCurrent && context.sha === branchName);
+                  const isSelected =
+                    item.sha === context.sha ||
+                    (isCurrent && context.sha === branchName);
 
-                    const onClickRef =
-                      isSelected || isCurrent ? branchName : item.sha;
+                  const onClickRef =
+                    isSelected || isCurrent ? branchName : item.sha;
 
-                    return (
-                      <motion.div layout layoutId={item.sha} key={item.sha}>
-                        <Commit
-                          {...item}
-                          onClickRef={onClickRef}
-                          isSelected={isSelected}
-                          key={item.sha}
-                        />
-                      </motion.div>
-                    );
-                  })}
-                </Timeline>
-              </LayoutGroup>
-            )}
-          </Box>
-        </div>
+                  return (
+                    <motion.div layout layoutId={item.sha} key={item.sha}>
+                      <Commit
+                        {...item}
+                        onClickRef={onClickRef}
+                        isSelected={isSelected}
+                        key={item.sha}
+                      />
+                    </motion.div>
+                  );
+                })}
+              </Timeline>
+            </LayoutGroup>
+          )}
+        </Box>
       </div>
     </div>
   );

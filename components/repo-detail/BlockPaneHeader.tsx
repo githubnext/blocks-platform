@@ -1,12 +1,12 @@
 import { useContext } from "react";
-import { useRouter } from "next/router";
-import { default as NextLink } from "next/link";
 import dynamic from "next/dynamic";
-import { Box, Button, Link } from "@primer/react";
+import { Box, Button, IconButton, Link } from "@primer/react";
 import {
   RepoPushIcon,
   ScreenFullIcon,
   ScreenNormalIcon,
+  SidebarCollapseIcon,
+  SidebarExpandIcon,
 } from "@primer/octicons-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { getBlockKey } from "hooks";
@@ -14,12 +14,13 @@ import type { UseManageBlockResult } from "hooks";
 import type { Context } from "./index";
 import { AppContext } from "context";
 import { Tooltip } from "components/Tooltip";
+import { useHistoryPane, useFileTreePane, useFullscreen } from "state";
+import { FloatingDelayGroup } from "@floating-ui/react-dom-interactions";
 
 const BlockPicker = dynamic(() => import("../block-picker"), { ssr: false });
 
 type BlockPaneHeaderProps = {
   manageBlockResult: UseManageBlockResult;
-  isFullscreen: boolean;
   path: string;
   isFolder: boolean;
   metadata: any;
@@ -30,7 +31,6 @@ type BlockPaneHeaderProps = {
 
 export default function BlockPaneHeader({
   manageBlockResult,
-  isFullscreen,
   path,
   isFolder,
   metadata,
@@ -38,7 +38,6 @@ export default function BlockPaneHeader({
   context,
   onSaveChanges,
 }: BlockPaneHeaderProps) {
-  const router = useRouter();
   const appContext = useContext(AppContext);
 
   const { block, setBlock, defaultBlock } = manageBlockResult.data ?? {};
@@ -52,11 +51,16 @@ export default function BlockPaneHeader({
     ? "The Blocks GitHub app is not installed on this repository"
     : "";
 
+  const fileTreePane = useFileTreePane();
+  const historyPane = useHistoryPane();
+  const { visible: isFullscreen, toggle: toggleFullscreen } = useFullscreen();
+
   return (
     <div className="flex-none top-0 z-10">
       <div>
         <Box
           bg="canvas.subtle"
+          className="h-panelHeader"
           p={2}
           borderBottom="1px solid"
           borderColor="border.muted"
@@ -64,20 +68,36 @@ export default function BlockPaneHeader({
           alignItems="center"
           justifyContent="space-between"
         >
+          {!fileTreePane.visible && !isFullscreen && (
+            <FloatingDelayGroup delay={200}>
+              <Tooltip placement="top" label="Open File Tree">
+                <div>
+                  <IconButton
+                    icon={SidebarCollapseIcon}
+                    onClick={fileTreePane.toggle}
+                    sx={{ mr: 2 }}
+                    title={"Open File Tree"}
+                  />
+                </div>
+              </Tooltip>
+            </FloatingDelayGroup>
+          )}
           <Box display="flex" alignItems="center" className="space-x-2">
-            <TooltipButtonWrapper
-              hasTooltip={!hasEditPermission || !onSaveChanges}
-              tooltipText={noEditPermissionReason || "No changes to save"}
-            >
-              <Button
-                disabled={!hasEditPermission || !onSaveChanges}
-                variant="primary"
-                leadingIcon={RepoPushIcon}
-                onClick={onSaveChanges}
+            <FloatingDelayGroup delay={200}>
+              <TooltipButtonWrapper
+                hasTooltip={!hasEditPermission || !onSaveChanges}
+                tooltipText={noEditPermissionReason || "No changes to save"}
               >
-                Save
-              </Button>
-            </TooltipButtonWrapper>
+                <Button
+                  disabled={!hasEditPermission || !onSaveChanges}
+                  variant="primary"
+                  leadingIcon={RepoPushIcon}
+                  onClick={onSaveChanges}
+                >
+                  Save
+                </Button>
+              </TooltipButtonWrapper>
+            </FloatingDelayGroup>
             <BlockPicker
               path={path}
               type={isFolder ? "folder" : "file"}
@@ -85,26 +105,28 @@ export default function BlockPaneHeader({
               value={block}
             />
             {!isDefaultBlock && (
-              <TooltipButtonWrapper
-                hasTooltip={!hasEditPermission}
-                tooltipText={noEditPermissionReason}
-              >
-                <Button
-                  disabled={!hasEditPermission}
-                  onClick={() => {
-                    const newMetadata = {
-                      ...metadata,
-                      [path]: {
-                        ...metadata[path],
-                        default: getBlockKey(block),
-                      },
-                    };
-                    setRequestedMetadata(newMetadata);
-                  }}
+              <FloatingDelayGroup delay={200}>
+                <TooltipButtonWrapper
+                  hasTooltip={!hasEditPermission}
+                  tooltipText={noEditPermissionReason}
                 >
-                  Make default
-                </Button>
-              </TooltipButtonWrapper>
+                  <Button
+                    disabled={!hasEditPermission}
+                    onClick={() => {
+                      const newMetadata = {
+                        ...metadata,
+                        [path]: {
+                          ...metadata[path],
+                          default: getBlockKey(block),
+                        },
+                      };
+                      setRequestedMetadata(newMetadata);
+                    }}
+                  >
+                    Make default
+                  </Button>
+                </TooltipButtonWrapper>
+              </FloatingDelayGroup>
             )}
           </Box>
           <AnimatePresence initial={false}>
@@ -146,23 +168,28 @@ export default function BlockPaneHeader({
           >
             View on GitHub
           </Link>
-          <NextLink
-            shallow
-            href={{
-              pathname: router.pathname,
-              query: {
-                ...router.query,
-                mode: isFullscreen ? undefined : "fullscreen",
-              },
-            }}
-          >
-            <span
-              className="text-gray-500 text-xs ml-2 mr-3 cursor-pointer"
-              title={isFullscreen ? "Exit fullscreen" : "Make fullscreen"}
-            >
-              {isFullscreen ? <ScreenNormalIcon /> : <ScreenFullIcon />}
-            </span>
-          </NextLink>
+
+          <IconButton
+            onClick={toggleFullscreen}
+            size="small"
+            aria-label={isFullscreen ? "Exit fullscreen" : "Make fullscreen"}
+            icon={isFullscreen ? ScreenNormalIcon : ScreenFullIcon}
+          />
+
+          {!historyPane.visible && !isFullscreen && (
+            <FloatingDelayGroup delay={200}>
+              <Tooltip placement="top-end" label="Open Commits Pane">
+                <div>
+                  <IconButton
+                    icon={SidebarExpandIcon}
+                    onClick={historyPane.toggle}
+                    sx={{ ml: 2 }}
+                    title={"Open Commits Pane"}
+                  />
+                </div>
+              </Tooltip>
+            </FloatingDelayGroup>
+          )}
         </Box>
       </div>
     </div>
@@ -180,7 +207,7 @@ const TooltipButtonWrapper = ({
 }) => {
   if (hasTooltip)
     return (
-      <Tooltip label={tooltipText}>
+      <Tooltip placement="top" label={tooltipText}>
         {/* Please don't delete this div!!!
           From an a11y perspective, the underlying button shouldn't actually be disabled (but rather use something like aria-disabled),
           since disabled elements don't emit events. But because we don't have the API from @primer/react, we have to stick

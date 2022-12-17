@@ -2,9 +2,12 @@ import {
   arrow,
   autoUpdate,
   flip,
+  FloatingDelayGroup,
   offset,
   Placement,
   shift,
+  useDelayGroup,
+  useDelayGroupContext,
   useDismiss,
   useFloating,
   useFocus,
@@ -26,6 +29,7 @@ export const Tooltip = ({
   label,
   placement: initialPlacement,
 }: Props) => {
+  const { delay, setCurrentId } = useDelayGroupContext();
   const [open, setOpen] = useState(false);
   const arrowRef = useRef<HTMLDivElement>(null);
 
@@ -41,18 +45,26 @@ export const Tooltip = ({
   } = useFloating({
     placement: initialPlacement,
     open,
-    onOpenChange: setOpen,
+    onOpenChange(open) {
+      setOpen(open);
+
+      if (open) {
+        setCurrentId(label);
+      }
+    },
     strategy: "fixed",
     middleware: [offset(8), shift(), flip(), arrow({ element: arrowRef })],
     whileElementsMounted: autoUpdate,
   });
 
   const { getReferenceProps, getFloatingProps } = useInteractions([
-    useHover(context),
+    useHover(context, { delay }),
     useFocus(context),
     useRole(context, { role: "tooltip" }),
     useDismiss(context),
   ]);
+
+  useDelayGroup(context, { id: label });
 
   // Preserve the consumer's ref
   const ref = useMemo(

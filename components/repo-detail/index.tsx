@@ -242,7 +242,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
               {historyPane && !isFullscreen && (
                 <motion.div
                   key="history-pane"
-                  className="w-80 overflow-hidden"
+                  className="w-80 h-full overflow-hidden"
                   initial={{ opacity: 0 }}
                   animate={{
                     opacity: 1,

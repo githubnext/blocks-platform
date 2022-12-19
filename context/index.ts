@@ -6,6 +6,8 @@ export interface AppContextValue {
   installationUrl: string;
   permissions: Permissions;
   devServerInfo?: DevServerInfo;
+  allowList: string[];
+  isPrivate: boolean;
 }
 
 export const AppContext = createContext<AppContextValue>(undefined);

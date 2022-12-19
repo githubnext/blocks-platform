@@ -48,7 +48,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     `https://api.github.com/repos/${owner}/${repo}`,
     {
       headers: {
-        Authorization: `token ${session.token}`,
+        Authorization: `token ${session.userToken}`,
       },
     }
   )

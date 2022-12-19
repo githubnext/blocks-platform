@@ -38,6 +38,7 @@ type Contributor = schemas["contributor"];
 type Branch = schemas["short-branch"];
 type RepoInfo = schemas["repository"] & {
   contributors: Contributor[];
+  allowList: string[];
 };
 
 type Commit = schemas["commit"];

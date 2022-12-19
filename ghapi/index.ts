@@ -3,7 +3,7 @@ import { Octokit } from "@octokit/rest";
 import { Endpoints } from "@octokit/types";
 import axios, { AxiosInstance } from "axios";
 import { signOut } from "next-auth/react";
-import { Base64 } from "js-base64";
+import { Base64, decode } from "js-base64";
 import {
   BlocksKeyParams,
   BlocksReposParams,
@@ -195,13 +195,34 @@ export const getRepoInfoWithContributors: QueryFunction<
   let meta = ctx.meta as BlocksQueryMeta;
   const url = `repos/${owner}/${repo}`;
   const repoInfoRes = await meta.ghapi.get(url);
+  let allowList = [];
+
+  if (repoInfoRes.data.private) {
+    try {
+      const contentRes = await meta.octokit.repos.getContent({
+        owner,
+        repo,
+        path: ".github/blocks/config.json",
+      });
+
+      let decoded = decode(contentRes.data["content"] as string);
+      let config = JSON.parse(decoded);
+      allowList = config.allow || [];
+    } catch (e) {
+      console.log("Error getting repo config.json", e);
+    }
+  }
 
   const contributorsUrl = `${url}/contributors`;
   try {
     const contributorsRes = await meta.ghapi.get(contributorsUrl);
-    return { ...repoInfoRes.data, contributors: contributorsRes.data };
+    return {
+      ...repoInfoRes.data,
+      contributors: contributorsRes.data,
+      allowList,
+    };
   } catch (e) {
-    return { ...repoInfoRes.data, contributors: [] };
+    return { ...repoInfoRes.data, contributors: [], allowList };
   }
 };
 

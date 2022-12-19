@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useQueryParam, BooleanParam, withDefault } from "use-query-params";
+import { BooleanParam, useQueryParam, withDefault } from "use-query-params";
 
 export const useVisibilityQueryParm = ({
   key,

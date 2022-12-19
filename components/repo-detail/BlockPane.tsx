@@ -29,7 +29,9 @@ export default function BlockPane({
   onSaveChanges,
 }: BlockPaneProps) {
   const router = useRouter();
+  const appContext = useContext(AppContext);
   const { devServerInfo } = useContext(AppContext);
+  const blockKey = router.query.blockKey as string;
 
   const isFolder = fileInfo.type !== "blob";
 
@@ -79,6 +81,8 @@ export default function BlockPane({
     JSON.stringify({ block, context })
   )}`;
 
+  const isAllowedBlock = appContext.allowList.includes(blockKey);
+
   return (
     <>
       <BlockPaneHeader
@@ -92,7 +96,7 @@ export default function BlockPane({
           onSaveChanges,
         }}
       />
-      {block && (
+      {isAllowedBlock && block ? (
         <div className="overflow-y-auto w-full flex-1">
           <iframe
             key={block.id}
@@ -109,6 +113,12 @@ export default function BlockPane({
             ].join(" ")}
             src={src}
           />
+        </div>
+      ) : (
+        <div className="overflow-y-auto w-full flex-1 flex items-center justify-center">
+          <div className="bg-red-50 p-4 border-red-200 border rounded">
+            <p className="text-red-600 text-sm">This block is not allowed.</p>
+          </div>
         </div>
       )}
     </>

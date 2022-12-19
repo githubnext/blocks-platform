@@ -49,10 +49,10 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
     if (!isAuthenticated) return;
 
     const meta = {
-      token: session?.token,
+      token: session?.userToken,
       userToken: session?.userToken,
-      ghapi: makeGitHubAPIInstance(session?.token as string),
-      octokit: makeOctokitInstance(session?.token as string),
+      ghapi: makeGitHubAPIInstance(session?.userToken as string),
+      octokit: makeOctokitInstance(session?.userToken as string),
       user: session?.user,
       queryClient,
     };
@@ -90,7 +90,9 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
     { owner, repo },
     { enabled: queryClientMetaLoaded }
   );
-  if (repoInfoStatus === "error" || repoInfo?.private) {
+
+  // TODO: || repoInfo?.private
+  if (repoInfoStatus === "error") {
     return (
       <div className="flex flex-col items-center justify-center h-full text-center">
         <div className="max-w-2xl mx-auto px-4">
@@ -124,6 +126,8 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
           installationUrl,
           permissions: repoInfo.permissions,
           devServerInfo,
+          isPrivate: repoInfo.private,
+          allowList: repoInfo.allowList,
         }}
       >
         <RepoDetail />

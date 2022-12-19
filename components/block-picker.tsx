@@ -40,6 +40,7 @@ export default function BlockPicker(props: BlockPickerProps) {
     searchTerm: isSearchTermUrl ? undefined : debouncedSearchTerm,
     repoUrl: isSearchTermUrl ? debouncedSearchTerm : undefined,
     devServerInfo,
+    allowList: appContext.blocksConfig.allow,
   };
   const { data: blockRepos, status } = useBlocksRepos(blocksReposParams);
   const invalidateBlocksReposQuery = () => {
@@ -165,6 +166,7 @@ export default function BlockPicker(props: BlockPickerProps) {
                         setSearchTerm("");
                       }}
                       isDev={!!repo["isDev"]}
+                      isAllowed={block.isAllowed}
                     />
                   );
                 });

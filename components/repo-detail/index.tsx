@@ -227,6 +227,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
                   setRequestedBlockMetadata,
                   context,
                   branchName,
+                  isBranchable,
                   onSaveChanges,
                 }}
               />

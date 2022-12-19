@@ -22,6 +22,7 @@ import { QueryClient, QueryFunction, QueryFunctionContext } from "react-query";
 import { Block, BlocksRepo } from "@githubnext/blocks";
 import { Session } from "next-auth";
 import pm from "picomatch";
+import { getBlockKey } from "hooks";
 
 export interface RepoContext {
   repo: string;
@@ -195,7 +196,7 @@ export const getRepoInfoWithContributors: QueryFunction<
   let meta = ctx.meta as BlocksQueryMeta;
   const url = `repos/${owner}/${repo}`;
   const repoInfoRes = await meta.ghapi.get(url);
-  let allowList = [];
+  let blocksConfig = {} as BlocksConfig;
 
   if (repoInfoRes.data.private) {
     try {
@@ -206,11 +207,14 @@ export const getRepoInfoWithContributors: QueryFunction<
       });
 
       let decoded = decode(contentRes.data["content"] as string);
-      let config = JSON.parse(decoded);
-      allowList = config.allow || [];
+      blocksConfig = JSON.parse(decoded);
     } catch (e) {
       console.log("Error getting repo config.json", e);
     }
+  }
+  // sanitize config so we can depend on it downstream
+  if (!blocksConfig.allow) {
+    blocksConfig.allow = [];
   }
 
   const contributorsUrl = `${url}/contributors`;
@@ -219,10 +223,10 @@ export const getRepoInfoWithContributors: QueryFunction<
     return {
       ...repoInfoRes.data,
       contributors: contributorsRes.data,
-      allowList,
+      blocksConfig,
     };
   } catch (e) {
-    return { ...repoInfoRes.data, contributors: [], allowList };
+    return { ...repoInfoRes.data, contributors: [], blocksConfig };
   }
 };
 
@@ -658,6 +662,8 @@ export const getOwnerRepoFromDevServer = async (devServer: string) => {
   return { owner, repo };
 };
 
+const exampleBlocksOwner = "githubnext";
+const exampleBlocksRepo = "blocks-examples";
 const getBlocksRepoFromDevServer = async ({
   devServerInfo,
   user,
@@ -710,7 +716,7 @@ export const getBlocksRepos: QueryFunction<
   const { queryClient } = meta;
   let { queryKey } = ctx;
   const params = queryKey[1];
-  const { path, searchTerm, repoUrl, type, devServerInfo } = params;
+  const { path, searchTerm, repoUrl, type, allowList, devServerInfo } = params;
 
   let repos = [];
   // allow user to search for Blocks on a specific repo
@@ -810,13 +816,36 @@ export const getBlocksRepos: QueryFunction<
         };
       })
     )
-  ).sort((a, b) => {
-    // list example repo first
-    if (a.full_name === "githubnext/blocks") {
-      return -1;
-    }
-    return b.stars - a.stars;
-  });
+  )
+    .map((blockRepo) => {
+      if (!allowList) return blockRepo;
+      return {
+        ...blockRepo,
+        blocks: blockRepo.blocks.map((block) => {
+          const key = getBlockKey(block);
+          return {
+            ...block,
+            isAllowed:
+              (blockRepo.owner === exampleBlocksOwner &&
+                blockRepo.repo === exampleBlocksRepo) ||
+              allowList.includes(key),
+          };
+        }),
+      };
+    })
+    .sort((a, b) => {
+      // list allow list first
+      if (allowList && a.blocks.some((block) => block.isAllowed)) {
+        return -1;
+      }
+
+      // list example repo next
+      if (a.full_name === `${exampleBlocksOwner}/${exampleBlocksRepo}`) {
+        return -1;
+      }
+
+      return b.stars - a.stars;
+    });
 
   const blocksRepos = [
     ...(devServerBlocksRepo ? [devServerBlocksRepo] : []),

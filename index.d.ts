@@ -38,7 +38,7 @@ type Contributor = schemas["contributor"];
 type Branch = schemas["short-branch"];
 type RepoInfo = schemas["repository"] & {
   contributors: Contributor[];
-  allowList: string[];
+  blocksConfig: BlocksConfig;
 };
 
 type Commit = schemas["commit"];
@@ -67,4 +67,8 @@ type DevServerInfo = {
   owner: string;
   repo: string;
   devServer: string;
+};
+
+type BlocksConfig = {
+  allow: string[];
 };

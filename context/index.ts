@@ -6,7 +6,7 @@ export interface AppContextValue {
   installationUrl: string;
   permissions: Permissions;
   devServerInfo?: DevServerInfo;
-  allowList: string[];
+  blocksConfig: BlocksConfig;
   isPrivate: boolean;
 }
 

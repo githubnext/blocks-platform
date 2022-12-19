@@ -14,6 +14,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "react-query";
 import { getSessionOnServer } from "pages/api/auth/[...nextauth]";
+import { Link } from "@primer/react";
 
 const { publicRuntimeConfig } = getConfig();
 
@@ -103,7 +104,20 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
             </strong>{" "}
             repo.
           </h3>
-          <h3>Blocks doesn't work with private repos.</h3>
+
+          <p className="mt-2">
+            If it's a private repo,{" "}
+            <Link
+              underline
+              muted
+              target="_blank"
+              rel="noopener"
+              href={installationUrl}
+            >
+              install the app
+            </Link>{" "}
+            and try again.
+          </p>
         </div>
       </div>
     );
@@ -127,7 +141,7 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
           permissions: repoInfo.permissions,
           devServerInfo,
           isPrivate: repoInfo.private,
-          allowList: repoInfo.allowList,
+          blocksConfig: repoInfo.blocksConfig,
         }}
       >
         <RepoDetail />

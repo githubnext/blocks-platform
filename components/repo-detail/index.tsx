@@ -181,9 +181,10 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
         onChangeBranch={setBranchName}
       />
 
-      <div className="flex flex-1 overflow-hidden w-full">
+      <div className="flex flex-1 overflow-hidden w-full divide-x divide-gray-200">
         <LayoutGroup>
           <motion.div
+            className="hidden lg:block"
             animate={{ width: fileTree && !isFullscreen ? "18rem" : 0 }}
             transition={layoutTransition}
           >
@@ -191,7 +192,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
               {fileTree && !isFullscreen && (
                 <motion.div
                   key="file-tree"
-                  className="overflow-hidden w-72 h-full border-r hidden lg:block bg-white"
+                  className="overflow-hidden w-72 h-full bg-white"
                   initial={{ x: "-100%" }}
                   animate={{ x: 0 }}
                   exit={{ x: "-100%" }}
@@ -233,6 +234,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
           </motion.div>
 
           <motion.div
+            className="hidden lg:block"
             animate={{ width: historyPane && !isFullscreen ? "20rem" : 0 }}
             transition={layoutTransition}
           >
@@ -240,7 +242,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
               {historyPane && !isFullscreen && (
                 <motion.div
                   key="history-pane"
-                  className="w-80 overflow-hidden hidden lg:block"
+                  className="w-80 overflow-hidden"
                   initial={{ opacity: 0 }}
                   animate={{
                     opacity: 1,

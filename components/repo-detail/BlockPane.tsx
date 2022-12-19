@@ -81,7 +81,11 @@ export default function BlockPane({
     JSON.stringify({ block, context })
   )}`;
 
-  const isAllowedBlock = appContext.allowList.includes(blockKey);
+  let isAllowedBlock = true;
+
+  if (appContext.isPrivate) {
+    isAllowedBlock = appContext.allowList.includes(blockKey);
+  }
 
   return (
     <>

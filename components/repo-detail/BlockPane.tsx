@@ -7,6 +7,8 @@ import { AppContext } from "context";
 import type { Context } from "./index";
 import { getBlockKey, useManageBlock } from "hooks";
 import BlockPaneHeader from "./BlockPaneHeader";
+import { Flash, StyledOcticon } from "@primer/react";
+import { AlertFillIcon } from "@primer/octicons-react";
 
 const { publicRuntimeConfig } = getConfig();
 
@@ -120,8 +122,21 @@ export default function BlockPane({
         </div>
       ) : (
         <div className="overflow-y-auto w-full flex-1 flex items-center justify-center">
-          <div className="bg-red-50 p-4 border-red-200 border rounded">
-            <p className="text-red-600 text-sm">This block is not allowed.</p>
+          <div className="max-w-4xl">
+            <Flash variant="danger">
+              <p className="text-red-700">
+                <StyledOcticon icon={AlertFillIcon} />
+                Sorry, this block is not allowed for this repository. The
+                following blocks are allowed:
+              </p>
+              <ul className="text-red-700 list-disc pl-8 mt-2">
+                {appContext.allowList.map((blockKey) => (
+                  <li key={blockKey}>
+                    <span className="font-mono text-sm">{blockKey}</span>
+                  </li>
+                ))}
+              </ul>
+            </Flash>
           </div>
         </div>
       )}

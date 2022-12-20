@@ -181,7 +181,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
         onChangeBranch={setBranchName}
       />
 
-      <div className="flex flex-1 overflow-hidden w-full divide-x divide-gray-200">
+      <div className="flex flex-1 overflow-hidden w-full divide-x divide-gray-200 bg-white z-10">
         <LayoutGroup>
           <motion.div
             className="hidden lg:block"

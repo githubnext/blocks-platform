@@ -2,7 +2,7 @@ import {
   arrow,
   autoUpdate,
   flip,
-  FloatingDelayGroup,
+  FloatingPortal,
   offset,
   Placement,
   shift,
@@ -87,33 +87,35 @@ export const Tooltip = ({
   return (
     <>
       {cloneElement(children, getReferenceProps({ ref, ...children.props }))}
-      {open && (
-        <div
-          {...getFloatingProps({
-            ref: floating,
-            className:
-              "relative z-20 bg-[#24292F] text-[11px] text-white py-[0.5em] px-[0.75em] rounded-md shadow-md",
-            style: {
-              position: strategy,
-              top: y ?? 0,
-              left: x ?? 0,
-            },
-          })}
-        >
-          {label}
+      <FloatingPortal>
+        {open && (
           <div
-            className="absolute bg-[#24292F] w-[8px] h-[8px] transform rotate-45"
-            style={{
-              left: arrowX != null ? `${arrowX}px` : "",
-              top: arrowY != null ? `${arrowY}px` : "",
-              right: "",
-              bottom: "",
-              [staticSide]: "-4px",
-            }}
-            ref={arrowRef}
-          />
-        </div>
-      )}
+            {...getFloatingProps({
+              ref: floating,
+              className:
+                "relative z-[99] bg-[#24292F] text-[11px] text-white py-[0.5em] px-[0.75em] rounded-md shadow-md",
+              style: {
+                position: strategy,
+                top: y ?? 0,
+                left: x ?? 0,
+              },
+            })}
+          >
+            {label}
+            <div
+              className="absolute bg-[#24292F] w-[8px] h-[8px] transform rotate-45"
+              style={{
+                left: arrowX != null ? `${arrowX}px` : "",
+                top: arrowY != null ? `${arrowY}px` : "",
+                right: "",
+                bottom: "",
+                [staticSide]: "-4px",
+              }}
+              ref={arrowRef}
+            />
+          </div>
+        )}
+      </FloatingPortal>
     </>
   );
 };

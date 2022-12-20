@@ -19,7 +19,7 @@ export function HistoryPane({
   blockType,
 }: HistoryPaneProps) {
   return (
-    <div className="flex-none h-full border-l border-gray-200">
+    <div className="flex-none h-full">
       <ActivityFeed
         context={context}
         branchName={branchName}

@@ -48,7 +48,7 @@ export default async function handler(
   const releaseInfoUrl = `${apiBaseUrl}/releases/latest`;
   const releaseInfo = await fetch(releaseInfoUrl, {
     headers: {
-      Authorization: `token ${session.token}`,
+      Authorization: `token ${session.userToken}`,
     },
   }).then((r) => r.json());
 
@@ -64,7 +64,7 @@ export default async function handler(
 
   const assetContentRes = await fetch(assetUrl, {
     headers: {
-      Authorization: `token ${session.token}`,
+      Authorization: `token ${session.userToken}`,
       Accept: "application/octet-stream",
     },
   });

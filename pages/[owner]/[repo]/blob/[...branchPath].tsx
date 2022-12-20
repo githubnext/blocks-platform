@@ -91,7 +91,7 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
     { owner, repo },
     { enabled: queryClientMetaLoaded }
   );
-  const { data: branchConfigContent, status: branchConfigContentStatus } =
+  const { data: blocksConfigContent, status: blocksConfigContentStatus } =
     useFileContent(
       {
         owner,
@@ -101,10 +101,10 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
       },
       { enabled: queryClientMetaLoaded }
     );
-  let branchConfig = { allow: [] };
+  let blocksConfig = repoInfo?.private ? { allow: [] } : {};
   try {
-    if (branchConfigContentStatus === "success")
-      branchConfig = JSON.parse(branchConfigContent.content);
+    if (blocksConfigContentStatus === "success")
+      blocksConfig = JSON.parse(blocksConfigContent.content);
   } catch (e) {
     console.log(e);
   }
@@ -158,7 +158,7 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
           permissions: repoInfo.permissions,
           devServerInfo,
           isPrivate: repoInfo.private,
-          blocksConfig: branchConfig,
+          blocksConfig: blocksConfig,
         }}
       >
         <RepoDetail />

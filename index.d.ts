@@ -70,5 +70,5 @@ type DevServerInfo = {
 };
 
 type BlocksConfig = {
-  allow: string[];
+  allow?: string[];
 };

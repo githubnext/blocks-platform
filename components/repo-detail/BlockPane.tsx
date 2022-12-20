@@ -2,7 +2,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import getConfig from "next/config";
 import { useRouter } from "next/router";
 import pm from "picomatch";
-import type { RepoFiles } from "@githubnext/blocks";
+import type { Block, RepoFiles } from "@githubnext/blocks";
 import { AppContext } from "context";
 import type { Context } from "./index";
 import { getBlockKey, useManageBlock } from "hooks";
@@ -116,6 +116,7 @@ export default function BlockPane({
         <div className=""></div>
       ) : !isAllowedBlock ? (
         <NotAllowedWarning
+          block={block}
           blockKey={blockKey}
           context={context}
           isBranchable={isBranchable}
@@ -146,12 +147,14 @@ export default function BlockPane({
 }
 
 const NotAllowedWarning = ({
+  block,
   blockKey,
   context,
   blocksConfig,
   isBranchable,
   branchName,
 }: {
+  block: Block;
   blockKey: string;
   context: Context;
   blocksConfig: BlocksConfig;
@@ -164,37 +167,27 @@ const NotAllowedWarning = ({
 
   return (
     <div className="overflow-y-auto w-full flex-1 pb-10 flex items-center justify-center">
-      <div className="max-w-4xl p-10">
+      <div className="max-w-3xl p-10">
         <Flash variant="danger" sx={{ mb: 3 }}>
           <p className="text-red-700">
             <StyledOcticon icon={AlertFillIcon} />
             This block is not allowed to be used in this repository.
           </p>
         </Flash>
-        {allowList?.length ? (
-          <>
-            <p>The following blocks are allowed:</p>
-            <ul className="text-red-700 list-disc pl-8 mt-2">
-              {allowList.map((blockKey) => (
-                <li key={blockKey}>
-                  <span className="font-mono text-sm">{blockKey}</span>
-                </li>
-              ))}
-            </ul>
-          </>
-        ) : (
-          <p>
-            To use specific blocks in this repo, add them to the allowlist in{" "}
-            <code className="text-sm">.github/blocks/config.json</code>.
-          </p>
-        )}
+        <p>
+          To protect against malicious code, blocks need to be explicitly
+          allowed in private repositories. If you trust this block, you can add
+          it to the allowlist in{" "}
+          <code className="text-sm">.github/blocks/config.json</code>.
+        </p>
         <div className="flex space-x-2">
           <Button
             onClick={() => setIsAdding(true)}
             variant="primary"
             className="mt-4"
+            size="large"
           >
-            Add to allowlist
+            Add {block.title} to allowlist
           </Button>
         </div>
       </div>
@@ -206,7 +199,7 @@ const NotAllowedWarning = ({
           newCode={JSON.stringify(
             {
               ...blocksConfig,
-              allow: [...blocksConfig.allow, blockKey],
+              allow: [...(blocksConfig.allow || []), blockKey],
             },
             null,
             2

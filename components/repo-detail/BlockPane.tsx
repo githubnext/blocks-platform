@@ -40,7 +40,6 @@ export default function BlockPane({
   const appContext = useContext(AppContext);
   const { devServerInfo } = useContext(AppContext);
   const blockKey = router.query.blockKey as string;
-  const [hasOverriddenAllowList, setHasOverriddenAllowList] = useState(false);
 
   const isFolder = fileInfo.type !== "blob";
 
@@ -90,15 +89,10 @@ export default function BlockPane({
     JSON.stringify({ block, context })
   )}`;
 
-  useEffect(() => {
-    setHasOverriddenAllowList(false);
-  }, [blockKey, path]);
-
   let isAllowedBlock = true;
 
   if (appContext.isPrivate) {
     isAllowedBlock =
-      hasOverriddenAllowList ||
       appContext.blocksConfig.allow.includes(blockKey) ||
       (manageBlockResult.status === "success" &&
         block.owner === "githubnext" &&
@@ -127,7 +121,6 @@ export default function BlockPane({
           isBranchable={isBranchable}
           branchName={branchName}
           blocksConfig={appContext.blocksConfig}
-          onOverrideAllowList={() => setHasOverriddenAllowList(true)}
         />
       ) : block ? (
         <div className="overflow-y-auto w-full flex-1">
@@ -158,14 +151,12 @@ const NotAllowedWarning = ({
   blocksConfig,
   isBranchable,
   branchName,
-  onOverrideAllowList,
 }: {
   blockKey: string;
   context: Context;
   blocksConfig: BlocksConfig;
   isBranchable: boolean;
   branchName: string;
-  onOverrideAllowList: () => void;
 }) => {
   const [isAdding, setIsAdding] = useState(false);
   const allowList = blocksConfig.allow;
@@ -205,14 +196,6 @@ const NotAllowedWarning = ({
           >
             Add to allowlist
           </Button>
-          <Button
-            onClick={onOverrideAllowList}
-            variant="default"
-            className="mt-4"
-          >
-            Use anyway{" "}
-            <span className="font-normal">(this might not be secure)</span>
-          </Button>
         </div>
       </div>
       {isAdding && (
@@ -231,11 +214,12 @@ const NotAllowedWarning = ({
           currentCode={JSON.stringify(blocksConfig, null, 2)}
           onCommit={() => {
             setIsAdding(false);
-            // invalidate repo info
             queryClient.invalidateQueries(
-              QueryKeyMap.info.factory({
+              QueryKeyMap.file.factory({
                 owner: context.owner,
                 repo: context.repo,
+                path: ".github/blocks/config.json",
+                fileRef: branchName,
               })
             );
           }}

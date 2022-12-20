@@ -196,26 +196,6 @@ export const getRepoInfoWithContributors: QueryFunction<
   let meta = ctx.meta as BlocksQueryMeta;
   const url = `repos/${owner}/${repo}`;
   const repoInfoRes = await meta.ghapi.get(url);
-  let blocksConfig = {} as BlocksConfig;
-
-  if (repoInfoRes.data.private) {
-    try {
-      const contentRes = await meta.octokit.repos.getContent({
-        owner,
-        repo,
-        path: ".github/blocks/config.json",
-      });
-
-      let decoded = decode(contentRes.data["content"] as string);
-      blocksConfig = JSON.parse(decoded);
-    } catch (e) {
-      console.log("Error getting repo config.json", e);
-    }
-  }
-  // sanitize config so we can depend on it downstream
-  if (!blocksConfig.allow) {
-    blocksConfig.allow = [];
-  }
 
   const contributorsUrl = `${url}/contributors`;
   try {
@@ -223,10 +203,9 @@ export const getRepoInfoWithContributors: QueryFunction<
     return {
       ...repoInfoRes.data,
       contributors: contributorsRes.data,
-      blocksConfig,
     };
   } catch (e) {
-    return { ...repoInfoRes.data, contributors: [], blocksConfig };
+    return { ...repoInfoRes.data, contributors: [] };
   }
 };
 
@@ -548,16 +527,28 @@ export async function createBranchAndPR(
   });
   const sourceSha = currentBranchData.data.object.sha;
 
-  // Let's also get the SHA of the *file* we're going to use when we commit on the new branch.
-  const currentFileData = await octokit.repos.getContent({
-    owner,
-    repo,
-    path,
-    ref: sourceBranch,
-  });
-
-  // @ts-ignore
-  let blobSha = currentFileData.data.sha;
+  let blobSha;
+  try {
+    // Let's also get the SHA of the *file* we're going to use when we commit on the new branch.
+    const currentFileData = await octokit.repos.getContent({
+      owner,
+      repo,
+      path,
+      ref: sourceBranch,
+    });
+    // @ts-ignore
+    blobSha = currentFileData.data.sha;
+  } catch (e) {
+    // if we get here, the file doesn't exist yet
+    // so we'll create a new blob
+    const blobData = await octokit.git.createBlob({
+      owner,
+      repo,
+      content,
+      encoding: "utf-8",
+    });
+    blobSha = blobData.data.sha;
+  }
 
   // Step 1. Create the new branch, using the SHA of the "main" branch as the base.
 

@@ -6,7 +6,7 @@ import {
   makeGitHubAPIInstance,
   makeOctokitInstance,
 } from "ghapi";
-import { useCheckRepoAccess, useRepoInfo } from "hooks";
+import { useCheckRepoAccess, useFileContent, useRepoInfo } from "hooks";
 import { GetServerSidePropsContext } from "next";
 import { signOut, useSession } from "next-auth/react";
 import getConfig from "next/config";
@@ -91,6 +91,23 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
     { owner, repo },
     { enabled: queryClientMetaLoaded }
   );
+  const { data: branchConfigContent, status: branchConfigContentStatus } =
+    useFileContent(
+      {
+        owner,
+        repo,
+        path: ".github/blocks/config.json",
+        fileRef: (router.query.sha || router.query.branchPath?.[0]) as string,
+      },
+      { enabled: queryClientMetaLoaded }
+    );
+  let branchConfig = { allow: [] };
+  try {
+    if (branchConfigContentStatus === "success")
+      branchConfig = JSON.parse(branchConfigContent.content);
+  } catch (e) {
+    console.log(e);
+  }
 
   // TODO: || repoInfo?.private
   if (repoInfoStatus === "error") {
@@ -141,7 +158,7 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
           permissions: repoInfo.permissions,
           devServerInfo,
           isPrivate: repoInfo.private,
-          blocksConfig: repoInfo.blocksConfig,
+          blocksConfig: branchConfig,
         }}
       >
         <RepoDetail />

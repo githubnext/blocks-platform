@@ -2,6 +2,7 @@ import {
   Avatar,
   AvatarStack,
   Box,
+  Label,
   Link,
   StyledOcticon,
   Text,
@@ -54,9 +55,11 @@ export const RepoHeader = ({
           <StyledOcticon
             icon={RepoIcon}
             sx={{
-              mr: 2,
+              mr: "7px",
+              mt: "4px",
               color: "fg.muted",
             }}
+            size={17}
           />
           <Link
             href={`https://github.com/${owner}/`}
@@ -76,6 +79,18 @@ export const RepoHeader = ({
           >
             {repo}
           </Link>
+          {appContext.isPrivate && (
+            <StyledOcticon
+              icon={LockIcon}
+              sx={{
+                ml: "7px",
+                mt: "3px",
+                color: "fg.muted",
+              }}
+              size={15}
+              aria-label="Private repository"
+            />
+          )}
           <Box ml={3}>
             <BranchPicker
               value={branchName}

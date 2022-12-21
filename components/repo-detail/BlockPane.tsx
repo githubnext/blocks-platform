@@ -173,11 +173,12 @@ const NotAllowedWarning = ({
         </Flash>
         <p>
           To protect against malicious code, blocks need to be explicitly
-          allowed in private repositories. If you trust this block, you can add
-          it to the allowlist in{" "}
+          allowed in private repositories.
+          <br />
+          If you trust this block, you can add it to the allowlist in{" "}
           <code className="text-sm">.github/blocks/config.json</code>.
         </p>
-        <div className="flex mt-6 space-x-2">
+        <div className="flex flex-wrap mt-6 -mx-2">
           <Button
             onClick={() =>
               setProposedBlock({
@@ -187,7 +188,7 @@ const NotAllowedWarning = ({
               })
             }
             variant="primary"
-            className="!font-normal"
+            className="!m-2 !font-normal"
             size="large"
           >
             Add <span className="font-semibold">{block.title}</span> to
@@ -202,7 +203,7 @@ const NotAllowedWarning = ({
               })
             }
             variant="default"
-            className="!font-normal"
+            className="!m-2 !font-normal"
             size="large"
           >
             Add{" "}

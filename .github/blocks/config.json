@@ -4,6 +4,11 @@
       "owner": "mattrothenberg",
       "repo": "directory-size-block",
       "id": "directory-size-block"
+    },
+    {
+      "owner": "Wattenberger",
+      "repo": "blocks",
+      "id": "*"
     }
   ]
 }

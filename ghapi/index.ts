@@ -22,7 +22,11 @@ import { QueryClient, QueryFunction, QueryFunctionContext } from "react-query";
 import { Block, BlocksRepo } from "@githubnext/blocks";
 import { Session } from "next-auth";
 import pm from "picomatch";
-import { BlocksRepoWithIsAllowed, getBlockKey } from "hooks";
+import {
+  BlockWithIsAllowed,
+  BlocksRepoWithIsAllowed,
+  getBlockKey,
+} from "hooks";
 
 export interface RepoContext {
   repo: string;
@@ -834,7 +838,10 @@ export const getBlocksRepos: QueryFunction<
     })
     .sort((a, b) => {
       // list allow list first
-      if (allowList && a.blocks.some((block) => block.isAllowed)) {
+      if (
+        allowList &&
+        a.blocks.some((block: BlockWithIsAllowed) => block.isAllowed)
+      ) {
         return -1;
       }
 

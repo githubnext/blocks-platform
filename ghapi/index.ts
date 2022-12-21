@@ -821,13 +821,13 @@ export const getBlocksRepos: QueryFunction<
       return {
         ...blockRepo,
         blocks: blockRepo.blocks.map((block) => {
-          const key = getBlockKey(block);
           return {
             ...block,
             isAllowed:
               (blockRepo.owner === exampleBlocksOwner &&
                 blockRepo.repo === exampleBlocksRepo) ||
-              allowList.includes(key),
+              !allowList ||
+              isBlockOnAllowList(allowList, block),
           };
         }),
       };
@@ -852,4 +852,21 @@ export const getBlocksRepos: QueryFunction<
   ];
 
   return blocksRepos.filter((repo) => repo.blocks?.length);
+};
+
+export const isBlockOnAllowList = (allowList: AllowBlock[], block: Block) => {
+  if (!allowList) return false;
+  // always allow example blocks
+  if (block.owner === "githubnext" && block.repo === "blocks-examples")
+    return true;
+  return allowList.some((allowBlock) => {
+    return doesAllowBlockMatch(allowBlock, block);
+  });
+};
+
+export const doesAllowBlockMatch = (allowBlock: AllowBlock, block: Block) => {
+  return ["owner", "repo", "id"].every((key) => {
+    if (!allowBlock[key]) return false;
+    return pm([allowBlock[key]], { bash: true, dot: true })(block[key]);
+  });
 };

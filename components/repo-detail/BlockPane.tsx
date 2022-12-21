@@ -12,6 +12,7 @@ import { AlertFillIcon } from "@primer/octicons-react";
 import { CommitCodeDialog } from "./../commit-code-dialog";
 import { useQueryClient } from "react-query";
 import { QueryKeyMap } from "lib/query-keys";
+import { isBlockOnAllowList } from "ghapi";
 
 const { publicRuntimeConfig } = getConfig();
 
@@ -247,21 +248,4 @@ const NotAllowedWarning = ({
       )}
     </div>
   );
-};
-
-const isBlockOnAllowList = (allowList: AllowBlock[], block: Block) => {
-  if (!allowList) return false;
-  // always allow example blocks
-  if (block.owner === "githubnext" && block.repo === "blocks-examples")
-    return true;
-  return allowList.some((allowBlock) => {
-    return doesAllowBlockMatch(allowBlock, block);
-  });
-};
-
-const doesAllowBlockMatch = (allowBlock: AllowBlock, block: Block) => {
-  return ["owner", "repo", "id"].every((key) => {
-    if (!allowBlock[key]) return false;
-    return pm([allowBlock[key]], { bash: true, dot: true })(block[key]);
-  });
 };

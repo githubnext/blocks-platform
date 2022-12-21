@@ -22,7 +22,7 @@ import { QueryClient, QueryFunction, QueryFunctionContext } from "react-query";
 import { Block, BlocksRepo } from "@githubnext/blocks";
 import { Session } from "next-auth";
 import pm from "picomatch";
-import { getBlockKey } from "hooks";
+import { BlocksRepoWithIsAllowed, getBlockKey } from "hooks";
 
 export interface RepoContext {
   repo: string;
@@ -708,7 +708,7 @@ const getBlocksRepoFromDevServer = async ({
 };
 
 export const getBlocksRepos: QueryFunction<
-  BlocksRepo[],
+  BlocksRepoWithIsAllowed[],
   GenericQueryKey<BlocksReposParams>
 > = async (ctx) => {
   let meta = ctx.meta as BlocksQueryMeta;

@@ -69,6 +69,7 @@ export type BlocksReposParams = Parameters<
   CommonBlockProps["onRequestBlocksRepos"]
 >[0] & {
   devServerInfo?: DevServerInfo;
+  allowList?: AllowBlock[];
 };
 
 function makeFactory<Key, Params>(

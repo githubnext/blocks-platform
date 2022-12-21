@@ -2,7 +2,7 @@ import { Block } from "@githubnext/blocks";
 import { PlugIcon, SearchIcon, SyncIcon } from "@primer/octicons-react";
 import { ActionList, ActionMenu, Button, Text, TextInput } from "@primer/react";
 import { AppContext } from "context";
-import { getBlockKey, useBlocksRepos } from "hooks";
+import { BlockWithIsAllowed, getBlockKey, useBlocksRepos } from "hooks";
 import { QueryKeyMap } from "lib/query-keys";
 import { useContext, useState } from "react";
 import { useQueryClient } from "react-query";
@@ -167,7 +167,7 @@ export default function BlockPicker(props: BlockPickerProps) {
             <div className="max-h-[calc(100vh-20em)] grid grid-cols-2 gap-1 px-2 pb-2 overflow-auto">
               {blockRepos.map((repo, index) => {
                 if (index > 50) return null;
-                return repo.blocks.map((block) => {
+                return repo.blocks.map((block: BlockWithIsAllowed) => {
                   const blockKey = getBlockKey(block);
                   return (
                     <BlockPickerItem

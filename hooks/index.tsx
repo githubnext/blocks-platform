@@ -285,11 +285,16 @@ export function useGetBranches(
   );
 }
 
+export type BlockWithIsAllowed = Block & { isAllowed: boolean };
+export type BlocksRepoWithIsAllowed = BlocksRepo & {
+  blocks: BlockWithIsAllowed[];
+};
+
 export function useBlocksRepos(
   params: BlocksReposParams,
-  config?: UseQueryOptions<BlocksRepo[]>
+  config?: UseQueryOptions<BlocksRepoWithIsAllowed[]>
 ) {
-  return useQuery<BlocksRepo[]>(
+  return useQuery<BlocksRepoWithIsAllowed[]>(
     QueryKeyMap.blocksRepos.factory(params),
     getBlocksRepos,
     {

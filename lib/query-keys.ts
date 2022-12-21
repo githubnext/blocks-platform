@@ -37,6 +37,7 @@ export interface FileKeyParams {
   owner: string;
   path: string;
   fileRef?: string;
+  doForceCacheRefresh?: boolean;
 }
 
 export interface BranchesKeyParams {

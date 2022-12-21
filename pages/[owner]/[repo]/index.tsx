@@ -1,3 +1,4 @@
+import { Button, Heading, Link } from "@primer/react";
 import { GetServerSidePropsContext } from "next";
 import getConfig from "next/config";
 import { useRouter } from "next/router";
@@ -48,7 +49,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     `https://api.github.com/repos/${owner}/${repo}`,
     {
       headers: {
-        Authorization: `token ${session.token}`,
+        Authorization: `token ${session.userToken}`,
       },
     }
   )
@@ -90,7 +91,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   return {
     props: {
-      defaultBranch,
+      // we need a default default in case we don't have access to the repo (e.g. private)
+      defaultBranch: defaultBranch ?? "main",
     },
   };
 }

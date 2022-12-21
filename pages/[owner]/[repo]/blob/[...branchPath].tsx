@@ -6,7 +6,7 @@ import {
   makeGitHubAPIInstance,
   makeOctokitInstance,
 } from "ghapi";
-import { useCheckRepoAccess, useRepoInfo } from "hooks";
+import { useCheckRepoAccess, useFileContent, useRepoInfo } from "hooks";
 import { GetServerSidePropsContext } from "next";
 import { signOut, useSession } from "next-auth/react";
 import getConfig from "next/config";
@@ -14,6 +14,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "react-query";
 import { getSessionOnServer } from "pages/api/auth/[...nextauth]";
+import { Link } from "@primer/react";
 
 const { publicRuntimeConfig } = getConfig();
 
@@ -49,10 +50,10 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
     if (!isAuthenticated) return;
 
     const meta = {
-      token: session?.token,
+      token: session?.userToken,
       userToken: session?.userToken,
-      ghapi: makeGitHubAPIInstance(session?.token as string),
-      octokit: makeOctokitInstance(session?.token as string),
+      ghapi: makeGitHubAPIInstance(session?.userToken as string),
+      octokit: makeOctokitInstance(session?.userToken as string),
       user: session?.user,
       queryClient,
     };
@@ -90,7 +91,24 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
     { owner, repo },
     { enabled: queryClientMetaLoaded }
   );
-  if (repoInfoStatus === "error" || repoInfo?.private) {
+  const { data: blocksConfigContent, status: blocksConfigContentStatus } =
+    useFileContent(
+      {
+        owner,
+        repo,
+        path: ".github/blocks/config.json",
+        fileRef: (router.query.sha || router.query.branchPath?.[0]) as string,
+        doForceCacheRefresh: true,
+      },
+      { enabled: queryClientMetaLoaded }
+    );
+  let blocksConfig = repoInfo?.private ? { allow: [] } : {};
+  try {
+    if (blocksConfigContentStatus === "success")
+      blocksConfig = JSON.parse(blocksConfigContent.content);
+  } catch (e) {}
+
+  if (repoInfoStatus === "error") {
     return (
       <div className="flex flex-col items-center justify-center h-full text-center">
         <div className="max-w-2xl mx-auto px-4">
@@ -101,7 +119,20 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
             </strong>{" "}
             repo.
           </h3>
-          <h3>Blocks doesn't work with private repos.</h3>
+
+          <p className="mt-2">
+            If it's a private repo,{" "}
+            <Link
+              underline
+              muted
+              target="_blank"
+              rel="noopener"
+              href={installationUrl}
+            >
+              install the app
+            </Link>{" "}
+            and try again.
+          </p>
         </div>
       </div>
     );
@@ -124,6 +155,8 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
           installationUrl,
           permissions: repoInfo.permissions,
           devServerInfo,
+          isPrivate: repoInfo.private,
+          blocksConfig: blocksConfig,
         }}
       >
         <RepoDetail />

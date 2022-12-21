@@ -102,7 +102,10 @@ export function CommitCodeDialog(props: CommitCodeDialogProps) {
           pathname: router.pathname,
           query: {
             ...router.query,
-            branchPath: makeBranchPath(res.head.ref, path),
+            branchPath: makeBranchPath(
+              res.head.ref,
+              router.query.branchPath[1] || path
+            ),
             fileRef: res.head.sha,
           },
         },

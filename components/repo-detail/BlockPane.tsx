@@ -1,12 +1,18 @@
-import { useContext, useEffect, useMemo } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import getConfig from "next/config";
 import { useRouter } from "next/router";
 import pm from "picomatch";
-import type { RepoFiles } from "@githubnext/blocks";
+import type { Block, RepoFiles } from "@githubnext/blocks";
 import { AppContext } from "context";
 import type { Context } from "./index";
 import { getBlockKey, useManageBlock } from "hooks";
 import BlockPaneHeader from "./BlockPaneHeader";
+import { Button, Flash, StyledOcticon } from "@primer/react";
+import { AlertFillIcon } from "@primer/octicons-react";
+import { CommitCodeDialog } from "./../commit-code-dialog";
+import { useQueryClient } from "react-query";
+import { QueryKeyMap } from "lib/query-keys";
+import { isBlockOnAllowList } from "ghapi";
 
 const { publicRuntimeConfig } = getConfig();
 
@@ -17,6 +23,7 @@ type BlockPaneProps = {
   setRequestedBlockMetadata: (metadata: any) => void;
   context: Context;
   branchName: string;
+  isBranchable: boolean;
   onSaveChanges: () => void;
 };
 
@@ -26,10 +33,14 @@ export default function BlockPane({
   metadata,
   setRequestedBlockMetadata,
   context,
+  branchName,
+  isBranchable,
   onSaveChanges,
 }: BlockPaneProps) {
   const router = useRouter();
+  const appContext = useContext(AppContext);
   const { devServerInfo } = useContext(AppContext);
+  const blockKey = router.query.blockKey as string;
 
   const isFolder = fileInfo.type !== "blob";
 
@@ -79,6 +90,13 @@ export default function BlockPane({
     JSON.stringify({ block, context })
   )}`;
 
+  let isAllowedBlock = true;
+
+  if (appContext.isPrivate) {
+    isAllowedBlock =
+      !!block && isBlockOnAllowList(appContext.blocksConfig.allow, block);
+  }
+
   return (
     <>
       <BlockPaneHeader
@@ -92,7 +110,18 @@ export default function BlockPane({
           onSaveChanges,
         }}
       />
-      {block && (
+      {manageBlockResult.status !== "success" ? (
+        <div className=""></div>
+      ) : !isAllowedBlock ? (
+        <NotAllowedWarning
+          block={block}
+          blockKey={blockKey}
+          context={context}
+          isBranchable={isBranchable}
+          branchName={branchName}
+          blocksConfig={appContext.blocksConfig}
+        />
+      ) : block ? (
         <div className="overflow-y-auto w-full flex-1">
           <iframe
             key={block.id}
@@ -110,7 +139,114 @@ export default function BlockPane({
             src={src}
           />
         </div>
-      )}
+      ) : null}
     </>
   );
 }
+
+const NotAllowedWarning = ({
+  block,
+  blockKey,
+  context,
+  blocksConfig,
+  isBranchable,
+  branchName,
+}: {
+  block: Block;
+  blockKey: string;
+  context: Context;
+  blocksConfig: BlocksConfig;
+  isBranchable: boolean;
+  branchName: string;
+}) => {
+  const [proposedBlock, setProposedBlock] = useState<AllowBlock | null>(null);
+  const queryClient = useQueryClient();
+
+  return (
+    <div className="overflow-y-auto w-full flex-1 pb-10 flex items-center justify-center">
+      <div className="max-w-3xl p-10">
+        <Flash variant="danger" sx={{ mb: 4 }}>
+          <p className="text-red-700">
+            <StyledOcticon icon={AlertFillIcon} />
+            This block is not allowed to be used in this repository.
+          </p>
+        </Flash>
+        <p>
+          To protect against malicious code, blocks need to be explicitly
+          allowed in private repositories.
+          <br />
+          If you trust this block, you can add it to the allowlist in{" "}
+          <code className="text-sm">.github/blocks/config.json</code>.
+        </p>
+        <div className="flex flex-wrap mt-6 -mx-2">
+          <Button
+            onClick={() =>
+              setProposedBlock({
+                owner: block.owner,
+                repo: block.repo,
+                id: block.id,
+              })
+            }
+            variant="primary"
+            className="!m-2 !font-normal"
+            size="large"
+          >
+            Add <span className="font-semibold">{block.title}</span> to
+            allowlist
+          </Button>
+          <Button
+            onClick={() =>
+              setProposedBlock({
+                owner: block.owner,
+                repo: block.repo,
+                id: "*",
+              })
+            }
+            variant="default"
+            className="!m-2 !font-normal"
+            size="large"
+          >
+            Add{" "}
+            <span className="font-semibold">
+              all blocks in {block.owner}/{block.repo}
+            </span>{" "}
+            to allowlist
+          </Button>
+        </div>
+      </div>
+      {!!proposedBlock && (
+        <CommitCodeDialog
+          repo={context.repo}
+          owner={context.owner}
+          path=".github/blocks/config.json"
+          newCode={JSON.stringify(
+            {
+              ...blocksConfig,
+              allow: [...(blocksConfig.allow || []), proposedBlock],
+            },
+            null,
+            2
+          )}
+          currentCode={JSON.stringify(blocksConfig, null, 2)}
+          onCommit={() => {
+            setProposedBlock(null);
+            queryClient.invalidateQueries(
+              QueryKeyMap.file.factory({
+                owner: context.owner,
+                repo: context.repo,
+                path: ".github/blocks/config.json",
+                fileRef: branchName,
+              })
+            );
+          }}
+          onCancel={() => {
+            setProposedBlock(null);
+          }}
+          isOpen
+          branchName={branchName}
+          branchingDisabled={!isBranchable}
+        />
+      )}
+    </div>
+  );
+};

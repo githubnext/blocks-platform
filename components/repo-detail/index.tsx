@@ -66,7 +66,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
   const { repoInfo, branches, branchName, path, files, timeline } = props;
   const router = useRouter();
   const { setColorMode } = useTheme();
-  const { repo, owner, theme, fileRef } = router.query as Record<
+  const { repo, owner, theme, fileRef, blockKey } = router.query as Record<
     string,
     string
   >;
@@ -227,6 +227,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
                   setRequestedBlockMetadata,
                   context,
                   branchName,
+                  isBranchable,
                   onSaveChanges,
                 }}
               />
@@ -383,6 +384,7 @@ export function RepoDetail() {
   const {
     data: { user },
   } = useSession();
+
   const { repo, owner, blockKey } = router.query as Record<string, string>;
   const { branchPath } = router.query as { branchPath: string[] };
 

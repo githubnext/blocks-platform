@@ -40,6 +40,7 @@ export default function BlockPicker(props: BlockPickerProps) {
     searchTerm: isSearchTermUrl ? undefined : debouncedSearchTerm,
     repoUrl: isSearchTermUrl ? debouncedSearchTerm : undefined,
     devServerInfo,
+    allowList: appContext.blocksConfig.allow,
   };
   const { data: blockRepos, status } = useBlocksRepos(blocksReposParams);
   const invalidateBlocksReposQuery = () => {
@@ -119,8 +120,23 @@ export default function BlockPicker(props: BlockPickerProps) {
                   <strong>
                     {searchTermOwner}/{searchTermRepo}
                   </strong>{" "}
-                  repo. Blocks doesn't work with private repos.
+                  repo. If this is a private repo, make sure our GitHub App has
+                  access.
                 </Text>
+
+                <div className="flex mt-4">
+                  <a
+                    target="_blank"
+                    rel="noopener"
+                    href={appContext.installationUrl}
+                    className="mr-2"
+                  >
+                    <Button variant="primary">Update App access</Button>
+                  </a>
+                  <Button onClick={invalidateBlocksReposQuery}>
+                    Try again
+                  </Button>
+                </div>
               </>
             ) : (
               <Text color="fg.muted" className="px-5" pb="1">
@@ -165,6 +181,7 @@ export default function BlockPicker(props: BlockPickerProps) {
                         setSearchTerm("");
                       }}
                       isDev={!!repo["isDev"]}
+                      isAllowed={block.isAllowed}
                     />
                   );
                 });

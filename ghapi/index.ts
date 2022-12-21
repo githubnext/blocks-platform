@@ -3,7 +3,7 @@ import { Octokit } from "@octokit/rest";
 import { Endpoints } from "@octokit/types";
 import axios, { AxiosInstance } from "axios";
 import { signOut } from "next-auth/react";
-import { Base64 } from "js-base64";
+import { Base64, decode } from "js-base64";
 import {
   BlocksKeyParams,
   BlocksReposParams,
@@ -22,6 +22,7 @@ import { QueryClient, QueryFunction, QueryFunctionContext } from "react-query";
 import { Block, BlocksRepo } from "@githubnext/blocks";
 import { Session } from "next-auth";
 import pm from "picomatch";
+import { getBlockKey } from "hooks";
 
 export interface RepoContext {
   repo: string;
@@ -87,13 +88,21 @@ export const getFileContent: (
 ) => Promise<FileData> = async (ctx) => {
   let meta = ctx.meta as BlocksQueryMeta;
   let params = ctx.queryKey[1];
-  const { path, owner, repo, fileRef = "HEAD" } = params;
+  const { path, owner, repo, fileRef = "HEAD", doForceCacheRefresh } = params;
   const query = fileRef && fileRef !== "HEAD" ? `?ref=${fileRef}` : "";
   const apiUrl = `repos/${owner}/${repo}/contents/${path}${query}`;
 
   const file = path.split("/").pop() || "";
 
-  const res = await meta.ghapi(apiUrl);
+  const res = await meta.ghapi(apiUrl, {
+    headers: doForceCacheRefresh
+      ? {
+          // this response is cached for 60s
+          // we need to bypass this eg. when a metadata update creates a new file
+          "If-None-Match": new Date().getTime().toString(),
+        }
+      : {},
+  });
   if (res.status !== 200) {
     if (res.status === 404) {
       throw new Error(`File not found: ${owner}/${repo}: ${path}`);
@@ -199,7 +208,10 @@ export const getRepoInfoWithContributors: QueryFunction<
   const contributorsUrl = `${url}/contributors`;
   try {
     const contributorsRes = await meta.ghapi.get(contributorsUrl);
-    return { ...repoInfoRes.data, contributors: contributorsRes.data };
+    return {
+      ...repoInfoRes.data,
+      contributors: contributorsRes.data,
+    };
   } catch (e) {
     return { ...repoInfoRes.data, contributors: [] };
   }
@@ -523,16 +535,28 @@ export async function createBranchAndPR(
   });
   const sourceSha = currentBranchData.data.object.sha;
 
-  // Let's also get the SHA of the *file* we're going to use when we commit on the new branch.
-  const currentFileData = await octokit.repos.getContent({
-    owner,
-    repo,
-    path,
-    ref: sourceBranch,
-  });
-
-  // @ts-ignore
-  let blobSha = currentFileData.data.sha;
+  let blobSha;
+  try {
+    // Let's also get the SHA of the *file* we're going to use when we commit on the new branch.
+    const currentFileData = await octokit.repos.getContent({
+      owner,
+      repo,
+      path,
+      ref: sourceBranch,
+    });
+    // @ts-ignore
+    blobSha = currentFileData.data.sha;
+  } catch (e) {
+    // if we get here, the file doesn't exist yet
+    // so we'll create a new blob
+    const blobData = await octokit.git.createBlob({
+      owner,
+      repo,
+      content,
+      encoding: "utf-8",
+    });
+    blobSha = blobData.data.sha;
+  }
 
   // Step 1. Create the new branch, using the SHA of the "main" branch as the base.
 
@@ -637,6 +661,8 @@ export const getOwnerRepoFromDevServer = async (devServer: string) => {
   return { owner, repo };
 };
 
+const exampleBlocksOwner = "githubnext";
+const exampleBlocksRepo = "blocks-examples";
 const getBlocksRepoFromDevServer = async ({
   devServerInfo,
   user,
@@ -689,7 +715,7 @@ export const getBlocksRepos: QueryFunction<
   const { queryClient } = meta;
   let { queryKey } = ctx;
   const params = queryKey[1];
-  const { path, searchTerm, repoUrl, type, devServerInfo } = params;
+  const { path, searchTerm, repoUrl, type, allowList, devServerInfo } = params;
 
   let repos = [];
   // allow user to search for Blocks on a specific repo
@@ -789,13 +815,36 @@ export const getBlocksRepos: QueryFunction<
         };
       })
     )
-  ).sort((a, b) => {
-    // list example repo first
-    if (a.full_name === "githubnext/blocks") {
-      return -1;
-    }
-    return b.stars - a.stars;
-  });
+  )
+    .map((blockRepo) => {
+      if (!allowList) return blockRepo;
+      return {
+        ...blockRepo,
+        blocks: blockRepo.blocks.map((block) => {
+          return {
+            ...block,
+            isAllowed:
+              (blockRepo.owner === exampleBlocksOwner &&
+                blockRepo.repo === exampleBlocksRepo) ||
+              !allowList ||
+              isBlockOnAllowList(allowList, block),
+          };
+        }),
+      };
+    })
+    .sort((a, b) => {
+      // list allow list first
+      if (allowList && a.blocks.some((block) => block.isAllowed)) {
+        return -1;
+      }
+
+      // list example repo next
+      if (a.full_name === `${exampleBlocksOwner}/${exampleBlocksRepo}`) {
+        return -1;
+      }
+
+      return b.stars - a.stars;
+    });
 
   const blocksRepos = [
     ...(devServerBlocksRepo ? [devServerBlocksRepo] : []),
@@ -803,4 +852,21 @@ export const getBlocksRepos: QueryFunction<
   ];
 
   return blocksRepos.filter((repo) => repo.blocks?.length);
+};
+
+export const isBlockOnAllowList = (allowList: AllowBlock[], block: Block) => {
+  if (!allowList) return false;
+  // always allow example blocks
+  if (block.owner === "githubnext" && block.repo === "blocks-examples")
+    return true;
+  return allowList.some((allowBlock) => {
+    return doesAllowBlockMatch(allowBlock, block);
+  });
+};
+
+export const doesAllowBlockMatch = (allowBlock: AllowBlock, block: Block) => {
+  return ["owner", "repo", "id"].every((key) => {
+    if (!allowBlock[key]) return false;
+    return pm([allowBlock[key]], { bash: true, dot: true })(block[key]);
+  });
 };

@@ -1,0 +1,9 @@
+{
+  "allow": [
+    {
+      "owner": "mattrothenberg",
+      "repo": "directory-size-block",
+      "id": "directory-size-block"
+    }
+  ]
+}

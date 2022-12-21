@@ -69,6 +69,12 @@ type DevServerInfo = {
   devServer: string;
 };
 
+type AllowBlock = {
+  owner: string;
+  repo: string;
+  id: string;
+};
+
 type BlocksConfig = {
-  allow?: string[];
+  allow?: AllowBlock[];
 };

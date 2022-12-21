@@ -93,10 +93,7 @@ export default function BlockPane({
 
   if (appContext.isPrivate) {
     isAllowedBlock =
-      appContext.blocksConfig.allow.includes(blockKey) ||
-      (manageBlockResult.status === "success" &&
-        block.owner === "githubnext" &&
-        block.repo === "blocks-examples");
+      !!block && isBlockOnAllowList(appContext.blocksConfig.allow, block);
   }
 
   return (
@@ -161,14 +158,13 @@ const NotAllowedWarning = ({
   isBranchable: boolean;
   branchName: string;
 }) => {
-  const [isAdding, setIsAdding] = useState(false);
-  const allowList = blocksConfig.allow;
+  const [proposedBlock, setProposedBlock] = useState<AllowBlock | null>(null);
   const queryClient = useQueryClient();
 
   return (
     <div className="overflow-y-auto w-full flex-1 pb-10 flex items-center justify-center">
       <div className="max-w-3xl p-10">
-        <Flash variant="danger" sx={{ mb: 3 }}>
+        <Flash variant="danger" sx={{ mb: 4 }}>
           <p className="text-red-700">
             <StyledOcticon icon={AlertFillIcon} />
             This block is not allowed to be used in this repository.
@@ -180,18 +176,43 @@ const NotAllowedWarning = ({
           it to the allowlist in{" "}
           <code className="text-sm">.github/blocks/config.json</code>.
         </p>
-        <div className="flex space-x-2">
+        <div className="flex mt-6 space-x-2">
           <Button
-            onClick={() => setIsAdding(true)}
+            onClick={() =>
+              setProposedBlock({
+                owner: block.owner,
+                repo: block.repo,
+                id: block.id,
+              })
+            }
             variant="primary"
-            className="mt-4"
+            className="!font-normal"
             size="large"
           >
-            Add {block.title} to allowlist
+            Add <span className="font-semibold">{block.title}</span> to
+            allowlist
+          </Button>
+          <Button
+            onClick={() =>
+              setProposedBlock({
+                owner: block.owner,
+                repo: block.repo,
+                id: "*",
+              })
+            }
+            variant="default"
+            className="!font-normal"
+            size="large"
+          >
+            Add{" "}
+            <span className="font-semibold">
+              all blocks in {block.owner}/{block.repo}
+            </span>{" "}
+            to allowlist
           </Button>
         </div>
       </div>
-      {isAdding && (
+      {!!proposedBlock && (
         <CommitCodeDialog
           repo={context.repo}
           owner={context.owner}
@@ -199,14 +220,14 @@ const NotAllowedWarning = ({
           newCode={JSON.stringify(
             {
               ...blocksConfig,
-              allow: [...(blocksConfig.allow || []), blockKey],
+              allow: [...(blocksConfig.allow || []), proposedBlock],
             },
             null,
             2
           )}
           currentCode={JSON.stringify(blocksConfig, null, 2)}
           onCommit={() => {
-            setIsAdding(false);
+            setProposedBlock(null);
             queryClient.invalidateQueries(
               QueryKeyMap.file.factory({
                 owner: context.owner,
@@ -217,7 +238,7 @@ const NotAllowedWarning = ({
             );
           }}
           onCancel={() => {
-            setIsAdding(false);
+            setProposedBlock(null);
           }}
           isOpen
           branchName={branchName}
@@ -226,4 +247,21 @@ const NotAllowedWarning = ({
       )}
     </div>
   );
+};
+
+const isBlockOnAllowList = (allowList: AllowBlock[], block: Block) => {
+  if (!allowList) return false;
+  // always allow example blocks
+  if (block.owner === "githubnext" && block.repo === "blocks-examples")
+    return true;
+  return allowList.some((allowBlock) => {
+    return doesAllowBlockMatch(allowBlock, block);
+  });
+};
+
+const doesAllowBlockMatch = (allowBlock: AllowBlock, block: Block) => {
+  return ["owner", "repo", "id"].every((key) => {
+    if (!allowBlock[key]) return false;
+    return pm([allowBlock[key]], { bash: true, dot: true })(block[key]);
+  });
 };

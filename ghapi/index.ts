@@ -88,13 +88,21 @@ export const getFileContent: (
 ) => Promise<FileData> = async (ctx) => {
   let meta = ctx.meta as BlocksQueryMeta;
   let params = ctx.queryKey[1];
-  const { path, owner, repo, fileRef = "HEAD" } = params;
+  const { path, owner, repo, fileRef = "HEAD", doForceCacheRefresh } = params;
   const query = fileRef && fileRef !== "HEAD" ? `?ref=${fileRef}` : "";
   const apiUrl = `repos/${owner}/${repo}/contents/${path}${query}`;
 
   const file = path.split("/").pop() || "";
 
-  const res = await meta.ghapi(apiUrl);
+  const res = await meta.ghapi(apiUrl, {
+    headers: doForceCacheRefresh
+      ? {
+          // this response is cached for 60s
+          // we need to bypass this eg. when a metadata update creates a new file
+          "If-None-Match": new Date().getTime().toString(),
+        }
+      : {},
+  });
   if (res.status !== 200) {
     if (res.status === 404) {
       throw new Error(`File not found: ${owner}/${repo}: ${path}`);

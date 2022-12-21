@@ -98,6 +98,7 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
         repo,
         path: ".github/blocks/config.json",
         fileRef: (router.query.sha || router.query.branchPath?.[0]) as string,
+        doForceCacheRefresh: true,
       },
       { enabled: queryClientMetaLoaded }
     );
@@ -105,11 +106,8 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
   try {
     if (blocksConfigContentStatus === "success")
       blocksConfig = JSON.parse(blocksConfigContent.content);
-  } catch (e) {
-    console.log(e);
-  }
+  } catch (e) {}
 
-  // TODO: || repoInfo?.private
   if (repoInfoStatus === "error") {
     return (
       <div className="flex flex-col items-center justify-center h-full text-center">

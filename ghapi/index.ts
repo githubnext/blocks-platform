@@ -165,7 +165,7 @@ export const getFolderContent: QueryFunction<
   const { tree: rawTree } = res.data;
 
   const files = (rawTree as TreeItem[]).filter((item) => {
-    return item.path?.includes(path);
+    return item.path?.startsWith(path);
   });
 
   const tree = files.map((item) => {

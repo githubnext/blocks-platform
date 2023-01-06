@@ -67,7 +67,9 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
   }, [sessionStatus]);
 
   useEffect(() => {
-    const devServerInfoPromise = /^http:\/\/localhost:[0-9]+\//.test(devServer)
+    const devServerInfoPromise = /^https?:\/\/localhost:[0-9]+\//.test(
+      devServer
+    )
       ? getOwnerRepoFromDevServer(devServer)
           .then(({ owner, repo }) => ({ devServer, owner, repo }))
           .catch(() => undefined)

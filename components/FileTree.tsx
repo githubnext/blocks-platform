@@ -360,12 +360,15 @@ const Item = ({
           <StyledOcticon icon={FileIcon} className="ml-4 text-[#57606a]" />
         )}
 
-        <div className={`flex items-center ml-2 overflow-hidden`} title={name}>
+        <div
+          className={`flex items-center w-full ml-2 overflow-hidden`}
+          title={name}
+        >
           <div className="whitespace-nowrap truncate text-[#24292f] text-sm">
             {name}
           </div>
           <div className="ml-auto">
-            {!isOpen &&
+            {(!isOpen || !isFolder) &&
               Object.keys(updatedContents).some((path2) =>
                 path2.startsWith(path)
               ) && <VscCircleOutline />}

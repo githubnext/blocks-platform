@@ -67,13 +67,14 @@ function RepoDetailContainer({ installationUrl }: AppContextValue) {
   }, [sessionStatus]);
 
   useEffect(() => {
-    const devServerInfoPromise = /^https?:\/\/localhost:[0-9]+\//.test(
-      devServer
-    )
-      ? getOwnerRepoFromDevServer(devServer)
-          .then(({ owner, repo }) => ({ devServer, owner, repo }))
-          .catch(() => undefined)
-      : Promise.resolve(undefined);
+    const devServerInfoPromise =
+      /(^https?:\/\/localhost:[0-9]+\/$)|(^https:\/\/[.]*.github.dev\/$)/.test(
+        devServer
+      )
+        ? getOwnerRepoFromDevServer(devServer)
+            .then(({ owner, repo }) => ({ devServer, owner, repo }))
+            .catch(() => undefined)
+        : Promise.resolve(undefined);
 
     devServerInfoPromise.then((devServerInfo) => {
       setDevServerInfo(devServerInfo);

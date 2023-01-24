@@ -45,6 +45,25 @@ type Session = {
   error?: string;
 };
 
+async function isShopifyOrgMember({
+  login,
+  accessToken,
+}: {
+  login: string;
+  accessToken: string;
+}) {
+  try {
+    let octokit = new Octokit({ auth: accessToken });
+    await octokit.orgs.checkMembershipForUser({
+      org: "Shopify",
+      username: login,
+    });
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 async function fetchHasAccess({
   login,
   accessToken,
@@ -60,24 +79,14 @@ async function fetchHasAccess({
     return true;
   }
 
-  // Check if user is a part of the Shopify org.
-  try {
-    let octokit = new Octokit({ auth: accessToken });
-    await octokit.orgs.checkMembershipForUser({
-      org: "Shopify",
-      username: login,
-    });
-    return true;
-  } catch (e) {
-    // Nothing to see here, let's move on to the waitlist check.
-  }
-
+  // Check if user is on the waitlist.
+  // If not, check if user is a Shopify org member.
   const res = await fetch(
     process.env.NEXT_PUBLIC_FUNCTIONS_URL +
       `/api/verify?project=blocks&token=${accessToken}`
   );
   const json = await res.json();
-  return json.hasAccess;
+  return json.hasAccess || (await isShopifyOrgMember({ login, accessToken }));
 }
 
 async function fetchPublicToken(accessToken: string): Promise<string> {

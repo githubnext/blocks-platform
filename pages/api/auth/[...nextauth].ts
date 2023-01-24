@@ -5,6 +5,7 @@ import hkdf from "@panva/hkdf";
 import NextAuth from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import GITHUB_STARS from "lib/stars.json";
+import { Octokit } from "@octokit/rest";
 
 const GUEST_LIST_INTERNAL = ["Krzysztof-Cieslak", "dsyme"];
 const GUEST_LIST_EXTERNAL = ["dmalan", ...GITHUB_STARS.map((d) => d.username)];
@@ -51,19 +52,32 @@ async function fetchHasAccess({
   login: string;
   accessToken: string;
 }): Promise<boolean> {
+  // Check if user is on the guest list.
   if (
     GUEST_LIST_INTERNAL.includes(login) ||
     GUEST_LIST_EXTERNAL.includes(login)
   ) {
     return true;
-  } else {
-    const res = await fetch(
-      process.env.NEXT_PUBLIC_FUNCTIONS_URL +
-        `/api/verify?project=blocks&token=${accessToken}`
-    );
-    const json = await res.json();
-    return json.hasAccess;
   }
+
+  // Check if user is a part of the Shopify org.
+  try {
+    let octokit = new Octokit({ auth: accessToken });
+    await octokit.orgs.checkMembershipForUser({
+      org: "Shopify",
+      username: login,
+    });
+    return true;
+  } catch (e) {
+    // Nothing to see here, let's move on to the waitlist check.
+  }
+
+  const res = await fetch(
+    process.env.NEXT_PUBLIC_FUNCTIONS_URL +
+      `/api/verify?project=blocks&token=${accessToken}`
+  );
+  const json = await res.json();
+  return json.hasAccess;
 }
 
 async function fetchPublicToken(accessToken: string): Promise<string> {

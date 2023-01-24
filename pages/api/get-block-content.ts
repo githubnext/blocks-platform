@@ -21,10 +21,14 @@ export default async function handler(
   // cache for 30 minutes
   res.setHeader("Cache-Control", "max-age=1800, immutable");
 
-  const session = await getSessionOnServer(req);
-  if (!session || !session.hasAccess) {
-    return res.status(401).json({ message: "Unauthorized." });
-  }
+  let token = process.env.GITHUB_PUBLIC_PAT;
+  try {
+    const session = await getSessionOnServer(req);
+    if (!session || !session.hasAccess) {
+      return res.status(401).json({ message: "Unauthorized." });
+    }
+    token = session.userToken;
+  } catch (error) {}
 
   await new Promise((resolve, reject) => {
     Cors({
@@ -48,7 +52,7 @@ export default async function handler(
   const releaseInfoUrl = `${apiBaseUrl}/releases/latest`;
   const releaseInfo = await fetch(releaseInfoUrl, {
     headers: {
-      Authorization: `token ${session.userToken}`,
+      Authorization: `token ${token}`,
     },
   }).then((r) => r.json());
 
@@ -64,7 +68,7 @@ export default async function handler(
 
   const assetContentRes = await fetch(assetUrl, {
     headers: {
-      Authorization: `token ${session.userToken}`,
+      Authorization: `token ${token}`,
       Accept: "application/octet-stream",
     },
   });
@@ -74,7 +78,9 @@ export default async function handler(
     });
   }
   // @ts-ignore
-  const buffer = await assetContentRes.buffer();
+  const buffer = await (assetContentRes.buffer
+    ? assetContentRes.buffer()
+    : assetContentRes.arrayBuffer());
   const text = await untar(buffer);
 
   res.status(200).json({ content: text });

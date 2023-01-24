@@ -35,6 +35,8 @@ module.exports = {
           textLight: "#586069",
           dark: "#444D56",
           marketingDark: "#050D21",
+          marketingButtonText: "#0d1117",
+          marketingDarkBg: "#0b0e19",
           "primer-link": "#0969DA",
         },
       },

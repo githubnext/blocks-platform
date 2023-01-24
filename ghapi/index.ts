@@ -64,7 +64,7 @@ export function makeGitHubAPIInstance(token: string) {
       return response;
     },
     function (error) {
-      if (error.response.status === 401) {
+      if (error.response.status === 401 && token) {
         if (typeof window !== "undefined") signOut();
       }
       return Promise.reject(error);
@@ -99,13 +99,13 @@ export const getFileContent: (
   const file = path.split("/").pop() || "";
 
   const res = await meta.ghapi(apiUrl, {
-    headers: doForceCacheRefresh
-      ? {
-          // this response is cached for 60s
-          // we need to bypass this eg. when a metadata update creates a new file
-          "If-None-Match": new Date().getTime().toString(),
-        }
-      : {},
+    // headers: doForceCacheRefresh
+    //   ? {
+    //       // this response is cached for 60s
+    //       // we need to bypass this eg. when a metadata update creates a new file
+    //       "If-None-Match": new Date().getTime().toString(),
+    //     }
+    //   : {},
   });
   if (res.status !== 200) {
     if (res.status === 404) {

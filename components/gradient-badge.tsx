@@ -1,6 +1,14 @@
-export function GradientBadge({ children }: { children: React.ReactNode }) {
+export function GradientBadge({
+  className = "",
+  children,
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="py-2 z-1 px-6 gradient-border-badge relative bg-transparent inline-flex items-center justify-center">
+    <div
+      className={`${className} py-2 z-1 px-6 gradient-border-badge relative bg-transparent inline-flex items-center justify-center`}
+    >
       <span className="z-10 text-sm lg:text-base bg-clip-text text-transparent bg-gradient-to-r from-[#9867f0] to-[#ed4e50] font-semibold relative -top-px">
         {children}
       </span>

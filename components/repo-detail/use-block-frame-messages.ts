@@ -102,7 +102,6 @@ const setBundle = async (
     if (res.ok) {
       bundle = await res.json().then((bundle) => bundle.content);
     } else {
-      console.error(res);
     }
   }
   blockFrame.window?.postMessage(
@@ -148,6 +147,7 @@ const makeSetInitialProps =
 
     // fetch metadata for the block and path
     const metadataPath = getMetadataPath(block, path);
+    console.log({ metadataPath });
     const metadata = queryClient.fetchQuery(
       QueryKeyMap.file.factory({
         owner: context.owner,
@@ -569,8 +569,8 @@ function useBlockFrameMessages({
   const { devServerInfo } = appContext;
   const queryClient = useQueryClient();
   const router = useRouter();
-  const { token, octokit } = queryClient.getDefaultOptions().queries
-    .meta as BlocksQueryMeta;
+  const queries = queryClient.getDefaultOptions().queries;
+  const { token, octokit } = (queries?.meta || {}) as BlocksQueryMeta;
 
   const blockFrames = useRef<BlockFrame[]>([]);
 

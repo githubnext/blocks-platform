@@ -272,17 +272,23 @@ export const getSessionOnServer = async (req: {
       : "next-auth.session-token";
   const cookieValue = req.cookies[cookieName];
 
-  // see https://github.com/nextauthjs/next-auth/blob/main/packages/next-auth/src/jwt/index.ts#L29
-  const encryptionSecret = await getDerivedEncryptionKey(secret);
-  const { payload } = await jwtDecrypt(cookieValue, encryptionSecret, {
-    clockTolerance: 15,
-  });
+  try {
+    // see https://github.com/nextauthjs/next-auth/blob/main/packages/next-auth/src/jwt/index.ts#L29
+    const encryptionSecret = await getDerivedEncryptionKey(secret);
+    const { payload } = await jwtDecrypt(cookieValue, encryptionSecret, {
+      clockTolerance: 15,
+    });
+    const token = payload as Token;
 
-  const parsedPayload = authOptions.callbacks.session({
-    session: {},
-    token: payload as Token,
-  });
-  return parsedPayload;
+    const parsedPayload = authOptions.callbacks.session({
+      session: {},
+      token: token,
+    });
+    return parsedPayload;
+  } catch (e) {
+    console.error("Error decrypting session cookie", e);
+    throw e;
+  }
 };
 
 async function getDerivedEncryptionKey(secret: string | Buffer) {

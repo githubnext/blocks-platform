@@ -5,6 +5,7 @@ import {
   FileIcon,
   LogoGithubIcon,
   MarkGithubIcon,
+  PlugIcon,
 } from "@primer/octicons-react";
 import { GradientBadge } from "components/gradient-badge";
 import { NextOctocat } from "components/next-octocat";
@@ -20,7 +21,7 @@ import useBlockFrameMessages from "components/repo-detail/use-block-frame-messag
 import { makeGitHubAPIInstance, makeOctokitInstance } from "ghapi";
 import { useQueryClient } from "react-query";
 import { AppContext } from "context";
-import { VscFolder } from "react-icons/vsc";
+import { VscFolder, VscReactions } from "react-icons/vsc";
 
 const { publicRuntimeConfig } = getConfig();
 
@@ -90,10 +91,27 @@ function Home({ publicToken }) {
         <WaveSvg />
 
         <motion.div
-          className="mt-[-13vh] mx-auto z-10 sticky top-0 h-screen flex items-center"
+          className={`mt-[-13vh] z-10 sticky top-0 h-screen flex items-center`}
           animate={{
-            width: sectionIndex === 0 ? "80%" : "59%",
-            left: sectionIndex === 0 ? "10%" : "37%",
+            width:
+              sectionIndex === 0
+                ? "80%"
+                : activeSection.hasAlternateLayout
+                ? "66%"
+                : "59%",
+            // opacity: activeSection.hasAlternateLayout ? 0 : 1,
+            left:
+              sectionIndex === 0
+                ? "10%"
+                : activeSection.hasAlternateLayout
+                ? "0%"
+                : "37%",
+            x: activeSection.hasAlternateLayout ? "-6%" : 0,
+          }}
+          transition={{
+            type: "spring",
+            damping: 20,
+            stiffness: 100,
           }}
         >
           {hasMounted && (
@@ -102,6 +120,7 @@ function Home({ publicToken }) {
               path={activeSection.path}
               block={activeSection.block}
               isShowingHistory={isShowingHistory}
+              isEditing={!!activeSection.isEditing}
             />
           )}
         </motion.div>
@@ -117,16 +136,19 @@ function Home({ publicToken }) {
           <div className="p-20">
             {/* <h2 className="text-6xl font-bold mb-8">Here's your code on GitHub.com</h2> */}
 
-            <div className="grid grid-cols-[27vw,1fr] mb-8">
-              {sections.map((item, i) => (
-                <BlocksIntroSection
-                  key={i}
-                  {...item}
-                  onEnter={() => {
-                    setActiveSectionIndex(i);
-                  }}
-                />
-              ))}
+            <div className="mb-2">
+              {sections.map(
+                (item, i) =>
+                  hasMounted && (
+                    <BlocksIntroSection
+                      key={i}
+                      {...item}
+                      onEnter={() => {
+                        setActiveSectionIndex(i);
+                      }}
+                    />
+                  )
+              )}
             </div>
           </div>
         </motion.div>
@@ -269,7 +291,12 @@ const sections = [
   },
   {
     title: "Make sense of data",
-    description: <>Instantly visualize any CSV file in a myriad of ways.</>,
+    description: (
+      <>
+        No dashboards needed - instantly turn live data into any chart,
+        shareable with a url.
+      </>
+    ),
     path: "data.csv",
     block: { owner: "githubnext", repo: "blocks-examples", id: "chart" },
   },
@@ -300,7 +327,7 @@ const sections = [
         Editing raw csv files is not fun - what if you could slice, dice, and
         update your data with a spreadsheet-like interface?
         <p className="mt-3">
-          Try it out! Add a new{" "}
+          ✨ Try it out! Add a new{" "}
           <code className="bg-gray-100 p-1 rounded">icon</code> type in one of
           the rows.
         </p>
@@ -316,7 +343,10 @@ const sections = [
       </>
     ),
     description: (
-      <>What if creating docs was as easy as editing a markdown file?</>
+      <>
+        What if creating documentation for your library was as easy as editing a
+        markdown file?
+      </>
     ),
     path: "README.md",
     // }, {
@@ -338,9 +368,10 @@ const sections = [
     description: (
       <>
         Blocks are composable, making it easy to embed live examples that update
-        with the rest of your code.
+        with the rest of your code. Let your users try out any version of your
+        library, where your code lives.
         <p className="mt-3">
-          Try it out! Type{" "}
+          ✨ Try it out! Type{" "}
           <code className="bg-gray-200 px-2 rounded inline-block">/</code> on a
           new line.
         </p>
@@ -365,8 +396,8 @@ const sections = [
     ),
     description: (
       <>
-        Not everyone wants to see the code the same way - view CSS styles in a
-        Style Guide to easily parse the styles.
+        Not everyone wants to see the code the same way - designers can view CSS
+        styles in a Style Guide, instead of reading the code.
       </>
     ),
     path: "style.css",
@@ -376,13 +407,25 @@ const sections = [
     title: <>Make sense of folders of content</>,
     description: (
       <>
-        Can we look at the contents of a folder in ways other than just a list
-        of files?
+        In addition to file blocks, we have <strong>folder blocks</strong>. Use
+        these to view the structure of your codebase.
       </>
     ),
     isFolder: true,
     path: "blocks-demo",
     block: { owner: "githubnext", repo: "blocks-examples", id: "minimap" },
+  },
+  {
+    title: <>Search and filter images</>,
+    description: (
+      <>
+        Folder blocks can also be used to explore the folders' contents: for
+        example, search and filter all of the icons in your codebase at once.
+      </>
+    ),
+    isFolder: true,
+    path: "blocks-demo",
+    block: { owner: "Wattenberger", repo: "blocks", id: "images" },
   },
   {
     title: <>Monitor the health of your community</>,
@@ -397,11 +440,73 @@ const sections = [
     block: { owner: "Wattenberger", repo: "blocks", id: "communities" },
   },
   {
-    title: <>Build your own custom blocks</>,
+    title: <>Build your own blocks</>,
+    hasAlternateLayout: true,
+    isEditing: true,
     description: (
       <>
-        Blocks are open source, so you can build your own custom blocks to fit
-        your needs.
+        We know you have a unique workflow, so we've made it easy for you to
+        build your own blocks.
+        <p className="mt-4">
+          We've made it as easy as possible, with a simple API and quick-start
+          templates in any framework you like best:
+        </p>
+        <div className="mt-6 grid grid-cols-4 gap-5">
+          <a
+            href="https://github.com/githubnext/blocks-template-react/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center"
+          >
+            <svg className="w-full" viewBox="-11.5 -10.23174 23 20.46348">
+              <title>React Logo</title>
+              <circle cx="0" cy="0" r="2.05" fill="#61dafb" />
+              <g stroke="#61dafb" stroke-width="1" fill="none">
+                <ellipse rx="11" ry="4.2" />
+                <ellipse rx="11" ry="4.2" transform="rotate(60)" />
+                <ellipse rx="11" ry="4.2" transform="rotate(120)" />
+              </g>
+            </svg>
+          </a>
+          <a
+            href="https://github.com/githubnext/blocks-template-svelte/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center"
+          >
+            <svg className="w-[90%]" viewBox="0 0 100 112">
+              <path
+                fill="#ff3e00"
+                d="M87.269,14.819C76.869-.066,56.328-4.478,41.477,4.984L15.4,21.608A29.921,29.921,0,0,0,1.876,41.651,31.514,31.514,0,0,0,4.984,61.882,30.006,30.006,0,0,0,.507,73.065,31.892,31.892,0,0,0,5.955,97.181c10.4,14.887,30.942,19.3,45.791,9.835L77.829,90.392A29.915,29.915,0,0,0,91.347,70.349a31.522,31.522,0,0,0-3.1-20.232,30.019,30.019,0,0,0,4.474-11.182,31.878,31.878,0,0,0-5.447-24.116"
+              />
+              <path
+                fill="white"
+                d="M38.929,98.582a20.72,20.72,0,0,1-22.237-8.243,19.176,19.176,0,0,1-3.276-14.5,18.143,18.143,0,0,1,.623-2.435l.491-1.5,1.337.981a33.633,33.633,0,0,0,10.2,5.1l.969.294-.089.968A5.844,5.844,0,0,0,28,83.122a6.24,6.24,0,0,0,6.7,2.485,5.748,5.748,0,0,0,1.6-.7L62.382,68.281a5.43,5.43,0,0,0,2.451-3.631,5.794,5.794,0,0,0-.988-4.371,6.244,6.244,0,0,0-6.7-2.487,5.755,5.755,0,0,0-1.6.7l-9.953,6.345a19.06,19.06,0,0,1-5.3,2.326,20.719,20.719,0,0,1-22.237-8.243,19.171,19.171,0,0,1-3.277-14.5A17.992,17.992,0,0,1,22.915,32.37L49,15.747a19.03,19.03,0,0,1,5.3-2.329,20.72,20.72,0,0,1,22.237,8.243,19.176,19.176,0,0,1,3.277,14.5,18.453,18.453,0,0,1-.624,2.435l-.491,1.5-1.336-.979a33.616,33.616,0,0,0-10.2-5.1l-.97-.294.09-.968a5.859,5.859,0,0,0-1.052-3.878,6.241,6.241,0,0,0-6.7-2.485,5.748,5.748,0,0,0-1.6.7L30.842,43.719a5.421,5.421,0,0,0-2.449,3.63,5.79,5.79,0,0,0,.986,4.372,6.245,6.245,0,0,0,6.7,2.487,5.773,5.773,0,0,0,1.6-.7l9.952-6.342a18.978,18.978,0,0,1,5.3-2.328,20.718,20.718,0,0,1,22.236,8.243,19.171,19.171,0,0,1,3.277,14.5,18,18,0,0,1-8.13,12.054L44.229,96.253a19.017,19.017,0,0,1-5.3,2.329"
+              />
+            </svg>
+          </a>
+          <a
+            href="https://github.com/githubnext/blocks-template-vue/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center"
+          >
+            <svg viewBox="0 0 128 128" className="w-full">
+              <path
+                fill="#42b883"
+                d="M78.8,10L64,35.4L49.2,10H0l64,110l64-110C128,10,78.8,10,78.8,10z"
+              ></path>
+              <path
+                fill="#35495e"
+                d="M78.8,10L64,35.4L49.2,10H25.6L64,76l38.4-66H78.8z"
+              ></path>
+            </svg>
+          </a>
+
+          <div className="border rounded-xl border-dashed text-slate-500 text-xs flex items-center justify-center text-center tracking-wide p-3">
+            or make your own template
+          </div>
+        </div>
         <Link href="block-docs">
           <a className="group mt-10 inline-flex items-center px-8 py-4 text-lg border border-transparent leading-4 font-bold rounded-md shadow-sm text-white bg-gradient-to-t from-black to-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#968DF2]">
             Read the docs
@@ -414,7 +519,11 @@ const sections = [
       </>
     ),
     path: "model.glb",
-    block: { owner: "githubnext", repo: "blocks-examples", id: "3d-model" },
+    block: {
+      owner: "githubnext",
+      repo: "blocks-examples",
+      id: "my custom block",
+    },
   },
 ];
 
@@ -433,16 +542,21 @@ const folders = [...sections]
 const BlocksIntroSection = ({
   title,
   description,
+  hasAlternateLayout = false,
   onEnter,
 }: {
   title: React.ReactNode;
   description: React.ReactNode;
-  image: string;
   filename: string;
+  hasAlternateLayout: boolean;
   onEnter: () => void;
 }) => {
   return (
-    <div className="min-h-[70vh] col-start-1">
+    <div
+      className={`min-h-[90vh] w-[27em] ${
+        hasAlternateLayout ? "ml-auto text-right" : ""
+      }`}
+    >
       <motion.div
         className="p-6"
         viewport={{
@@ -465,7 +579,7 @@ const BlocksIntroSection = ({
 
 const FooterCTA = ({ devServer }: { devServer?: string }) => {
   return (
-    <div className="relative px-10 lg:px-32 py-[30vh] bg-gh-marketingDarkBg text-white text-center z-30">
+    <div className="relative px-10 lg:px-32 py-[33vh] bg-gh-marketingDarkBg text-white text-center z-30">
       <h2 className="text-[5vw] font-black mb-8 font-mona">
         Work with content your way
       </h2>
@@ -579,11 +693,11 @@ const blocksPerPath = {
   ],
   "blocks-demo": [
     { owner: "githubnext", repo: "blocks-examples", id: "minimap" },
+    { owner: "Wattenberger", repo: "blocks", id: "images" },
     { owner: "Wattenberger", repo: "blocks", id: "communities" },
   ],
   "model.glb": [
-    codeBlock,
-    { owner: "githubnext", repo: "blocks-examples", id: "3d-model" },
+    { owner: "githubnext", repo: "blocks-examples", id: "my custom block" },
   ],
 };
 const defaultBlock = blocksPerPath["README.md"][0];
@@ -601,11 +715,13 @@ const Frame = ({
   block = defaultBlock,
   path = "README.md",
   isShowingHistory = false,
+  isEditing = false,
 }: {
   sectionIndex: number;
   path?: string;
   block?: { owner: string; repo: string; id: string };
   isShowingHistory?: boolean;
+  isEditing?: boolean;
 }) => {
   const isShowingBlockPicker = sectionIndex > 0;
 
@@ -619,15 +735,16 @@ const Frame = ({
   useEffect(() => {
     setLocalPath(path);
   }, [path]);
+  const [headlineText, setHeadlineText] = useState("Hello from your block");
 
   const srcBase = publicRuntimeConfig.sandboxDomain;
   const src = `${srcBase}#${encodeURIComponent(
     JSON.stringify({
       block: localBlock,
       context: {
-        owner: "githubnext",
-        repo: "blocks",
-        sha: "main",
+        owner: block.id === "images" ? "feathericons" : "githubnext",
+        repo: block.id === "images" ? "feather" : "blocks",
+        sha: block.id === "images" ? "master" : "main",
         path: examplePaths[localPath],
       },
     })
@@ -683,7 +800,7 @@ const Frame = ({
                       </motion.button>
                     ))}
                 </AnimatePresence>
-                {sectionIndex > 1 && (
+                {sectionIndex > 1 && !isEditing && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -698,13 +815,13 @@ const Frame = ({
           )}
         </AnimatePresence>
       </motion.div>
-      <div className="flex flex-col w-full [aspect-ratio:16/13] border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+      <div className="flex flex-col w-full [aspect-ratio:16/10.5] border border-gray-200 rounded-xl shadow-lg">
         <Box
           bg="canvas.subtle"
           borderColor="border.default"
           borderBottomWidth={1}
           borderBottomStyle="solid"
-          className="py-[0.68em] px-[0.86em]"
+          className="py-[0.68em] px-[0.86em] rounded-t-xl"
           flex="none"
         >
           <div className="flex text-[0.7em]">
@@ -713,12 +830,7 @@ const Frame = ({
             <span className="ml-1">/ blocks-demo</span>
           </div>
         </Box>
-        <div
-          className="flex-1 flex flex-row h-full"
-          style={{
-            aspectRatio: "16 / 9",
-          }}
-        >
+        <div className="flex-1 flex flex-row h-full">
           <div className="flex flex-col border-r overflow-auto w-[9em] pt-2">
             {files.map((file, i) => (
               <button
@@ -745,36 +857,63 @@ const Frame = ({
               </button>
             ))}
           </div>
-          <div className="flex-1 h-full">
-            {/* <div className="p-2 text-sm">
-                  Blocks / {activeSection.filename}
-                </div> */}
-            {/* <div style={{
-              // backgroundImage: `url(/landing/${activeSection.image})`,
-              aspectRatio: "16 / 9",
-            }} className="w-full bg-contain" /> */}
-
-            <div
-              className="overflow-y-auto h-[133%] w-[133%] flex-1 transform scale-75 origin-top-left"
-              key={localBlock}
+          {isEditing ? (
+            <motion.div
+              className="relative flex-1 h-full overflow-hidden border-4 border-indigo-500 shadow-inner shadow-indigo-100"
+              initial={{ borderWidth: 0 }}
+              animate={{ borderWidth: 1 }}
+              transition={{ delay: 0.2 }}
             >
-              <iframe
-                key={localPath + localBlock?.id}
-                className={"w-full h-full"}
-                allow="camera;microphone;xr-spatial-tracking"
-                sandbox={[
-                  "allow-scripts",
-                  "allow-same-origin",
-                  "allow-forms",
-                  // so blocks can open links
-                  "allow-top-navigation-by-user-activation",
-                  // so blocks can open links in new windows
-                  "allow-popups",
-                ].join(" ")}
-                src={src}
-              />
+              <motion.div
+                className="absolute top-2 right-4 text-indigo-500"
+                initial={{ y: 30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ type: "spring", delay: 0.5 }}
+              >
+                <PlugIcon />
+              </motion.div>
+              <div className="p-[2em]">
+                <h1 className="mt-[0.6em] text-[2em] font-bold">
+                  {headlineText}
+                </h1>
+                <pre className="mt-[2em] overflow-hidden  w-full bg-slate-50 text-slate-500 border border-slate-100 p-[1em] text-[0.8em]">{`{
+  "name": "blocks-template-react",
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@githubnext/blocks": "^2.3.4",
+    "@githubnext/blocks-runtime": "^1.0.3",
+    "@types/react": "^18.0.26"
+  }
+}`}</pre>
+              </div>
+            </motion.div>
+          ) : (
+            <div className="flex-1 h-full">
+              <div
+                className="overflow-y-auto h-[133%] w-[133%] flex-1 transform scale-75 origin-top-left"
+                key={localBlock}
+              >
+                <iframe
+                  key={localPath + localBlock?.id}
+                  className={"w-full h-full"}
+                  allow="camera;microphone;xr-spatial-tracking"
+                  sandbox={[
+                    "allow-scripts",
+                    "allow-same-origin",
+                    "allow-forms",
+                    // so blocks can open links
+                    "allow-top-navigation-by-user-activation",
+                    // so blocks can open links in new windows
+                    "allow-popups",
+                  ].join(" ")}
+                  src={src}
+                />
+              </div>
             </div>
-          </div>
+          )}
           <motion.div animate={{ width: isShowingHistory ? "9em" : 0 }}>
             {isShowingHistory && (
               <div className="flex flex-col h-full border-l overflow-auto w-full">
@@ -792,6 +931,178 @@ const Frame = ({
                   </div>
                 ))}
               </div>
+            )}
+          </motion.div>
+          <motion.div
+            animate={{ width: isEditing ? "26em" : 0 }}
+            transition={{ delay: isEditing ? 1.3 : 0, duration: 0.2 }}
+            className="flex-none h-full min-w-0"
+          >
+            {isEditing && (
+              <motion.div
+                className="h-full w-[26em]"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.5 }}
+              >
+                <div className="p-5 whitespace-pre-wrap font-mono text-[0.7em] leading-relaxed">
+                  <span className="text-[#cf222e]">import</span>
+                  {` { FileBlockProps } `}
+                  <span className="text-[#cf222e]">from</span>
+                  <span className="text-[#0a3069]">
+                    <motion.span
+                      initial={{
+                        border: "1px solid transparent",
+                        background: "#ffffff00",
+                      }}
+                      animate={{
+                        border: "1px solid #A5B4FB",
+                        background: "#EDF3FA",
+                      }}
+                      transition={{ delay: 1.8 }}
+                      className="relative p-1 border border-indigo-300"
+                    >
+                      {`"@githubnext/blocks"`}
+                      <motion.div
+                        initial={{ opacity: 0, x: "50%", y: 20 }}
+                        animate={{ opacity: 1, x: "50%", y: 0 }}
+                        transition={{ delay: 1.8 }}
+                        className="absolute top-0 right-0 text-[1.2em] transform mr-[-3em] -translate-y-full font-mona tracking-wide font-medium w-[12em] mt-[-2.8em] text-indigo-500"
+                      >
+                        Block-building utilities
+                        <svg
+                          className="absolute left-[-2.3em] top-[0.8em] w-[2em] h-[2em] overflow-visible transform rotate-90"
+                          viewBox="0 0 1 1"
+                        >
+                          <path
+                            d="M 0 0 C 0 1 1 1 1 1"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1"
+                            vectorEffect="non-scaling-stroke"
+                          />
+                        </svg>
+                      </motion.div>
+                    </motion.span>
+                  </span>
+                  ;<br />
+                  <span className="text-[#cf222e]">import </span>
+                  <span className="text-[#0a3069]">"./index.css"</span>;
+                  <br />
+                  <br />
+                  <span className="text-[#cf222e]">{`export default function `}</span>
+                  {`(props:`}
+                  <motion.span
+                    initial={{
+                      border: "1px solid transparent",
+                      background: "#ffffff00",
+                    }}
+                    animate={{
+                      border: "1px solid #A5B4FB",
+                      background: "#EDF3FA",
+                    }}
+                    transition={{ delay: 2 }}
+                    className="relative p-1 border border-indigo-300"
+                  >
+                    FileBlockProps
+                    <motion.div
+                      initial={{ opacity: 0, x: "100%", y: 20 }}
+                      animate={{ opacity: 1, x: "100%", y: 0 }}
+                      transition={{ delay: 2 }}
+                      className="absolute top-0 right-0 text-[1.2em] transform translate-x-full translate-y-full font-mona tracking-wide font-medium w-[10em] mt-[2.9em] text-indigo-500 h-[1.5em] leading-tight"
+                    >
+                      Typed data & callback functions
+                      <svg
+                        className="absolute left-[-2.3em] top-[-1.3em] w-[2em] h-[2em] overflow-visible"
+                        viewBox="0 0 1 1"
+                      >
+                        <path
+                          d="M 0 0 C 0 1 1 1 1 1"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1"
+                          vectorEffect="non-scaling-stroke"
+                        />
+                      </svg>
+                    </motion.div>
+                  </motion.span>
+                  {`) {`}
+                  <span className="inline-block text-[#cf222e]">{`  const`}</span>
+                  {` { content } = props;`}
+                  <br />
+                  <span className="text-[#cf222e]">{`
+  return `}</span>
+                  (
+                  <span className="text-[#0a3069]">{`
+    <>`}</span>
+                  <br />
+                  <span className="text-[#0a3069]">{`      <`}</span>
+                  <span className="text-[#116329]">h1</span>
+                  <span className="text-[#0a3069]">{`>`}</span>
+                  <input
+                    className="bg-transparent border-none outline-none"
+                    style={{ width: headlineText.length + 0.2 + "ch" }}
+                    value={headlineText}
+                    onChange={(e) => setHeadlineText(e.target.value)}
+                    autoFocus
+                  />
+                  <span className="text-[#0a3069]">{`</`}</span>
+                  <span className="text-[#116329]">h1</span>
+                  <span className="text-[#0a3069]">{`>`}</span>
+                  <span className="text-[#0a3069]">{`
+      <`}</span>
+                  <span className="text-[#116329]">pre</span>
+                  <span className="text-[#0a3069]">{`>`}</span>
+                  <motion.span
+                    initial={{
+                      border: "1px solid transparent",
+                      background: "#ffffff00",
+                    }}
+                    animate={{
+                      border: "1px solid #A5B4FB",
+                      background: "#EDF3FA",
+                    }}
+                    transition={{ delay: 2.2 }}
+                    className="relative p-1 border border-indigo-300"
+                  >
+                    {`{content}`}
+                    <motion.div
+                      initial={{
+                        opacity: 0,
+                        x: "100%",
+                        y: 20,
+                      }}
+                      animate={{ opacity: 1, x: "100%", y: 0 }}
+                      transition={{ delay: 2.2 }}
+                      className="absolute top-0 right-0 text-[1.2em] transform translate-x-full font-mona tracking-wide font-medium w-[9em] mt-[2.9em] text-indigo-500 h-[1.5em] leading-tight"
+                    >
+                      Useful data,
+                      <br />
+                      like the contents of the file
+                      <svg
+                        className="absolute left-[-2.3em] top-[-1.3em] w-[2em] h-[2em] overflow-visible"
+                        viewBox="0 0 1 1"
+                      >
+                        <path
+                          d="M 0 0 C 0 1 1 1 1 1"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1"
+                          vectorEffect="non-scaling-stroke"
+                        />
+                      </svg>
+                    </motion.div>
+                  </motion.span>
+                  <span className="text-[#0a3069]">{`</`}</span>
+                  <span className="text-[#116329]">pre</span>
+                  <span className="text-[#0a3069]">{`>`}</span>
+                  <span className="text-[#0a3069]">{`
+    </>`}</span>
+                  {`
+  );
+}`}
+                </div>
+              </motion.div>
             )}
           </motion.div>
         </div>

@@ -15,6 +15,7 @@ import {
   getRepoFiles,
   getRepoInfoWithContributors,
   getRepoTimeline,
+  isBlockOnAllowList,
   RepoContext,
   RepoSearchResult,
   searchRepos,
@@ -339,7 +340,8 @@ export function useManageBlock({
 }: UseManageBlockParams): UseManageBlockResult {
   const router = useRouter();
   const { blockKey = "" } = router.query as Record<string, string>;
-  const { devServerInfo } = useContext(AppContext);
+  const { devServerInfo, blocksConfig } = useContext(AppContext);
+  const allowList = blocksConfig.allow;
 
   const type = isFolder ? "folder" : "file";
   const filteredBlocksReposResult = useBlocksRepos({
@@ -384,10 +386,14 @@ export function useManageBlock({
     storedDefaultBlockResult.data,
   ].filter(Boolean);
 
-  const exampleBlocks =
+  let exampleBlocks =
     blocksRepos.find(
       (b) => b.owner === "githubnext" && b.repo === "blocks-examples"
     )?.blocks ?? [];
+  // filter out unallowed blocks on private repos
+  exampleBlocks = exampleBlocks.filter(
+    (block) => !allowList || isBlockOnAllowList(allowList, block)
+  );
   const extension = (path as string).split(".").slice(-1)[0];
 
   // find default block

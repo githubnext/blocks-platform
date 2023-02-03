@@ -827,11 +827,7 @@ export const getBlocksRepos: QueryFunction<
         blocks: blockRepo.blocks.map((block) => {
           return {
             ...block,
-            isAllowed:
-              (blockRepo.owner === exampleBlocksOwner &&
-                blockRepo.repo === exampleBlocksRepo) ||
-              !allowList ||
-              isBlockOnAllowList(allowList, block),
+            isAllowed: !allowList || isBlockOnAllowList(allowList, block),
           };
         }),
       };
@@ -863,8 +859,12 @@ export const getBlocksRepos: QueryFunction<
 
 export const isBlockOnAllowList = (allowList: AllowBlock[], block: Block) => {
   if (!allowList) return false;
-  // always allow example blocks
-  if (block.owner === "githubnext" && block.repo === "blocks-examples")
+  // always allow these example blocks
+  if (
+    block.owner === "githubnext" &&
+    block.repo === "blocks-examples" &&
+    ["code-block", "minimap"].includes(block.id)
+  )
     return true;
   return allowList.some((allowBlock) => {
     return doesAllowBlockMatch(allowBlock, block);

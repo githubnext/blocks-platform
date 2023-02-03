@@ -41,8 +41,8 @@ export const BlockPickerItem = ({
       }}
     >
       {isAllowed === false && (
-        <div className="w-full px-5 pt-[0.1em] pb-1 bg-gray-600 text-white rounded-t-xl">
-          <Text className="text-xs text-slate-800">Not in the allowlist</Text>
+        <div className="w-full px-5 pt-[0.1em] pb-1 bg-gray-200 text-white rounded-t-xl">
+          <Text className="text-xs text-gray-700">Not in the allowlist</Text>
         </div>
       )}
       <div

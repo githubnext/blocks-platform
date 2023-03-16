@@ -458,6 +458,12 @@ export function RepoDetail() {
       return getBlockKey(cb) === blockKey;
     });
   const queries = [repoInfo, branches, repoFiles, repoTimeline];
+  console.log({
+    repoInfo,
+    branches,
+    repoFiles,
+    repoTimeline,
+  });
   const hasQueryErrors = queries.some((res) => res.status === "error");
   const showErrorState = hasQueryErrors || accessProhibited;
 

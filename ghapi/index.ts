@@ -284,7 +284,9 @@ export const getRepoTimeline: QueryFunction<
 
   const url = `repos/${owner}/${repo}/commits?path=${path}&${randomQueryParamName}=""&sha=${sha}`;
 
-  const commitsRes = await meta.ghapi(url);
+  const commitsRes = await meta.ghapi(url).catch((e) => {
+    return { data: [] };
+  });
 
   const commits: RepoTimeline = commitsRes.data.map((commit: Commit) => ({
     date: commit.commit.author.date,
@@ -311,13 +313,21 @@ export const getRepoFiles: QueryFunction<
 
   const url = `repos/${owner}/${repo}/git/trees/${sha}?recursive=1`;
 
-  const fileTreeRes = await meta.ghapi(url, {
-    headers: {
-      // this response is cached for 60s
-      // we need to bypass this eg. when a metadata update creates a new file
-      "If-None-Match": new Date().getTime().toString(),
-    },
-  });
+  const fileTreeRes = await meta
+    .ghapi(url, {
+      headers: {
+        // this response is cached for 60s
+        // we need to bypass this eg. when a metadata update creates a new file
+        "If-None-Match": new Date().getTime().toString(),
+      },
+    })
+    .catch(() => {
+      return {
+        data: {
+          tree: [],
+        },
+      };
+    });
 
   const files = fileTreeRes.data.tree;
   return files;
@@ -482,14 +492,15 @@ export const getBranches: QueryFunction<
   let params = ctx.queryKey[1];
   const { owner, repo } = params;
   let octokit = ctx.meta.octokit as Octokit;
-  const branchesRes = await octokit.paginate(
-    "GET /repos/{owner}/{repo}/branches",
-    {
+  const branchesRes = await octokit
+    .paginate("GET /repos/{owner}/{repo}/branches", {
       owner,
       repo,
       per_page: 100,
-    }
-  );
+    })
+    .catch(() => {
+      return [];
+    });
   return branchesRes;
 };
 

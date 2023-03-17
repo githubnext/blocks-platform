@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, useMemo, useContext } from "react";
+import { FileCodeIcon } from "@primer/octicons-react";
 import * as Immer from "immer";
 import { useQueryClient } from "react-query";
-import { Link, useTheme } from "@primer/react";
+import { Link, LinkButton, useTheme } from "@primer/react";
 import { QueryKeyMap } from "lib/query-keys";
 import type { BlocksQueryMeta } from "ghapi";
 import { AppContext } from "context";
@@ -31,6 +32,7 @@ import { WarningModal } from "components/WarningModal";
 import makeBranchPath from "utils/makeBranchPath";
 import { useHistoryPane, useFileTreePane, useFullscreen } from "state";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
+import { EmptyRepositoryMessage } from "components/empty-repository-message";
 
 export type Context = {
   repo: string;
@@ -461,6 +463,12 @@ export function RepoDetail() {
   const hasQueryErrors = queries.some((res) => res.status === "error");
   const showErrorState = hasQueryErrors || accessProhibited;
 
+  const repoIsEmpty =
+    repoFiles.isSuccess &&
+    repoFiles.data.length === 0 &&
+    repoTimeline.isSuccess &&
+    repoTimeline.data.length === 0;
+
   if (showErrorState) {
     const error = queries.find((res) => res.error)?.error;
     return (
@@ -472,6 +480,9 @@ export function RepoDetail() {
       </div>
     );
   } else if (repoInfo.status === "success" && branches.status === "success") {
+    if (repoIsEmpty) {
+      return <EmptyRepositoryMessage owner={owner} repo={repo} />;
+    }
     return (
       <RepoDetailInner
         repoInfo={repoInfo.data}

@@ -98,17 +98,19 @@ export const RepoHeader = ({
               onChange={onChangeBranch}
             />
           </Box>
-          <Box ml={3}>
-            <AvatarStack>
-              {contributors?.map((contributor) => (
-                <Avatar
-                  alt={contributor.login}
-                  key={contributor.login}
-                  src={`https://avatars.githubusercontent.com/${contributor.login}`}
-                />
-              ))}
-            </AvatarStack>
-          </Box>
+          {contributors && (
+            <Box ml={3}>
+              <AvatarStack>
+                {contributors?.map((contributor) => (
+                  <Avatar
+                    alt={contributor.login}
+                    key={contributor.login}
+                    src={`https://avatars.githubusercontent.com/${contributor.login}`}
+                  />
+                ))}
+              </AvatarStack>
+            </Box>
+          )}
         </Box>
       </Box>
 

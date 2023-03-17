@@ -462,15 +462,12 @@ export function RepoDetail() {
   const queries = [repoInfo, branches, repoFiles, repoTimeline];
   const hasQueryErrors = queries.some((res) => res.status === "error");
   const showErrorState = hasQueryErrors || accessProhibited;
-  const showLoader = queries.some((res) => res.status === "loading");
 
   const repoIsEmpty =
     repoFiles.isSuccess &&
     repoFiles.data.length === 0 &&
     repoTimeline.isSuccess &&
     repoTimeline.data.length === 0;
-
-  if (showLoader) return <FullPageLoader />;
 
   if (showErrorState) {
     const error = queries.find((res) => res.error)?.error;
@@ -482,11 +479,10 @@ export function RepoDetail() {
         </p>
       </div>
     );
-  } else {
+  } else if (repoInfo.status === "success" && branches.status === "success") {
     if (repoIsEmpty) {
       return <EmptyRepositoryMessage owner={owner} repo={repo} />;
     }
-
     return (
       <RepoDetailInner
         repoInfo={repoInfo.data}
@@ -497,6 +493,8 @@ export function RepoDetail() {
         timeline={repoTimeline.data}
       />
     );
+  } else {
+    return <FullPageLoader />;
   }
 }
 

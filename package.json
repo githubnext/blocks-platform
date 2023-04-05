@@ -38,7 +38,7 @@
     "js-base64": "^3.7.2",
     "lodash": "^4.17.21",
     "next": "latest",
-    "next-auth": "^4.10.3",
+    "next-auth": "^4.20.1",
     "next-query-params": "^4.1.0",
     "next-seo": "^5.14.0",
     "openai": "^2.0.5",

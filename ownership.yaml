@@ -4,13 +4,13 @@
 # so it also needs to be committed to github/blocks
 version: 1
 ownership:
-  - name: github-blocks
+  - name: githubnext_dotcom_github-blocks
     long_name: Github Blocks
     description: GitHub Blocks prototype service
     kind: logical
     maintainer: idan
     team: github/next
-    exec_sponsor: oegerikus
+    exec_sponsor: lostintangent
     product_manager: idan
     repo: https://github.com/githubnext/blocks
     sev3:

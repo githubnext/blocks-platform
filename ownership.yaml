@@ -16,7 +16,7 @@ ownership:
     product_manager: idan
     repo: https://github.com/githubnext/blocks
     sev3:
-      issue: https://github.com/githubnext/blocks-platform/issues
+      issue: https://github.com/githubnext/blocks/issues
       slack: next-noodles
-      tta: "1 business day"
+      tta: "1 week"
     qos: experimental

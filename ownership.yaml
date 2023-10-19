@@ -6,7 +6,9 @@ version: 1
 ownership:
   - name: githubnext_dotcom_github-blocks
     long_name: Github Blocks
+    tier: 3
     description: GitHub Blocks prototype service
+    team_slack: next-noodles
     kind: logical
     maintainer: idan
     team: github/next
@@ -14,6 +16,6 @@ ownership:
     product_manager: idan
     repo: https://github.com/githubnext/blocks
     sev3:
-      slack: next-devex
+      slack: next-noodles
       tta: "1 business day"
     qos: experimental

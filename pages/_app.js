@@ -18,10 +18,8 @@ function App({ Component, pageProps: { session, ...pageProps } }) {
     if (process.env.NODE_ENV !== "production") return;
     const appInsights = new ApplicationInsights({
       config: {
-
         // this isn't a high-security key, see https://stackoverflow.com/questions/54535275/what-will-happen-if-applicationinsights-instrumentationkey-gets-stolen
-        connectionString:
-          `InstrumentationKey=96006ad9-5042-466e-b5c9-641be3a9e13f;IngestionEndpoint=/api/telemetry/ingest;LiveEndpoint=/api/telemetry/live`,
+        connectionString: `InstrumentationKey=96006ad9-5042-466e-b5c9-641be3a9e13f;IngestionEndpoint=/api/telemetry/ingest;LiveEndpoint=/api/telemetry/live`,
       },
     });
     appInsights.loadAppInsights();
@@ -78,7 +76,16 @@ function App({ Component, pageProps: { session, ...pageProps } }) {
                 session={session}
                 refetchInterval={5 * 60}
               >
-                <Component {...pageProps} />
+                <div className="h-screen flex flex-col">
+                  <div className="text-center p-4 bg-[#ddf4ff]">
+                    GitHub Next has successfully completed our exploration of
+                    Blocks. We extend our heartfelt thanks to everyone who
+                    participated in this technical preview.
+                  </div>
+                  <div className="flex-1 overflow-auto">
+                    <Component {...pageProps} />
+                  </div>
+                </div>
               </SessionProvider>
             </BaseStyles>
           </ThemeProvider>

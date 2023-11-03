@@ -160,7 +160,7 @@ export function RepoDetailInner(props: RepoDetailInnerProps) {
   const { visible: historyPane } = useHistoryPane();
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
+    <div className="flex flex-col h-full overflow-hidden">
       <Head>
         <title>
           {/* mimicking github.com's title */}

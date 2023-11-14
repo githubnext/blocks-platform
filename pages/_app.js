@@ -78,7 +78,7 @@ function App({ Component, pageProps: { session, ...pageProps } }) {
               >
                 <div className="h-screen flex flex-col">
                   <div className="text-center p-4 bg-yellow-200">
-                    The Blocks technology preview is shutting down on December
+                    The Blocks technical preview is shutting down on December
                     15th, 2023.{" "}
                     <a
                       href="https://gist.github.com/idan/325676d192b32f169b032fde2d866c2c#github-next--technical-preview-sunsets"

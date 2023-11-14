@@ -18,10 +18,8 @@ function App({ Component, pageProps: { session, ...pageProps } }) {
     if (process.env.NODE_ENV !== "production") return;
     const appInsights = new ApplicationInsights({
       config: {
-
         // this isn't a high-security key, see https://stackoverflow.com/questions/54535275/what-will-happen-if-applicationinsights-instrumentationkey-gets-stolen
-        connectionString:
-          `InstrumentationKey=96006ad9-5042-466e-b5c9-641be3a9e13f;IngestionEndpoint=/api/telemetry/ingest;LiveEndpoint=/api/telemetry/live`,
+        connectionString: `InstrumentationKey=96006ad9-5042-466e-b5c9-641be3a9e13f;IngestionEndpoint=/api/telemetry/ingest;LiveEndpoint=/api/telemetry/live`,
       },
     });
     appInsights.loadAppInsights();
@@ -78,7 +76,21 @@ function App({ Component, pageProps: { session, ...pageProps } }) {
                 session={session}
                 refetchInterval={5 * 60}
               >
-                <Component {...pageProps} />
+                <div className="h-screen flex flex-col">
+                  <div className="text-center p-4 bg-yellow-200">
+                    The Blocks technical preview is shutting down on December
+                    15th, 2023.{" "}
+                    <a
+                      href="https://gist.github.com/idan/325676d192b32f169b032fde2d866c2c#github-next--technical-preview-sunsets"
+                      className="underline"
+                    >
+                      Learn more about why we're sunsetting Blocks.
+                    </a>
+                  </div>
+                  <div className="flex-1 overflow-auto">
+                    <Component {...pageProps} />
+                  </div>
+                </div>
               </SessionProvider>
             </BaseStyles>
           </ThemeProvider>

@@ -77,10 +77,12 @@ function App({ Component, pageProps: { session, ...pageProps } }) {
                 refetchInterval={5 * 60}
               >
                 <div className="h-screen flex flex-col">
-                  <div className="text-center p-4 bg-[#ddf4ff]">
-                    GitHub Next has successfully completed our exploration of
-                    Blocks. We extend our heartfelt thanks to everyone who
-                    participated in this technical preview.
+                  <div className="text-center p-4 bg-yellow-200">
+                    The Blocks technology preview is shutting down on December
+                    15th, 2023.{" "}
+                    <a href="" className="underline">
+                      Learn more about why we're sunsetting Blocks.
+                    </a>
                   </div>
                   <div className="flex-1 overflow-auto">
                     <Component {...pageProps} />

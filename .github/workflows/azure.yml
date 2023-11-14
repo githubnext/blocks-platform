@@ -53,6 +53,12 @@ jobs:
       - name: package zip
         run: zip -r web.zip package.json next.config.js .next node_modules/ public/
 
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: web-zip
+          path: web.zip
+
       - name: "Deploy to Azure Web App"
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2

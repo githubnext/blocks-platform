@@ -1,5 +1,8 @@
 # GitHub Blocks
 
+> [!CAUTION]
+> Blocks was sunset on Dec 15th 2023. This repository contains the prototype platform that ran Blocks. Since the shutdown of Blocks, it is being made available AS-IS, for learning purposes. There's no support. We are unlikely to answer questions as we're busy with other adventures!.
+
 > 📣 Read this if you're part of the team creating the GitHub Blocks projects.
 
 This repo contains the source code for a [prototype app](https://blocks.githubnext.com/) that demos the GitHub Blocks project.

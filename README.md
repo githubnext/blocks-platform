@@ -1,7 +1,7 @@
 # GitHub Blocks
 
 > [!CAUTION]
-> Blocks was sunset on Dec 15th 2023. This repository contains the prototype platform that ran Blocks. Since the shutdown of Blocks, it is being made available AS-IS, for learning purposes. There's no support. We are unlikely to answer questions as we're busy with other adventures!.
+> Blocks was [sunset on Dec 15th 2023](https://gist.github.com/idan/325676d192b32f169b032fde2d866c2c). This repository contains the prototype platform that ran Blocks. Since the shutdown of Blocks, it is being made available AS-IS, for learning purposes. There's no support and we don't have the bandwidth to help people with questions.
 
 > 📣 Read this if you're part of the team creating the GitHub Blocks projects.
 
